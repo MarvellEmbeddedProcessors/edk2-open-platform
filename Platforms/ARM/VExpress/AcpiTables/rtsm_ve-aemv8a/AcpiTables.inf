@@ -27,6 +27,8 @@
   dsdt.asl
   facp.asl
   gtdt.asl
+  dbg2.asl
+  spcr.asl
 
 [Packages]
   MdePkg/MdePkg.dec
