@@ -23,6 +23,8 @@
 
 [Sources]
   Dsdt.asl
+  Dbg2.asl
+  Spcr.asl
   Facs.aslc
   Fadt.aslc
   Gtdt.aslc
