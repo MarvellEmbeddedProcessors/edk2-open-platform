@@ -31,8 +31,6 @@
 #  BASE SEC PEI_CORE PEIM DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER DXE_SAL_DRIVER UEFI_DRIVER UEFI_APPLICATION
 #
 ################################################################################
-[Includes.common]
-  Include                        # Root include for the package
 
 [Guids.common]
   gLan91xDxeTokenSpaceGuid	= { 0xae317565, 0xdb72, 0x4841,  { 0xbc, 0x9b, 0x76, 0x47, 0x56, 0xd0, 0xb5, 0x99 }}
