@@ -1,5 +1,7 @@
 #/** @file
 #
+#  Interrupt DXE driver
+#
 #  Copyright (c) 2008 - 2010, Apple Inc. All rights reserved.<BR>
 #  This program and the accompanying materials
 #  are licensed and made available under the terms and conditions of the BSD License
@@ -13,29 +15,40 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = GdbSerialLib
-  FILE_GUID                      = E2423349-EF5D-439B-95F5-8B8D8E3B443F
-  MODULE_TYPE                    = UEFI_DRIVER
+  BASE_NAME                      = Omap35xxBoardInterruptDxe
+  FILE_GUID                      = 23eed05d-1b93-4a1a-8e1b-931d69e37952
+  MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = GdbSerialLib
 
-  CONSTRUCTOR                    = GdbSerialLibConstructor
+  ENTRY_POINT                    = InterruptDxeInitialize
 
 
 [Sources.common]
-  GdbSerialLib.c
+  HardwareInterrupt.c
 
 
 [Packages]
+  ArmPkg/ArmPkg.dec
+  OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Omap35xxPkg.dec
   MdePkg/MdePkg.dec
   EmbeddedPkg/EmbeddedPkg.dec
-  OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Omap35xxPkg.dec
 
 [LibraryClasses]
+  BaseLib
+  UefiLib
+  UefiBootServicesTableLib
   DebugLib
+  PrintLib
+  UefiDriverEntryPoint
   IoLib
-  OmapLib
+  ArmLib
 
-[FixedPcd]
-  gOmap35xxTokenSpaceGuid.PcdOmap35xxConsoleUart
+[Protocols]
+  gHardwareInterruptProtocolGuid
+  gEfiCpuArchProtocolGuid
 
+[FixedPcd.common]
+  gEmbeddedTokenSpaceGuid.PcdInterruptBaseAddress
+
+[Depex]
+  gEfiCpuArchProtocolGuid

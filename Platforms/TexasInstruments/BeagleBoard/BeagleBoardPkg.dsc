@@ -82,11 +82,11 @@
   CpuExceptionHandlerLib|MdeModulePkg/Library/CpuExceptionHandlerLibNull/CpuExceptionHandlerLibNull.inf
   PrePiLib|EmbeddedPkg/Library/PrePiLib/PrePiLib.inf
 
-  SerialPortLib|Omap35xxPkg/Library/SerialPortLib/SerialPortLib.inf
+  SerialPortLib|OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Library/SerialPortLib/SerialPortLib.inf
   SerialPortExtLib|EmbeddedPkg/Library/TemplateSerialPortExtLib/TemplateSerialPortExtLib.inf
   SemihostLib|ArmPkg/Library/SemihostLib/SemihostLib.inf
 
-  RealTimeClockLib|Omap35xxPkg/Library/RealTimeClockLib/RealTimeClockLib.inf
+  RealTimeClockLib|OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Library/RealTimeClockLib/RealTimeClockLib.inf
 
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
 
@@ -112,12 +112,12 @@
 
   CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
 
-  TimerLib|Omap35xxPkg/Library/Omap35xxTimerLib/Omap35xxTimerLib.inf
-  OmapLib|Omap35xxPkg/Library/OmapLib/OmapLib.inf
-  OmapDmaLib|Omap35xxPkg/Library/OmapDmaLib/OmapDmaLib.inf
-  DebugAgentTimerLib|Omap35xxPkg/Library/DebugAgentTimerLib/DebugAgentTimerLib.inf
+  TimerLib|OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Library/Omap35xxTimerLib/Omap35xxTimerLib.inf
+  OmapLib|OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Library/OmapLib/OmapLib.inf
+  OmapDmaLib|OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Library/OmapDmaLib/OmapDmaLib.inf
+  DebugAgentTimerLib|OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Library/DebugAgentTimerLib/DebugAgentTimerLib.inf
 
-  GdbSerialLib|Omap35xxPkg/Library/GdbSerialLib/GdbSerialLib.inf
+  GdbSerialLib|OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Library/GdbSerialLib/GdbSerialLib.inf
   ArmDisassemblerLib|ArmPkg/Library/ArmDisassemblerLib/ArmDisassemblerLib.inf
   DebugAgentLib|MdeModulePkg/Library/DebugAgentLibNull/DebugAgentLibNull.inf
   DmaLib|ArmPkg/Library/ArmDmaLib/ArmDmaLib.inf
@@ -427,7 +427,7 @@
   #
   # USB
   #
-  Omap35xxPkg/PciEmulation/PciEmulation.inf
+  OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/PciEmulation/PciEmulation.inf
 
   MdeModulePkg/Bus/Pci/EhciDxe/EhciDxe.inf {
     <PcdsFixedAtBuild>
@@ -440,31 +440,31 @@
   #
   # Nand Flash
   #
-  Omap35xxPkg/Flash/Flash.inf
+  OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Flash/Flash.inf
 
   #
   # MMC/SD
   #
   EmbeddedPkg/Universal/MmcDxe/MmcDxe.inf
-  Omap35xxPkg/MmcHostDxe/MmcHostDxe.inf
+  OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/MmcHostDxe/MmcHostDxe.inf
 
   #
   # I2C
   #
-  Omap35xxPkg/SmbusDxe/Smbus.inf
+  OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/SmbusDxe/Smbus.inf
 
   #
   # SoC Drivers
   #
-  Omap35xxPkg/Gpio/Gpio.inf
-  Omap35xxPkg/InterruptDxe/InterruptDxe.inf
-  Omap35xxPkg/TimerDxe/TimerDxe.inf
-  Omap35xxPkg/LcdGraphicsOutputDxe/LcdGraphicsOutputDxe.inf
+  OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Gpio/Gpio.inf
+  OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/InterruptDxe/InterruptDxe.inf
+  OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/TimerDxe/TimerDxe.inf
+  OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/LcdGraphicsOutputDxe/LcdGraphicsOutputDxe.inf
 
   #
   # Power IC
   #
-  Omap35xxPkg/TPS65950Dxe/TPS65950.inf
+  OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/TPS65950Dxe/TPS65950.inf
 
   #
   # Bds

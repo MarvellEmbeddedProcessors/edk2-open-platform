@@ -117,31 +117,31 @@ READ_LOCK_STATUS   = TRUE
   #
   # Nand Flash
   #
-  INF Omap35xxPkg/Flash/Flash.inf
+  INF OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Flash/Flash.inf
 
   #
   # MMC/SD
   #
   INF EmbeddedPkg/Universal/MmcDxe/MmcDxe.inf
-  INF Omap35xxPkg/MmcHostDxe/MmcHostDxe.inf
+  INF OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/MmcHostDxe/MmcHostDxe.inf
 
   #
   # I2C
   #
-  INF Omap35xxPkg/SmbusDxe/Smbus.inf
+  INF OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/SmbusDxe/Smbus.inf
 
   #
   # SoC Drivers
   #
-  INF Omap35xxPkg/Gpio/Gpio.inf
-  INF Omap35xxPkg/InterruptDxe/InterruptDxe.inf
-  INF Omap35xxPkg/TimerDxe/TimerDxe.inf
-  INF Omap35xxPkg/LcdGraphicsOutputDxe/LcdGraphicsOutputDxe.inf
+  INF OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Gpio/Gpio.inf
+  INF OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/InterruptDxe/InterruptDxe.inf
+  INF OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/TimerDxe/TimerDxe.inf
+  INF OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/LcdGraphicsOutputDxe/LcdGraphicsOutputDxe.inf
 
   #
   # Power IC
   #
-  INF Omap35xxPkg/TPS65950Dxe/TPS65950.inf
+  INF OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/TPS65950Dxe/TPS65950.inf
 
   #
   # FAT filesystem + GPT/MBR partitioning
@@ -155,7 +155,7 @@ READ_LOCK_STATUS   = TRUE
   # USB Support
   #
 
-  INF Omap35xxPkg/PciEmulation/PciEmulation.inf
+  INF OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/PciEmulation/PciEmulation.inf
 
   INF MdeModulePkg/Bus/Pci/EhciDxe/EhciDxe.inf
   INF MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
