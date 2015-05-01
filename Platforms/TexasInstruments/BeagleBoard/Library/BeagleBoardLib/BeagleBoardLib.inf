@@ -25,7 +25,7 @@
   EmbeddedPkg/EmbeddedPkg.dec
   ArmPkg/ArmPkg.dec
   ArmPlatformPkg/ArmPlatformPkg.dec
-  Omap35xxPkg/Omap35xxPkg.dec
+  OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Omap35xxPkg.dec
   OpenPlatformPkg/Platforms/TexasInstruments/BeagleBoard/BeagleBoardPkg.dec
 
 [LibraryClasses]

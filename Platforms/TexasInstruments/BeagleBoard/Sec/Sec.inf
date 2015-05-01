@@ -36,7 +36,7 @@
   MdeModulePkg/MdeModulePkg.dec
   EmbeddedPkg/EmbeddedPkg.dec
   ArmPkg/ArmPkg.dec
-  Omap35xxPkg/Omap35xxPkg.dec
+  OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Omap35xxPkg.dec
   IntelFrameworkModulePkg/IntelFrameworkModulePkg.dec
 
 [LibraryClasses]

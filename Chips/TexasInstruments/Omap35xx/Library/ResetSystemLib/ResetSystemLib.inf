@@ -26,10 +26,10 @@
   ResetSystemLib.c
 
 [Packages]
-  MdePkg/MdePkg.dec
-  ArmPkg/ArmPkg.dec
-  EmbeddedPkg/EmbeddedPkg.dec
   OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Omap35xxPkg.dec
+  ArmPkg/ArmPkg.dec
+  MdePkg/MdePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
 
 [Pcd.common]
   gArmTokenSpaceGuid.PcdCpuResetAddress
@@ -37,13 +37,4 @@
 
 [LibraryClasses]
   DebugLib
-  ArmLib
-  CacheMaintenanceLib
-  MemoryAllocationLib
-  UefiRuntimeServicesTableLib
-  TimerLib
-  UefiLib
-  UefiBootServicesTableLib
-
-[Pcd]
-  gArmTokenSpaceGuid.PcdFvBaseAddress
+  BeagleBoardSystemLib
