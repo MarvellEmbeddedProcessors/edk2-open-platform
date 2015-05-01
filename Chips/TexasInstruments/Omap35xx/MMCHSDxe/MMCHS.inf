@@ -13,18 +13,16 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = GdbSerialLib
-  FILE_GUID                      = E2423349-EF5D-439B-95F5-8B8D8E3B443F
-  MODULE_TYPE                    = UEFI_DRIVER
+  BASE_NAME                      = MMCHS
+  FILE_GUID                      = 100c2cfa-b586-4198-9b4c-1683d195b1da
+  MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = GdbSerialLib
 
-  CONSTRUCTOR                    = GdbSerialLibConstructor
+  ENTRY_POINT                    = MMCHSInitialize
 
 
 [Sources.common]
-  GdbSerialLib.c
-
+  MMCHS.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -32,10 +30,25 @@
   OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Omap35xxPkg.dec
 
 [LibraryClasses]
-  DebugLib
+  PcdLib
+  UefiLib
+  UefiDriverEntryPoint
+  MemoryAllocationLib
   IoLib
-  OmapLib
+  OmapDmaLib
+  DmaLib
 
-[FixedPcd]
-  gOmap35xxTokenSpaceGuid.PcdOmap35xxConsoleUart
+[Guids]
 
+[Protocols]
+  gEfiBlockIoProtocolGuid
+  gEfiCpuArchProtocolGuid
+  gEfiDevicePathProtocolGuid
+  gEmbeddedExternalDeviceProtocolGuid
+
+[Pcd]
+  gOmap35xxTokenSpaceGuid.PcdOmap35xxMMCHS1Base
+  gOmap35xxTokenSpaceGuid.PcdMmchsTimerFreq100NanoSeconds
+
+[depex]
+  gEmbeddedExternalDeviceProtocolGuid

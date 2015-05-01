@@ -1,7 +1,9 @@
 #/** @file
-# Reset System lib to make it easy to port new platforms
+# Component description file for Base PCI Cf8 Library.
 #
-# Copyright (c) 2008, Apple Inc. All rights reserved.<BR>
+# PCI CF8 Library that uses I/O ports 0xCF8 and 0xCFC to perform PCI Configuration cycles.
+#  Layers on top of an I/O Library instance.
+# Copyright (c) 2007, Intel Corporation. All rights reserved.<BR>
 #
 #  This program and the accompanying materials
 #  are licensed and made available under the terms and conditions of the BSD License
@@ -15,35 +17,30 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = BeagleBoardResetSystemLib
-  FILE_GUID                      = 781371a2-3fdd-41d4-96a1-7b34cbc9e895
+  BASE_NAME                      = DebugAgentTimerLibNull
+  FILE_GUID                      = E82F99DE-74ED-4e56-BBA1-B143FCA3F69A
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = EfiResetSystemLib
+  LIBRARY_CLASS                  = DebugAgentTimerLib|SEC BASE DXE_CORE
 
 
 [Sources.common]
-  ResetSystemLib.c
+  DebugAgentTimerLib.c
+
 
 [Packages]
   MdePkg/MdePkg.dec
-  ArmPkg/ArmPkg.dec
   EmbeddedPkg/EmbeddedPkg.dec
   OpenPlatformPkg/Chips/TexasInstruments/Omap35xx/Omap35xxPkg.dec
+  ArmPkg/ArmPkg.dec
 
-[Pcd.common]
-  gArmTokenSpaceGuid.PcdCpuResetAddress
-  gEmbeddedTokenSpaceGuid.PcdEmbeddedFdBaseAddress
 
 [LibraryClasses]
-  DebugLib
+  BaseLib
+  IoLib
+  OmapLib
   ArmLib
-  CacheMaintenanceLib
-  MemoryAllocationLib
-  UefiRuntimeServicesTableLib
-  TimerLib
-  UefiLib
-  UefiBootServicesTableLib
 
 [Pcd]
-  gArmTokenSpaceGuid.PcdFvBaseAddress
+  gOmap35xxTokenSpaceGuid.PcdOmap35xxDebugAgentTimer
+  gOmap35xxTokenSpaceGuid.PcdDebugAgentTimerFreqNanoSeconds
