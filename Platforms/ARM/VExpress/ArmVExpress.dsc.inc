@@ -111,11 +111,9 @@
   SemihostLib|ArmPkg/Library/SemihostLib/SemihostLib.inf
 
   # BDS Libraries
-!ifndef INTEL_BDS
   BdsLib|ArmPkg/Library/BdsLib/BdsLib.inf
-!endif
-  AcpiLib|EmbeddedPkg/Library/AcpiLib/AcpiLib.inf
 
+  AcpiLib|EmbeddedPkg/Library/AcpiLib/AcpiLib.inf
   FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
 
   # RunAxf support via Dynamic Shell Command protocol
@@ -216,6 +214,16 @@
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
   ReportStatusCodeLib|IntelFrameworkModulePkg/Library/DxeReportStatusCodeLibFramework/DxeReportStatusCodeLib.inf
   CapsuleLib|MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf
+  ArmPlatformSysConfigLib|ArmPlatformPkg/Library/ArmPlatformSysConfigLibNull/ArmPlatformSysConfigLibNull.inf
+
+  #
+  # PSCI support in EL3 may not be available if we are not running under a PSCI
+  # compliant secure firmware, but since the default VExpress EfiResetSystemLib
+  # cannot be supported at runtime (due to the fact that the syscfg MMIO registers
+  # cannot be runtime remapped), it is our best bet to get ResetSystem functionality
+  # on these platforms.
+  #
+  EfiResetSystemLib|ArmPkg/Library/ArmPsciResetSystemLib/ArmPsciResetSystemLib.inf
 
 [LibraryClasses.ARM, LibraryClasses.AARCH64]
   #
@@ -341,11 +349,9 @@
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderCode|20
   gEmbeddedTokenSpaceGuid.PcdMemoryTypeEfiLoaderData|0
 
-!ifndef NO_LINUX_LOADER
   # Device path of block device on which Android Fastboot should flash
   # partitions. We just use the SD card on VExpress.
   gArmVExpressTokenSpaceGuid.PcdAndroidFastbootNvmDevicePath|L"VenHw(09831032-6FA3-4484-AF4F-0A000A8D3A82)"
-!endif
 
   #
   # ARM Pcds
@@ -417,14 +423,12 @@
   # ISP1761 USB OTG Controller
   EmbeddedPkg/Drivers/Isp1761UsbDxe/Isp1761UsbDxe.inf
 
-!ifndef NO_LINUX_LOADER
   #
   # Android Fastboot
   #
   EmbeddedPkg/Application/AndroidFastboot/AndroidFastbootApp.inf
   EmbeddedPkg/Drivers/AndroidFastbootTransportUsbDxe/FastbootTransportUsbDxe.inf
   ArmPlatformPkg/ArmVExpressPkg/ArmVExpressFastBootDxe/ArmVExpressFastBootDxe.inf
-!endif
 
   # FV Filesystem
   MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
