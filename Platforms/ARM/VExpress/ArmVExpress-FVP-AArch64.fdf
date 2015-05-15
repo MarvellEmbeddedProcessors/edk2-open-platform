@@ -208,11 +208,6 @@ READ_LOCK_STATUS   = TRUE
 !endif
 
   #
-  # FDT installation
-  #
-  INF EmbeddedPkg/Drivers/FdtPlatformDxe/FdtPlatformDxe.inf
-
-  #
   # UEFI application (Shell Embedded Boot Loader)
   #
   INF ShellBinPkg/UefiShell/UefiShell.inf
@@ -225,6 +220,38 @@ READ_LOCK_STATUS   = TRUE
 
   # FV Filesystem
   INF MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
+
+  #
+  # FDT installation
+  #
+  # The UEFI driver is at the end of the list of the driver to be dispatched
+  # after the device drivers (eg: Ethernet) to ensure we have support for them.
+  INF EmbeddedPkg/Drivers/FdtPlatformDxe/FdtPlatformDxe.inf
+
+!ifdef $(DTB_DIR)
+  #
+  # Embed flattened device tree (FDT) images for all known
+  # variants of this platform
+  #
+  FILE RAW = PCD (gArmVExpressTokenSpaceGuid.PcdFdtFvpBaseAEMv8x4GicV2) {
+    $(DTB_DIR)/fvp-base-gicv2-psci.dtb
+  }
+  FILE RAW = PCD (gArmVExpressTokenSpaceGuid.PcdFdtFvpBaseAEMv8x4GicV2Legacy) {
+    $(DTB_DIR)/fvp-base-gicv2legacy-psci.dtb
+  }
+  FILE RAW = PCD (gArmVExpressTokenSpaceGuid.PcdFdtFvpBaseAEMv8x4GicV3) {
+    $(DTB_DIR)/fvp-base-gicv3-psci.dtb
+  }
+  FILE RAW = PCD (gArmVExpressTokenSpaceGuid.PcdFdtFvpFoundationGicV2) {
+    $(DTB_DIR)/fvp-foundation-gicv2-psci.dtb
+  }
+  FILE RAW = PCD (gArmVExpressTokenSpaceGuid.PcdFdtFvpFoundationGicV2Legacy) {
+    $(DTB_DIR)/fvp-foundation-gicv2legacy-psci.dtb
+  }
+  FILE RAW = PCD (gArmVExpressTokenSpaceGuid.PcdFdtFvpFoundationGicV3) {
+    $(DTB_DIR)/fvp-foundation-gicv3-psci.dtb
+  }
+!endif
 
 [FV.FVMAIN_COMPACT]
 FvAlignment        = 16
