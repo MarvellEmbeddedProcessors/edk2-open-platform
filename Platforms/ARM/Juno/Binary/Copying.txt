@@ -1,0 +1,2 @@
+The Juno bl30.bin is released under the Juno Software EULA:
+http://community.arm.com/docs/DOC-8402
