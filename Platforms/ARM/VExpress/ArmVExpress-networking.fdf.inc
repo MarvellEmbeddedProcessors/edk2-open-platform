@@ -17,7 +17,6 @@
   INF MdeModulePkg/Universal/Network/DpcDxe/DpcDxe.inf
   INF MdeModulePkg/Universal/Network/ArpDxe/ArpDxe.inf
   INF MdeModulePkg/Universal/Network/Dhcp4Dxe/Dhcp4Dxe.inf
-  INF MdeModulePkg/Universal/Network/Ip4ConfigDxe/Ip4ConfigDxe.inf
   INF MdeModulePkg/Universal/Network/Ip4Dxe/Ip4Dxe.inf
   INF MdeModulePkg/Universal/Network/MnpDxe/MnpDxe.inf
   INF MdeModulePkg/Universal/Network/VlanConfigDxe/VlanConfigDxe.inf
