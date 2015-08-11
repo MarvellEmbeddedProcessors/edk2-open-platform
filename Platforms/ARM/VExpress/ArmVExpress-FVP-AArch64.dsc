@@ -264,7 +264,15 @@
   #
   ArmPkg/Drivers/CpuDxe/CpuDxe.inf
   MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf {
+    <LibraryClasses>
+      NULL|SecurityPkg/Library/DxeImageVerificationLib/DxeImageVerificationLib.inf
+  }
+  SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
+!else
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf
+!endif
   MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf
   MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
   MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf
@@ -289,7 +297,11 @@
   OpenPlatformPkg/Platforms/ARM/VExpress/AcpiTables/rtsm_ve-aemv8a/AcpiTables.inf
 
   ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  ArmPlatformPkg/Drivers/NorFlashDxe/NorFlashAuthenticatedDxe.inf
+!else
   ArmPlatformPkg/Drivers/NorFlashDxe/NorFlashDxe.inf
+!endif
   ArmPkg/Drivers/TimerDxe/TimerDxe.inf
 !ifndef ARM_FOUNDATION_FVP
   ArmPlatformPkg/Drivers/LcdGraphicsOutputDxe/PL111LcdGraphicsOutputDxe.inf

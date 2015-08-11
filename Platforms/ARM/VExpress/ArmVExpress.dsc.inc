@@ -13,6 +13,7 @@
 
 [Defines]
   USE_ARM_BDS         = TRUE
+  SECURE_BOOT_ENABLE  = FALSE
 
 [BuildOptions.AARCH64.EDKII.DXE_RUNTIME_DRIVER]
   GCC:*_*_AARCH64_DLINK_FLAGS = --script=$(EDK_TOOLS_PATH)/Scripts/gcc-aarch64-64K-align-ld-script
@@ -129,8 +130,22 @@
   FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
   SortLib|MdeModulePkg/Library/UefiSortLib/UefiSortLib.inf
 
+  #
+  # Secure Boot dependencies
+  #
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+  OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf
+  TpmMeasurementLib|SecurityPkg/Library/DxeTpmMeasurementLib/DxeTpmMeasurementLib.inf
+  AuthVariableLib|SecurityPkg/Library/AuthVariableLib/AuthVariableLib.inf
+  BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
+
+  # re-use the UserPhysicalPresent() dummy implementation from the ovmf tree
+  PlatformSecureLib|OvmfPkg/Library/PlatformSecureLib/PlatformSecureLib.inf
+!else
   TpmMeasurementLib|MdeModulePkg/Library/TpmMeasurementLibNull/TpmMeasurementLibNull.inf
   AuthVariableLib|MdeModulePkg/Library/AuthVariableLibNull/AuthVariableLibNull.inf
+!endif
 
 !if $(USE_ARM_BDS) == FALSE
   CapsuleLib|MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf
@@ -231,6 +246,9 @@
   ReportStatusCodeLib|IntelFrameworkModulePkg/Library/DxeReportStatusCodeLibFramework/DxeReportStatusCodeLib.inf
   CapsuleLib|MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf
   ArmPlatformSysConfigLib|ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressSysConfigRuntimeLib/ArmVExpressSysConfigRuntimeLib.inf
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  BaseCryptLib|CryptoPkg/Library/BaseCryptLib/RuntimeCryptLib.inf
+!endif
 
 [LibraryClasses.AARCH64.DXE_RUNTIME_DRIVER]
   #
@@ -411,6 +429,13 @@
 !ifdef EDK2_ENABLE_SMSC_91X
   # Ethernet (SMSC 91C111)
   gLan91xDxeTokenSpaceGuid.PcdLan91xDxeBaseAddress|0x1A000000
+!endif
+
+!if $(SECURE_BOOT_ENABLE) == TRUE
+  # override the default values from SecurityPkg to ensure images from all sources are verified in secure boot
+  gEfiSecurityPkgTokenSpaceGuid.PcdOptionRomImageVerificationPolicy|0x04
+  gEfiSecurityPkgTokenSpaceGuid.PcdFixedMediaImageVerificationPolicy|0x04
+  gEfiSecurityPkgTokenSpaceGuid.PcdRemovableMediaImageVerificationPolicy|0x04
 !endif
 
 [Components.common]
