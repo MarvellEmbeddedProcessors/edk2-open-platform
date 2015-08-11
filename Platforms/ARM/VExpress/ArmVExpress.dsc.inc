@@ -480,3 +480,6 @@
   # FDT installation
   #
   EmbeddedPkg/Drivers/FdtPlatformDxe/FdtPlatformDxe.inf
+
+  # Legacy Linux Loader
+  ArmPkg/Application/LinuxLoader/LinuxLoader.inf
