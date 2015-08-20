@@ -1,0 +1,50 @@
+#/* @file
+#
+#  Copyright (c) 2011-2013, ARM Limited. All rights reserved.<BR>
+#  Copyright (c) 2014 - 2016, AMD Inc. All rights reserved.<BR>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution.  The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+#*/
+#/**
+#  Derived from:
+#   ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressSecLibRTSM/ArmVExpressSecLib.inf
+#
+#**/
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AmdStyxSecLib
+  FILE_GUID                      = af95afa9-fc3f-47b4-9237-d024305cd2e2
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = ArmPlatformSecLib
+
+[Packages]
+  ArmPkg/ArmPkg.dec
+  ArmPlatformPkg/ArmPlatformPkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+
+[LibraryClasses]
+  IoLib
+  ArmLib
+  SerialPortLib
+
+[Sources.common]
+  StyxSec.c
+
+[Sources.AARCH64]
+  AArch64/StyxBoot.S   | GCC
+  AArch64/GicV3.S      | GCC
+
+[FixedPcd]
+  gArmTokenSpaceGuid.PcdFvBaseAddress
+  gArmTokenSpaceGuid.PcdGicInterruptInterfaceBase
