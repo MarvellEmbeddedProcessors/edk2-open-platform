@@ -1,0 +1,2 @@
+
+EFI_STATUS MPConfigEntry ();

@@ -1,0 +1,48 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SFCDriver
+  FILE_GUID                      = 7E197D40-5A7F-4517-86B8-FD8A353B2106
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT	                 = SaveMemoryConfigDxeEntry
+
+
+
+[Sources.common]
+  SaveMemoryConfigDxe.c
+
+[Packages]
+  ArmPlatformPkg/ArmPlatformPkg.dec
+  MdePkg/MdePkg.dec
+  ArmPkg/ArmPkg.dec
+  OpenPlatformPkg/Chips/Hisilicon/HisiPkg.dec
+  
+[LibraryClasses]
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  DebugLib
+  BaseLib
+  DebugLib
+  SerialPortLib
+  ArmLib
+  CacheMaintenanceLib
+  UefiLib
+  PrintLib
+  PcdLib
+  IoLib
+  DxeServicesTableLib
+  TimerLib
+  HobLib
+  
+[Guids]
+  gEfiMemoryMapGuid
+
+[Protocols]
+  gSpiFlashProtocolGuid
+
+[FixedPcd.common]
+
+
+[Depex]
+TRUE

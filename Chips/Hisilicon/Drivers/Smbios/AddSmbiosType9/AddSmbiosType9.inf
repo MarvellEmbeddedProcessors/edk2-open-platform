@@ -1,0 +1,52 @@
+/*************************************************
+
+  Copyright (C), 1988-2013, Huawei Tech. Co., Ltd.
+
+  File name: HwProductsPkg\2PServer\AddSmbiosType9\AddSmbiosType9.inf
+
+  Author: uniBIOS-y00216284-097		Version:        Date: 2015.9.24
+
+  Description:
+
+  History:
+
+    1. Date:       Author:
+
+       Modification:
+
+*************************************************/
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AddSmbiosType9
+  FILE_GUID                      = 7AE6F104-66DF-48EF-B5A3-5050BF4908F0
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = AddSmbiosType9Entry
+
+[Sources]
+  AddSmbiosType9.c
+  
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  OpenPlatformPkg/Chips/Hisilicon/HisiPkg.dec
+  
+[LibraryClasses]
+  BaseMemoryLib
+  MemoryAllocationLib
+  DebugLib
+  UefiLib
+  UefiDriverEntryPoint
+  HwSafeOperationLib
+  OemMiscLib
+  
+[Protocols]
+  gEfiSmbiosProtocolGuid
+  
+[Guids]
+  
+[Pcd]
+
+[Depex]
+  gEfiSmbiosProtocolGuid

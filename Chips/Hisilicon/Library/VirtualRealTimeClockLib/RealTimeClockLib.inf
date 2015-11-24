@@ -1,0 +1,31 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = RealTimeClockLibVirtual
+  FILE_GUID                      = 432B35C1-A0CC-4720-A4B9-1EFD70050107
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = RealTimeClockLib
+
+[Sources.common]
+  RealTimeClockLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  ArmPkg/ArmPkg.dec
+
+[LibraryClasses]
+  IoLib
+  UefiLib
+  DebugLib
+  PcdLib
+  DxeServicesTableLib
+  UefiRuntimeLib
+
+  ArmLib      
+
+[Guids]
+  gEfiEventVirtualAddressChangeGuid
+
+[Pcd]
+  gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz
