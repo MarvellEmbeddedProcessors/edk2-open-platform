@@ -84,14 +84,8 @@ EFI_ACPI_DEBUG_PORT_2_TABLE Dbg2 = {
   }
 };
 
-VOID*
-ReferenceAcpiTable (
-  VOID
-  )
-{
-  //
-  // Reference the table being generated to prevent the optimizer from removing the
-  // data structure from the exeutable
-  //
-  return (VOID*)&Dbg2;
-}
+//
+// Reference the table being generated to prevent the optimizer from removing the
+// data structure from the executable
+//
+VOID* CONST ReferenceAcpiTable = &Dbg2;

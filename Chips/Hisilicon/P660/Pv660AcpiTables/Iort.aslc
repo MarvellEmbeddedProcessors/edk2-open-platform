@@ -47,14 +47,8 @@ EFI_ACPI_6_0_IO_REMAPPING_TABLES Iort = {
   		{0x00,0x00,0x00,0x00,0x00}}}				 // ID section[2]
 };
 
-VOID*
-ReferenceAcpiTable (
-  VOID
-  )
-{
-  //
-  // Reference the table being generated to prevent the optimizer from removing the
-  // data structure from the exeutable
-  //
-  return (VOID*)&Iort;
-}
+//
+// Reference the table being generated to prevent the optimizer from removing the
+// data structure from the executable
+//
+VOID* CONST ReferenceAcpiTable = &Iort;

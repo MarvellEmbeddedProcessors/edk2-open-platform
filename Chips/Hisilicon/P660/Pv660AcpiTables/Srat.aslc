@@ -107,14 +107,9 @@ EFI_ACPI_5_0_SYSTEM_RESOURCE_AFFINITY_TABLE Srat = {
   },
 };
 
-VOID*
-ReferenceAcpiTable (
-  VOID
-  )
-{
-  //
-  // Reference the table being generated to prevent the optimizer from removing the
-  // data structure from the exeutable
-  //
-  return (VOID*)&Srat;
-}
+//
+// Reference the table being generated to prevent the optimizer from removing the
+// data structure from the executable
+//
+VOID* CONST ReferenceAcpiTable = &Srat;
+
