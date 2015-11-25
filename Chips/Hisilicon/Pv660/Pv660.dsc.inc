@@ -278,7 +278,9 @@
   # Control what commands are supported from the UI
   # Turn these on and off to add features or save size
   #
-  gEmbeddedTokenSpaceGuid.PcdEmbeddedMacBoot|TRUE
+  ## Set PcdEmbeddedMacBoot to FALSE, or console mode will be changed when
+  ## entering EBL and not restored when exiting.
+  gEmbeddedTokenSpaceGuid.PcdEmbeddedMacBoot|FALSE
   gEmbeddedTokenSpaceGuid.PcdEmbeddedDirCmd|TRUE
   gEmbeddedTokenSpaceGuid.PcdEmbeddedHobCmd|TRUE
   gEmbeddedTokenSpaceGuid.PcdEmbeddedHwDebugCmd|TRUE
