@@ -27,6 +27,7 @@
   SKUID_IDENTIFIER               = DEFAULT
   FLASH_DEFINITION               = OpenPlatformPkg/Platforms/Hisilicon/D02/$(PLATFORM_NAME).fdf
   DEFINE EDK2_SKIP_PEICORE=0
+  DEFINE INTEL_BDS=TRUE
 
 !include OpenPlatformPkg/Chips/Hisilicon/P660/Pv660.dsc.inc
 
@@ -76,6 +77,15 @@
   OemAddressMapLib|OpenPlatformPkg/Platforms/Hisilicon/D02/Library/AddressMapPv660D02/OemAddressMapPv660D02.inf
   PlatformSysCtrlLib|OpenPlatformPkg/Chips/Hisilicon/Library/PlatformSysCtrlLib/PlatformSysCtrlLibPv660/PlatformSysCtrlLibPv660.inf
   #IpmiCmdLib|OpenPlatformPkg/Chips/Hisilicon/Library/IpmiCmdLibNull/IpmiCmdLibNull.inf
+
+!if $(INTEL_BDS) == TRUE
+  CapsuleLib|MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf
+  GenericBdsLib|IntelFrameworkModulePkg/Library/GenericBdsLib/GenericBdsLib.inf
+  #PlatformBdsLib|ArmPlatformPkg/ArmVirtualizationPkg/Library/PlatformIntelBdsLib/PlatformIntelBdsLib.inf
+  PlatformBdsLib|OpenPlatformPkg/Chips/Hisilicon/Override/ArmVirtPkg/Library/PlatformIntelBdsLib/PlatformIntelBdsLib.inf
+  CustomizedDisplayLib|MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf
+  #QemuBootOrderLib|OvmfPkg/Library/QemuBootOrderLib/QemuBootOrderLib.inf
+!endif
 
 [LibraryClasses.common.SEC]
   ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64LibSec.inf
@@ -283,6 +293,11 @@
   
   gHwTokenSpaceGuid.PcdTrustedFirmwareEnable|0x1
   gHwTokenSpaceGuid.PcdTrustedFirmwareBL1Base|0xA4A00000
+
+!if $(INTEL_BDS) == TRUE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdResetOnMemoryTypeInformationChange|FALSE
+  gEfiIntelFrameworkModulePkgTokenSpaceGuid.PcdShellFile|{ 0x83, 0xA5, 0x04, 0x7C, 0x3E, 0x9E, 0x1C, 0x4F, 0xAD, 0x65, 0xE0, 0x52, 0x68, 0xD0, 0xB4, 0xD1 }
+!endif
 
 ################################################################################
 #
@@ -504,7 +519,13 @@
   
   OpenPlatformPkg/Chips/Hisilicon/Drivers/Smbios/ProcessorSubClassDxe/ProcessorSubClassDxe.inf
 
-  OpenPlatformPkg/Chips/Hisilicon/Bds/Bds.inf
+!if $(INTEL_BDS) == TRUE
+  MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe.inf
+  MdeModulePkg/Universal/SetupBrowserDxe/SetupBrowserDxe.inf
+  IntelFrameworkModulePkg/Universal/BdsDxe/BdsDxe.inf
+!else
+   OpenPlatformPkg/Chips/Hisilicon/Bds/Bds.inf
+!endif
 
   #
   # UEFI application (Shell Embedded Boot Loader)
