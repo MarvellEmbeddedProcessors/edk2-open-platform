@@ -20,6 +20,7 @@
 #include <Library/PcdLib.h>
 #include <Library/PlatformBdsLib.h>
 //#include <Library/QemuBootOrderLib.h>
+#include <Library/UefiLib.h>
 #include <Protocol/DevicePath.h>
 #include <Protocol/GraphicsOutput.h>
 #include <Protocol/PciIo.h>
@@ -441,6 +442,7 @@ PlatformBdsPolicyBehavior (
   BdsLibBuildOptionFromVar (BootOptionList, L"BootOrder");
 
   //PlatformBdsEnterFrontPage (GetFrontPageTimeoutFromQemu(), TRUE);
+  Print (L"Press any key in %d seconds to stop automatical booting...\n", PcdGet16(PcdPlatformBootTimeOut));
   PlatformBdsEnterFrontPage (PcdGet16(PcdPlatformBootTimeOut), TRUE);
 }
 

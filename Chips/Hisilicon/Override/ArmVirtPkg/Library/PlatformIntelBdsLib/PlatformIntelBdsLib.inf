@@ -54,6 +54,7 @@
   #QemuFwCfgLib
   UefiBootServicesTableLib
   UefiRuntimeServicesTableLib
+  UefiLib
 
 [FixedPcd]
   gEfiIntelFrameworkModulePkgTokenSpaceGuid.PcdLogoFile
