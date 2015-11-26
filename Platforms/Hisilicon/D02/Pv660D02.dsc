@@ -418,7 +418,7 @@
   OpenPlatformPkg/Chips/Hisilicon/Drivers/TimerDxe_SOC/TimerDxe_SOC.inf
   ArmPlatformPkg/Drivers/LcdGraphicsOutputDxe/PL111LcdGraphicsOutputDxe.inf
 
-  OpenPlatformPkg/Chips/Hisilicon/Override/ArmPlatformPkg/Drivers/SP805WatchdogDxe/SP805WatchdogDxe.inf
+  ArmPlatformPkg/Drivers/SP805WatchdogDxe/SP805WatchdogDxe.inf
 
   #OpenPlatformPkg/Platforms/Hisilicon/D02/CpuSelfTestDxe/CpuSelfTestDxe.inf
 
