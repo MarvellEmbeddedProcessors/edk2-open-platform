@@ -29,7 +29,7 @@
   DEFINE EDK2_SKIP_PEICORE=0
   DEFINE INTEL_BDS=TRUE
 
-!include OpenPlatformPkg/Chips/Hisilicon/P660/Pv660.dsc.inc
+!include OpenPlatformPkg/Chips/Hisilicon/Pv660/Pv660.dsc.inc
 
 [LibraryClasses.common]
   ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64Lib.inf
@@ -430,7 +430,7 @@
   MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
   MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
 
-  OpenPlatformPkg/Chips/Hisilicon/P660/Pv660AcpiTables/AcpiTables.inf
+  OpenPlatformPkg/Chips/Hisilicon/Pv660/Pv660AcpiTables/AcpiTables.inf
 
   #Pci Express
   #OpenPlatformPkg/Chips/Hisilicon/Override/UefiCpuPkg/CpuIo2Dxe/CpuIo2Dxe.inf
