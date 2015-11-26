@@ -33,6 +33,11 @@
 GUID gEblFileGuid = {0x3CEF354A, 0x3B7A, 0x4519, {0xAD, 0x70,
   0x72, 0xA1, 0x34, 0x69, 0x83, 0x11} };
 
+// Need to keep the same with FlashStartOs.inf
+// 282cae50-940e-11e5-b7b8-774201c0f2d8
+GUID gFlashStartOsAppGuid = { 0x282cae50, 0x940e, 0x11e5, {0xb7, 0xb8,
+  0x77, 0x42, 0x01, 0xc0, 0xf2, 0xd8} };
+
 EFI_STATUS
 BdsDeleteAllInvalidEfiBootOption (
   VOID
@@ -436,6 +441,9 @@ PlatformBdsPolicyBehavior (
   //TryRunningQemuKernel ();
 
   BdsLibEnumerateAllBootOption (BootOptionList);
+
+  // Add Flash start os boot option
+  (VOID) HwBdsLibRegisterAppBootOption (BootOptionList, &gFlashStartOsAppGuid, L"Flash Start OS");
 
   // Add EBL as boot option
   (VOID) HwBdsLibRegisterAppBootOption (BootOptionList, &gEblFileGuid, L"EBL");

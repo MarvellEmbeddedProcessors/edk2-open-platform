@@ -527,6 +527,7 @@
   MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe.inf
   MdeModulePkg/Universal/SetupBrowserDxe/SetupBrowserDxe.inf
   IntelFrameworkModulePkg/Universal/BdsDxe/BdsDxe.inf
+  OpenPlatformPkg/Chips/Hisilicon/Application/EmbeddedLoader/FlashStartOs.inf
 !else
    OpenPlatformPkg/Chips/Hisilicon/Bds/Bds.inf
 !endif

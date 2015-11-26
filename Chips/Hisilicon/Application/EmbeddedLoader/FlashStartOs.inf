@@ -1,0 +1,46 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = FlashStartOs 
+  FILE_GUID                      = 282cae50-940e-11e5-b7b8-774201c0f2d8
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = FlashStartOsEntry
+
+[Sources]
+  CustomLoader.c
+  FlashStartOs.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  ArmPkg/ArmPkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  IntelFrameworkModulePkg/IntelFrameworkModulePkg.dec
+
+  OpenPlatformPkg/Chips/Hisilicon/HisiPkg.dec
+
+[LibraryClasses]
+  BdsLib
+  UefiBootServicesTableLib
+  UefiApplicationEntryPoint
+  DebugLib
+  BaseLib
+  FdtLib
+
+  OemMiscLib
+  FdtUpdateLib
+  PlatformSysCtrlLib
+  LzmaDecompressLib
+
+[Guids]
+  gFdtTableGuid
+
+[Protocols]
+
+[FeaturePcd]
+
+[Pcd]
+  gHwTokenSpaceGuid.PcdIsMPBoot
+  gHwTokenSpaceGuid.PcdTrustedFirmwareEnable
+
