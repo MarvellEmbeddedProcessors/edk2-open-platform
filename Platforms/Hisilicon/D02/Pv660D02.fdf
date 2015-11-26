@@ -54,7 +54,7 @@ NumBlocks     = 0x30
 
 0x00000000|0x00040000
 gArmTokenSpaceGuid.PcdSecureFvBaseAddress|gArmTokenSpaceGuid.PcdSecureFvSize
-FILE = OpenPlatformPkg/Platforms/Hisilicon/D02/Sec/FVMAIN_SEC.Fv
+FILE = OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Sec/FVMAIN_SEC.Fv
 
 0x00040000|0x00190000
 gArmTokenSpaceGuid.PcdFvBaseAddress|gArmTokenSpaceGuid.PcdFvSize
@@ -106,9 +106,9 @@ gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareBase|gEfiMdeModulePkgTok
 
 ## Place for Trusted Firmware
 0x00200000|0x00020000
-FILE = OpenPlatformPkg/Platforms/Hisilicon/D02/Binary/bl1.bin
+FILE = OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/bl1.bin
 0x00220000|0x000e0000
-FILE = OpenPlatformPkg/Platforms/Hisilicon/D02/Binary/fip.bin
+FILE = OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/fip.bin
 
 ################################################################################
 #
@@ -160,15 +160,15 @@ READ_LOCK_STATUS   = TRUE
   #INF HwProductsPkg/Pv660Evb/OemNicConfigEvb/OemNicConfigEvb.inf
 
   #INF OpenPlatformPkg/Chips/Hisilicon/Drivers/SFC/SfcDxeDriver.inf
-  INF OpenPlatformPkg/Platforms/Hisilicon/D02/Drivers/SFC/SfcDxeDriver.inf
+  INF OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Drivers/SFC/SfcDxeDriver.inf
 
   # PCI Express
   #INF OpenPlatformPkg/Chips/Hisilicon/Override/UefiCpuPkg/CpuIo2Dxe/CpuIo2Dxe.inf
-  INF OpenPlatformPkg/Platforms/Hisilicon/D02/Drivers/CpuIo2Dxe/CpuIo2Dxe.inf
+  INF OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Drivers/CpuIo2Dxe/CpuIo2Dxe.inf
   #INF OpenPlatformPkg/Chips/Hisilicon/Drivers/PcieInitDxe/PcieInitDxe.inf
-  INF OpenPlatformPkg/Platforms/Hisilicon/D02/Drivers/PcieInitDxe/PcieInitDxe.inf
+  INF OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Drivers/PcieInitDxe/PcieInitDxe.inf
   # Right now only PCI enumeration is not needed
-  #INF OpenPlatformPkg/Chips/Hisilicon/Drivers/PciHostBridge/PciHostBridge.inf
+  #INF OpenPlatformPkg/Chips/Hisilicon/Binary/Drivers/PciHostBridge/PciHostBridge.inf
   #INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf 
 
 
@@ -244,12 +244,9 @@ READ_LOCK_STATUS   = TRUE
   #
   #Network
   # 
-  #INF OpenPlatformPkg/Chips/Hisilicon/Drivers/Network/SnpPV600DxeD02Service_GE5/SnpPV600Dxe.inf
-  #INF OpenPlatformPkg/Chips/Hisilicon/Drivers/Network/SnpPV600DxeDebug_GE6/SnpPV600Dxe.inf
-  #INF OpenPlatformPkg/Chips/Hisilicon/Drivers/Network/SnpPV600DxeDebug/SnpPV600Dxe.inf
   #INF OpenPlatformPkg/Chips/Hisilicon/Drivers/Network/SnpPV600Dxe_PLAT/SnpPV600DxeMac4.inf
   #INF OpenPlatformPkg/Chips/Hisilicon/Drivers/Network/SnpPV600Dxe_PLAT/SnpPV600DxeMac5.inf
-  INF OpenPlatformPkg/Platforms/Hisilicon/D02/Drivers/SnpPV600Dxe_PLAT/SnpPV600DxeMac5.inf
+  INF OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Drivers/SnpPV600Dxe_PLAT/SnpPV600DxeMac5.inf
 
   INF MdeModulePkg/Universal/Network/ArpDxe/ArpDxe.inf
   INF MdeModulePkg/Universal/Network/Dhcp4Dxe/Dhcp4Dxe.inf
@@ -274,7 +271,7 @@ READ_LOCK_STATUS   = TRUE
   #Sata
   #
   #INF OpenPlatformPkg/Chips/Hisilicon/Drivers/AtaAtapiPassThru/AtaAtapiPassThru.inf
-  INF OpenPlatformPkg/Platforms/Hisilicon/D02/Drivers/AtaAtapiPassThru/AtaAtapiPassThru.inf
+  INF OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Drivers/AtaAtapiPassThru/AtaAtapiPassThru.inf
   INF MdeModulePkg/Bus/Ata/AtaBusDxe/AtaBusDxe.inf
 
   #
@@ -287,7 +284,7 @@ READ_LOCK_STATUS   = TRUE
   #
   # UEFI application (Shell Embedded Boot Loader)
   #
-  INF OpenPlatformPkg/Platforms/Hisilicon/D02/Ebl/Ebl.inf
+  INF OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Ebl/Ebl.inf
 
   #
   # Build Shell from latest source code instead of prebuilt binary
@@ -338,7 +335,7 @@ READ_LOCK_STATUS   = TRUE
   INF ArmPlatformPkg/PlatformPei/PlatformPeim.inf
   #INF ArmPlatformPkg/MemoryInitPei/MemoryInitPeim.inf
   #INF OpenPlatformPkg/Chips/Hisilicon/Override/ArmPlatformPkg/MemoryInitPei/MemoryInitPeim.inf
-  INF OpenPlatformPkg/Platforms/Hisilicon/D02/MemoryInitPei/MemoryInitPeim.inf
+  INF OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/MemoryInitPei/MemoryInitPeim.inf
   INF ArmPkg/Drivers/CpuPei/CpuPei.inf
   INF MdeModulePkg/Universal/PCD/Pei/Pcd.inf
   INF IntelFrameworkModulePkg/Universal/StatusCode/Pei/StatusCodePei.inf

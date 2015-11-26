@@ -64,7 +64,7 @@
 
   CpldDriverLib|OpenPlatformPkg/Chips/Hisilicon/Library/CpldDriverLib/CpldDriverLib.inf
 
-  SerdesLib|OpenPlatformPkg/Chips/Hisilicon/Library/Serdes/Pv660Serdes/Pv660SerdesLib.inf
+  SerdesLib|OpenPlatformPkg/Chips/Hisilicon/Binary/Pv660/Library/Pv660Serdes/Pv660SerdesLib.inf
 
   # ARM PL031 RTC Driver
   #RealTimeClockLib|ArmPlatformPkg/Library/PL031RealTimeClockLib/PL031RealTimeClockLib.inf
@@ -74,8 +74,8 @@
   #OemMiscLib|HwProductsPkg/Pv660Evb/Library/OemMiscLibEvb/OemMiscLibEvbb.inf
   BootLineLib|OpenPlatformPkg/Platforms/Hisilicon/D02/Library/BootLineLibD02/BootLineLibD02.inf
   
-  OemAddressMapLib|OpenPlatformPkg/Platforms/Hisilicon/D02/Library/AddressMapPv660D02/OemAddressMapPv660D02.inf
-  PlatformSysCtrlLib|OpenPlatformPkg/Chips/Hisilicon/Library/PlatformSysCtrlLib/PlatformSysCtrlLibPv660/PlatformSysCtrlLibPv660.inf
+  OemAddressMapLib|OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Library/AddressMapPv660D02/OemAddressMapPv660D02.inf
+  PlatformSysCtrlLib|OpenPlatformPkg/Chips/Hisilicon/Binary/Pv660/Library/PlatformSysCtrlLibPv660/PlatformSysCtrlLibPv660.inf
   #IpmiCmdLib|OpenPlatformPkg/Chips/Hisilicon/Library/IpmiCmdLibNull/IpmiCmdLibNull.inf
 
 !if $(INTEL_BDS) == TRUE
@@ -345,7 +345,7 @@
   ArmPlatformPkg/PlatformPei/PlatformPeim.inf
   #ArmPlatformPkg/MemoryInitPei/MemoryInitPeim.inf
   #OpenPlatformPkg/Chips/Hisilicon/Override/ArmPlatformPkg/MemoryInitPei/MemoryInitPeim.inf
-  OpenPlatformPkg/Platforms/Hisilicon/D02/MemoryInitPei/MemoryInitPeim.inf
+  OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/MemoryInitPei/MemoryInitPeim.inf
   ArmPkg/Drivers/CpuPei/CpuPei.inf
   IntelFrameworkModulePkg/Universal/StatusCode/Pei/StatusCodePei.inf
   MdeModulePkg/Universal/FaultTolerantWritePei/FaultTolerantWritePei.inf
@@ -381,7 +381,7 @@
   OpenPlatformPkg/Platforms/Hisilicon/D02/OemNicConfigD02/OemNicConfigD02.inf
 
   #OpenPlatformPkg/Chips/Hisilicon/Drivers/SFC/SfcDxeDriver.inf
-  OpenPlatformPkg/Platforms/Hisilicon/D02/Drivers/SFC/SfcDxeDriver.inf
+  OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Drivers/SFC/SfcDxeDriver.inf
 
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf
   MdeModulePkg/Universal/Variable/EmuRuntimeDxe/EmuVariableRuntimeDxe.inf
@@ -436,21 +436,18 @@
   #OpenPlatformPkg/Chips/Hisilicon/Override/UefiCpuPkg/CpuIo2Dxe/CpuIo2Dxe.inf
   #OpenPlatformPkg/Chips/Hisilicon/Drivers/PcieInitDxe/PcieInitDxe.inf
   #OpenPlatformPkg/Chips/Hisilicon/Drivers/PciHostBridge/PciHostBridge.inf
-  OpenPlatformPkg/Platforms/Hisilicon/D02/Drivers/CpuIo2Dxe/CpuIo2Dxe.inf
-  OpenPlatformPkg/Platforms/Hisilicon/D02/Drivers/PcieInitDxe/PcieInitDxe.inf
-  OpenPlatformPkg/Platforms/Hisilicon/D02/Drivers/PciHostBridge/PciHostBridge.inf
+  OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Drivers/CpuIo2Dxe/CpuIo2Dxe.inf
+  OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Drivers/PcieInitDxe/PcieInitDxe.inf
+  OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Drivers/PciHostBridge/PciHostBridge.inf
   MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf 
 
   #
   #network
   #
  
-  #OpenPlatformPkg/Chips/Hisilicon/Drivers/Network/SnpPV600DxeDebug/SnpPV600Dxe.inf
-  #OpenPlatformPkg/Chips/Hisilicon/Drivers/Network/SnpPV600DxeDebug_GE6/SnpPV600Dxe.inf
-  #OpenPlatformPkg/Chips/Hisilicon/Drivers/Network/SnpPV600DxeD02Service_GE5/SnpPV600Dxe.inf
   #OpenPlatformPkg/Chips/Hisilicon/Drivers/Network/SnpPV600Dxe_PLAT/SnpPV600DxeMac4.inf
   #OpenPlatformPkg/Chips/Hisilicon/Drivers/Network/SnpPV600Dxe_PLAT/SnpPV600DxeMac5.inf
-  OpenPlatformPkg/Platforms/Hisilicon/D02/Drivers/SnpPV600Dxe_PLAT/SnpPV600DxeMac5.inf
+  OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Drivers/SnpPV600Dxe_PLAT/SnpPV600DxeMac5.inf
   
   MdeModulePkg/Universal/Network/ArpDxe/ArpDxe.inf
   MdeModulePkg/Universal/Network/Dhcp4Dxe/Dhcp4Dxe.inf
@@ -484,7 +481,7 @@
   MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
 
   #OpenPlatformPkg/Chips/Hisilicon/Override/EmbeddedPkg/Ebl/Ebl.inf
-  OpenPlatformPkg/Platforms/Hisilicon/D02/Ebl/Ebl.inf
+  OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Ebl/Ebl.inf
   #c00213799 secure boot test
   MdeModulePkg/Application/HelloWorld/HelloWorld.inf
   #
@@ -495,7 +492,7 @@
   #OpenPlatformPkg/Chips/Hisilicon/Network/OemFtp/OemFtp.inf
 
   #OpenPlatformPkg/Chips/Hisilicon/Drivers/AtaAtapiPassThru/AtaAtapiPassThru.inf
-  OpenPlatformPkg/Platforms/Hisilicon/D02/Drivers/AtaAtapiPassThru/AtaAtapiPassThru.inf
+  OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Drivers/AtaAtapiPassThru/AtaAtapiPassThru.inf
   MdeModulePkg/Bus/Ata/AtaBusDxe/AtaBusDxe.inf
 
 
