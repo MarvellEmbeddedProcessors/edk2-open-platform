@@ -82,7 +82,7 @@
   PL011UartLib|ArmPlatformPkg/Drivers/PL011Uart/PL011Uart.inf
 
   #SerialPortLib|ArmPlatformPkg/Library/PL011SerialPortLib/PL011SerialPortLib.inf
-  SerialPortLib|OpenPlatformPkg/Chips/Hisilicon/Library/Uart/PV650/Library/PV650SerialPortLib/PV650SerialPortLib.inf
+  SerialPortLib|OpenPlatformPkg/Chips/Hisilicon/Library/Dw8250SerialPortLib/Dw8250SerialPortLib.inf
 
   #RamExamLib|OpenPlatformPkg/Chips/Hisilicon/RamExamLib/RamExamLib.inf
 
@@ -235,7 +235,7 @@
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
   ReportStatusCodeLib|MdeModulePkg/Library/RuntimeDxeReportStatusCodeLib/RuntimeDxeReportStatusCodeLib.inf
   CapsuleLib|MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf
-  SerialPortLib|OpenPlatformPkg/Chips/Hisilicon/Library/Uart/PV650/Library/PV650SerialPortRuntimeLib/PV650SerialPortRuntimeLib.inf
+  SerialPortLib|OpenPlatformPkg/Chips/Hisilicon/Library/Dw8250SerialPortRuntimeLib/Dw8250SerialPortRuntimeLib.inf
   DebugLib|IntelFrameworkModulePkg/Library/PeiDxeDebugLibReportStatusCode/PeiDxeDebugLibReportStatusCode.inf
 
 [LibraryClasses.ARM]

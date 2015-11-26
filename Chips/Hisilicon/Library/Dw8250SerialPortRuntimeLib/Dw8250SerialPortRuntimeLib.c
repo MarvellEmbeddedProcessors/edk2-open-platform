@@ -10,7 +10,7 @@
 
 #include <Protocol/SerialIo.h>
 #include <Guid/EventGroup.h>
-#include "PV650SerialPortRuntimeLib.h"
+#include "Dw8250SerialPortRuntimeLib.h"
 
 UINT64    mSerialRegBaseAddr = 0;
 

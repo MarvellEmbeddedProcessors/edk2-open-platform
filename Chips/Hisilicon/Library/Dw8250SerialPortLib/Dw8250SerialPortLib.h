@@ -1,5 +1,5 @@
-#ifndef __PV650_SERIALPORTLIB_H__
-#define __PV650_SERIALPORTLIB_H__
+#ifndef __DW8250_SERIALPORTLIB_H__
+#define __DW8250_SERIALPORTLIB_H__
 
 
 #define UART_USED_CHANNELS          1          

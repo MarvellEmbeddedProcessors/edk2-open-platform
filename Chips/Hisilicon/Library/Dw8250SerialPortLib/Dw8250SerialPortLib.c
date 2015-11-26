@@ -16,7 +16,7 @@
 #include <Library/SerialPortLib.h>
 #include <Protocol/SerialIo.h>
 
-#include "PV650SerialPortLib.h"
+#include "Dw8250SerialPortLib.h"
 
 
 /**

@@ -15,7 +15,7 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = PV650SerialPortLib
+  BASE_NAME                      = Dw8250SerialPortLib
   FILE_GUID                      = 16D53E86-7EA6-47bd-861F-511ED9B8ABE0
   MODULE_TYPE                    = DXE_RUNTIME_DRIVER
   VERSION_STRING                 = 1.0
@@ -23,7 +23,7 @@
   DESTRUCTOR                     = SerialPortLibDestructor
 
 [Sources.common]
-  PV650SerialPortRuntimeLib.c
+  Dw8250SerialPortRuntimeLib.c
 
 
 [Packages]
