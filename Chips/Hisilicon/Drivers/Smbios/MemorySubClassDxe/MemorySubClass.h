@@ -22,7 +22,6 @@
 #include <Guid/MemoryMapData.h>
 #include <Library/PlatformSysCtrlLib.h> //uniBIOS_y00216284_018_start DTS2015010906228 2015-1-13
 #include <Library/OemMiscLib.h>
-#include <Library/HwSafeOperationLib.h>
 
 //
 // This is the generated header file which includes whatever needs to be exported (strings + IFR)

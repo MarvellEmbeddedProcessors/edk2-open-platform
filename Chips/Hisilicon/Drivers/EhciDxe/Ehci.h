@@ -41,7 +41,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DxeServicesTableLib.h>
 #include <Library/TimerLib.h>
 #include <Library/CacheMaintenanceLib.h>
-#include <Library/HwSafeOperationLib.h>
 
 #include <Library/ReportStatusCodeLib.h>
 

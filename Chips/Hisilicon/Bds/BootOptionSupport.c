@@ -27,8 +27,6 @@
 
 #include <Guid/FileSystemInfo.h>
 
-#include <Library/HwSafeOperationLib.h>
-
 
 #define IS_DEVICE_PATH_NODE(node,type,subtype) (((node)->Type == (type)) && ((node)->SubType == (subtype)))
 
@@ -375,8 +373,7 @@ BdsLoadOptionFileSystemCreatePcdDevicePath (
   FilePathDevicePath->Header.Type = MEDIA_DEVICE_PATH;
   FilePathDevicePath->Header.SubType = MEDIA_FILEPATH_DP;
   SetDevicePathNodeLength (FilePathDevicePath, SIZE_OF_FILEPATH_DEVICE_PATH + BootFilePathSize);
-  //CopyMem (FilePathDevicePath->PathName, BootFilePath, BootFilePathSize);
-  memcpy_s(FilePathDevicePath->PathName, BootFilePathSize,BootFilePath, BootFilePathSize);
+  CopyMem(FilePathDevicePath->PathName, BootFilePath, BootFilePathSize);
   SetDevicePathEndNode ((VOID*)((UINTN)FilePathDevicePath + SIZE_OF_FILEPATH_DEVICE_PATH + BootFilePathSize));
   *DevicePathNodes = (EFI_DEVICE_PATH_PROTOCOL*)FilePathDevicePath;
 

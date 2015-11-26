@@ -12,7 +12,6 @@
 #include <Library/DebugLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include <Library/HwSafeOperationLib.h>
 
 #define MAX_SMBIOS_STRING_NUMBER 0xFF
 

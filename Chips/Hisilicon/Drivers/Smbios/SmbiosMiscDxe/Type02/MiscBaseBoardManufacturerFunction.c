@@ -148,7 +148,7 @@ MISC_SMBIOS_TABLE_FUNCTION(MiscBaseBoardManufacturer)
     }
     //uniBIOS_c00213799_end  2014-12-11 14:47:57 
     
-    (VOID)memcpy_s(SmbiosRecord, sizeof (SMBIOS_TABLE_TYPE2), InputData, sizeof (SMBIOS_TABLE_TYPE2));
+    (VOID)CopyMem(SmbiosRecord, InputData, sizeof (SMBIOS_TABLE_TYPE2));
     SmbiosRecord->Hdr.Length        = sizeof (SMBIOS_TABLE_TYPE2);
    
     //
@@ -198,7 +198,7 @@ Exit:
     if(SerialNumber != NULL)
     {
         FreePool(SerialNumber);   
-    }  
+    }
 
     if(AssetTag != NULL)
     {

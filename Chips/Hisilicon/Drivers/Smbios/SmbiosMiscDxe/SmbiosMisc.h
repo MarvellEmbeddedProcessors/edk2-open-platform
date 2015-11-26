@@ -39,7 +39,6 @@ Abstract:
 //#include <Library/IpmiLib.h>
 
 #include <Library/PrintLib.h>
-#include <Library/HwSafeOperationLib.h>
 
 //
 // Data table entry update function.

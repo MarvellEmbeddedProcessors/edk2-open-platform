@@ -46,8 +46,7 @@ GetNextLanguage (
     Index++;
   }
 
-  //CopyMem (Lang, StringPtr, Index);
-  (VOID)memcpy_s(Lang, Index, StringPtr, Index);
+  (VOID)CopyMem(Lang, StringPtr, Index);
   Lang[Index] = 0;
 
   if (StringPtr[Index] == ';') {
@@ -142,7 +141,7 @@ MISC_SMBIOS_TABLE_FUNCTION(MiscNumberOfInstallableLanguages)
     return EFI_OUT_OF_RESOURCES;
   }
   
-  (VOID)memcpy_s(SmbiosRecord, sizeof (SMBIOS_TABLE_TYPE13), InputData, sizeof (SMBIOS_TABLE_TYPE13));
+  (VOID)CopyMem(SmbiosRecord, InputData, sizeof (SMBIOS_TABLE_TYPE13));
   
   SmbiosRecord->Hdr.Length = sizeof (SMBIOS_TABLE_TYPE13);
   

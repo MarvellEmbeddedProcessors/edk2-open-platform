@@ -61,7 +61,7 @@ MISC_SMBIOS_TABLE_FUNCTION(MiscIpmiDeviceInformation)
         return EFI_OUT_OF_RESOURCES;
     }
 
-    (VOID)memcpy_s(SmbiosRecord, sizeof (SMBIOS_TABLE_TYPE38), InputData, sizeof (SMBIOS_TABLE_TYPE38));
+    (VOID)CopyMem(SmbiosRecord, InputData, sizeof (SMBIOS_TABLE_TYPE38));
 
     SmbiosRecord->Hdr.Length = sizeof (SMBIOS_TABLE_TYPE38);
 

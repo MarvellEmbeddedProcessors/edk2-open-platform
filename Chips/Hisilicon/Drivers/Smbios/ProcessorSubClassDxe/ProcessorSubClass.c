@@ -323,8 +323,8 @@ UpdateSmbiosCacheTable (
     // ÅäÖÃSRAM TypeĞÅÏ¢       
     //
     CacheSramType.Synchronous = 1;
-    (VOID)memcpy_s(&mSmbiosCacheTable[CacheLevel].SupportedSRAMType, sizeof(CACHE_SRAM_TYPE_DATA), &CacheSramType, sizeof(CACHE_SRAM_TYPE_DATA));
-    (VOID)memcpy_s(&mSmbiosCacheTable[CacheLevel].CurrentSRAMType, sizeof(CACHE_SRAM_TYPE_DATA), &CacheSramType, sizeof(CACHE_SRAM_TYPE_DATA));
+    (VOID)CopyMem(&mSmbiosCacheTable[CacheLevel].SupportedSRAMType, &CacheSramType, sizeof(CACHE_SRAM_TYPE_DATA));
+    (VOID)CopyMem(&mSmbiosCacheTable[CacheLevel].CurrentSRAMType, &CacheSramType, sizeof(CACHE_SRAM_TYPE_DATA));
 }
 
 /**
@@ -391,7 +391,7 @@ AddSmbiosCacheTypeTable (
             goto Exit;
         }    
 
-        (VOID)memcpy_s(Type7Record, sizeof (SMBIOS_TABLE_TYPE7), &mSmbiosCacheTable[CacheLevel], sizeof (SMBIOS_TABLE_TYPE7));
+        (VOID)CopyMem(Type7Record, &mSmbiosCacheTable[CacheLevel], sizeof (SMBIOS_TABLE_TYPE7));
 
         OptionalStrStart = (CHAR8 *) (Type7Record + 1);
         UnicodeStrToAsciiStr (CacheSocketStr, OptionalStrStart);
@@ -596,7 +596,7 @@ AddSmbiosProcessorTypeTable (
         goto Exit;
     }
 
-    (VOID)memcpy_s(Type4Record, sizeof (SMBIOS_TABLE_TYPE4), &mSmbiosProcessorTable[ProcessorNumber], sizeof (SMBIOS_TABLE_TYPE4));
+    (VOID)CopyMem(Type4Record, &mSmbiosProcessorTable[ProcessorNumber], sizeof (SMBIOS_TABLE_TYPE4));
 
     *(UINT8 *) &Type4Record->Voltage        = Voltage;         
     Type4Record->CurrentSpeed               = CurrentSpeed;

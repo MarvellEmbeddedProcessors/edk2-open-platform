@@ -137,8 +137,6 @@ MISC_SMBIOS_TABLE_FUNCTION(MiscSystemManufacturer)
                                                                 + SKUNumStrLen    + 1 
                                                                 + FamilyStrLen    + 1 + 1);
 
-    //uniBIOS_c00213799_start DTS2014121003065 2014-12-11 11:01:25
-    //Description:COVERITY
     if (NULL == SmbiosRecord)
     {
         Status = EFI_OUT_OF_RESOURCES;
@@ -146,13 +144,11 @@ MISC_SMBIOS_TABLE_FUNCTION(MiscSystemManufacturer)
     }
     //uniBIOS_c00213799_end  2014-12-11 11:01:25
 
-    (VOID)memcpy_s(SmbiosRecord, sizeof (SMBIOS_TABLE_TYPE1), InputData, sizeof (SMBIOS_TABLE_TYPE1));
+    (VOID)CopyMem(SmbiosRecord, InputData, sizeof (SMBIOS_TABLE_TYPE1));
 
     SmbiosRecord->Hdr.Length = sizeof (SMBIOS_TABLE_TYPE1);   
    
-    // uniBIOS_y00216284_072_start DTS2015073004262 2015-8-3 >>>
-    // Description:从BMC获取信息更新SMBIOS 
-    //(VOID)memcpy_s((UINT8 *) (&SmbiosRecord->Uuid), sizeof(EFI_GUID), &InputData->Uuid, sizeof(EFI_GUID)); 
+    //(VOID)CopyMem((UINT8 *) (&SmbiosRecord->Uuid), sizeof(EFI_GUID), &InputData->Uuid, sizeof(EFI_GUID)); 
     SmbiosRecord->Uuid = InputData->Uuid;
 
     OptionalStrStart = (CHAR8 *)(SmbiosRecord + 1);

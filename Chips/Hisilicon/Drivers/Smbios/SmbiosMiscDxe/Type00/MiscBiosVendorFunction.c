@@ -172,7 +172,7 @@ MISC_SMBIOS_TABLE_FUNCTION(MiscBiosVendor)
         goto Exit;
     }
 
-    (VOID)memcpy_s(SmbiosRecord, sizeof (SMBIOS_TABLE_TYPE0), InputData, sizeof (SMBIOS_TABLE_TYPE0));
+    (VOID)CopyMem(SmbiosRecord, InputData, sizeof (SMBIOS_TABLE_TYPE0));
 
     SmbiosRecord->Hdr.Length = sizeof (SMBIOS_TABLE_TYPE0);   
     SmbiosRecord->BiosSegment = (UINT16)(FixedPcdGet32 (PcdFdBaseAddress) / 0x10000);

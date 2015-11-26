@@ -172,7 +172,7 @@ MemMap (
         return EFI_OUT_OF_RESOURCES;
       }
 
-      (VOID)memcpy_s(Buffer, *NumberOfBytes, HostAddress, *NumberOfBytes);
+      (VOID)CopyMem(Buffer, HostAddress, *NumberOfBytes);
 
       *DeviceAddress = (EFI_PHYSICAL_ADDRESS)(UINTN)Buffer;
     } else {
@@ -215,8 +215,7 @@ MemUnmap (
 
   if (Map->DoubleBuffer) { 
     if ((Map->Operation == EfiPciIoOperationBusMasterWrite) || (Map->Operation == EfiPciIoOperationBusMasterCommonBuffer)) {
-      //CopyMem ((VOID *)(UINTN)Map->HostAddress, (VOID *)(UINTN)Map->DeviceAddress, Map->NumberOfBytes);
-      (VOID)memcpy_s((VOID *)(UINTN)Map->HostAddress, Map->NumberOfBytes, (VOID *)(UINTN)Map->DeviceAddress, Map->NumberOfBytes);   
+      (VOID)CopyMem((VOID *)(UINTN)Map->HostAddress, (VOID *)(UINTN)Map->DeviceAddress, Map->NumberOfBytes);   
     }
 
     if((VOID *)(UINTN)Map->DeviceAddress != NULL) {

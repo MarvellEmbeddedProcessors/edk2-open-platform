@@ -38,7 +38,6 @@
   TimerLib
 # Use EFiAtRuntime to check stage
   UefiRuntimeLib
-  HwSafeOperationLib
 
 [Pcd]
 

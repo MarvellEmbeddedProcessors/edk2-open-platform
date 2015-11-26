@@ -54,7 +54,7 @@ MISC_SMBIOS_TABLE_FUNCTION(MiscBootInformation)
         return EFI_OUT_OF_RESOURCES;
     }
 
-    (VOID)memcpy_s(SmbiosRecord, sizeof (SMBIOS_TABLE_TYPE32), InputData, sizeof (SMBIOS_TABLE_TYPE32));
+    (VOID)CopyMem(SmbiosRecord, InputData, sizeof (SMBIOS_TABLE_TYPE32));
 
     SmbiosRecord->Hdr.Length = sizeof (SMBIOS_TABLE_TYPE32);
 

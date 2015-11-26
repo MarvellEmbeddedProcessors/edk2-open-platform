@@ -11,7 +11,6 @@
 #include <Library/DxeServicesTableLib.h>
 #include <Library/FdtUpdateLib.h>
 
-#include <Library/HwSafeOperationLib.h>
 #include "UpdateFdtDxe.h"
 
 STATIC
@@ -83,8 +82,7 @@ EFIAPI UpdateFdt (
     EFI_STATUS          Status = EFI_SUCCESS;
     UINT32              Index = 0;
     UINTN               FDTConfigTable;
-    VOID*               dMem=NULL;
-    
+ 
     (VOID) SetNvramSpace ();
 
     Fdt = (VOID*)(PcdGet64(FdtFileAddress));
@@ -107,12 +105,7 @@ EFIAPI UpdateFdt (
         return EFI_OUT_OF_RESOURCES;
     }
 
-    dMem = memcpy_s((VOID*)NewFdtBlobBase,NewFdtBlobSize, Fdt, Size);
-    if(NULL == dMem)
-    {
-        DEBUG((EFI_D_ERROR, "%a(%d):MEM CPY FAIL!\n", __FUNCTION__,__LINE__));
-        goto EXIT;
-    }
+    (VOID) CopyMem((VOID*)NewFdtBlobBase, Fdt, Size);
    
     Status = EFIFdtUpdate(NewFdtBlobBase);
     if (EFI_ERROR (Status)) 

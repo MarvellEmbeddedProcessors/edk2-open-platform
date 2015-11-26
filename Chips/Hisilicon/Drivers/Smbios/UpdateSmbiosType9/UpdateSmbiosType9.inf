@@ -36,7 +36,6 @@
   DebugLib
   UefiLib
   UefiDriverEntryPoint
-  HwSafeOperationLib
   
 [Protocols]
   gEfiPciIoProtocolGuid

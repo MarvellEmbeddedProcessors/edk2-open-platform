@@ -12,7 +12,6 @@
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/HwSafeOperationLib.h>
 #include <Library/OemMiscLib.h>
 
 #endif

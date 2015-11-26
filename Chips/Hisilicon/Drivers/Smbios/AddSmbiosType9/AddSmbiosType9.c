@@ -82,7 +82,7 @@ AddSmbiosType9Entry (
             goto Exit;
         }
 
-        (VOID)memcpy_s(SmbiosRecord, sizeof (SMBIOS_TABLE_TYPE9), Type9Record, sizeof (SMBIOS_TABLE_TYPE9));
+        (VOID)CopyMem(SmbiosRecord, Type9Record, sizeof (SMBIOS_TABLE_TYPE9));
 
         SmbiosRecord->Hdr.Length = sizeof (SMBIOS_TABLE_TYPE9);
 

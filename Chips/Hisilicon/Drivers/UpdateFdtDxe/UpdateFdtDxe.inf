@@ -36,8 +36,6 @@
   FdtUpdateLib
   DxeServicesTableLib
   
-  HwSafeOperationLib
-  
 [Guids]
  gFdtTableGuid
 [Protocols]

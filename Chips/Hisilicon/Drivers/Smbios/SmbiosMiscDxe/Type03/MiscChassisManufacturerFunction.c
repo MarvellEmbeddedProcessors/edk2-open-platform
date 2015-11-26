@@ -125,7 +125,7 @@ MISC_SMBIOS_TABLE_FUNCTION(MiscChassisManufacturer)
         goto Exit;
     }
 
-    (VOID)memcpy_s(SmbiosRecord, sizeof (SMBIOS_TABLE_TYPE3), InputData, sizeof (SMBIOS_TABLE_TYPE3));
+    (VOID)CopyMem(SmbiosRecord, InputData, sizeof (SMBIOS_TABLE_TYPE3));
 
     SmbiosRecord->Hdr.Length = sizeof (SMBIOS_TABLE_TYPE3) + ExtendLength + 1;
 
@@ -136,7 +136,7 @@ MISC_SMBIOS_TABLE_FUNCTION(MiscChassisManufacturer)
     }
 
     //ContainedElements
-    (VOID)memcpy_s(SmbiosRecord + 1, ExtendLength, &ContainedElements, ExtendLength);
+    (VOID)CopyMem(SmbiosRecord + 1, &ContainedElements, ExtendLength);
     
     //ChassisSkuNumber
     *((UINT8 *)SmbiosRecord + sizeof (SMBIOS_TABLE_TYPE3) + ExtendLength) = 5;

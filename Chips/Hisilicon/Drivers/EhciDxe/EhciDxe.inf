@@ -83,7 +83,6 @@
   DxeServicesTableLib
   TimerLib
   CacheMaintenanceLib
-  HwSafeOperationLib
   PlatformSysCtrlLib
 
 [Guids]
