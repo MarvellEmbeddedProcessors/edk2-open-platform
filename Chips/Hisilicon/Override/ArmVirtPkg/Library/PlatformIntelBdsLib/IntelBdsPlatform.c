@@ -367,6 +367,7 @@ PlatformBdsPolicyBehavior (
   IN BASEM_MEMORY_TEST               BaseMemoryTest
   )
 {
+  EFI_STATUS Status;
   //
   // Locate the PCI root bridges and make the PCI bus driver connect each,
   // non-recursively. This will produce a number of child handles with PciIo on
@@ -417,6 +418,14 @@ PlatformBdsPolicyBehavior (
   // Connect the rest of the devices.
   //
   BdsLibConnectAll ();
+
+  //
+  // Add memory test to convert memory above 4GB to be tested
+  //
+  Status = BaseMemoryTest (QUICK);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((EFI_D_ERROR, "[%a:%d] - Base memory test failed: %r\n", __FUNCTION__, __LINE__, Status));
+  }
 
   //
   // Process QEMU's -kernel command line option. Note that the kernel booted

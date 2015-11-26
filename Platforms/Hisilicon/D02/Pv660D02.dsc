@@ -495,7 +495,6 @@
 
   #OpenPlatformPkg/Chips/Hisilicon/Network/OemFtp/OemFtp.inf
 
-
   #OpenPlatformPkg/Chips/Hisilicon/Drivers/AtaAtapiPassThru/AtaAtapiPassThru.inf
   OpenPlatformPkg/Platforms/Hisilicon/D02/Drivers/AtaAtapiPassThru/AtaAtapiPassThru.inf
   MdeModulePkg/Bus/Ata/AtaBusDxe/AtaBusDxe.inf
@@ -520,6 +519,11 @@
   OpenPlatformPkg/Chips/Hisilicon/Drivers/Smbios/ProcessorSubClassDxe/ProcessorSubClassDxe.inf
 
 !if $(INTEL_BDS) == TRUE
+  #
+  # Memory test
+  #
+  MdeModulePkg/Universal/MemoryTest/GenericMemoryTestDxe/GenericMemoryTestDxe.inf
+
   MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe.inf
   MdeModulePkg/Universal/SetupBrowserDxe/SetupBrowserDxe.inf
   IntelFrameworkModulePkg/Universal/BdsDxe/BdsDxe.inf
