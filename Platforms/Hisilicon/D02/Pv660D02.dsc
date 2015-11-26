@@ -348,7 +348,6 @@
   OpenPlatformPkg/Platforms/Hisilicon/D02/MemoryInitPei/MemoryInitPeim.inf
   ArmPkg/Drivers/CpuPei/CpuPei.inf
   IntelFrameworkModulePkg/Universal/StatusCode/Pei/StatusCodePei.inf
-  OpenPlatformPkg/Chips/Hisilicon/Drivers/BootModePei/BootModePei.inf
   MdeModulePkg/Universal/FaultTolerantWritePei/FaultTolerantWritePei.inf
   MdeModulePkg/Universal/Variable/Pei/VariablePei.inf
   OpenPlatformPkg/Platforms/Hisilicon/D02/BootLinuxConfig/BootLinuxConfigPeim.inf
