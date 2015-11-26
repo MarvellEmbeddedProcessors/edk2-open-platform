@@ -342,8 +342,7 @@ READ_LOCK_STATUS   = TRUE
   #INF MdeModulePkg/Universal/FaultTolerantWritePei/FaultTolerantWritePei.inf
   #INF MdeModulePkg/Universal/Variable/Pei/VariablePei.inf
   
-  INF OpenPlatformPkg/Platforms/Hisilicon/D02/BootLinuxConfig/BootLinuxConfigPeim.inf
-
+  INF OpenPlatformPkg/Platforms/Hisilicon/D02/EarlyConfigPeim/EarlyConfigPeim.inf
   INF MdeModulePkg/Core/DxeIplPeim/DxeIpl.inf
 !endif
 
