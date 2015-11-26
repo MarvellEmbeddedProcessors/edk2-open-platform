@@ -20,7 +20,7 @@
 
 [LibraryClasses]
   SerialPortLib
-  CpldDriverLib
+  CpldIoLib
 
 [BuildOptions]
 

@@ -62,7 +62,7 @@
 
   #PcieInitLib|OpenPlatformPkg/Chips/Hisilicon/PcieInitLib/PcieInitLib.inf
 
-  CpldDriverLib|OpenPlatformPkg/Chips/Hisilicon/Library/CpldDriverLib/CpldDriverLib.inf
+  CpldIoLib|OpenPlatformPkg/Chips/Hisilicon/Library/CpldIoLib/CpldIoLib.inf
 
   SerdesLib|OpenPlatformPkg/Chips/Hisilicon/Binary/Pv660/Library/Pv660Serdes/Pv660SerdesLib.inf
 

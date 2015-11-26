@@ -1,14 +1,14 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = CpldDriverLib
+  BASE_NAME                      = CpldIoLib
   FILE_GUID                      = 4633665C-0029-464E-9788-58B8D49FF57E
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = CpldDriverLib
+  LIBRARY_CLASS                  = CpldIoLib
 
 [Sources.common]
-  CpldDriver.c
+  CpldIoLib.c
 
 [Packages]
   MdePkg/MdePkg.dec

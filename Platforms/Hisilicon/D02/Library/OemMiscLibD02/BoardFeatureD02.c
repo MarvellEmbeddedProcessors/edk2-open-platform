@@ -6,7 +6,7 @@
 #include <Library/HwMemInitLib.h>
 #include <Library/OemMiscLib.h>
 #include <Library/SerdesLib.h>
-#include <Library/CpldApi.h>
+#include <Library/CpldIoLib.h>
 #include <Library/CpldD02.h>
 #include <Library/TimerLib.h>
 #include <Library/I2CLib.h>

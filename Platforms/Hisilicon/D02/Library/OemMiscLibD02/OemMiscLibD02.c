@@ -3,7 +3,7 @@
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
 
-#include <Library/CpldApi.h>
+#include <Library/CpldIoLib.h>
 #include <Library/OemMiscLib.h>
 #include <PlatformArch.h>
 #include <Library/PlatformSysCtrlLib.h>
