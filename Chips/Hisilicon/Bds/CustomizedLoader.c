@@ -11,9 +11,6 @@
 #include <Library/TimerLib.h>
 #include <Library/OemAddressMapLib.h>
 #include <Library/FdtUpdateLib.h>
-// We move asm_read_reg from ArmLib to HwArmLib
-#include <Library/HwArmLib.h>
-
 #include <Library/LzmaCustomDecompressLib/LzmaDecompressLibInternal.h>
 
 typedef VOID (*ESL_LINUX)(UINTN ParametersBase, UINTN Reserved0,
@@ -58,7 +55,7 @@ ESL_Start_OS (
   )
 {
     EFI_STATUS Status;
-    UINTN     Reg_Value;
+    UINT64     Reg_Value;
     ESL_LINUX LinuxKernel = (ESL_LINUX)(0x80000); 
 
     if(!PcdGet32(PcdIsMPBoot))
@@ -135,7 +132,7 @@ ESL_Start_OS (
         StartupAp();
     }
 
-    Reg_Value = asm_read_reg();
+    Reg_Value = ArmReadCpuExCr();
 
     DEBUG((EFI_D_ERROR,"CPUECTLR_EL1 = 0x%llx\n",Reg_Value));
 

@@ -27,6 +27,7 @@
   DebugLib
   BaseLib
   FdtLib
+  ArmCpuLib
 
   OemMiscLib
   FdtUpdateLib

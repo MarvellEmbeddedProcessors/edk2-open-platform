@@ -5,15 +5,13 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/ArmLib.h>
 #include <Guid/Fdt.h>
+#include <Chipset/ArmCortexA5x.h>
 
 #include <PlatformArch.h>
 #include <Library/PlatformSysCtrlLib.h>
 #include <Library/TimerLib.h>
 #include <Library/OemAddressMapLib.h>
 #include <Library/FdtUpdateLib.h>
-// We move asm_read_reg from ArmLib to HwArmLib
-#include <Library/HwArmLib.h>
-
 #include <Library/LzmaCustomDecompressLib/LzmaDecompressLibInternal.h>
 
 typedef VOID (*ESL_LINUX)(UINTN ParametersBase, UINTN Reserved0,

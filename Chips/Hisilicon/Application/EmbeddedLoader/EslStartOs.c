@@ -8,7 +8,7 @@ EslStartOsEntry (
   )
 {
     EFI_STATUS Status;
-    //UINTN     Reg_Value;
+    UINT64     Reg_Value;
     ESL_LINUX LinuxKernel = (ESL_LINUX)(0x80000); 
 
     if(!PcdGet32(PcdIsMPBoot))
@@ -85,8 +85,8 @@ EslStartOsEntry (
         StartupAp();
     }
 
-    // Reg_Value = asm_read_reg();
-    // DEBUG((EFI_D_ERROR,"CPUECTLR_EL1 = 0x%llx\n",Reg_Value));
+    Reg_Value = ArmReadCpuExCr();
+    DEBUG((EFI_D_ERROR,"CPUECTLR_EL1 = 0x%llx\n",Reg_Value));
 
     MN_CONFIG ();
 
