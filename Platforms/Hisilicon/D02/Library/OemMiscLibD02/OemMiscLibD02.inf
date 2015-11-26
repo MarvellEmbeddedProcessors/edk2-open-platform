@@ -16,7 +16,7 @@
   ArmPkg/ArmPkg.dec
 
   OpenPlatformPkg/Chips/Hisilicon/HisiPkg.dec
-  OpenPlatformPkg/Platforms/Hisilicon/D02/PV660D02.dec
+  OpenPlatformPkg/Platforms/Hisilicon/D02/Pv660D02.dec
 
 [LibraryClasses]
   SerialPortLib
