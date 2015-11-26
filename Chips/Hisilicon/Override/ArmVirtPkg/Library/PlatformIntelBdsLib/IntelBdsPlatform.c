@@ -38,6 +38,11 @@ GUID gEblFileGuid = {0x3CEF354A, 0x3B7A, 0x4519, {0xAD, 0x70,
 GUID gFlashStartOsAppGuid = { 0x282cae50, 0x940e, 0x11e5, {0xb7, 0xb8,
   0x77, 0x42, 0x01, 0xc0, 0xf2, 0xd8} };
 
+// Need to keep the same with EslStartOs.inf
+// 8880a72c-9411-11e5-b6f0-97310bc151d1
+GUID gEslStartOsAppGuid = { 0x8880a72c, 0x9411, 0x11e5, {0xb6, 0xf0,
+  0x97, 0x31, 0x0b, 0xc1, 0x51, 0xd1} };
+
 EFI_STATUS
 BdsDeleteAllInvalidEfiBootOption (
   VOID
@@ -442,8 +447,9 @@ PlatformBdsPolicyBehavior (
 
   BdsLibEnumerateAllBootOption (BootOptionList);
 
-  // Add Flash start os boot option
+  // Add Flash Start OS and ESL Start OS boot option
   (VOID) HwBdsLibRegisterAppBootOption (BootOptionList, &gFlashStartOsAppGuid, L"Flash Start OS");
+  (VOID) HwBdsLibRegisterAppBootOption (BootOptionList, &gEslStartOsAppGuid, L"ESL Start OS");
 
   // Add EBL as boot option
   (VOID) HwBdsLibRegisterAppBootOption (BootOptionList, &gEblFileGuid, L"EBL");

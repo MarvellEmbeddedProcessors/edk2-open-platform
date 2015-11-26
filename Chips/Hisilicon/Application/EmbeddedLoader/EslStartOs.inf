@@ -1,0 +1,46 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = EslStartOs 
+  FILE_GUID                      = 8880a72c-9411-11e5-b6f0-97310bc151d1
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = EslStartOsEntry
+
+[Sources]
+  CustomLoader.c
+  EslStartOs.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  ArmPkg/ArmPkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  IntelFrameworkModulePkg/IntelFrameworkModulePkg.dec
+
+  OpenPlatformPkg/Chips/Hisilicon/HisiPkg.dec
+
+[LibraryClasses]
+  BdsLib
+  UefiBootServicesTableLib
+  UefiApplicationEntryPoint
+  DebugLib
+  BaseLib
+  FdtLib
+
+  OemMiscLib
+  FdtUpdateLib
+  PlatformSysCtrlLib
+  LzmaDecompressLib
+
+[Guids]
+  gFdtTableGuid
+
+[Protocols]
+
+[FeaturePcd]
+
+[Pcd]
+  gHwTokenSpaceGuid.PcdIsMPBoot
+  gHwTokenSpaceGuid.PcdTrustedFirmwareEnable
+
