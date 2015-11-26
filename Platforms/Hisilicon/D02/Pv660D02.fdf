@@ -200,7 +200,7 @@ READ_LOCK_STATUS   = TRUE
   #INF EmbeddedPkg/SimpleTextInOutSerial/SimpleTextInOutSerial.inf
 
   #INF ArmPkg/Drivers/PL390Gic/PL390GicDxe.inf
-  INF OpenPlatformPkg/Chips/Hisilicon/Drivers/PL390Gic/PL390GicDxe.inf
+  INF OpenPlatformPkg/Chips/Hisilicon/Drivers/Hic/HicDxe.inf
   #INF ArmPkg/Drivers/TimerDxe/TimerDxe.inf
   INF OpenPlatformPkg/Chips/Hisilicon/Drivers/TimerDxe_SOC/TimerDxe_SOC.inf
   #INF ArmPlatformPkg/Drivers/NorFlashDxe/NorFlashDxe.inf

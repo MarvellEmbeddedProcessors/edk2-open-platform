@@ -412,7 +412,7 @@
   MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf
 
   #ArmPkg/Drivers/PL390Gic/PL390GicDxe.inf
-  OpenPlatformPkg/Chips/Hisilicon/Drivers/PL390Gic/PL390GicDxe.inf
+  OpenPlatformPkg/Chips/Hisilicon/Drivers/Hic/HicDxe.inf
 
   #ArmPkg/Drivers/TimerDxe/TimerDxe
   OpenPlatformPkg/Chips/Hisilicon/Drivers/TimerDxe_SOC/TimerDxe_SOC.inf
