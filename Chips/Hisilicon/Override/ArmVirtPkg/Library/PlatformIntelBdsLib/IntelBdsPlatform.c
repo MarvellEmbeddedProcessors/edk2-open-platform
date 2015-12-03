@@ -452,7 +452,7 @@ PlatformBdsPolicyBehavior (
   (VOID) HwBdsLibRegisterAppBootOption (BootOptionList, &gEslStartOsAppGuid, L"ESL Start OS");
 
   // Add EBL as boot option
-  (VOID) HwBdsLibRegisterAppBootOption (BootOptionList, &gEblFileGuid, L"EBL");
+  (VOID) HwBdsLibRegisterAppBootOption (BootOptionList, &gEblFileGuid, L"Embedded Boot Loader (EBL)");
 
   // Remove EFI Misc Device Boot Options
   BdsDeleteAllInvalidEfiBootOption ();
