@@ -17,8 +17,8 @@ Scope(_SB)
 {
   // UART PL011
   Device(COM0) {
-    Name(_HID, "HISI0030")
-    Name(_CID, "8250dw") //PL011
+    Name(_HID, "APMC0D08") //Or AMD0020, trick to use dw8250 serial driver
+    Name(_CID, "8250dw")
     Name(_UID, Zero)
     Name(_CRS, ResourceTemplate() {
       Memory32Fixed(ReadWrite, 0x80300000, 0x1000) //0x7FF80000, 0x1000
