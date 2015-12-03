@@ -326,10 +326,7 @@
       ArmPlatformGlobalVariableLib|ArmPlatformPkg/Library/ArmPlatformGlobalVariableLib/PrePi/PrePiArmPlatformGlobalVariableLib.inf
   }
 !else
-  ArmPlatformPkg/PrePeiCore/PrePeiCoreMPCore.inf {
-    <LibraryClasses>
-      ArmPlatformGlobalVariableLib|ArmPlatformPkg/Library/ArmPlatformGlobalVariableLib/Pei/PeiArmPlatformGlobalVariableLib.inf
-  }
+  ArmPlatformPkg/PrePeiCore/PrePeiCoreMPCore.inf
   MdeModulePkg/Core/Pei/PeiMain.inf
   MdeModulePkg/Universal/PCD/Pei/Pcd.inf  {
     <LibraryClasses>
@@ -398,7 +395,7 @@
   MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
   MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
   MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
-  EmbeddedPkg/SerialDxe/SerialDxe.inf
+  MdeModulePkg/Universal/SerialDxe/SerialDxe.inf
 
   # Simple TextIn/TextOut for UEFI Terminal
   EmbeddedPkg/SimpleTextInOutSerial/SimpleTextInOutSerial.inf

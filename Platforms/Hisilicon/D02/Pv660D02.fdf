@@ -194,7 +194,7 @@ READ_LOCK_STATUS   = TRUE
   INF MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
   INF MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
   INF MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
-  INF EmbeddedPkg/SerialDxe/SerialDxe.inf
+  INF MdeModulePkg/Universal/SerialDxe/SerialDxe.inf
 
   # Simple TextIn/TextOut for UEFI Terminal
   #INF EmbeddedPkg/SimpleTextInOutSerial/SimpleTextInOutSerial.inf

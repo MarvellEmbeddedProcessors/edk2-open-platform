@@ -222,41 +222,51 @@ UINT8 SerialPortReadChar(VOID)
 }
 
 /**
-  Set new attributes to PL011.
+  Sets the baud rate, receive FIFO depth, transmit/receice time out, parity,
+  data bits, and stop bits on a serial device.
 
-  @param  BaudRate                The baud rate of the serial device. If the baud rate is not supported,
-                                  the speed will be reduced down to the nearest supported one and the
-                                  variable's value will be updated accordingly.
-  @param  ReceiveFifoDepth        The number of characters the device will buffer on input. If the specified
-                                  value is not supported, the variable's value will be reduced down to the
-                                  nearest supported one.
-  @param  Timeout                 If applicable, the number of microseconds the device will wait
-                                  before timing out a Read or a Write operation.
-  @param  Parity                  If applicable, this is the EFI_PARITY_TYPE that is computer or checked
-                                  as each character is transmitted or received. If the device does not
-                                  support parity, the value is the default parity value.
-  @param  DataBits                The number of data bits in each character
-  @param  StopBits                If applicable, the EFI_STOP_BITS_TYPE number of stop bits per character.
-                                  If the device does not support stop bits, the value is the default stop
-                                  bit value.
+  @param BaudRate           The requested baud rate. A BaudRate value of 0 will use the
+                            device's default interface speed.
+                            On output, the value actually set.
+  @param ReveiveFifoDepth   The requested depth of the FIFO on the receive side of the
+                            serial interface. A ReceiveFifoDepth value of 0 will use
+                            the device's default FIFO depth.
+                            On output, the value actually set.
+  @param Timeout            The requested time out for a single character in microseconds.
+                            This timeout applies to both the transmit and receive side of the
+                            interface. A Timeout value of 0 will use the device's default time
+                            out value.
+                            On output, the value actually set.
+  @param Parity             The type of parity to use on this serial device. A Parity value of
+                            DefaultParity will use the device's default parity value.
+                            On output, the value actually set.
+  @param DataBits           The number of data bits to use on the serial device. A DataBits
+                            vaule of 0 will use the device's default data bit setting.
+                            On output, the value actually set.
+  @param StopBits           The number of stop bits to use on this serial device. A StopBits
+                            value of DefaultStopBits will use the device's default number of
+                            stop bits.
+                            On output, the value actually set.
 
-  @retval EFI_SUCCESS             All attributes were set correctly on the serial device.
-  @retval EFI_INVALID_PARAMETERS  One or more of the attributes has an unsupported value.
+  @retval RETURN_SUCCESS            The new attributes were set on the serial device.
+  @retval RETURN_UNSUPPORTED        The serial device does not support this operation.
+  @retval RETURN_INVALID_PARAMETER  One or more of the attributes has an unsupported value.
+  @retval RETURN_DEVICE_ERROR       The serial device is not functioning correctly.
 
 **/
 RETURN_STATUS
 EFIAPI
 SerialPortSetAttributes (
-  IN UINT64              BaudRate,
-  IN UINT32              ReceiveFifoDepth,
-  IN UINT32              Timeout,
-  IN EFI_PARITY_TYPE     Parity,
-  IN UINT8               DataBits,
-  IN EFI_STOP_BITS_TYPE  StopBits
+  IN OUT UINT64             *BaudRate,
+  IN OUT UINT32             *ReceiveFifoDepth,
+  IN OUT UINT32             *Timeout,
+  IN OUT EFI_PARITY_TYPE    *Parity,
+  IN OUT UINT8              *DataBits,
+  IN OUT EFI_STOP_BITS_TYPE *StopBits
   )
 {
-  return EFI_UNSUPPORTED;
-}
+  return RETURN_UNSUPPORTED;
+} 
 
 /**
   Set the serial device control bits.
