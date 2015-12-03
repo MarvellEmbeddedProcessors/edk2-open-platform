@@ -12,10 +12,9 @@
 
 **/
 
-//#include "ArmPlatform.h"
 #include "Pv660Platform.h"
 
-DefinitionBlock("DsdtTable.aml", "DSDT", 1, "ARMLTD", "ARM-JUNO", EFI_ACPI_ARM_OEM_REVISION) {
+DefinitionBlock("DsdtTable.aml", "DSDT", 1, "HISI", "HISI-EVB", EFI_ACPI_ARM_OEM_REVISION) {
      include ("CPU.asl")
      include ("ComHi1610.asl")
      include ("I2c.asl")

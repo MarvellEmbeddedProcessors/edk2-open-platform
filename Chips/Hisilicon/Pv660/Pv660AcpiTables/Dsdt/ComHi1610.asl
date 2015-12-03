@@ -12,7 +12,6 @@
 
 **/
 
-//#include "ArmPlatform.h"
 Scope(_SB) 
 {
     // UART PL011

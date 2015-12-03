@@ -12,7 +12,6 @@
 
 **/
 
-//#include "ArmPlatform.h"
 Scope(_SB) 
 {
     //Device(I2C0)  { 
