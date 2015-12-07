@@ -79,6 +79,13 @@ typedef union
 {
   struct
   {
+    UINT32   SclId    :  8;
+    UINT32   Cpu      :  8;
+    UINT32   Result   :  8;
+    UINT32   Reserved :  8;
+  } cpu_bist;
+  struct
+  {
     UINT32   Result   :  8;
     UINT32   Reserved :  24;
   } clock;        
@@ -106,6 +113,13 @@ typedef union
     UINT32 Dimm      :   8;
     UINT32 Result    :   8;
   } dimm_isolate;  
+  struct
+  {
+    UINT32   Bank     :  8;
+    UINT32   Tag_Data :  8; //0:tag,  1:data
+    UINT32   Result   :  8;
+    UINT32   Reserved :  8;
+  } l3_bist;
 
   UINT32    Data;
 } U_SELF_TEST_PARA;
@@ -118,6 +132,7 @@ typedef enum
     SELF_TEST_BIOS_CRC,
     SELF_TEST_DIMM_ABSENT,
     SELF_TEST_DIMM_ISOLATE,
+    SELT_TEST_L3CACHE,
 
     SELF_TEST_BUTT
 } E_SELF_TEST_ITEM;
@@ -151,8 +166,6 @@ extern I2C_SLAVE_ADDR  DimmSpdAddr[MAX_SOCKET][MAX_CHANNEL][MAX_DIMM];
 
 BOOLEAN OemIsSocketPresent (UINTN Socket);
 
-EFI_STATUS OemMemoryTest (UINTN Base, UINTN Size);
-
 EFI_STATUS OemSelfTestReport(IN E_SELF_TEST_ITEM Item, IN U_SELF_TEST_PARA Para);
 VOID OemSetSelfTestFailFlagAndAlarm(VOID);
 UINT32 OemGetCurrentBiosChannel(VOID);
@@ -184,7 +197,7 @@ UINT32  SelDdrFreq(pGBL_DATA pGblData);
 VOID BoardInformation(void);
 
 UINT8 OemAhciStartPort(VOID);
-EFI_STATUS GetSetupData(SETUP_PARAMS *Setup);
+UINT32 OemGetDefaultSetupData(VOID *Setup);
 
 VOID CpldRamWriteCpuBist(IN UINT32 SelfTestPara);
 VOID CpldRamWriteClockCheck(IN UINT32 SelfTestPara);
@@ -198,10 +211,18 @@ extern CHAR8 *sTokenList[];
 UINT32 OemEthFindFirstSP();
 ETH_PRODUCT_DESC *OemEthInit(UINT32 port);
 
+VOID InitMarginLog();
+VOID GetMarginRamInfo(UINT16 AreaOffset, UINT8 *Data, UINT8 Bytes);
+VOID SetMarginRamInfo(UINT16 Addr, UINT8 *Data, UINT8 Bytes);
+BOOLEAN OemPreMarginTestInit();
+VOID OemScrubFlagConfig(pGBL_DATA pGblData);
 UINTN OemGetSocketNumber(VOID);
 UINTN OemGetDdrChannel (VOID);
 UINTN OemGetDimmSlot(UINTN Socket, UINTN Channel);
+BOOLEAN OemIsLoadDefault();
 
 BOOLEAN OemIsMpBoot();
+
+BOOLEAN OemIsInitEth(UINT32 Port);
 #endif
 
