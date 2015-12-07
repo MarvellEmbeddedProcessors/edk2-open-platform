@@ -41,11 +41,6 @@ VOID OemPostEndIndicator (VOID)
 {
 }
 
-EFI_STATUS OemMemoryTest (UINTN Base, UINTN Size)
-{
-  return EFI_SUCCESS;
-}
-
 EFI_STATUS OemSelfTestReport(IN E_SELF_TEST_ITEM Item, IN U_SELF_TEST_PARA Para)
 {
     return EFI_SUCCESS;
@@ -188,7 +183,7 @@ VOID OemPcieCardReset(UINT32 Reset)
 
 UINT32  SelDdrFreq(pGBL_DATA pGblData)
 {
-    return DDR_MAX;
+    return DDR_FREQ_AUTO;
 }
 
 UINT8 OemAhciStartPort(VOID)
@@ -196,9 +191,9 @@ UINT8 OemAhciStartPort(VOID)
     return 0;
 }
 
-EFI_STATUS GetSetupData(SETUP_PARAMS *Setup)
+UINT32 OemGetDefaultSetupData(VOID *Setup)
 {
-    return EFI_UNSUPPORTED;
+    return 0;
 }
 
 
@@ -248,7 +243,46 @@ EFI_STATUS OemBootOrderSeting(IN OUT UINT16* BootOrderFinal, UINTN BootOrderSize
     {
         return EFI_INVALID_PARAMETER;
     }
-    return EFI_SUCCESS;    
+    return EFI_SUCCESS;
+}
+
+VOID InitMarginLog()
+{
+    return;
+}
+
+VOID GetMarginRamInfo(UINT16 AreaOffset, UINT8 *Data, UINT8 Bytes)
+{
+    return;
+}
+
+VOID SetMarginRamInfo(UINT16 Addr, UINT8 *Data, UINT8 Bytes)
+{
+    return;
+}
+
+BOOLEAN OemPreMarginTestInit()
+{
+    return FALSE;     
+}
+
+VOID OemScrubFlagConfig(pGBL_DATA pGblData)
+{
+    return;     
+}
+
+VOID ClearWatchDogTag(UINT8 tag)
+{
+    return;
+}
+BOOLEAN OemIsLoadDefault()
+{
+    return FALSE;
+}
+
+BOOLEAN OemIsInitEth(UINT32 Port)
+{
+    return TRUE;
 }
 
 BOOLEAN OemIsMpBoot()
