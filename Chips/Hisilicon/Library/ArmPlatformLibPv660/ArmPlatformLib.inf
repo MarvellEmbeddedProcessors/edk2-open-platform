@@ -61,6 +61,5 @@
   gArmTokenSpaceGuid.PcdGicInterruptInterfaceBase
   gHwTokenSpaceGuid.PcdSysControlBaseAddress
   gHwTokenSpaceGuid.PcdPeriSubctrlAddress
-  gHwTokenSpaceGuid.PcdTimerBaseAddress
   gArmPlatformTokenSpaceGuid.PcdSP805WatchdogBase
 

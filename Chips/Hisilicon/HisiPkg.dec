@@ -59,10 +59,6 @@
   gHwTokenSpaceGuid.PcdCpldBaseAddress|0|UINT64|0x01000024
   gHwTokenSpaceGuid.PcdMailBoxAddress|0|UINT64|0x01000025
 
-
-
-  gHwTokenSpaceGuid.PcdTimerBaseAddress|0|UINT64|0x01000030
-
   gHwTokenSpaceGuid.PcdSFCCFGBaseAddress|0|UINT64|0x01000037     
   gHwTokenSpaceGuid.PcdSFCMEM0BaseAddress|0|UINT64|0x01000038     
 

@@ -259,11 +259,6 @@
 
   gHwTokenSpaceGuid.PcdCpldBaseAddress|0x98000000
 
- 
-  gHwTokenSpaceGuid.PcdTimerBaseAddress|0x80060000
-
- 
-
   gHwTokenSpaceGuid.PcdSFCCFGBaseAddress|0xA6000000     
   gHwTokenSpaceGuid.PcdSFCMEM0BaseAddress|0xA4000000      
 
@@ -414,7 +409,6 @@
   OpenPlatformPkg/Chips/Hisilicon/Drivers/Hic/HicDxe.inf
 
   #ArmPkg/Drivers/TimerDxe/TimerDxe
-  #OpenPlatformPkg/Chips/Hisilicon/Drivers/TimerDxe_SOC/TimerDxe_SOC.inf
   ArmPlatformPkg/Drivers/SP804TimerDxe/SP804TimerDxe.inf
   ArmPlatformPkg/Drivers/LcdGraphicsOutputDxe/PL111LcdGraphicsOutputDxe.inf
 
