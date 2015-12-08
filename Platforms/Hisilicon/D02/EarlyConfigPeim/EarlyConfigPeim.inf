@@ -26,6 +26,7 @@
 
 [Pcd]
   gHwTokenSpaceGuid.PcdMailBoxAddress
+  gHwTokenSpaceGuid.PcdPeriSubctrlAddress
 
 [Depex]
 ## As we will clean mailbox in this module, need to wait memory init complete

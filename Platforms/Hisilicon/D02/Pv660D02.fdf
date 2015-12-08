@@ -202,7 +202,8 @@ READ_LOCK_STATUS   = TRUE
   #INF ArmPkg/Drivers/PL390Gic/PL390GicDxe.inf
   INF OpenPlatformPkg/Chips/Hisilicon/Drivers/Hic/HicDxe.inf
   #INF ArmPkg/Drivers/TimerDxe/TimerDxe.inf
-  INF OpenPlatformPkg/Chips/Hisilicon/Drivers/TimerDxe_SOC/TimerDxe_SOC.inf
+  #INF OpenPlatformPkg/Chips/Hisilicon/Drivers/TimerDxe_SOC/TimerDxe_SOC.inf
+  INF ArmPlatformPkg/Drivers/SP804TimerDxe/SP804TimerDxe.inf
   #INF ArmPlatformPkg/Drivers/NorFlashDxe/NorFlashDxe.inf
 
   INF ArmPlatformPkg/Drivers/SP805WatchdogDxe/SP805WatchdogDxe.inf

@@ -293,6 +293,14 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdResetOnMemoryTypeInformationChange|FALSE
   gEfiIntelFrameworkModulePkgTokenSpaceGuid.PcdShellFile|{ 0x83, 0xA5, 0x04, 0x7C, 0x3E, 0x9E, 0x1C, 0x4F, 0xAD, 0x65, 0xE0, 0x52, 0x68, 0xD0, 0xB4, 0xD1 }
 
+  ## SP804 DualTimer
+  gArmPlatformTokenSpaceGuid.PcdSP804TimerFrequencyInMHz|200
+  gArmPlatformTokenSpaceGuid.PcdSP804TimerPeriodicInterruptNum|48
+  gArmPlatformTokenSpaceGuid.PcdSP804TimerPeriodicBase|0x80060000
+  ## TODO: need to confirm the base for Performance and Metronome base for PV660
+  gArmPlatformTokenSpaceGuid.PcdSP804TimerPerformanceBase|0x80060000
+  gArmPlatformTokenSpaceGuid.PcdSP804TimerMetronomeBase|0x80060000
+
 ################################################################################
 #
 # Components Section - list of all EDK II Modules needed by this Platform
@@ -406,7 +414,8 @@
   OpenPlatformPkg/Chips/Hisilicon/Drivers/Hic/HicDxe.inf
 
   #ArmPkg/Drivers/TimerDxe/TimerDxe
-  OpenPlatformPkg/Chips/Hisilicon/Drivers/TimerDxe_SOC/TimerDxe_SOC.inf
+  #OpenPlatformPkg/Chips/Hisilicon/Drivers/TimerDxe_SOC/TimerDxe_SOC.inf
+  ArmPlatformPkg/Drivers/SP804TimerDxe/SP804TimerDxe.inf
   ArmPlatformPkg/Drivers/LcdGraphicsOutputDxe/PL111LcdGraphicsOutputDxe.inf
 
   ArmPlatformPkg/Drivers/SP805WatchdogDxe/SP805WatchdogDxe.inf

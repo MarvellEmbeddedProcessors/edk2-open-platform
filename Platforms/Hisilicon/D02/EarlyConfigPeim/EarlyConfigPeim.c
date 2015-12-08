@@ -10,6 +10,15 @@
 
 #include <Library/OemMiscLib.h>
 
+#define TIMER_SUBCTRL_BASE   PcdGet64(PcdPeriSubctrlAddress)
+#define SC_TM_CLKEN0_REG     (0x2050)
+
+VOID PlatformTimerStart (VOID)
+{
+    // Timer0 clock enable
+    MmioWrite32 (TIMER_SUBCTRL_BASE + SC_TM_CLKEN0_REG, 0x3);
+}
+
 EFI_STATUS
 EFIAPI
 EarlyConfigEntry (
@@ -50,6 +59,10 @@ DEBUG((EFI_D_ERROR,"Done\n"));
     MmioWrite32(0x80010000 + 0x5000, 0x1);
     *(volatile UINT32*)0xA0000A8C = 0x1f;
 
+    DEBUG((EFI_D_ERROR,"Done\n"));
+
+    DEBUG((EFI_D_ERROR,"Timer CONFIG........."));
+    PlatformTimerStart ();
     DEBUG((EFI_D_ERROR,"Done\n"));
 
     return EFI_SUCCESS;
