@@ -38,12 +38,11 @@
 
 typedef struct {
   EFI_ACPI_1_0_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER   Header;
-  //EFI_ACPI_5_1_GIC_STRUCTURE                            GicInterfaces[FixedPcdGet32 (PcdCoreCount)];
+  //EFI_ACPI_5_1_GIC_STRUCTURE                          GicInterfaces[FixedPcdGet32 (PcdCoreCount)];
   EFI_ACPI_5_1_GIC_STRUCTURE                            GicInterfaces[16];
   EFI_ACPI_5_0_GIC_DISTRIBUTOR_STRUCTURE                GicDistributor;
-  EFI_ACPI_5_1_GICR_STRUCTURE             			  GicRe;
-  EFI_ACPI_6_0_GIC_ITS_STRUCTURE                		  GicITS[5];
-  EFI_ACPI_HuaWei_GIC_MBI_STRUCTURE                	  GicMBI[3];
+  EFI_ACPI_5_1_GICR_STRUCTURE             			        GicRe;
+  EFI_ACPI_6_0_GIC_ITS_STRUCTURE                		    GicITS[4];
 } EFI_ACPI_1_0_MULTIPLE_APIC_DESCRIPTION_TABLE;
 
 #pragma pack ()
@@ -139,17 +138,10 @@ EFI_ACPI_1_0_MULTIPLE_APIC_DESCRIPTION_TABLE Madt = {
   //},
    EFI_ACPI_5_1_GICR_STRUCTURE_INIT(FixedPcdGet32 (PcdGicDistributorBase) + 0x100000,0x300000),//1
   {
-    EFI_ACPI_6_0_GIC_ITS_INIT(0,0x8C000000),
-    EFI_ACPI_6_0_GIC_ITS_INIT(1,0xC6000000),
-    EFI_ACPI_6_0_GIC_ITS_INIT(2,0xD3000000),
-    EFI_ACPI_6_0_GIC_ITS_INIT(3,0xA3000000),
-    EFI_ACPI_6_0_GIC_ITS_INIT(4,0xB7000000)
-  },
-  {
-  //EFI_ACPI_HuaWei_GIC_MBI_INIT(1,1,0x4C030000,0x10000),
-  EFI_ACPI_HuaWei_GIC_MBI_INIT(0,0,0x8C030000,0x10000),
-  EFI_ACPI_HuaWei_GIC_MBI_INIT(1,1,0xC6030000,0x10000),
-  EFI_ACPI_HuaWei_GIC_MBI_INIT(2,3,0xA3030000,0x10000)
+    EFI_ACPI_6_0_GIC_ITS_INIT(0,0x8C000000), // pc
+    EFI_ACPI_6_0_GIC_ITS_INIT(1,0xC6000000), // dsa
+    EFI_ACPI_6_0_GIC_ITS_INIT(2,0xA3000000), // m3
+    EFI_ACPI_6_0_GIC_ITS_INIT(3,0xB7000000)  // pcie
   }
 };
 
