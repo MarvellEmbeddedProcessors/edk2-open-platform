@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 1999, 2000
  * Intel Corporation.
@@ -36,7 +35,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
  */
- //modified by d00183345 2013-1-23,½â¾ö±àÒë¸æ¾¯
  
 #ifndef _RAMDISK_H_
 #define _RAMDISK_H_

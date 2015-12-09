@@ -8,6 +8,8 @@
  *
  * Contributors:
  *     Yi Li - yi.li@linaro.org
+ *
+ *  Based on the files under ArmPlatformPkg/ArmJunoPkg/AcpiTables/
 */
 
 #include <IndustryStandard/Acpi.h>

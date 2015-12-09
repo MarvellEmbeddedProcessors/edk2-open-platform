@@ -6,6 +6,8 @@
 #  MiscSubclassDriver.uni file, the StrGather tool will expand MiscSubclassDriver.uni file
 #  and parse all .uni file.
 # Copyright (c) 2006 - 2010, Intel Corporation. All rights reserved.<BR>
+# Copyright (c) 2015, Hisilicon Limited. All rights reserved.<BR>
+# Copyright (c) 2015, Linaro Limited. All rights reserved.<BR>
 #
 #  This program and the accompanying materials
 #  are licensed and made available under the terms and conditions of the BSD License
@@ -15,6 +17,7 @@
 #  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #
 #
+# Based on files under Nt32Pkg/MiscSubClassPlatformDxe/
 ##
 
 

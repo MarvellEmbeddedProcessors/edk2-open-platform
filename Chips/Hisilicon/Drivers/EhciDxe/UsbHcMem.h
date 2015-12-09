@@ -11,6 +11,8 @@ http://opensource.org/licenses/bsd-license.php
 THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
+Based on the files under MdeModulePkg/Bus/Pci/EhciDxe/
+
 **/
 
 #ifndef _EFI_EHCI_MEM_H_

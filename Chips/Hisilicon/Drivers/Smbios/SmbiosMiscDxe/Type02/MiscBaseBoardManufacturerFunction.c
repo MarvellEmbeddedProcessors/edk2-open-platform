@@ -1,14 +1,8 @@
-/*-----------------------------------------------------------------------*/
-/*!!Warning: Huawei key information asset. No spread without permission. */
-/*CODEMARK:EG4uRhTwMmgcVFBsBnYHCEm2UPcyllv4D4NOje6cFLSYglw6LvPA978sGAr3yTchgOI0M46H
-HZIZCDLcNqR1rbxHHGWmLNp+CRsGfVaxSWS77M+1CS28w31VEQfZSX1k6kWiUvrwZ/IoCE8Z
-UyfWHI/Fd02wZ9veRITVo0hpJY5VcC8u6fE5B+OEJC8fn7ME1kdpr88BlUyarLnD5D1ZmANy
-I1bistyQpzRZrAaVS0Y+eiJtLdnkXZB12Tf8hkXF0BnLN2R+Oi9GMlhXdymu7g==#*/
-/*--!!Warning: Deleting or modifying the preceding information is prohibited.--*/
-
 /** @file
 
   Copyright (c) 2009 - 2011, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2015, Hisilicon Limited. All rights reserved.<BR>
+  Copyright (c) 2015, Linaro Limited. All rights reserved.<BR>
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
@@ -26,11 +20,8 @@ Abstract:
   This driver parses the mSmbiosMiscDataTable structure and reports
   any generated data using SMBIOS protocol.
 
+Based on files under Nt32Pkg/MiscSubClassPlatformDxe/
 **/
-/* Modify list
-DATA        AUTHOR            REASON
-2015.08.12  y00216284-079     DTS2015081210371，SMBIOS代码检视意见修改 
-*/
 
 #include "SmbiosMisc.h"
 

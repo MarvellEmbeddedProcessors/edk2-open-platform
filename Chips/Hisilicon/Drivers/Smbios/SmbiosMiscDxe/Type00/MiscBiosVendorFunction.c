@@ -1,6 +1,8 @@
 /** @file
 
   Copyright (c) 2009, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2015, Hisilicon Limited. All rights reserved.<BR>
+  Copyright (c) 2015, Linaro Limited. All rights reserved.<BR>
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
@@ -19,10 +21,9 @@ Abstract:
   This driver parses the mMiscSubclassDataTable structure and reports
   any generated data to the DataHub.
 
+Based on the files under Nt32Pkg/MiscSubClassPlatformDxe/
+
 --*/
-/* Modify list
-DATA        AUTHOR              REASON
-*/
 
 //
 #include "SmbiosMisc.h"

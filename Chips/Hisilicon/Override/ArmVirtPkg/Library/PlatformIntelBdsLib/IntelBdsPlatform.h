@@ -2,6 +2,8 @@
   Head file for BDS Platform specific code
 
   Copyright (c) 2004 - 2008, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2015, Hisilicon Limited. All rights reserved.<BR>
+  Copyright (c) 2015, Linaro Limited. All rights reserved.<BR>
 
   This program and the accompanying materials are licensed and made available
   under the terms and conditions of the BSD License which accompanies this
@@ -10,6 +12,8 @@
 
   THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS, WITHOUT
   WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+
+  Based on the files under ArmVirtPkg/Library/PlatformIntelBdsLib/
 
 **/
 
