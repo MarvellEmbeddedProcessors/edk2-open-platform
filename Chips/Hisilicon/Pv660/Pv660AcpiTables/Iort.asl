@@ -67,11 +67,11 @@
 
 /* mbi-gen pc, named component */
 [0001]                               Type : 01
-[0002]                             Length : 003A
+[0002]                             Length : 003B
 [0001]                           Revision : 00
 [0004]                           Reserved : 00000000
 [0004]                      Mapping Count : 00000001
-[0004]                     Mapping Offset : 00000026
+[0004]                     Mapping Offset : 00000027
 
 [0004]                         Node Flags : 00000000
 [0008]                  Memory Properties : [IORT Memory Access Properties]
@@ -86,7 +86,7 @@
                                 Coherency : 0
                          Device Attribute : 0
 [0001]                  Memory Size Limit : 00
-[0011]                        Device Name : "\_SB.MBI0"
+[0012]                        Device Name : "\_SB_.MBI0"
 [0004]                            Padding : 00 00 00 00
 
 [0004]                         Input base : 00000000
@@ -98,11 +98,11 @@
 
 /* mbi-gen dsa, named component */
 [0001]                               Type : 01
-[0002]                             Length : 003A
+[0002]                             Length : 003B
 [0001]                           Revision : 00
 [0004]                           Reserved : 00000000
 [0004]                      Mapping Count : 00000001
-[0004]                     Mapping Offset : 00000026
+[0004]                     Mapping Offset : 00000027
 
 [0004]                         Node Flags : 00000000
 [0008]                  Memory Properties : [IORT Memory Access Properties]
@@ -117,7 +117,7 @@
                                 Coherency : 0
                          Device Attribute : 0
 [0001]                  Memory Size Limit : 00
-[0011]                        Device Name : "\_SB.MBI1"
+[0011]                        Device Name : "\_SB_.MBI1"
 [0004]                            Padding : 00 00 00 00
 
 [0004]                         Input base : 00000000
@@ -129,11 +129,11 @@
 
 /* mbi-gen m3, named component */
 [0001]                               Type : 01
-[0002]                             Length : 003A
+[0002]                             Length : 003B
 [0001]                           Revision : 00
 [0004]                           Reserved : 00000000
 [0004]                      Mapping Count : 00000001
-[0004]                     Mapping Offset : 00000026
+[0004]                     Mapping Offset : 00000027
 
 [0004]                         Node Flags : 00000000
 [0008]                  Memory Properties : [IORT Memory Access Properties]
@@ -148,7 +148,7 @@
                                 Coherency : 0
                          Device Attribute : 0
 [0001]                  Memory Size Limit : 00
-[0011]                        Device Name : "\_SB.MBI2"
+[0011]                        Device Name : "\_SB_.MBI2"
 [0004]                            Padding : 00 00 00 00
 
 [0004]                         Input base : 00000000
@@ -160,11 +160,11 @@
 
 /* mbi-gen pcie, named component */
 [0001]                               Type : 01
-[0002]                             Length : 003A
+[0002]                             Length : 003B
 [0001]                           Revision : 00
 [0004]                           Reserved : 00000000
 [0004]                      Mapping Count : 00000001
-[0004]                     Mapping Offset : 00000026
+[0004]                     Mapping Offset : 00000027
 
 [0004]                         Node Flags : 00000000
 [0008]                  Memory Properties : [IORT Memory Access Properties]
@@ -179,7 +179,7 @@
                                 Coherency : 0
                          Device Attribute : 0
 [0001]                  Memory Size Limit : 00
-[0011]                        Device Name : "\_SB.MBI3"
+[0011]                        Device Name : "\_SB_.MBI3"
 [0004]                            Padding : 00 00 00 00
 
 [0004]                         Input base : 00000000
