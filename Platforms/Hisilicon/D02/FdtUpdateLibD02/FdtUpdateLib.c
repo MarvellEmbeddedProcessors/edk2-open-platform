@@ -8,6 +8,7 @@
 #include <Protocol/OemNicProtocol.h>
 #include <Library/MemoryAllocationLib.h>
 
+MAC_ADDRESS gMacAddress[1];
 
 CHAR8  *EthName[8]=
 {

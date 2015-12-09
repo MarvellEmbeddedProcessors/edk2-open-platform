@@ -32,8 +32,6 @@ typedef struct
   UINT8 data5;
 }MAC_ADDRESS;
 
-MAC_ADDRESS gMacAddress[1];
-
 typedef struct region
 {
     UINT32 BaseHigh;    
