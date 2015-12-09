@@ -81,7 +81,7 @@ struct DDR_RANK {
     UINT16      MR4;
     UINT16      MR5;
     UINT16      MR6[9];
-}DDR_RANK;
+};
 
 typedef struct _DDR_DIMM{
     BOOLEAN     Status;
