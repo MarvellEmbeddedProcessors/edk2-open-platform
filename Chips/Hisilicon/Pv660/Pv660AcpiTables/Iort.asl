@@ -91,7 +91,7 @@
 
 [0004]                         Input base : 00000000
 [0004]                           ID Count : 00000001
-[0004]                        Output Base : 00000010
+[0004]                        Output Base : 0000FFCC
 [0004]                   Output Reference : 00000034  // point to its totem
 [0004]              Flags (decoded below) : 00000000
                            Single Mapping : 1
@@ -122,7 +122,7 @@
 
 [0004]                         Input base : 00000000
 [0004]                           ID Count : 00000001
-[0004]                        Output Base : 00000010
+[0004]                        Output Base : 0000FFCC
 [0004]                   Output Reference : 0000004C
 [0004]              Flags (decoded below) : 00000000
                            Single Mapping : 1
@@ -153,7 +153,7 @@
 
 [0004]                         Input base : 00000000
 [0004]                           ID Count : 00000001
-[0004]                        Output Base : 00000010
+[0004]                        Output Base : 0000FFCC
 [0004]                   Output Reference : 00000064
 [0004]              Flags (decoded below) : 00000000
                            Single Mapping : 1
@@ -184,7 +184,7 @@
 
 [0004]                         Input base : 00000000
 [0004]                           ID Count : 00000001
-[0004]                        Output Base : 00000010
+[0004]                        Output Base : 0000FFCC
 [0004]                   Output Reference : 0000007C
 [0004]              Flags (decoded below) : 00000000
                            Single Mapping : 1

@@ -48,29 +48,11 @@ Scope(_SB)
     })
   }
 
-  // mbi-gen pcie
+  // mbi-gen m3
   Device(MBI2) {
     Name(_HID, "HISI00B0")
     Name(_CID, "MBIGen")
     Name(_UID, 2)
-    Name(_CRS, ResourceTemplate() {
-      Memory32Fixed(ReadWrite, 0xb7030000, 0x10000) 
-    })
-
-    Name (_DSD, Package () {
-      ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
-      Package ()
-      {
-        Package () {"num-msis", 640}
-      }
-    })
-  }
-
-  // mbi-gen m3
-  Device(MBI3) {
-    Name(_HID, "HISI00B0")
-    Name(_CID, "MBIGen")
-    Name(_UID, 3)
     Name(_CRS, ResourceTemplate() {
     Memory32Fixed(ReadWrite, 0xa3030000, 0x10000) 
     })
@@ -80,6 +62,24 @@ Scope(_SB)
       Package ()
       {
         Package () {"num-msis", 256}
+      }
+    })
+  }
+
+  // mbi-gen pcie
+  Device(MBI3) {
+    Name(_HID, "HISI00B0")
+    Name(_CID, "MBIGen")
+    Name(_UID, 3)
+    Name(_CRS, ResourceTemplate() {
+      Memory32Fixed(ReadWrite, 0xb7030000, 0x10000) 
+    })
+
+    Name (_DSD, Package () {
+      ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
+      Package ()
+      {
+        Package () {"num-msis", 640}
       }
     })
   }
