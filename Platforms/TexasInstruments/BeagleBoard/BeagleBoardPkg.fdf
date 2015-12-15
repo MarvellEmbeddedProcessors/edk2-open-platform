@@ -101,7 +101,7 @@ FvNameGuid         = d0dd3e90-343d-4cb3-8f69-772214989282
   INF MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
   INF MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
   INF MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
-  INF EmbeddedPkg/SerialDxe/SerialDxe.inf
+  INF MdeModulePkg/Universal/SerialDxe/SerialDxe.inf
   INF MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
 
   INF EmbeddedPkg/ResetRuntimeDxe/ResetRuntimeDxe.inf
