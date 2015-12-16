@@ -36,7 +36,7 @@
 
 [0004]                          Signature : "APIC"
 [0004]                       Table Length : 00000000
-[0001]                           Revision : 04
+[0001]                           Revision : 03
 [0001]                           Checksum : 00
 [0006]                             Oem ID : "LINARO"
 [0008]                       Oem Table ID : "RTSMVEV8"
@@ -49,7 +49,7 @@
                       PC-AT Compatibility : 0
 
 [0001]                      Subtable Type : 0B [Generic Interrupt Controller]
-[0001]                             Length : 4C
+[0001]                             Length : 50
 [0002]                           Reserved : 0000
 [0004]               CPU Interface Number : 00000000
 [0004]                      Processor UID : 00000000
@@ -66,9 +66,11 @@
 [0004]              Virtual GIC Interrupt : 0
 [0008]         Redistributor Base Address : 0
 [0008]                          ARM MPIDR : 0
+[0001]                   Efficiency Class : 00
+[0003]                           Reserved : 000000
 
 [0001]                      Subtable Type : 0B [Generic Interrupt Controller]
-[0001]                             Length : 4C
+[0001]                             Length : 50
 [0002]                           Reserved : 0000
 [0004]               CPU Interface Number : 00000001
 [0004]                      Processor UID : 00000001
@@ -85,9 +87,11 @@
 [0004]              Virtual GIC Interrupt : 0
 [0008]         Redistributor Base Address : 0
 [0008]                          ARM MPIDR : 0000000000000001
+[0001]                   Efficiency Class : 00
+[0003]                           Reserved : 000000
 
 [0001]                      Subtable Type : 0B [Generic Interrupt Controller]
-[0001]                             Length : 4C
+[0001]                             Length : 50
 [0002]                           Reserved : 0000
 [0004]               CPU Interface Number : 00000002
 [0004]                      Processor UID : 00000002
@@ -104,9 +108,11 @@
 [0004]              Virtual GIC Interrupt : 0
 [0008]         Redistributor Base Address : 0
 [0008]                          ARM MPIDR : 0000000000000002
+[0001]                   Efficiency Class : 00
+[0003]                           Reserved : 000000
 
 [0001]                      Subtable Type : 0B [Generic Interrupt Controller]
-[0001]                             Length : 4C
+[0001]                             Length : 50
 [0002]                           Reserved : 0000
 [0004]               CPU Interface Number : 00000003
 [0004]                      Processor UID : 00000003
@@ -123,9 +129,11 @@
 [0004]              Virtual GIC Interrupt : 0
 [0008]         Redistributor Base Address : 0
 [0008]                          ARM MPIDR : 0000000000000003
+[0001]                   Efficiency Class : 00
+[0003]                           Reserved : 000000
 
 [0001]                      Subtable Type : 0B [Generic Interrupt Controller]
-[0001]                             Length : 4C
+[0001]                             Length : 50
 [0002]                           Reserved : 0000
 [0004]               CPU Interface Number : 00000004
 [0004]                      Processor UID : 00000004
@@ -142,9 +150,11 @@
 [0004]              Virtual GIC Interrupt : 0
 [0008]         Redistributor Base Address : 0
 [0008]                          ARM MPIDR : 0000000000000100
+[0001]                   Efficiency Class : 00
+[0003]                           Reserved : 000000
 
 [0001]                      Subtable Type : 0B [Generic Interrupt Controller]
-[0001]                             Length : 4C
+[0001]                             Length : 50
 [0002]                           Reserved : 0000
 [0004]               CPU Interface Number : 00000005
 [0004]                      Processor UID : 00000005
@@ -161,9 +171,11 @@
 [0004]              Virtual GIC Interrupt : 0
 [0008]         Redistributor Base Address : 0
 [0008]                          ARM MPIDR : 0000000000000101
+[0001]                   Efficiency Class : 00
+[0003]                           Reserved : 000000
 
 [0001]                      Subtable Type : 0B [Generic Interrupt Controller]
-[0001]                             Length : 4C
+[0001]                             Length : 50
 [0002]                           Reserved : 0000
 [0004]               CPU Interface Number : 00000006
 [0004]                      Processor UID : 00000006
@@ -180,9 +192,11 @@
 [0004]              Virtual GIC Interrupt : 0
 [0008]         Redistributor Base Address : 0
 [0008]                          ARM MPIDR : 0000000000000102
+[0001]                   Efficiency Class : 00
+[0003]                           Reserved : 000000
 
 [0001]                      Subtable Type : 0B [Generic Interrupt Controller]
-[0001]                             Length : 4C
+[0001]                             Length : 50
 [0002]                           Reserved : 0000
 [0004]               CPU Interface Number : 00000007
 [0004]                      Processor UID : 00000007
@@ -199,6 +213,8 @@
 [0004]              Virtual GIC Interrupt : 0
 [0008]         Redistributor Base Address : 0
 [0008]                          ARM MPIDR : 0000000000000103
+[0001]                   Efficiency Class : 00
+[0003]                           Reserved : 000000
 
 [0001]                      Subtable Type : 0C [Generic Interrupt Distributor]
 [0001]                             Length : 18
@@ -206,4 +222,5 @@
 [0004]              Local GIC Hardware ID : 00000000
 [0008]                       Base Address : 000000002F000000 /* armv8 FVP Base GIC distributor base addr */
 [0004]                     Interrupt Base : 00000000
-[0004]                           Reserved : 00000000
+[0001]                            Version : 02
+[0003]                           Reserved : 000000
