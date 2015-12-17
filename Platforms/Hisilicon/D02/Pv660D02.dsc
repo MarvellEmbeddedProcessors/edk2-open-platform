@@ -99,6 +99,10 @@
   GCC:*_*_AARCH64_PP_FLAGS  = -DARM_CPU_AARCH64
   GCC:*_*_AARCH64_PLATFORM_FLAGS == -I$(WORKSPACE)/ArmPlatformPkg/ArmVExpressPkg/Include -I$(WORKSPACE)/ArmPlatformPkg/ArmVExpressPkg/Include/Platform/RTSM -I$(WORKSPACE)/OpenPlatformPkg/Chips/Hisilicon/Pv660/Include
 
+[BuildOptions.AARCH64.EDKII.UEFI_APPLICATION]
+  GCC:*_*_*_CC_FLAGS = -mcmodel=small -falign-functions=16
+  GCC:*_*_*_DLINK_FLAGS = -z common-page-size=0x1000 --sort-section=alignment
+
 
 ################################################################################
 #
