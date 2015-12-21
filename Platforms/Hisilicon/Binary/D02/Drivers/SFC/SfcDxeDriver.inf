@@ -25,4 +25,5 @@
 
 [Binaries.common]
   PE32|SFCDriver.efi|*
+  DXE_DEPEX|SFCDriver.depex|*
 

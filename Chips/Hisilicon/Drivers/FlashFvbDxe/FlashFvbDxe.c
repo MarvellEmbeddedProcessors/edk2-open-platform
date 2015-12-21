@@ -1,20 +1,24 @@
-#/** @file
-#
-# Copyright (c) 2011-2015, ARM Limited. All rights reserved.
-# Copyright (c) 2015, Hisilicon Limited. All rights reserved.
-# Copyright (c) 2015, Linaro Limited. All rights reserved.
-#
-#    This program and the accompanying materials
-#    are licensed and made available under the terms and conditions of the BSD License
-#    which accompanies this distribution. The full text of the license may be found at
-#    http://opensource.org/licenses/bsd-license.php
-#
-#    THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-#    WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-#
-#**/
+/** @file
+*
+*  Copyright (c) 2011-2015, ARM Limited. All rights reserved.
+*  Copyright (c) 2015, Hisilicon Limited. All rights reserved.
+*  Copyright (c) 2015, Linaro Limited. All rights reserved.
+*
+*  This program and the accompanying materials
+*  are licensed and made available under the terms and conditions of the BSD License
+*  which accompanies this distribution.  The full text of the license may be found at
+*  http://opensource.org/licenses/bsd-license.php
+*
+*  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+*
+* Based on files under ArmPlatformPkg/Drivers/NorFlashDxe/
+**/
 
 #include "FlashFvbDxe.h"
+STATIC EFI_EVENT mFlashFvbVirtualAddrChangeEvent;
+STATIC UINTN     mFlashNvStorageVariableBase;
+
 
 //
 // Global variable declarations
@@ -25,7 +29,7 @@ FLASH_DESCRIPTION mFlashDevices[FLASH_DEVICE_COUNT] =
     {
         // UEFI Variable Services non-volatile storage
         0xa4000000,
-        0xa49D0000,
+        FixedPcdGet32(PcdFlashNvStorageVariableBase),
         0x20000,
         SIZE_64KB,
         {0xCC2CBF29, 0x1498, 0x4CDD, {0x81, 0x71, 0xF8, 0xB6, 0xB4, 0x1D, 0x09, 0x09}}
@@ -379,7 +383,7 @@ FvbGetPhysicalAddress (
         return EFI_UNSUPPORTED;
     };
 
-    *Address = PcdGet32 (PcdFlashNvStorageVariableBase);
+    *Address = mFlashNvStorageVariableBase;
     return EFI_SUCCESS;
 }
 
@@ -502,6 +506,11 @@ FvbRead (
 
     if (!Instance->Initialized && Instance->Initialize)
     {
+        if (EfiAtRuntime ()) {
+            DEBUG ((EFI_D_ERROR, "[%a]:[%dL] Initialize at runtime is not supported!\n", __FUNCTION__, __LINE__));
+            return EFI_UNSUPPORTED;
+        }
+
         Instance->Initialize(Instance);
     }
 
@@ -624,6 +633,11 @@ FvbWrite (
 
     if (!Instance->Initialized && Instance->Initialize)
     {
+        if (EfiAtRuntime ()) {
+            DEBUG ((EFI_D_ERROR, "[%a]:[%dL] Initialize at runtime is not supported!\n", __FUNCTION__, __LINE__));
+            return EFI_UNSUPPORTED;
+        }
+
         Instance->Initialize(Instance);
     }
 
@@ -829,6 +843,7 @@ FvbInitialize (
     UINT32      FvbNumLba;
 
     Instance->Initialized = TRUE;
+    mFlashNvStorageVariableBase = FixedPcdGet32 (PcdFlashNvStorageVariableBase);
 
     // Set the index of the first LBA for the FVB
     Instance->StartLba = (PcdGet32 (PcdFlashNvStorageVariableBase) - Instance->RegionBaseAddress) / Instance->Media.BlockSize;
@@ -895,7 +910,7 @@ FlashCreateInstance (
         return EFI_INVALID_PARAMETER;
     }
 
-    Instance = AllocateCopyPool (sizeof(FLASH_INSTANCE), &mFlashInstanceTemplate);
+    Instance = AllocateRuntimeCopyPool (sizeof(FLASH_INSTANCE), &mFlashInstanceTemplate);
     if (Instance == NULL)
     {
         return EFI_INVALID_PARAMETER;
@@ -959,12 +974,7 @@ FlashUnlockSingleBlockIfNecessary (
     IN UINTN                  BlockAddress
 )
 {
-    EFI_STATUS Status = EFI_SUCCESS;
-    //if (NorFlashBlockIsLocked (Instance, BlockAddress) == TRUE) {
-    //  Status = NorFlashUnlockSingleBlock (Instance, BlockAddress);
-    //}
-
-    return Status;
+    return EFI_SUCCESS;
 }
 
 
@@ -1140,7 +1150,17 @@ FlashReadBlocks (
     return EFI_SUCCESS;
 }
 
-
+VOID
+EFIAPI
+FlashFvbVirtualNotifyEvent (
+  IN EFI_EVENT        Event,
+  IN VOID             *Context
+  )
+{
+  EfiConvertPointer (0x0, (VOID**)&mFlash);
+  EfiConvertPointer (0x0, (VOID**)&mFlashNvStorageVariableBase);
+  return;
+}
 
 EFI_STATUS
 EFIAPI
@@ -1194,6 +1214,18 @@ FlashFvbInitialize (
             DEBUG((EFI_D_ERROR, "[%a]:[%dL] Fail to create instance for Flash[%d]\n", __FUNCTION__, __LINE__, Index));
         }
     }
+    //
+    // Register for the virtual address change event
+    //
+    Status = gBS->CreateEventEx (
+                  EVT_NOTIFY_SIGNAL,
+                  TPL_NOTIFY,
+                  FlashFvbVirtualNotifyEvent,
+                  NULL,
+                  &gEfiEventVirtualAddressChangeGuid,
+                  &mFlashFvbVirtualAddrChangeEvent
+                  );
+    ASSERT_EFI_ERROR (Status);
 
     return Status;
 }
