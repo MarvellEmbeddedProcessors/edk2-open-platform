@@ -36,11 +36,14 @@
 #include <Library/TimerLib.h>
 #include <Protocol/RealTimeClock.h>
 #include <Library/I2CLib.h>
+#include <Guid/EventGroup.h>
 #include "DS3231RealTimeClock.h"
 
 extern I2C_DEVICE gDS3231RtcDevice;
 
 STATIC BOOLEAN       mDS3231Initialized = FALSE;
+
+//STATIC EFI_EVENT     mRtcVirtualAddrChangeEvent;
 
 EFI_STATUS
 IdentifyDS3231 (
@@ -165,10 +168,6 @@ LibGetTime (
   
   I2C_DEVICE    Dev;
 
-  if(EfiAtRuntime()){
-    return EFI_UNSUPPORTED;
-  }
-
   // Initialize the hardware if not already done
   if (!mDS3231Initialized) {
     Status = InitializeDS3231 ();
@@ -287,10 +286,6 @@ LibSetTime (
   UINT8 Temp;
   UINT16 BaseYear = 2000;
 
-  if(EfiAtRuntime()){
-    return EFI_UNSUPPORTED;
-  }
-
   // Check the input parameters are within the range specified by UEFI
   if ((Time->Year   < 2000) ||
        (Time->Year   > 2199) ||
@@ -358,9 +353,9 @@ LibSetTime (
     goto EXIT;
   }
 
-  Temp = 0;
+  Temp = 0x8;
   if(Time->Year > 2099){
-    Temp = 0x8;
+    Temp = 0x0;
     BaseYear = 2100;
   }
   if(Time->Month > 9){
@@ -434,7 +429,30 @@ LibSetWakeupTime (
   return EFI_UNSUPPORTED;
 }
 
+/**
+  Fixup internal data so that EFI can be call in virtual mode.
+  Call the passed in Child Notify event and convert any pointers in
+  lib to virtual mode.
 
+  @param[in]    Event   The Event that is being processed
+  @param[in]    Context Event Context
+**/
+VOID
+EFIAPI
+LibRtcVirtualNotifyEvent (
+  IN EFI_EVENT        Event,
+  IN VOID             *Context
+  )
+{
+  //
+  // Only needed if you are going to support the OS calling RTC functions in virtual mode.
+  // You will need to call EfiConvertPointer (). To convert any stored physical addresses
+  // to virtual address. After the OS transitions to calling in virtual mode, all future
+  // runtime calls will be made in virtual mode.
+  //
+  //EfiConvertPointer (0x0, (VOID**)&gRT);
+  return;
+}
 
 /**
   This is the declaration of an EFI image entry point. This can be the entry point to an application
@@ -462,6 +480,7 @@ LibRtcInitialize (
   gRT->GetWakeupTime = LibGetWakeupTime;
   gRT->SetWakeupTime = LibSetWakeupTime;
 
+  (VOID) InitializeDS3231 ();
   // Install the protocol
   Handle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
@@ -469,31 +488,30 @@ LibRtcInitialize (
                   &gEfiRealTimeClockArchProtocolGuid,  NULL,
                   NULL
                  );
+  if (EFI_ERROR (Status))
+  {
+    DEBUG ((EFI_D_ERROR, "[%a:%d] Install protocol failed: %r\n",
+         __FUNCTION__, __LINE__, Status));
+    return Status;
+  }
+    
+  //
+  // Register for the virtual address change event
+  //
+  /* Nothing needs to be converted in this module
+  Status = gBS->CreateEventEx (
+                  EVT_NOTIFY_SIGNAL,
+                  TPL_NOTIFY,
+                  LibRtcVirtualNotifyEvent,
+                  NULL,
+                  &gEfiEventVirtualAddressChangeGuid,
+                  &mRtcVirtualAddrChangeEvent
+                  );
 
   return Status;
+  */
+  return EFI_SUCCESS;
 }
 
 
-/**
-  Fixup internal data so that EFI can be call in virtual mode.
-  Call the passed in Child Notify event and convert any pointers in
-  lib to virtual mode.
 
-  @param[in]    Event   The Event that is being processed
-  @param[in]    Context Event Context
-**/
-VOID
-EFIAPI
-LibRtcVirtualNotifyEvent (
-  IN EFI_EVENT        Event,
-  IN VOID             *Context
-  )
-{
-  //
-  // Only needed if you are going to support the OS calling RTC functions in virtual mode.
-  // You will need to call EfiConvertPointer (). To convert any stored physical addresses
-  // to virtual address. After the OS transitions to calling in virtual mode, all future
-  // runtime calls will be made in virtual mode.
-  //
-  return;
-}
