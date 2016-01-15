@@ -366,6 +366,11 @@
   gArmTokenSpaceGuid.PcdSystemMemorySize|0x40000000
   gArmTokenSpaceGuid.PcdArmScr|0x531
 
+  # Marvell Pcds
+  gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0x50, 0x57 }
+  gMarvellTokenSpaceGuid.PcdI2cBaseAddress|0xF0511000
+  gMarvellTokenSpaceGuid.PcdTclkFrequency|200000000
+
 ################################################################################
 #
 # Components Section - list of all EDK II Modules needed by this Platform
@@ -398,6 +403,10 @@
   ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
   ArmPkg/Drivers/TimerDxe/TimerDxe.inf
   ArmPkg/Drivers/GenericWatchdogDxe/GenericWatchdogDxe.inf
+
+  # Platform drivers
+  OpenPlatformPkg/Drivers/I2c/A8kI2cDxe/A8kI2cDxe.inf
+  MdeModulePkg/Bus/I2c/I2cDxe/I2cDxe.inf
 
   MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf

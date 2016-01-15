@@ -1,5 +1,6 @@
 /*-
  * Copyright (C) 2008 MARVELL INTERNATIONAL LTD.
+ * Copyright (C) 2016 MARVELL INTERNATIONAL LTD.
  * All rights reserved.
  *
  * Developed by Semihalf.
@@ -29,189 +30,160 @@
  * SUCH DAMAGE.
  */
 
-/*
- * Driver for the TWSI (aka I2C, aka IIC) bus controller found on Marvell
- * SoCs. Supports master operation only, and works in polling mode.
- *
- * Calls to DELAY() are needed per Application Note AN-179 "TWSI Software
- * Guidelines for Discovery(TM), Horizon (TM) and Feroceon(TM) Devices".
- */
+#include <Protocol/I2cMaster.h>
+#include <Protocol/I2cEnumerate.h>
+#include <Protocol/I2cBusConfigurationManagement.h>
+#include <Protocol/DevicePath.h>
 
-#include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
+#include <Library/BaseLib.h>
+#include <Library/IoLib.h>
+#include <Library/DebugLib.h>
+#include <Library/PcdLib.h>
+#include <Library/UefiLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/UefiBootServicesTableLib.h>
 
-#include <sys/param.h>
-#include <sys/systm.h>
-#include <sys/bus.h>
-#include <sys/kernel.h>
-#include <sys/module.h>
-#include <sys/resource.h>
+#include "A8kI2cDxe.h"
 
-#include <machine/_inttypes.h>
-#include <machine/bus.h>
-#include <machine/resource.h>
+STATIC A8K_I2C_BAUD_RATE baud_rate[IIC_FASTEST + 1];
 
-#include <sys/rman.h>
-
-#include <sys/lock.h>
-#include <sys/mutex.h>
-
-#include <dev/iicbus/iiconf.h>
-#include <dev/iicbus/iicbus.h>
-#include <dev/fdt/fdt_common.h>
-#include <dev/ofw/ofw_bus.h>
-#include <dev/ofw/ofw_bus_subr.h>
-
-#include <arm/mv/mvreg.h>
-#include <arm/mv/mvvar.h>
-
-#include "iicbus_if.h"
-
-#define MV_TWSI_NAME		"twsi"
-#define	IICBUS_DEVNAME		"iicbus"
-
-#define TWSI_SLAVE_ADDR		0x00
-#define TWSI_EXT_SLAVE_ADDR	0x10
-#define TWSI_DATA		0x04
-
-#define TWSI_CONTROL		0x08
-#define TWSI_CONTROL_ACK	(1 << 2)
-#define TWSI_CONTROL_IFLG	(1 << 3)
-#define TWSI_CONTROL_STOP	(1 << 4)
-#define TWSI_CONTROL_START	(1 << 5)
-#define TWSI_CONTROL_TWSIEN	(1 << 6)
-#define TWSI_CONTROL_INTEN	(1 << 7)
-
-#define TWSI_STATUS			0x0c
-#define TWSI_STATUS_START		0x08
-#define TWSI_STATUS_RPTD_START		0x10
-#define TWSI_STATUS_ADDR_W_ACK		0x18
-#define TWSI_STATUS_DATA_WR_ACK		0x28
-#define TWSI_STATUS_ADDR_R_ACK		0x40
-#define TWSI_STATUS_DATA_RD_ACK		0x50
-#define TWSI_STATUS_DATA_RD_NOACK	0x58
-
-#define TWSI_BAUD_RATE		0x0c
-#define	TWSI_BAUD_RATE_PARAM(M,N)	((((M) << 3) | ((N) & 0x7)) & 0x7f)
-#define	TWSI_BAUD_RATE_RAW(C,M,N)	((C)/((10*(M+1))<<(N+1)))
-#define	TWSI_BAUD_RATE_SLOW		50000	/* 50kHz */
-#define	TWSI_BAUD_RATE_FAST		100000	/* 100kHz */
-
-#define TWSI_SOFT_RESET		0x1c
-
-#define TWSI_DEBUG
-#undef TWSI_DEBUG
-
-#ifdef  TWSI_DEBUG
-#define debugf(fmt, args...) do { printf("%s(): ", __func__); printf(fmt,##args); } while (0)
-#else
-#define debugf(fmt, args...)
-#endif
-
-struct mv_twsi_softc {
-	device_t	dev;
-	struct resource	*res[1];	/* SYS_RES_MEMORY */
-	struct mtx	mutex;
-	device_t	iicbus;
+A8K_I2C_DEVICE_PATH gDevicePathProtocol = {
+  {
+    {
+      HARDWARE_DEVICE_PATH,
+      HW_VENDOR_DP,
+      {
+  (UINT8) (sizeof(VENDOR_DEVICE_PATH)),
+  (UINT8) (sizeof(VENDOR_DEVICE_PATH) >> 8),
+      },
+    },
+    EFI_CALLER_ID_GUID
+  },
+  {
+    END_DEVICE_PATH_TYPE,
+    END_ENTIRE_DEVICE_PATH_SUBTYPE,
+    {
+      sizeof(EFI_DEVICE_PATH_PROTOCOL),
+      0
+    }
+  }
 };
 
-static struct mv_twsi_baud_rate {
-	uint32_t	raw;
-	int		param;
-	int		m;
-	int		n;
-} baud_rate[IIC_FASTEST + 1];
-
-static int mv_twsi_probe(device_t);
-static int mv_twsi_attach(device_t);
-static int mv_twsi_detach(device_t);
-
-static int mv_twsi_reset(device_t dev, u_char speed, u_char addr,
-    u_char *oldaddr);
-static int mv_twsi_repeated_start(device_t dev, u_char slave, int timeout);
-static int mv_twsi_start(device_t dev, u_char slave, int timeout);
-static int mv_twsi_stop(device_t dev);
-static int mv_twsi_read(device_t dev, char *buf, int len, int *read, int last,
-    int delay);
-static int mv_twsi_write(device_t dev, const char *buf, int len, int *sent,
-    int timeout);
-
-static struct resource_spec res_spec[] = {
-	{ SYS_RES_MEMORY, 0, RF_ACTIVE },
-	{ -1, 0 }
-};
-
-static device_method_t mv_twsi_methods[] = {
-	/* device interface */
-	DEVMETHOD(device_probe,		mv_twsi_probe),
-	DEVMETHOD(device_attach,	mv_twsi_attach),
-	DEVMETHOD(device_detach,	mv_twsi_detach),
-
-	/* iicbus interface */
-	DEVMETHOD(iicbus_callback, iicbus_null_callback),
-	DEVMETHOD(iicbus_repeated_start, mv_twsi_repeated_start),
-	DEVMETHOD(iicbus_start,		mv_twsi_start),
-	DEVMETHOD(iicbus_stop,		mv_twsi_stop),
-	DEVMETHOD(iicbus_write,		mv_twsi_write),
-	DEVMETHOD(iicbus_read,		mv_twsi_read),
-	DEVMETHOD(iicbus_reset,		mv_twsi_reset),
-	DEVMETHOD(iicbus_transfer,	iicbus_transfer_gen),
-	{ 0, 0 }
-};
-
-static devclass_t mv_twsi_devclass;
-
-static driver_t mv_twsi_driver = {
-	MV_TWSI_NAME,
-	mv_twsi_methods,
-	sizeof(struct mv_twsi_softc),
-};
-
-DRIVER_MODULE(twsi, simplebus, mv_twsi_driver, mv_twsi_devclass, 0, 0);
-DRIVER_MODULE(iicbus, twsi, iicbus_driver, iicbus_devclass, 0, 0);
-MODULE_DEPEND(twsi, iicbus, 1, 1, 1);
-
-static __inline uint32_t
-TWSI_READ(struct mv_twsi_softc *sc, bus_size_t off)
+STATIC
+UINT32
+TWSI_READ(
+  IN I2C_MASTER_CONTEXT *I2cMasterContext,
+  IN UINTN off)
 {
-
-	return (bus_read_4(sc->res[0], off));
+  ASSERT (I2cMasterContext != NULL);
+  return MmioRead32 (I2cMasterContext->BaseAddress + off);
 }
 
-static __inline void
-TWSI_WRITE(struct mv_twsi_softc *sc, bus_size_t off, uint32_t val)
+STATIC
+EFI_STATUS
+TWSI_WRITE (
+  IN I2C_MASTER_CONTEXT *I2cMasterContext,
+  IN UINTN off,
+  IN UINT32 val)
 {
-
-	bus_write_4(sc->res[0], off, val);
+  ASSERT (I2cMasterContext != NULL);
+  return MmioWrite32 (I2cMasterContext->BaseAddress + off, val);
 }
 
-static __inline void
-twsi_control_clear(struct mv_twsi_softc *sc, uint32_t mask)
+EFI_STATUS
+EFIAPI
+A8kI2cInitialise (
+  IN EFI_HANDLE  ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
+  )
 {
-	uint32_t val;
+  EFI_STATUS Status;
+  I2C_MASTER_CONTEXT *I2cMasterContext;
 
-	val = TWSI_READ(sc, TWSI_CONTROL);
-	val &= ~mask;
-	TWSI_WRITE(sc, TWSI_CONTROL, val);
+  /* if attachment succeeds, this gets freed at ExitBootServices */
+  I2cMasterContext = AllocateZeroPool (sizeof (I2C_MASTER_CONTEXT));
+  if (I2cMasterContext == NULL) {
+    DEBUG((DEBUG_ERROR, "Allocation fail.\n"));
+    return EFI_OUT_OF_RESOURCES;
+  }
+  I2cMasterContext->Signature = I2C_MASTER_SIGNATURE;
+  I2cMasterContext->I2cMaster.Reset = A8kI2cReset;
+  I2cMasterContext->I2cMaster.StartRequest = A8kI2cStartRequest;
+  I2cMasterContext->I2cEnumerate.Enumerate = A8kI2cEnumerate;
+  I2cMasterContext->I2cBusConf.EnableI2cBusConfiguration = A8kI2cEnableConf;
+  I2cMasterContext->TclkFrequency = PcdGet32 (PcdTclkFrequency);
+  I2cMasterContext->BaseAddress = PcdGet64 (PcdI2cBaseAddress);
+
+  EfiInitializeLock(&I2cMasterContext->Lock, TPL_NOTIFY);
+
+  /* checks if protocol is *not yet* installed */
+  ASSERT_PROTOCOL_ALREADY_INSTALLED(NULL, &gEfiI2cMasterProtocolGuid);
+  ASSERT_PROTOCOL_ALREADY_INSTALLED(NULL, &gEfiI2cEnumerateProtocolGuid);
+  ASSERT_PROTOCOL_ALREADY_INSTALLED(NULL, &gEfiI2cBusConfigurationManagementProtocolGuid);
+
+  A8kI2cCalBaudRate(TWSI_BAUD_RATE_SLOW, &baud_rate[IIC_SLOW], I2cMasterContext->TclkFrequency);
+  A8kI2cCalBaudRate(TWSI_BAUD_RATE_FAST, &baud_rate[IIC_FAST], I2cMasterContext->TclkFrequency);
+
+  Status = gBS->InstallMultipleProtocolInterfaces(
+      &I2cMasterContext->Controller,
+      &gEfiI2cMasterProtocolGuid,
+      &I2cMasterContext->I2cMaster,
+      &gEfiI2cEnumerateProtocolGuid,
+      &I2cMasterContext->I2cEnumerate,
+      &gEfiI2cBusConfigurationManagementProtocolGuid,
+      &I2cMasterContext->I2cBusConf,
+      &gEfiDevicePathProtocolGuid,
+      (EFI_DEVICE_PATH_PROTOCOL *) &gDevicePathProtocol,
+      NULL);
+
+  if (EFI_ERROR(Status)) {
+    DEBUG((DEBUG_ERROR, "Installing protocol interfaces failed!\n"));
+    goto fail;
+  }
+
+  return EFI_SUCCESS;
+
+fail:
+  FreePool(I2cMasterContext);
+  return Status;
 }
 
-static __inline void
-twsi_control_set(struct mv_twsi_softc *sc, uint32_t mask)
+STATIC
+VOID
+A8kI2cControlClear (
+  IN I2C_MASTER_CONTEXT *I2cMasterContext,
+  IN UINT32 mask)
 {
-	uint32_t val;
+  UINT32 val;
 
-	val = TWSI_READ(sc, TWSI_CONTROL);
-	val |= mask;
-	TWSI_WRITE(sc, TWSI_CONTROL, val);
+  val = TWSI_READ(I2cMasterContext, TWSI_CONTROL);
+  val &= ~mask;
+  TWSI_WRITE(I2cMasterContext, TWSI_CONTROL, val);
 }
 
-static __inline void
-twsi_clear_iflg(struct mv_twsi_softc *sc)
+STATIC
+VOID
+A8kI2cControlSet (
+  IN I2C_MASTER_CONTEXT *I2cMasterContext,
+  IN UINT32 mask)
+{
+  UINT32 val;
+
+  val = TWSI_READ(I2cMasterContext, TWSI_CONTROL);
+  val |= mask;
+  TWSI_WRITE(I2cMasterContext, TWSI_CONTROL, val);
+}
+
+STATIC
+VOID
+A8kI2cClearIflg (
+ IN I2C_MASTER_CONTEXT *I2cMasterContext
+ )
 {
 
-	DELAY(1000);
-	twsi_control_clear(sc, TWSI_CONTROL_IFLG);
-	DELAY(1000);
+  gBS->Stall(1000);
+  A8kI2cControlClear(I2cMasterContext, TWSI_CONTROL_IFLG);
+  gBS->Stall(1000);
 }
 
 
@@ -221,421 +193,490 @@ twsi_clear_iflg(struct mv_twsi_softc *sc)
  *   0 on sucessfull mask change
  *   non-zero on timeout
  */
-static int
-twsi_poll_ctrl(struct mv_twsi_softc *sc, int timeout, uint32_t mask)
+STATIC
+UINTN
+A8kI2cPollCtrl (
+  IN I2C_MASTER_CONTEXT *I2cMasterContext,
+  IN UINTN timeout,
+  IN UINT32 mask)
 {
 
-	timeout /= 10;
-	while (!(TWSI_READ(sc, TWSI_CONTROL) & mask)) {
-		DELAY(10);
-		if (--timeout < 0)
-			return (timeout);
-	}
-	return (0);
+  timeout /= 10;
+  while (!(TWSI_READ(I2cMasterContext, TWSI_CONTROL) & mask)) {
+    gBS->Stall(10);
+    if (--timeout == 0)
+      return (timeout);
+  }
+  return (0);
 }
 
 
 /*
  * 'timeout' is given in us. Note also that timeout handling is not exact --
- * twsi_locked_start() total wait can be more than 2 x timeout
- * (twsi_poll_ctrl() is called twice). 'mask' can be either TWSI_STATUS_START
+ * A8kI2cLockedStart() total wait can be more than 2 x timeout
+ * (A8kI2cPollCtrl() is called twice). 'mask' can be either TWSI_STATUS_START
  * or TWSI_STATUS_RPTD_START
  */
-static int
-twsi_locked_start(device_t dev, struct mv_twsi_softc *sc, int32_t mask,
-    u_char slave, int timeout)
+STATIC
+EFI_STATUS
+A8kI2cLockedStart (
+  IN I2C_MASTER_CONTEXT *I2cMasterContext,
+  IN INT32 mask,
+  IN UINT8 slave,
+  IN UINTN timeout
+  )
 {
-	int read_access, iflg_set = 0;
-	uint32_t status;
+  UINTN read_access, iflg_set = 0;
+  UINT32 status;
 
-	mtx_assert(&sc->mutex, MA_OWNED);
+  if (mask == TWSI_STATUS_RPTD_START)
+    /* read IFLG to know if it should be cleared later; from NBSD */
+    iflg_set = TWSI_READ(I2cMasterContext, TWSI_CONTROL) & TWSI_CONTROL_IFLG;
 
-	if (mask == TWSI_STATUS_RPTD_START)
-		/* read IFLG to know if it should be cleared later; from NBSD */
-		iflg_set = TWSI_READ(sc, TWSI_CONTROL) & TWSI_CONTROL_IFLG;
+  A8kI2cControlSet(I2cMasterContext, TWSI_CONTROL_START);
 
-	twsi_control_set(sc, TWSI_CONTROL_START);
+  if (mask == TWSI_STATUS_RPTD_START && iflg_set) {
+    DEBUG((DEBUG_INFO, "IFLG set, clearing\n"));
+    A8kI2cClearIflg(I2cMasterContext);
+  }
 
-	if (mask == TWSI_STATUS_RPTD_START && iflg_set) {
-		debugf("IFLG set, clearing\n");
-		twsi_clear_iflg(sc);
-	}
+  /*
+   * Without this delay we timeout checking IFLG if the timeout is 0.
+   * NBSD driver always waits here too.
+   */
+  gBS->Stall(1000);
 
-	/*
-	 * Without this delay we timeout checking IFLG if the timeout is 0.
-	 * NBSD driver always waits here too.
-	 */
-	DELAY(1000);
+  if (A8kI2cPollCtrl(I2cMasterContext, timeout, TWSI_CONTROL_IFLG)) {
+    DEBUG((DEBUG_ERROR, "timeout sending %sSTART condition\n",
+        mask == TWSI_STATUS_START ? "" : "repeated "));
+    return EFI_NO_RESPONSE;
+  }
 
-	if (twsi_poll_ctrl(sc, timeout, TWSI_CONTROL_IFLG)) {
-		debugf("timeout sending %sSTART condition\n",
-		    mask == TWSI_STATUS_START ? "" : "repeated ");
-		return (IIC_ETIMEOUT);
-	}
+  status = TWSI_READ(I2cMasterContext, TWSI_STATUS);
+  if (status != mask) {
+    DEBUG((DEBUG_ERROR, "wrong status (%02x) after sending %sSTART condition\n",
+        status, mask == TWSI_STATUS_START ? "" : "repeated "));
+    return EFI_DEVICE_ERROR;
+  }
 
-	status = TWSI_READ(sc, TWSI_STATUS);
-	if (status != mask) {
-		debugf("wrong status (%02x) after sending %sSTART condition\n",
-		    status, mask == TWSI_STATUS_START ? "" : "repeated ");
-		return (IIC_ESTATUS);
-	}
+  TWSI_WRITE(I2cMasterContext, TWSI_DATA, slave);
+  gBS->Stall(1000);
+  A8kI2cClearIflg(I2cMasterContext);
 
-	TWSI_WRITE(sc, TWSI_DATA, slave);
-	DELAY(1000);
-	twsi_clear_iflg(sc);
+  if (A8kI2cPollCtrl(I2cMasterContext, timeout, TWSI_CONTROL_IFLG)) {
+    DEBUG((DEBUG_ERROR, "timeout sending slave address\n"));
+    return EFI_NO_RESPONSE;
+  }
 
-	if (twsi_poll_ctrl(sc, timeout, TWSI_CONTROL_IFLG)) {
-		debugf("timeout sending slave address\n");
-		return (IIC_ETIMEOUT);
-	}
-	
-	read_access = (slave & 0x1) ? 1 : 0;
-	status = TWSI_READ(sc, TWSI_STATUS);
-	if (status != (read_access ?
-	    TWSI_STATUS_ADDR_R_ACK : TWSI_STATUS_ADDR_W_ACK)) {
-		debugf("no ACK (status: %02x) after sending slave address\n",
-		    status);
-		return (IIC_ENOACK);
-	}
+  read_access = (slave & 0x1) ? 1 : 0;
+  status = TWSI_READ(I2cMasterContext, TWSI_STATUS);
+  if (status != (read_access ?
+      TWSI_STATUS_ADDR_R_ACK : TWSI_STATUS_ADDR_W_ACK)) {
+    DEBUG((DEBUG_ERROR, "no ACK (status: %02x) after sending slave address\n",
+        status));
+    return EFI_NO_RESPONSE;
+  }
 
-	return (IIC_NOERR);
+  return EFI_SUCCESS;
 }
 
-static int
-mv_twsi_probe(device_t dev)
+#define  ABSSUB(a,b)  (((a) > (b)) ? (a) - (b) : (b) - (a))
+STATIC
+VOID
+A8kI2cCalBaudRate (
+  IN CONST UINT32 target,
+  IN OUT A8K_I2C_BAUD_RATE *rate,
+  UINT32 clk
+  )
 {
+  UINT32 cur, diff, diff0;
+  UINTN m, n, m0, n0;
 
-	if (!ofw_bus_status_okay(dev))
-		return (ENXIO);
+  /* Calculate baud rate. */
+  m0 = n0 = 4;  /* Default values on reset */
+  diff0 = 0xffffffff;
 
-	if (!ofw_bus_is_compatible(dev, "mrvl,twsi"))
-		return (ENXIO);
-
-	device_set_desc(dev, "Marvell Integrated I2C Bus Controller");
-	return (BUS_PROBE_DEFAULT);
+  for (n = 0; n < 8; n++) {
+    for (m = 0; m < 16; m++) {
+      cur = TWSI_BAUD_RATE_RAW(clk,m,n);
+      diff = ABSSUB(target, cur);
+      if (diff < diff0) {
+        m0 = m;
+        n0 = n;
+        diff0 = diff;
+      }
+    }
+  }
+  rate->raw = TWSI_BAUD_RATE_RAW(clk, m0, n0);
+  rate->param = TWSI_BAUD_RATE_PARAM(m0, n0);
+  rate->m = m0;
+  rate->n = n0;
 }
 
-#define	ABSSUB(a,b)	(((a) > (b)) ? (a) - (b) : (b) - (a))
-static void
-mv_twsi_cal_baud_rate(const uint32_t target, struct mv_twsi_baud_rate *rate)
+EFI_STATUS
+EFIAPI
+A8kI2cReset (
+  IN CONST EFI_I2C_MASTER_PROTOCOL *This
+  )
 {
-	uint32_t clk, cur, diff, diff0;
-	int m, n, m0, n0;
+  UINT32 param;
+  I2C_MASTER_CONTEXT *I2cMasterContext = I2C_SC_FROM_MASTER(This);
 
-	/* Calculate baud rate. */
-	m0 = n0 = 4;	/* Default values on reset */
-	diff0 = 0xffffffff;
-	clk = get_tclk();
+  param = baud_rate[IIC_FAST].param;
 
-	for (n = 0; n < 8; n++) {
-		for (m = 0; m < 16; m++) {
-			cur = TWSI_BAUD_RATE_RAW(clk,m,n);
-			diff = ABSSUB(target, cur);
-			if (diff < diff0) {
-				m0 = m;
-				n0 = n;
-				diff0 = diff;
-			}
-		}
-	}
-	rate->raw = TWSI_BAUD_RATE_RAW(clk, m0, n0);
-	rate->param = TWSI_BAUD_RATE_PARAM(m0, n0);
-	rate->m = m0;
-	rate->n = n0;
-}
+  EfiAcquireLock (&I2cMasterContext->Lock);
+  TWSI_WRITE(I2cMasterContext, TWSI_SOFT_RESET, 0x0);
+  gBS->Stall(2000);
+  TWSI_WRITE(I2cMasterContext, TWSI_BAUD_RATE, param);
+  TWSI_WRITE(I2cMasterContext, TWSI_CONTROL, TWSI_CONTROL_TWSIEN | TWSI_CONTROL_ACK);
+  gBS->Stall(1000);
+  EfiReleaseLock (&I2cMasterContext->Lock);
 
-static int
-mv_twsi_attach(device_t dev)
-{
-	struct mv_twsi_softc *sc;
-	phandle_t child, iicbusnode;
-	device_t childdev;
-	struct iicbus_ivar *devi;
-	char dname[32];	/* 32 is taken from struct u_device */
-	uint32_t paddr;
-	int len, error;
-
-	sc = device_get_softc(dev);
-	sc->dev = dev;
-	bzero(baud_rate, sizeof(baud_rate));
-
-	mtx_init(&sc->mutex, device_get_nameunit(dev), MV_TWSI_NAME, MTX_DEF);
-
-	/* Allocate IO resources */
-	if (bus_alloc_resources(dev, res_spec, sc->res)) {
-		device_printf(dev, "could not allocate resources\n");
-		mv_twsi_detach(dev);
-		return (ENXIO);
-	}
-
-	mv_twsi_cal_baud_rate(TWSI_BAUD_RATE_SLOW, &baud_rate[IIC_SLOW]);
-	mv_twsi_cal_baud_rate(TWSI_BAUD_RATE_FAST, &baud_rate[IIC_FAST]);
-	if (bootverbose)
-		device_printf(dev, "calculated baud rates are:\n"
-		    " %" PRIu32 " kHz (M=%d, N=%d) for slow,\n"
-		    " %" PRIu32 " kHz (M=%d, N=%d) for fast.\n",
-		    baud_rate[IIC_SLOW].raw / 1000,
-		    baud_rate[IIC_SLOW].m,
-		    baud_rate[IIC_SLOW].n,
-		    baud_rate[IIC_FAST].raw / 1000,
-		    baud_rate[IIC_FAST].m,
-		    baud_rate[IIC_FAST].n);
-
-	sc->iicbus = device_add_child(dev, IICBUS_DEVNAME, -1);
-	if (sc->iicbus == NULL) {
-		device_printf(dev, "could not add iicbus child\n");
-		mv_twsi_detach(dev);
-		return (ENXIO);
-	}
-	/* Attach iicbus. */
-	bus_generic_attach(dev);
-
-	iicbusnode = 0;
-	/* Find iicbus as the child devices in the device tree. */
-	for (child = OF_child(ofw_bus_get_node(dev)); child != 0;
-	    child = OF_peer(child)) {
-		len = OF_getproplen(child, "model");
-		if (len <= 0 || len > sizeof(dname) - 1)
-			continue;
-		error = OF_getprop(child, "model", &dname, len);
-		dname[len + 1] = '\0';
-		if (error == -1)
-			continue;
-		len = strlen(dname);
-		if (len == strlen(IICBUS_DEVNAME) &&
-		    strncasecmp(dname, IICBUS_DEVNAME, len) == 0) {
-			iicbusnode = child;
-			break; 
-		}
-	}
-	if (iicbusnode == 0)
-		goto attach_end;
-
-	/* Attach child devices onto iicbus. */
-	for (child = OF_child(iicbusnode); child != 0; child = OF_peer(child)) {
-		/* Get slave address. */
-		error = OF_getprop(child, "i2c-address", &paddr, sizeof(paddr));
-		if (error == -1)
-			error = OF_getprop(child, "reg", &paddr, sizeof(paddr));
-		if (error == -1)
-			continue;
-
-		/* Get device driver name. */
-		len = OF_getproplen(child, "model");
-		if (len <= 0 || len > sizeof(dname) - 1)
-			continue;
-		OF_getprop(child, "model", &dname, len);
-		dname[len + 1] = '\0';
-
-		if (bootverbose)
-			device_printf(dev, "adding a device %s at %d.\n",
-			    dname, fdt32_to_cpu(paddr));
-		childdev = BUS_ADD_CHILD(sc->iicbus, 0, dname, -1);
-		devi = IICBUS_IVAR(childdev);
-		devi->addr = fdt32_to_cpu(paddr);
-	}
-
-attach_end:
-	bus_generic_attach(sc->iicbus);
-
-	return (0);
-}
-
-static int
-mv_twsi_detach(device_t dev)
-{
-	struct mv_twsi_softc *sc;
-	int rv;
-
-	sc = device_get_softc(dev);
-
-	if ((rv = bus_generic_detach(dev)) != 0)
-		return (rv);
-
-	if (sc->iicbus != NULL)
-		if ((rv = device_delete_child(dev, sc->iicbus)) != 0)
-			return (rv);
-
-	bus_release_resources(dev, res_spec, sc->res);
-
-	mtx_destroy(&sc->mutex);
-	return (0);
-}
-
-/*
- * Only slave mode supported, disregard [old]addr
- */
-static int
-mv_twsi_reset(device_t dev, u_char speed, u_char addr, u_char *oldaddr)
-{
-	struct mv_twsi_softc *sc;
-	uint32_t param;
-
-	sc = device_get_softc(dev);
-
-	switch (speed) {
-	case IIC_SLOW:
-	case IIC_FAST:
-		param = baud_rate[speed].param;
-		break;
-	case IIC_FASTEST:
-	case IIC_UNKNOWN:
-	default:
-		param = baud_rate[IIC_FAST].param;
-		break;
-	}
-
-	mtx_lock(&sc->mutex);
-	TWSI_WRITE(sc, TWSI_SOFT_RESET, 0x0);
-	DELAY(2000);
-	TWSI_WRITE(sc, TWSI_BAUD_RATE, param);
-	TWSI_WRITE(sc, TWSI_CONTROL, TWSI_CONTROL_TWSIEN | TWSI_CONTROL_ACK);
-	DELAY(1000);
-	mtx_unlock(&sc->mutex);
-
-	return (0);
+  return EFI_SUCCESS;
 }
 
 /*
  * timeout is given in us
  */
-static int
-mv_twsi_repeated_start(device_t dev, u_char slave, int timeout)
+STATIC
+EFI_STATUS
+A8kI2cRepeatedStart (
+  IN I2C_MASTER_CONTEXT *I2cMasterContext,
+  IN UINT8 slave,
+  IN UINTN timeout
+  )
 {
-	struct mv_twsi_softc *sc;
-	int rv;
+  EFI_STATUS Status;
 
-	sc = device_get_softc(dev);
+  EfiAcquireLock (&I2cMasterContext->Lock);
+  Status = A8kI2cLockedStart(I2cMasterContext, TWSI_STATUS_RPTD_START, slave,
+      timeout);
+  EfiReleaseLock (&I2cMasterContext->Lock);
 
-	mtx_lock(&sc->mutex);
-	rv = twsi_locked_start(dev, sc, TWSI_STATUS_RPTD_START, slave,
-	    timeout);
-	mtx_unlock(&sc->mutex);
-
-	if (rv) {
-		mv_twsi_stop(dev);
-		return (rv);
-	} else
-		return (IIC_NOERR);
+  if (EFI_ERROR(Status)) {
+    A8kI2cStop(I2cMasterContext);
+  }
+  return Status;
 }
 
 /*
  * timeout is given in us
  */
-static int
-mv_twsi_start(device_t dev, u_char slave, int timeout)
+STATIC
+EFI_STATUS
+A8kI2cStart (
+  IN I2C_MASTER_CONTEXT *I2cMasterContext,
+  IN UINT8 slave,
+  IN UINTN timeout
+  )
 {
-	struct mv_twsi_softc *sc;
-	int rv;
+  EFI_STATUS Status;
 
-	sc = device_get_softc(dev);
+  EfiAcquireLock (&I2cMasterContext->Lock);
+  Status = A8kI2cLockedStart(I2cMasterContext, TWSI_STATUS_START, slave, timeout);
+  EfiReleaseLock (&I2cMasterContext->Lock);
 
-	mtx_lock(&sc->mutex);
-	rv = twsi_locked_start(dev, sc, TWSI_STATUS_START, slave, timeout);
-	mtx_unlock(&sc->mutex);
-
-	if (rv) {
-		mv_twsi_stop(dev);
-		return (rv);
-	} else
-		return (IIC_NOERR);
+  if (EFI_ERROR(Status)) {
+    A8kI2cStop(I2cMasterContext);
+  }
+  return Status;
 }
 
-static int
-mv_twsi_stop(device_t dev)
+STATIC
+EFI_STATUS
+A8kI2cStop (
+  IN I2C_MASTER_CONTEXT *I2cMasterContext
+  )
 {
-	struct mv_twsi_softc *sc;
 
-	sc = device_get_softc(dev);
+  EfiAcquireLock (&I2cMasterContext->Lock);
+  A8kI2cControlSet(I2cMasterContext, TWSI_CONTROL_STOP);
+  gBS->Stall(1000);
+  A8kI2cClearIflg(I2cMasterContext);
+  EfiReleaseLock (&I2cMasterContext->Lock);
 
-	mtx_lock(&sc->mutex);
-	twsi_control_set(sc, TWSI_CONTROL_STOP);
-	DELAY(1000);
-	twsi_clear_iflg(sc);
-	mtx_unlock(&sc->mutex);
-
-	return (IIC_NOERR);
+  return EFI_SUCCESS;
 }
 
-static int
-mv_twsi_read(device_t dev, char *buf, int len, int *read, int last, int delay)
+STATIC
+EFI_STATUS
+A8kI2cRead (
+  IN I2C_MASTER_CONTEXT *I2cMasterContext,
+  IN OUT UINT8 *buf,
+  IN UINTN len,
+  IN OUT UINTN *read,
+  IN UINTN last,
+  IN UINTN delay
+  )
 {
-	struct mv_twsi_softc *sc;
-	uint32_t status;
-	int last_byte, rv;
+  UINT32 status;
+  UINTN last_byte;
+  EFI_STATUS Status;
 
-	sc = device_get_softc(dev);
+  EfiAcquireLock (&I2cMasterContext->Lock);
+  *read = 0;
+  while (*read < len) {
+    /*
+     * Check if we are reading last byte of the last buffer,
+     * do not send ACK then, per I2C specs
+     */
+    last_byte = ((*read == len - 1) && last) ? 1 : 0;
+    if (last_byte)
+      A8kI2cControlClear(I2cMasterContext, TWSI_CONTROL_ACK);
+    else
+      A8kI2cControlSet(I2cMasterContext, TWSI_CONTROL_ACK);
 
-	mtx_lock(&sc->mutex);
-	*read = 0;
-	while (*read < len) {
-		/*
-		 * Check if we are reading last byte of the last buffer,
-		 * do not send ACK then, per I2C specs
-		 */
-		last_byte = ((*read == len - 1) && last) ? 1 : 0;
-		if (last_byte)
-			twsi_control_clear(sc, TWSI_CONTROL_ACK);
-		else
-			twsi_control_set(sc, TWSI_CONTROL_ACK);
+    gBS->Stall (1000);
+    A8kI2cClearIflg(I2cMasterContext);
 
-		DELAY (1000);
-		twsi_clear_iflg(sc);
+    if (A8kI2cPollCtrl(I2cMasterContext, delay, TWSI_CONTROL_IFLG)) {
+      DEBUG((DEBUG_ERROR, "timeout reading data\n"));
+      Status = EFI_NO_RESPONSE;
+      goto out;
+    }
 
-		if (twsi_poll_ctrl(sc, delay, TWSI_CONTROL_IFLG)) {
-			debugf("timeout reading data\n");
-			rv = IIC_ETIMEOUT;
-			goto out;
-		}
+    status = TWSI_READ(I2cMasterContext, TWSI_STATUS);
+    if (status != (last_byte ?
+        TWSI_STATUS_DATA_RD_NOACK : TWSI_STATUS_DATA_RD_ACK)) {
+      DEBUG((DEBUG_ERROR, "wrong status (%02x) while reading\n", status));
+      Status = EFI_DEVICE_ERROR;
+      goto out;
+    }
 
-		status = TWSI_READ(sc, TWSI_STATUS);
-		if (status != (last_byte ?
-		    TWSI_STATUS_DATA_RD_NOACK : TWSI_STATUS_DATA_RD_ACK)) {
-			debugf("wrong status (%02x) while reading\n", status);
-			rv = IIC_ESTATUS;
-			goto out;
-		}
-
-		*buf++ = TWSI_READ(sc, TWSI_DATA);
-		(*read)++;
-	}
-	rv = IIC_NOERR;
+    *buf++ = TWSI_READ(I2cMasterContext, TWSI_DATA);
+    (*read)++;
+  }
+  Status = EFI_SUCCESS;
 out:
-	mtx_unlock(&sc->mutex);
-	return (rv);
+  EfiReleaseLock (&I2cMasterContext->Lock);
+  return (Status);
 }
 
-static int
-mv_twsi_write(device_t dev, const char *buf, int len, int *sent, int timeout)
+STATIC
+EFI_STATUS
+A8kI2cWrite (
+  IN I2C_MASTER_CONTEXT *I2cMasterContext,
+  IN OUT CONST UINT8 *buf,
+  IN UINTN len,
+  IN OUT UINTN *sent,
+  IN UINTN timeout
+  )
 {
-	struct mv_twsi_softc *sc;
-	uint32_t status;
-	int rv;
+  UINT32 status;
+  EFI_STATUS Status;
 
-	sc = device_get_softc(dev);
+  EfiAcquireLock (&I2cMasterContext->Lock);
+  *sent = 0;
+  while (*sent < len) {
+    TWSI_WRITE(I2cMasterContext, TWSI_DATA, *buf++);
 
-	mtx_lock(&sc->mutex);
-	*sent = 0;
-	while (*sent < len) {
-		TWSI_WRITE(sc, TWSI_DATA, *buf++);
+    A8kI2cClearIflg(I2cMasterContext);
+    if (A8kI2cPollCtrl(I2cMasterContext, timeout, TWSI_CONTROL_IFLG)) {
+      DEBUG((DEBUG_ERROR, "timeout writing data\n"));
+      Status = EFI_NO_RESPONSE;
+      goto out;
+    }
 
-		twsi_clear_iflg(sc);
-		if (twsi_poll_ctrl(sc, timeout, TWSI_CONTROL_IFLG)) {
-			debugf("timeout writing data\n");
-			rv = IIC_ETIMEOUT;
-			goto out;
-		}
-
-		status = TWSI_READ(sc, TWSI_STATUS);
-		if (status != TWSI_STATUS_DATA_WR_ACK) {
-			debugf("wrong status (%02x) while writing\n", status);
-			rv = IIC_ESTATUS;
-			goto out;
-		}
-		(*sent)++;
-	}
-	rv = IIC_NOERR;
+    status = TWSI_READ(I2cMasterContext, TWSI_STATUS);
+    if (status != TWSI_STATUS_DATA_WR_ACK) {
+      DEBUG((DEBUG_ERROR, "wrong status (%02x) while writing\n", status));
+      Status = EFI_DEVICE_ERROR;
+      goto out;
+    }
+    (*sent)++;
+  }
+  Status = EFI_SUCCESS;
 out:
-	mtx_unlock(&sc->mutex);
-	return (rv);
+  EfiReleaseLock (&I2cMasterContext->Lock);
+  return (Status);
+}
+
+/*
+ * A8kI2cStartRequest should be called only by I2cHost.
+ * I2C device drivers ought to use EFI_I2C_IO_PROTOCOL instead.
+ */
+STATIC
+EFI_STATUS
+A8kI2cStartRequest (
+  IN CONST EFI_I2C_MASTER_PROTOCOL *This,
+  IN UINTN                         SlaveAddress,
+  IN EFI_I2C_REQUEST_PACKET        *RequestPacket,
+  IN EFI_EVENT                     Event      OPTIONAL,
+  OUT EFI_STATUS                   *I2cStatus OPTIONAL
+  )
+{
+  UINTN Count;
+  UINTN ReadMode;
+  UINTN Transmitted;
+  I2C_MASTER_CONTEXT *I2cMasterContext = I2C_SC_FROM_MASTER(This);
+  EFI_I2C_OPERATION *Operation;
+
+  ASSERT (RequestPacket != NULL);
+  ASSERT (I2cMasterContext != NULL);
+
+  for (Count = 0; Count < RequestPacket->OperationCount; Count++) {
+    Operation = &RequestPacket->Operation[Count];
+    ReadMode = Operation->Flags & I2C_FLAG_READ;
+
+    if (Count == 0) {
+      A8kI2cStart ( I2cMasterContext,
+		    (SlaveAddress << 1) | ReadMode,
+		    TWSI_TRANSFER_TIMEOUT
+	          );
+    } else if (!(Operation->Flags & I2C_FLAG_NORESTART)) {
+      A8kI2cRepeatedStart ( I2cMasterContext,
+		            (SlaveAddress << 1) | ReadMode,
+			    TWSI_TRANSFER_TIMEOUT
+		          );
+    }
+
+    if (ReadMode) {
+      A8kI2cRead ( I2cMasterContext,
+		   Operation->Buffer,
+		   Operation->LengthInBytes,
+		   &Transmitted,
+		   Count == 1,
+		   TWSI_TRANSFER_TIMEOUT
+		  );
+    } else {
+      A8kI2cWrite ( I2cMasterContext,
+		   Operation->Buffer,
+		   Operation->LengthInBytes,
+		   &Transmitted,
+		   TWSI_TRANSFER_TIMEOUT
+		  );
+    }
+    if (Count == RequestPacket->OperationCount - 1) {
+      A8kI2cStop ( I2cMasterContext );
+    }
+  }
+
+  if (I2cStatus != NULL)
+    I2cStatus = EFI_SUCCESS;
+  if (Event != NULL)
+    gBS->SignalEvent(Event);
+  return EFI_SUCCESS;
+}
+
+/*
+ * I2C_GUID is embedded in EFI_I2C_DEVICE structure, with last byte set to
+ * address of device on I2C bus. Device driver should compare its GUID with
+ * offered one in Supported() function.
+ */
+#define I2C_GUID \
+  { \
+  0x391fc679, 0x6cb0, 0x4f01, { 0x9a, 0xc7, 0x8e, 0x1b, 0x78, 0x6b, 0x7a, 0x00 } \
+  }
+
+STATIC
+EFI_STATUS
+A8kI2cAllocDevice (
+  IN UINT8 SlaveAddress,
+  IN OUT CONST EFI_I2C_DEVICE **Device
+  )
+{
+  EFI_STATUS Status;
+  EFI_I2C_DEVICE *Dev;
+  UINT32 *TmpSlaveArray;
+  EFI_GUID DevGuid = I2C_GUID;
+  EFI_GUID *TmpGuidP;
+
+  DevGuid.Data4[7] = SlaveAddress;
+
+  Status = gBS->AllocatePool ( EfiBootServicesData,
+             sizeof(EFI_I2C_DEVICE),
+             (VOID **) &Dev );
+  if (EFI_ERROR(Status)) {
+    DEBUG((DEBUG_ERROR, "allocate pool fail\n"));
+    return Status;
+  }
+  *Device = Dev;
+  Dev->DeviceIndex = SlaveAddress;
+  Dev->SlaveAddressCount = 1;
+  Dev->I2cBusConfiguration = 0;
+  Status = gBS->AllocatePool ( EfiBootServicesData,
+             sizeof(UINT32),
+             (VOID **) &TmpSlaveArray);
+  if (EFI_ERROR(Status)) {
+    goto fail1;
+  }
+  TmpSlaveArray[0] = SlaveAddress;
+  Dev->SlaveAddressArray = TmpSlaveArray;
+
+  Status = gBS->AllocatePool ( EfiBootServicesData,
+             sizeof(EFI_GUID),
+             (VOID **) &TmpGuidP);
+  if (EFI_ERROR(Status)) {
+    goto fail2;
+  }
+  *TmpGuidP = DevGuid;
+  Dev->DeviceGuid = TmpGuidP;
+
+  DEBUG((DEBUG_INFO, "A8kI2c: allocated device with address %x\n", (UINTN)SlaveAddress));
+  return EFI_SUCCESS;
+
+fail2:
+  FreePool(TmpSlaveArray);
+fail1:
+  FreePool(Dev);
+
+  return Status;
+}
+
+/*
+ * It is called by I2cBus to enumerate devices on I2C bus. In this case,
+ * enumeration is based on PCD configuration - all slave addresses specified
+ * in PCD get their corresponding EFI_I2C_DEVICE structures here.
+ *
+ * After enumeration succeeds, Supported() function of drivers that installed
+ * DriverBinding protocol is called.
+ */
+STATIC
+EFI_STATUS
+EFIAPI
+A8kI2cEnumerate (
+  IN CONST EFI_I2C_ENUMERATE_PROTOCOL *This,
+  IN OUT CONST EFI_I2C_DEVICE         **Device
+  )
+{
+  UINT8 *DevicesPcd;
+  UINTN Index;
+  UINT8 NextDeviceAddress;
+
+  DevicesPcd = PcdGetPtr (PcdI2cSlaveAddresses);
+  if (*Device == NULL) {
+    if (DevicesPcd[0] != '\0')
+      A8kI2cAllocDevice (DevicesPcd[0], Device);
+    return EFI_SUCCESS;
+  } else {
+    for (Index = 0; DevicesPcd[Index] != '\0'; Index++) {
+      if (DevicesPcd[Index] == (*Device)->DeviceIndex) {
+  NextDeviceAddress = DevicesPcd[Index + 1];
+  if (NextDeviceAddress != '\0') {
+    A8kI2cAllocDevice(NextDeviceAddress, Device);
+    return EFI_SUCCESS;
+  }
+  break;
+      }
+    }
+    *Device = NULL;
+    return EFI_SUCCESS;
+  }
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+A8kI2cEnableConf (
+  IN CONST EFI_I2C_BUS_CONFIGURATION_MANAGEMENT_PROTOCOL *This,
+  IN UINTN                                               I2cBusConfiguration,
+  IN EFI_EVENT                                           Event      OPTIONAL,
+  IN EFI_STATUS                                          *I2cStatus OPTIONAL
+  )
+{
+  if (I2cStatus != NULL)
+    I2cStatus = EFI_SUCCESS;
+  if (Event != NULL)
+    gBS->SignalEvent(Event);
+  return EFI_SUCCESS;
 }

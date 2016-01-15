@@ -139,6 +139,8 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   INF EmbeddedPkg/ResetRuntimeDxe/ResetRuntimeDxe.inf
   INF EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
   INF EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
+  INF OpenPlatformPkg/Drivers/I2c/A8kI2cDxe/A8kI2cDxe.inf
+  INF MdeModulePkg/Bus/I2c/I2cDxe/I2cDxe.inf
 
   # Multiple Console IO support
   INF MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
