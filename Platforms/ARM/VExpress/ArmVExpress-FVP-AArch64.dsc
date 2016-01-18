@@ -79,6 +79,10 @@
   #  It could be set FALSE to save size.
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutGopSupport|TRUE
 
+!ifdef ARM_FVP_GICV3_WITH_V2_LEGACY
+  gArmTokenSpaceGuid.PcdArmGicV3WithV2Legacy|TRUE
+!endif
+
 [PcdsFixedAtBuild.common]
   gArmPlatformTokenSpaceGuid.PcdFirmwareVendor|"ARM Fixed Virtual Platform"
   gEmbeddedTokenSpaceGuid.PcdEmbeddedPrompt|"ARM-FVP"
