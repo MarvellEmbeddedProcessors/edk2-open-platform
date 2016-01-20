@@ -45,7 +45,9 @@
 
   ArmPlatformSysConfigLib|ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressSysConfigLib/ArmVExpressSysConfigLib.inf
   NorFlashPlatformLib|ArmPlatformPkg/ArmVExpressPkg/Library/NorFlashArmVExpressLib/NorFlashArmVExpressLib.inf
+!ifdef EDK2_ENABLE_PL111
   LcdPlatformLib|ArmPlatformPkg/ArmVExpressPkg/Library/PL111LcdArmVExpressLib/PL111LcdArmVExpressLib.inf
+!endif
 
   TimerLib|ArmPkg/Library/ArmArchTimerLib/ArmArchTimerLib.inf
 
@@ -140,8 +142,10 @@
   ## PL031 RealTimeClock
   gArmPlatformTokenSpaceGuid.PcdPL031RtcBase|0x1C170000
 
+!ifdef EDK2_ENABLE_PL111
   ## PL111 Versatile Express Motherboard controller
   gArmPlatformTokenSpaceGuid.PcdPL111LcdBase|0x1C1F0000
+!endif
 
   ## PL180 MMC/SD card controller
   gArmPlatformTokenSpaceGuid.PcdPL180SysMciRegAddress|0x1C010048
@@ -167,7 +171,11 @@
   gArmPlatformTokenSpaceGuid.PcdDefaultBootArgument|L"console=ttyAMA0 earlycon=pl011,0x1c090000 debug user_debug=31 loglevel=9"
 
   # Use the serial console (ConIn & ConOut) and the Graphic driver (ConOut)
+!ifdef EDK2_ENABLE_PL111
   gArmPlatformTokenSpaceGuid.PcdDefaultConOutPaths|L"VenHw(D3987D4B-971A-435F-8CAF-4967EB627241)/Uart(38400,8,N,1)/VenPcAnsi();VenHw(407B4008-BF5B-11DF-9547-CF16E0D72085)"
+!else
+  gArmPlatformTokenSpaceGuid.PcdDefaultConOutPaths|L"VenHw(D3987D4B-971A-435F-8CAF-4967EB627241)/Uart(38400,8,N,1)/VenPcAnsi();"
+!endif
   gArmPlatformTokenSpaceGuid.PcdDefaultConInPaths|L"VenHw(D3987D4B-971A-435F-8CAF-4967EB627241)/Uart(38400,8,N,1)/VenPcAnsi()"
 
   #
@@ -287,7 +295,9 @@
   ArmPlatformPkg/Drivers/NorFlashDxe/NorFlashDxe.inf
 !endif
   ArmPkg/Drivers/TimerDxe/TimerDxe.inf
+!ifdef EDK2_ENABLE_PL111
   ArmPlatformPkg/Drivers/LcdGraphicsOutputDxe/PL111LcdGraphicsOutputDxe.inf
+!endif
   ArmPlatformPkg/Drivers/SP805WatchdogDxe/SP805WatchdogDxe.inf
 
   # SMBIOS Support
