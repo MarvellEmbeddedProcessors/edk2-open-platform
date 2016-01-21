@@ -164,7 +164,7 @@ FvNameGuid         = 73dcb643-3862-4904-9076-a94af1890243
   #
   # UEFI application
   #
-  INF ShellBinPkg/UefiShell/UefiShell.inf
+  INF ShellPkg/Application/Shell/Shell.inf
 
   #
   # Bds
