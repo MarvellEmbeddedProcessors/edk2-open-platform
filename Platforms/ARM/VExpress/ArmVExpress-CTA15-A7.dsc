@@ -74,6 +74,7 @@
 ################################################################################
 
 [PcdsFeatureFlag.common]
+  gArmTokenSpaceGuid.PcdNormalMemoryNonshareableOverride|TRUE
   gArmPlatformTokenSpaceGuid.PcdSystemMemoryInitializeInSec|TRUE
   gArmPlatformTokenSpaceGuid.PcdSendSgiToBringUpSecondaryCores|TRUE
 
