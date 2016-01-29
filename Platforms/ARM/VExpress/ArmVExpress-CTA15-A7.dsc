@@ -286,4 +286,6 @@
   # Bds
   #
   MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
-  ArmPlatformPkg/Bds/Bds.inf
+  MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe.inf
+  MdeModulePkg/Universal/SetupBrowserDxe/SetupBrowserDxe.inf
+  IntelFrameworkModulePkg/Universal/BdsDxe/BdsDxe.inf
