@@ -31,34 +31,40 @@
 #
 
 [Defines]
-  DEC_SPECIFICATION              = 0x00010005
-  PACKAGE_NAME                   = OpenPlatformPkg
-  PACKAGE_GUID                   = c372916e-83ad-4b2a-8410-bbc31bd9e68f
-  PACKAGE_VERSION                = 0.1
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = A8kEeprom
+  FILE_GUID                      = 59fc3843-d8d4-40aa-ae07-38967138509c
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = A8kEepromInitialise
 
-################################################################################
-#
-# Include Section - list of Include Paths that are provided by this package.
-#                   Comments are used for Keywords and Module Types.
-#
-# Supported Module Types:
-#  BASE SEC PEI_CORE PEIM DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER DXE_SAL_DRIVER UEFI_DRIVER UEFI_APPLICATION
-#
-################################################################################
+[Sources.common]
+  A8kEeprom.c
 
-[Includes]
-  Include
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  ArmPlatformPkg/ArmPlatformPkg.dec
+  ArmPkg/ArmPkg.dec
+  OpenPlatformPkg/Platforms/Marvell/Armada7040/Armada7040.dec
 
-[Guids.common]
-  gArmada7040TokenSpaceGuid	     = { 0xc372916e, 0x83ad, 0x4b2a, { 0x84, 0x10, 0xbb, 0xc3, 0x1b, 0xd9, 0xe6, 0x8f } }
-  gMarvellTokenSpaceGuid	     = { 0xf995c6c8, 0xbc9b, 0x4e93, { 0xbd, 0xcf, 0x49, 0x90, 0xc6, 0xe7, 0x8c, 0x7f } }
-
-[PcdsFixedAtBuild.common]
-  gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0 }|VOID*|0x40000005
-  gMarvellTokenSpaceGuid.PcdEepromI2cAddresses|{ 0 }|VOID*|0x40000009
-  gMarvellTokenSpaceGuid.PcdI2cBaseAddress|0|UINT64|0x135
-  gMarvellTokenSpaceGuid.PcdTclkFrequency|0|UINT32|0x137
+[LibraryClasses]
+  IoLib
+  PcdLib
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  UefiLib
+  UefiDriverEntryPoint
+  UefiBootServicesTableLib
 
 [Protocols]
-  gEfiEepromProtocolGuid               = { 0xcd728a1f, 0x45b5, 0x4feb, { 0x98, 0xc8, 0x31, 0x3d, 0xa8, 0x11, 0x74, 0x62 }}
+  gEfiI2cIoProtocolGuid
+  gEfiDriverBindingProtocolGuid
+  gEfiEepromProtocolGuid
 
+[Pcd]
+  gMarvellTokenSpaceGuid.PcdEepromI2cAddresses
+
+[Depex]
+  TRUE

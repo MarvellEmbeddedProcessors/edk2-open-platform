@@ -367,7 +367,8 @@
   gArmTokenSpaceGuid.PcdArmScr|0x531
 
   # Marvell Pcds
-  gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0x50, 0x57 }
+  gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0x50, 0x57, 0x60  }
+  gMarvellTokenSpaceGuid.PcdEepromI2cAddresses|{ 0x50, 0x57 }
   gMarvellTokenSpaceGuid.PcdI2cBaseAddress|0xF0511000
   gMarvellTokenSpaceGuid.PcdTclkFrequency|200000000
 
@@ -407,6 +408,7 @@
   # Platform drivers
   OpenPlatformPkg/Drivers/I2c/A8kI2cDxe/A8kI2cDxe.inf
   MdeModulePkg/Bus/I2c/I2cDxe/I2cDxe.inf
+  OpenPlatformPkg/Drivers/I2c/Devices/A8kEeprom/A8kEeprom.inf
 
   MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf
