@@ -24,35 +24,6 @@
 #
 ################################################################################
 
-[FD.FVP_AARCH64_EFI_SEC]
-BaseAddress   = 0x00000000|gArmTokenSpaceGuid.PcdFdBaseAddress  # The base address of the Firmware in SecureROM.
-Size          = 0x04000000|gArmTokenSpaceGuid.PcdFdSize         # The size in bytes of the device (64MiB).
-ErasePolarity = 1
-
-# This one is tricky, it must be: BlockSize * NumBlocks = Size
-BlockSize     = 0x00001000
-NumBlocks     = 0x4000
-
-################################################################################
-#
-# Following are lists of FD Region layout which correspond to the locations of different
-# images within the flash device.
-#
-# Regions must be defined in ascending order and may not overlap.
-#
-# A Layout Region start with a eight digit hex offset (leading "0x" required) followed by
-# the pipe "|" character, followed by the size of the region, also in hex with the leading
-# "0x" characters. Like:
-# Offset|Size
-# PcdOffsetCName|PcdSizeCName
-# RegionType <FV, DATA, or FILE>
-#
-################################################################################
-
-0x00000000|0x00080000
-gArmTokenSpaceGuid.PcdSecureFvBaseAddress|gArmTokenSpaceGuid.PcdSecureFvSize
-FV = FVMAIN_SEC
-
 [FD.FVP_AARCH64_EFI]
 !ifdef ARM_FVP_RUN_NORFLASH
 BaseAddress   = 0x08000000|gArmTokenSpaceGuid.PcdFdBaseAddress  # The base address of the Firmware in Flash0.
@@ -80,29 +51,6 @@ FV = FVMAIN_COMPACT
 # module statements.
 #
 ################################################################################
-
-[FV.FVMAIN_SEC]
-FvBaseAddress      = 0x0  # Secure ROM
-FvForceRebase      = TRUE
-FvAlignment        = 16
-ERASE_POLARITY     = 1
-MEMORY_MAPPED      = TRUE
-STICKY_WRITE       = TRUE
-LOCK_CAP           = TRUE
-LOCK_STATUS        = TRUE
-WRITE_DISABLED_CAP = TRUE
-WRITE_ENABLED_CAP  = TRUE
-WRITE_STATUS       = TRUE
-WRITE_LOCK_CAP     = TRUE
-WRITE_LOCK_STATUS  = TRUE
-READ_DISABLED_CAP  = TRUE
-READ_ENABLED_CAP   = TRUE
-READ_STATUS        = TRUE
-READ_LOCK_CAP      = TRUE
-READ_LOCK_STATUS   = TRUE
-
-  INF ArmPlatformPkg/Sec/Sec.inf
-
 
 [FV.FvMain]
 BlockSize          = 0x40

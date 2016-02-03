@@ -205,15 +205,6 @@
 [Components.common]
 
   #
-  # SEC
-  #
-  ArmPlatformPkg/Sec/Sec.inf {
-    <LibraryClasses>
-      # Use the implementation which set the Secure bits
-      ArmGicLib|ArmPkg/Drivers/ArmGic/ArmGicSecLib.inf
-  }
-
-  #
   # PEI Phase modules
   #
 !ifdef EDK2_SKIP_PEICORE
