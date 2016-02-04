@@ -13,3 +13,6 @@ Table of contents:
 3. Drivers guidelines
  eeprom - Drivers/EepromDriver.txt
  i2c - Drivers/I2cDriver.txt
+
+4. Commands
+ eeprom - Commands/Eeprom.txt
