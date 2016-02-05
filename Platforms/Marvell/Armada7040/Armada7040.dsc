@@ -28,6 +28,7 @@
 
 [LibraryClasses.common]
   ArmPlatformLib|OpenPlatformPkg/Platforms/Marvell/Armada7040/Library/Armada7040Lib/Armada7040Lib.inf
+  PinMuxLib|OpenPlatformPkg/Platforms/Marvell/Armada7040/Library/Armada7040PinMuxLib/Armada7040PinMuxLib.inf
 
 !if $(TARGET) == RELEASE
   DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
@@ -371,6 +372,23 @@
   gMarvellTokenSpaceGuid.PcdEepromI2cAddresses|{ 0x50, 0x57 }
   gMarvellTokenSpaceGuid.PcdI2cBaseAddress|0xF0511000
   gMarvellTokenSpaceGuid.PcdTclkFrequency|200000000
+
+  gMarvellTokenSpaceGuid.PcdApPinMuxChipCount|1
+
+  # APN806-Z1 MPP SET
+  gMarvellTokenSpaceGuid.PcdAp0PinMuxReverseFlag|TRUE
+  gMarvellTokenSpaceGuid.PcdAp0PinMuxBaseAddress|0xF06F008C
+  gMarvellTokenSpaceGuid.PcdAp0MppRegCount|2
+  gMarvellTokenSpaceGuid.PcdAp0MppSel0|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 }
+  gMarvellTokenSpaceGuid.PcdAp0MppSel1|{ 0x1, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0 }
+
+  # APN806-A0 MPP SET
+  #gMarvellTokenSpaceGuid.PcdAp0PinMuxReverseFlag|FALSE
+  #gMarvellTokenSpaceGuid.PcdAp0PinMuxBaseAddress|0xF06F4000
+  #gMarvellTokenSpaceGuid.PcdAp0MppRegCount|2
+  #gMarvellTokenSpaceGuid.PcdAp0MppSel0|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 }
+  #gMarvellTokenSpaceGuid.PcdAp0MppSel1|{ 0x1, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0 }
+  #gMarvellTokenSpaceGuid.PcdAp0MppSel2|{ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
 
 ################################################################################
 #

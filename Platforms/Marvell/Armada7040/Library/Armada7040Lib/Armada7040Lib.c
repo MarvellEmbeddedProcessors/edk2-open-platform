@@ -14,6 +14,7 @@
 
 #include <Library/ArmLib.h>
 #include <Library/ArmPlatformLib.h>
+#include <Library/PinMuxLib.h>
 #include <Ppi/ArmMpCoreInfo.h>
 
 
@@ -92,6 +93,7 @@ ArmPlatformInitialize (
 
   //TODO: Add basic platfrom initialization
 
+  PinMuxInitialize();
   return RETURN_SUCCESS;
 }
 

@@ -24,11 +24,13 @@
   MdeModulePkg/MdeModulePkg.dec
   ArmPkg/ArmPkg.dec
   ArmPlatformPkg/ArmPlatformPkg.dec
+  OpenPlatformPkg/Platforms/Marvell/Armada7040/Armada7040.dec
 
 [LibraryClasses]
   ArmLib
   DebugLib
   MemoryAllocationLib
+  PinMuxLib
 
 [Sources.common]
   Armada7040Lib.c
