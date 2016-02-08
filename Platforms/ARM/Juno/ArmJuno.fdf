@@ -198,6 +198,7 @@ FvNameGuid         = B73FE497-B92E-416e-8326-45AD0D270092
   # Juno platform driver
   #
   INF ArmPlatformPkg/ArmJunoPkg/Drivers/ArmJunoDxe/ArmJunoDxe.inf
+  INF SecurityPkg/RandomNumberGenerator/RngDxe/RngDxe.inf
 
   #
   # Bds
