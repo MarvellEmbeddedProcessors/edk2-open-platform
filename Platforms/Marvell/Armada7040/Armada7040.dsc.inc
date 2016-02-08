@@ -451,8 +451,10 @@
   IntelFrameworkModulePkg/Universal/BdsDxe/BdsDxe.inf
   #ArmPlatformPkg/Bds/Bds.inf
 
+  EmbeddedPkg/Drivers/FdtPlatformDxe/FdtPlatformDxe.inf
   # Legacy Linux Loader
   ArmPkg/Application/LinuxLoader/LinuxLoader.inf
+  MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
 
   # UEFI application (Shell Embedded Boot Loader)
   ShellPkg/Application/Shell/Shell.inf {
