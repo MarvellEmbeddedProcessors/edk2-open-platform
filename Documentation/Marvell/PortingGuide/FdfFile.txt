@@ -1,0 +1,42 @@
+FdfFile poritng guide - FV size
+-------------------------------
+
+In order to set intended Firmware Volume size, user has to increase limit set in
+platform Flash Description File (.fdf).
+All changes should be made in [FD section].
+Below is example for Armada7040 platforms.
+
+Excerpt from OpenPlatformPkg/Platform/Marvell/Armada/Armada7040.fdf (for clarity
+some comments were removed):
+
+  [FD.Armada7040_EFI]
+  BaseAddress   = 0x00000000|gArmTokenSpaceGuid.PcdFdBaseAddress
+  Size          = 0x00b00000|gArmTokenSpaceGuid.PcdFdSize
+  ErasePolarity = 1
+
+  # This one is tricky, it must be: BlockSize * NumBlocks = Size
+  BlockSize     = 0x00001000
+  NumBlocks     = 0xb00
+
+  0x00000000|0x00b00000
+  gArmTokenSpaceGuid.PcdFvBaseAddress|gArmTokenSpaceGuid.PcdFvSize
+  FV = FVMAIN_COMPACT
+
+Assuming that Firmware Volume size should be at least 0xe00000 MB, following 3
+changes should be made (marked with additional comments):
+
+  [FD.Armada7040_EFI]
+  BaseAddress   = 0x00000000|gArmTokenSpaceGuid.PcdFdBaseAddress
+  Size          = 0x00e00000|gArmTokenSpaceGuid.PcdFdSize  ## <-- Here set new FV size limit
+  ErasePolarity = 1
+
+  # This one is tricky, it must be: BlockSize * NumBlocks = Size
+  BlockSize     = 0x00001000
+  NumBlocks     = 0xe00  ## <-- Ass in comment two lines above, edit NumBlocks
+                         ## value regarding new size, such as
+                         ## NumBlocks * BlockSize = Size
+
+  0x00000000|0x00e00000 ## <-- Here set new FV size limit
+  gArmTokenSpaceGuid.PcdFvBaseAddress|gArmTokenSpaceGuid.PcdFvSize
+  FV = FVMAIN_COMPACT
+

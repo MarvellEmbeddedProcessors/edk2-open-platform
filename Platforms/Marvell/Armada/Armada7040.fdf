@@ -26,12 +26,12 @@
 
 [FD.Armada7040_EFI]
 BaseAddress   = 0x00000000|gArmTokenSpaceGuid.PcdFdBaseAddress  # The base address of the Firmware in NOR Flash.
-Size          = 0x00400000|gArmTokenSpaceGuid.PcdFdSize         # The size in bytes of the FLASH Device
+Size          = 0x00b00000|gArmTokenSpaceGuid.PcdFdSize         # The size in bytes of the FLASH Device
 ErasePolarity = 1
 
 # This one is tricky, it must be: BlockSize * NumBlocks = Size
 BlockSize     = 0x00001000
-NumBlocks     = 0x400
+NumBlocks     = 0xb00
 
 ################################################################################
 #
@@ -49,7 +49,7 @@ NumBlocks     = 0x400
 #
 ################################################################################
 
-0x00000000|0x00400000
+0x00000000|0x00b00000
 gArmTokenSpaceGuid.PcdFvBaseAddress|gArmTokenSpaceGuid.PcdFvSize
 FV = FVMAIN_COMPACT
 
@@ -143,7 +143,18 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
 
   # Legacy Linux Loader
   INF ArmPkg/Application/LinuxLoader/LinuxLoader.inf
+  INF MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
+  INF EmbeddedPkg/Drivers/FdtPlatformDxe/FdtPlatformDxe.inf
 
+FILE FREEFORM = 5807a6cc-a7e0-46b5-8e68-6ab0c221e950 {
+  SECTION RAW = OpenPlatformPkg/Platforms/Marvell/Armada7040/Binary/Image
+  SECTION UI = "Linux.efi"
+}
+
+FILE FREEFORM = 4807a6cc-a7e0-46b5-8e68-6ab0c221e950 {
+  SECTION RAW = OpenPlatformPkg/Platforms/Marvell/Armada7040/Binary/devicetree.dtb
+  SECTION UI = "devicetree.dtb"
+}
 
 # PEI phase firmware volume
 [FV.FVMAIN_COMPACT]
