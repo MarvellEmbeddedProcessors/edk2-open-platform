@@ -1,0 +1,36 @@
+EEPROM read/write commands
+--------------------------
+'eeprom' command provides support for basic EEPROM operations.
+
+Syntax
+------
+eeprom [read] [write] [list] [-m] [-c <Chip>] [-a <Address>] [-l <Length>]
+[-d <Data>] [-s <Source>]
+
+Usage
+-----
+One of the read/write/list modes must be specified. 'list' requires no other
+specifiers, while read/write always require Address, Length and Chip.
+read    - read from EEPROM
+write   - write Data to EEPROM, requires -d
+list    - list available EEPROM devices
+help	- show help
+-m      - transfer from/to RAM memory, requires -s
+Chip    - EEPROM unique identifier
+Address - address in EEPROM to read/write
+Data    - data to be written
+Length  - length of data to read/write/copy
+Source  - address of data in RAM to be copied
+
+Examples
+--------
+List devices:
+  eeprom list
+Read 16 bytes from address 0x0 in chip 0x57:
+  eeprom read -c 0x57 -a 0x0 -l 0x10
+Fill 16 bytes with 0xab at address 0x0 in chip 0x57:
+  eeprom write -c 0x57 -a 0x0 -l 0x10 -d 0xab
+Copy 8 bytes from 0x2000000 in RAM to EEPROM:
+  eeprom write -m -c 0x57 -a 0x0 -l 0x10 -s 0x2000000
+Copy 8 bytes from EEPROM to RAM:
+  eeprom read -m -c 0x57 -a 0x0 -l 0x10 -s 0x2000000

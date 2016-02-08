@@ -1,0 +1,49 @@
+MPP configuration
+-----------------
+Multi-Purpose Ports (MPP) are configurable through platform PCDs.
+In order to set desired pin multiplexing, .dsc file needs to be modificated.
+Following PCDs are available:
+
+  gMarvellTokenSpaceGuid.PcdApPinMuxChipCount
+
+Indicates how many APN806 and CP110 chips are placed on board. So far 1 of
+each is supported. PinMux Library is ready to support more after slight
+modification of the library and additional PCD declarations are needed in
+according .inf and .dec files.
+
+Every MPP PCD has <Name><X> part where
+ <Name> stands for chip type: APN806 ('Ap') or CP110 ('Cp')
+ <X> stands for chip ID - so far 0 is supported.
+Below is example for the first APN806 chip (Ap0).
+
+  gMarvellTokenSpaceGuid.PcdAp0ReverseFlag
+
+Indicates that register order is reversed.
+
+  gMarvellTokenSpaceGuid.PcdAp0PinMuxBaseAddress
+
+This is base address for MPP configuration register.
+
+  gMarvellTokenSpaceGuid.PcdAp0MppRegCount
+
+Defines how many MPP configuration registers (see below) are available.
+
+  gMarvellTokenSpaceGuid.PcdAp0MppSel0
+  gMarvellTokenSpaceGuid.PcdAp0MppSel1
+  gMarvellTokenSpaceGuid.PcdAp0MppSel2
+
+These mirror registers in hardware. Every register defines functions
+of 8 pins in ascending order.
+
+Examples
+--------
+#APN806-A0 MPP SET
+  gMarvellTokenSpaceGuid.PcdAp0PinMuxReverseFlag|FALSE
+  gMarvellTokenSpaceGuid.PcdAp0PinMuxBaseAddress|0xF06F4000
+  gMarvellTokenSpaceGuid.PcdAp0MppRegCount|3
+  gMarvellTokenSpaceGuid.PcdAp0MppSel0|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 }
+  gMarvellTokenSpaceGuid.PcdAp0MppSel1|{ 0x1, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdAp0MppSel2|{ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
+
+Set pin 6 and 7 to 0xa function:
+  gMarvellTokenSpaceGuid.PcdAp0MppSel0|{ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xa, 0xa }

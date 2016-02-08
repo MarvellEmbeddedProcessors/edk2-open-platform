@@ -1,0 +1,15 @@
+Booting Linux from UEFI
+-----------------------
+In order to boot Linux from UEFI EFI_STUB is used. EFI_STUB is part of
+Linux kernel that acts like UEFI application. It was appended to UEFI
+image as a part of FV filesystem.
+
+Usage
+-----
+Once UEFI is built from delivered branch, required Linux image and
+DTB file are attached. To run, boot UEFI and execute:
+  fs1:
+  Linux.efi dtb=armada.dtb console=ttyS0,115200
+
+Please note that in order to boot Linux psci must be disabled. It can be
+achieved by removing / disabling psci DTS node.

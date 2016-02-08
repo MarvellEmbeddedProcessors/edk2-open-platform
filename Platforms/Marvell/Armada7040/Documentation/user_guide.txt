@@ -1,0 +1,13 @@
+User Guide
+----------
+User guide for building, launching and using UEFI.
+
+Table of contents:
+1. Build instructions
+  build.txt
+2. Booting Linux Kernel
+  booting_linux.txt
+3. Commands
+  eeprom - commands/eeprom.txt
+4. Porting guide
+  pinmux - porting_guide/pinmux.txt
