@@ -130,6 +130,7 @@
   # LAN9118 Ethernet Driver
   gEmbeddedTokenSpaceGuid.PcdLan9118DxeBaseAddress|0x18000000
   gEmbeddedTokenSpaceGuid.PcdLan9118DefaultMacAddress|0x1215161822242628
+  gEmbeddedTokenSpaceGuid.PcdLan9118DefaultNegotiationTimeout|40000
 
   #
   # ARM General Interrupt Controller
