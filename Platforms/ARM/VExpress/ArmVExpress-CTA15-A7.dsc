@@ -167,6 +167,7 @@
 
   # Ethernet (SMSC LAN9118)
   gEmbeddedTokenSpaceGuid.PcdLan9118DxeBaseAddress|0x1A000000
+  gEmbeddedTokenSpaceGuid.PcdLan9118DefaultNegotiationTimeout|400000
 
   #
   # Define the device path to the FDT for the platform
