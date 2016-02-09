@@ -10,4 +10,5 @@ Table of contents:
 3. Commands
   eeprom - commands/eeprom.txt
 4. Porting guide
+  i2c - porting_guide/i2c.txt
   pinmux - porting_guide/pinmux.txt
