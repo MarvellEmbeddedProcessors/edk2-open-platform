@@ -65,6 +65,10 @@
   gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|10000000|UINT32|0x3
   gMarvellTokenSpaceGuid.PcdSpiTimeout|100000|UINT64|0x6
 
+  gMarvellTokenSpaceGuid.PcdSpiFlashAddressCycles|4|UINT32|0x11
+  gMarvellTokenSpaceGuid.PcdSpiFlashEraseSize|65536|UINT64|0x12
+  gMarvellTokenSpaceGuid.PcdSpiFlashPageSize|256|UINT32|0x13
+
 #MPP
   gMarvellTokenSpaceGuid.PcdApPinMuxChipCount|0|UINT32|0x30000001
 
