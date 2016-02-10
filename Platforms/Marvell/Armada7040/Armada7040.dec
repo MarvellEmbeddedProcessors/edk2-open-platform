@@ -68,6 +68,9 @@
   gMarvellTokenSpaceGuid.PcdSpiFlashAddressCycles|4|UINT32|0x11
   gMarvellTokenSpaceGuid.PcdSpiFlashEraseSize|65536|UINT64|0x12
   gMarvellTokenSpaceGuid.PcdSpiFlashPageSize|256|UINT32|0x13
+  gMarvellTokenSpaceGuid.PcdSpiFlashMode|0|UINT8|0x14
+  gMarvellTokenSpaceGuid.PcdSpiFlashCs|0|UINT32|0x15
+  gMarvellTokenSpaceGuid.PcdSpiFlashId|0x20BA21|UINT32|0x17
 
 #MPP
   gMarvellTokenSpaceGuid.PcdApPinMuxChipCount|0|UINT32|0x30000001
