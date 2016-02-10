@@ -59,6 +59,12 @@
   gMarvellTokenSpaceGuid.PcdI2cBaseAddress|0|UINT64|0x135
   gMarvellTokenSpaceGuid.PcdTclkFrequency|0|UINT32|0x137
 
+#SPI
+  gMarvellTokenSpaceGuid.PcdSpiRegBase|0xF0510600|UINT32|0x1
+  gMarvellTokenSpaceGuid.PcdSpiTimerClock|200000000|UINT32|0x2
+  gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|10000000|UINT32|0x3
+  gMarvellTokenSpaceGuid.PcdSpiTimeout|100000|UINT64|0x6
+
 #MPP
   gMarvellTokenSpaceGuid.PcdApPinMuxChipCount|0|UINT32|0x30000001
 
