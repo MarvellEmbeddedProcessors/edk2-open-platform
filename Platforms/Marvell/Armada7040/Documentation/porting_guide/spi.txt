@@ -1,0 +1,211 @@
+1. Introduction
+---------------
+**A8kSpiDxe** driver implements EFI_SPI_MASTER_PROTOCOL in order to manage SPI
+controller on Marvell A8k boards. It exposes below functionalities:
+ - create and setup SPI slaves
+ - raw transfer over SPI bus
+
+2. A8kSpiDxe driver design
+
+  2.1 EFI_SPI_MASTER_PROTOCOL
+  -----------------------
+  First member of SPI_MASTER protocol is Init function, implemented for SPI
+  master controller initialization. 
+
+  ->Init()
+
+    //
+    //Initializes the host controller to execute SPI commands.
+    //
+
+    param[IN]   This			Pointer to the EFI_SPI_MASTER_PROTOCOL
+					instance
+
+    return      EFI_SUCCESS             Opcode initialization on the SPI host
+					controller completed.
+    return      EFI_ACCESS_DENIED       The SPI configuration interface is
+					locked.
+    return      EFI_OUT_OF_RESOURCES    Not enough resource available to
+					initialize the device.
+    return      EFI_DEVICE_ERROR        Device error, operation failed.
+
+  ********
+
+  SPI devices (slaves) do not support any kind of automatic discovery or
+  enumaration, so every device needs manual configuration, which may be done
+  with SetupDevice function.
+
+    ->SetupDevice()
+
+    //
+    //Allocate and zero all fields in the SPI_DEVICE struct. Set the chip
+    //select, max frequency and transfer mode supported by slave device.
+    //
+
+    param[IN]   Cs			Chip select ID of the slave chip.
+    param[IN]   MaxFreq			Maximum SCK rate in Hz.
+    param[IN]   Mode			Clock polarity and clock phase.
+
+    return      *SPI_DEVICE		Pointer to new allocated struct
+					SPI_DEVICE.
+    return      NULL			NULL pointer if any eroor occured.
+
+    ********
+
+  Developers have to destroy all created SPI device structs (with FreeDevice
+  function) in order to prevent from memory leak.
+
+    ->FreeDevice()
+
+    //
+    //Free any memory associated with a SPI device.
+    //
+
+    param[in]   SpiDev			Pointer to the SPI_DEVICE struct.
+
+    return      EFI_SUCCESS		Memory fried succesfully.
+    return      EFI_DEVICE_ERROR        Device error, operation failed.
+
+    ********
+
+  Transfer function allows write/read raw bytes over SPI bus.
+
+    ->Transfer()
+
+    //
+    //Perform transfer over SPI bus
+    //
+    param[in]     This			Pointer to the EFI_SPI_MASTER_PROTOCOL
+					instance.
+    param[in]     Slave			Pointer to the SPI_DEVICE struct.
+    param[in]     DataByteCount		Number of bytes in the data portion of
+					the SPI cycle.
+    param[in]     DataOut		Pointer to caller-allocated buffer
+					containing the data to send.
+    param[out]    DataIn		Pointer to caller-allocated buffer
+					where received data will be placed.
+    param[in]     Flag			Flags which indicate state of CS line
+					during/after transfer (see file
+					Drivers/Spi/Devices/A8kSpiFlash.h)
+
+    return        EFI_SUCCESS		Memory fried succesfully.
+    return        EFI_DEVICE_ERROR	Device error, operation failed.
+
+    *********
+
+  When working with SPI devices it is often necessary to perform "command and
+  address" transactions. It may be done via ReadWrite function.
+
+    ->ReadWrite()
+
+    //
+    //Perform two steps transactions. First write Command, then read/write
+    //buffer
+    //
+
+    param[in]     This			Pointer to the EFI_SPI_MASTER_PROTOCOL
+					instance.
+    param[in]     Slave			Pointer to the SPI_DEVICE struct.
+    param[in]     Cmd			Pointer to caller-allocated buffer
+					containing the command to send.
+    param[in]     CmdSize		Size of command (in bytes).
+    param[in]     DataOut		Pointer to caller-allocated buffer
+					containing the data to send.
+    param[out]    DataIn		Pointer to caller-allocated buffer
+					where received data will be placed.
+    param[in]     DataSize		Number of bytes in the data portion of
+					the SPI cycle.
+
+3. A8kSpiFlash driver design
+----------------------------
+**A8kSpiFlash** driver implements EFI_SPI_FLASH_PROTOCOL and consume
+EFI_SPI_MASTER_PROTOCOL for transactions on SPI bus. It exposes below
+functionalities:
+ - probe SPI bus in order to detect supported SPI flash
+ - read/write/erase SPI flash operations
+ - update (first erase then write) SPI flash
+
+  3.1 EFI_SPI_FLASH_PROTOCOL
+  --------------------------
+  First member of SPI_FLASH protocol is Init function, implemented for SPI
+  flash initialization.
+
+    ->Init()
+
+    //
+    //Initializes SPI flash for communications.
+    //
+
+    param[IN]   This			Pointer to the EFI_SPI_FLASH_PROTOCOL
+          				instance
+    param[IN]   SpiDev			Pointer to the SPI_DEVICE struct.
+
+    return      EFI_SUCCESS		Opcode initialization on the SPI host
+          				controller completed.
+    return      EFI_ACCESS_DENIED	The SPI configuration interface is
+          				locked.
+    return      EFI_OUT_OF_RESOURCES	Not enough resource available to
+          				initialize the device.
+    return      EFI_DEVICE_ERROR	Device error, operation failed.
+
+    ********
+
+  Main protocol function - Execute - is an interface for preparing transfers
+  with SPI devices. Supported commands are defined in enum SPI_COMMAND
+  (Drivers/Spi/Devices/A8kSpiFlash.h)
+
+    -> Execute()
+
+    //
+    // Execute SPI commands.
+    //
+
+    param[in]   This			Pointer to the EFI_SPI_PROTOCOL
+					instance.
+    param[in]   SpiDev			Pointer to the SPI_DEVICE struct.
+    param[in]   Command			Command to execute.
+    param[in]   Address			When operating on SPI flash memory it
+					is offset inside memory chip where
+					operation will be done.
+    param[in]   DataByteCount		Number of bytes in the data portion of
+					the SPI cycle.
+    param[in]   Buffer			Pointer to caller-allocated buffer
+					containing the data
+					received or sent during the SPI cycle.
+
+    return 	EFI_SUCCESS		Command succeed.
+    return	EFI_INVALID_PARAMETER	The parameters specified are not valid.
+    exception 	EFI_UNSUPPORTED		Command not supported.
+    return 	EFI_DEVICE_ERROR	Device error, command aborts
+					abnormally.
+
+3. Configure communication with SPI device via PCDs
+---------------------------------------------------
+There is set of PCDs used for configurating SPI controller
+ - PcdSpiTimerClock         - frequency (in Hz) of tclk
+ - PcdSpiMaxFrequency       - max SCLK line frequency (in Hz) (max transfer
+			      frequency)
+ - PcdSpiDefaultMode        - default SCLK mode (see SPI_MODE enum in
+			      Drivers/Spi/A8kSpi.h)
+
+There is set of PCDs used for configuring communication between A8kSpi driver
+and SPI flash.
+ - PcdSpiFlashAddressCycles - size of SPI flash address in bytes (3 or 4)
+ - PcdSpiFlashEraseSize     - size of minimal erase block in bytes
+ - PcdSpiFlashPageSize      - size of SPI flash page
+
+4. Adding new SPI slave device drivers
+--------------------------------------
+In order to support SPI slave device other than SPI flash from Armada7040
+platorm, new driver should
+be created. Required steps follow.
+
+  1. Create driver directory (OpenPlatformPkg/Drivers/Spi/Devices/...).
+  2. Create stubs of .inf and .c files (SpiFlash files are a reference),
+  include .inf file in platform .dsc and .fdf files.
+  3. Consume EFI_SPI_MASTER_PROTOCOL.
+    3.1 Use SetupDevice method with proper CS and Mode values.
+    3.2 After performing transfer operations on device, free memory with
+	FreeDevice method.
+  4. Implement core functionality of driver
+  5. (not mandatory) Produce/consume additional protocols.

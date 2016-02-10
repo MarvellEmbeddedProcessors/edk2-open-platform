@@ -1,0 +1,38 @@
+SF (SPI Flash) command
+----------------------
+sf UEFI command is used to write/read/erase SPI flash memory.
+
+Syntax
+------
+sf [help] [probe] [read] [write] [erase] [update] [-d] [-a <Address>]
+[-o <Offset>] [-l <Length>]
+
+Usage
+-----
+On of the read/write/erase modes must be specified. Erase requires only Offset
+and Length, but read, write and update requires Offset, Length and Address.
+probe  - check response from SPI flash by reading its ID
+read   - read from SPI flash Offset into RAM Address
+write  - write data from RAM Address into SPI flash at Offset
+erase  - erase data in SPI flash at Offset (must be 0x10000 aligned)
+update - update data from RAM Address into SPI flash at Offset
+-d     - dump memory read from SPI flash, only with read mode
+help   - show help massage
+Address - address in RAM of data to be copied/stored (in hex)
+Offset  - offset in SPI flash to read/write (in hex)
+Length  - number of bytes to read/write/erase (in hex or dec)
+
+Examples
+--------
+Check if there is response from SPI flash
+  sf probe
+Read 32 bytes from 0xe00000 of SPI flash into RAM at address 0x100000
+  sf read -a 0x100000 -o 0xe00000 -l 32
+Read 0x20 bytes from 0x200000 of SPI flash into RAM at address 0x300000 and print output
+  sf read -a 0x300000 -o 0x200000 -l 0x20 -d
+Erase 0x10000 bytes from offset 0x100000 of SPI flash
+  sf erase -o 0x100000 -l 0x100000
+Write 16 bytes from 0x200000 at RAM into SPI flash at address 0x4000000
+  sf write -a 0x200000 -o 0x4000000 -l 16
+Update 100 bytes from 0x100000 at RAM in SPI flash at address 0xe00000
+  sf update -a 0x100000 -o 0xe00000 -l 100

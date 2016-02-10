@@ -9,6 +9,8 @@ Table of contents:
   booting_linux.txt
 3. Commands
   eeprom - commands/eeprom.txt
+  sf     - commands/sf.txt
 4. Porting guide
   i2c - porting_guide/i2c.txt
   pinmux - porting_guide/pinmux.txt
+  spi    - porting_guide/spi.txt
