@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/PrintLib.h>
 #include <Library/ShellCEntryLib.h>
 #include <Library/HiiLib.h>
+#include <Library/FileHandleLib.h>
 
 #include "../../Drivers/Spi/Devices/A8kSpiFlash.h"
 
@@ -60,6 +61,7 @@ STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
   {L"-a", TypeValue},
   {L"-l", TypeValue},
   {L"-o", TypeValue},
+  {L"-f", TypeValue},
   {L"-d", TypeFlag},
   {L"read", TypeFlag},
   {L"write", TypeFlag},
@@ -92,10 +94,11 @@ SfUsage (
 {
   Print (L"\nBasic SPI command\n"
 	 "sf [probe] [read] [write] [erase] [update] -a <Address>"
-	 "-l <Length> -o <Offset>\n\n"
-	 "Length  - Number of bytes to send\n"
-	 "Address - Address in RAM to store/load data\n"
-	 "Offset  - Offset from beggining of SPI flash to store/load data\n"
+	 "-l <Length> -o <Offset> -f <FileName>\n\n"
+	 "Length   - Number of bytes to send\n"
+	 "Address  - Address in RAM to store/load data\n"
+	 "Offset   - Offset from beginning of SPI flash to store/load data\n"
+	 "FileName - Name of file to read/write/update data into/from flash\n"
   );
 }
 
@@ -147,18 +150,40 @@ ShellCommandRunSpiFlash (
   SPI_DEVICE		*Slave;
   LIST_ENTRY		*CheckPackage;
   EFI_PHYSICAL_ADDRESS	Address, Offset;
+  SHELL_FILE_HANDLE	FileHandle = NULL;
   SPI_COMMAND		Cmd;
   SPI_MODE		Mode;
-  UINTN			Iterator;
-  UINT32		ByteCount, Cs;
-  UINT8			*Buffer;
-  CHAR16		*ProblemParam;
+  UINTN			Iterator, ByteCount, FileSize;
+  UINT64		OpenMode;
+  UINT32		Cs;
+  UINT8			*Buffer, *FileBuffer;
+  CHAR16		*ProblemParam, *FileName;
   CONST CHAR16		*ValueStr;
   BOOLEAN		ReadFlag, WriteFlag, EraseFlag, UpdateFlag, ProbeFlag;
-  BOOLEAN		DumpFlag;
+  BOOLEAN		DumpFlag, FileMode;
 
   Mode = PcdGet8 (PcdSpiFlashMode);
   Cs   = PcdGet32 (PcdSpiFlashCs);
+
+  Status = gBS->LocateProtocol (
+    &gEfiSpiFlashProtocolGuid,
+    NULL,
+    (VOID **)&SpiFlashProtocol
+  );
+  if (EFI_ERROR(Status)) {
+    Print (L"SPI flash protocol error!\n");
+    return SHELL_ABORTED;
+  }
+
+  Status = gBS->LocateProtocol (
+    &gEfiSpiMasterProtocolGuid,
+    NULL,
+    (VOID **)&SpiMasterProtocol
+  );
+  if (EFI_ERROR(Status)) {
+    Print (L"SPI Master protocol error!\n");
+    return SHELL_ABORTED;
+  }
 
   Status = ShellInitialize ();
   if (EFI_ERROR (Status)) {
@@ -182,25 +207,42 @@ ShellCommandRunSpiFlash (
   EraseFlag = ShellCommandLineGetFlag (CheckPackage, L"erase");
   UpdateFlag = ShellCommandLineGetFlag (CheckPackage, L"update");
   DumpFlag  = ShellCommandLineGetFlag (CheckPackage, L"-d");
+  FileMode = ShellCommandLineGetFlag (CheckPackage, L"-f");
 
   if (InitFlag && !ProbeFlag) {
     Print (L"Please run sf probe\n");
     return EFI_SUCCESS;
   }
 
-  ValueStr = ShellCommandLineGetValue (CheckPackage, L"-l");
-  if (ValueStr == NULL && !ProbeFlag) {
-    Print (L"No lenght parameter!\n");
-    return SHELL_ABORTED;
-  } else {
-    ByteCount = ShellStrToUintn (ValueStr);
-    if (ByteCount < 0) {
-      Print (L"\nWrong parameter Length = %s!\n", ValueStr);
+  Slave = SpiMasterProtocol->SetupDevice (SpiMasterProtocol, Cs, Mode);
+    if (Slave == NULL) {
+      Print(L"Cannot allocate SPI device!\n");
+    }
+
+  if (ProbeFlag) {
+    Status = FlashProbe (Slave);
+    if (EFI_ERROR(Status)) {
       return SHELL_ABORTED;
+    } else {
+      return Status;
+    }
+  }
+
+  if (!((WriteFlag || UpdateFlag) && FileMode)) {
+    ValueStr = ShellCommandLineGetValue (CheckPackage, L"-l");
+    if (ValueStr == NULL) {
+      Print (L"No lenght parameter!\n");
+      return SHELL_ABORTED;
+    } else {
+      ByteCount = ShellStrToUintn (ValueStr);
+      if (ByteCount < 0) {
+        Print (L"\nWrong parameter Length = %s!\n", ValueStr);
+        return SHELL_ABORTED;
+      }
     }
   }
   
-  if (ReadFlag || WriteFlag || UpdateFlag) {
+  if ((ReadFlag || WriteFlag || UpdateFlag) && !FileMode) {
     ValueStr = ShellCommandLineGetValue (CheckPackage, L"-a");
     if (ValueStr == NULL) {
       Print (L"No address parameter!\n");
@@ -210,7 +252,7 @@ ShellCommandRunSpiFlash (
   }
 
   ValueStr = ShellCommandLineGetValue (CheckPackage, L"-o");
-  if (ValueStr == NULL && !ProbeFlag) {
+  if (ValueStr == NULL) {
     Print (L"No offset Parameter!\n");
     return SHELL_ABORTED;
   } else {
@@ -221,37 +263,60 @@ ShellCommandRunSpiFlash (
     }
   }
 
-  Status = gBS->LocateProtocol (
-    &gEfiSpiFlashProtocolGuid,
-    NULL,
-    (VOID **)&SpiFlashProtocol
-  );
-  if (Status != EFI_SUCCESS) {
-    Print (L"Flash protocol error!\n");
-    return SHELL_ABORTED;
-  }
-
-  Status = gBS->LocateProtocol (
-    &gEfiSpiMasterProtocolGuid,
-    NULL,
-    (VOID **)&SpiMasterProtocol
-  );
-  if (Status != EFI_SUCCESS) {
-    Print (L"Master protocol error!\n");
-    return SHELL_ABORTED;
-  }
-
-  Slave = SpiMasterProtocol->SetupDevice (SpiMasterProtocol, Cs, Mode);
-    if (Slave == NULL) {
-      Print(L"Cannot allocate SPI device!\n");
-    }
-
-  if (ProbeFlag) {
-    Status = FlashProbe (Slave);
-    if (Status != EFI_SUCCESS) {
+  if (FileMode) {
+    ValueStr = ShellCommandLineGetValue (CheckPackage, L"-f");
+    if (ValueStr == NULL) {
+      Print (L"No FileName parameter!\n");
       return SHELL_ABORTED;
     } else {
+      FileName = (CHAR16 *) ValueStr;
+      Status = ShellIsFile (FileName);
+      if (EFI_ERROR(Status) && !ReadFlag) {
+        Print (L"Wrong FileName parameter!\n");
+        return SHELL_ABORTED;
+      }
+    }
+
+    if (WriteFlag || UpdateFlag) {
+      OpenMode = EFI_FILE_MODE_READ;
+    } else if (ReadFlag) {
+      OpenMode = EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE;
+    }
+
+    Status = ShellOpenFileByName (FileName, &FileHandle, OpenMode, 0);
+    if (EFI_ERROR (Status)) {
+      Print (L"Cannot open file\n");
+    }
+
+    Status = FileHandleSetPosition(FileHandle, 0);
+    if (EFI_ERROR(Status)) {
+      Print (L"Cannot set file position to first byte\n");
       return Status;
+    }
+
+    if (WriteFlag || UpdateFlag) {
+      Status = FileHandleGetSize (FileHandle, &FileSize);
+      if (EFI_ERROR (Status)) {
+        Print (L"Cannot get file size\n");
+      }
+      ByteCount = (UINTN) FileSize;
+    }
+
+    FileBuffer = AllocateZeroPool ((UINTN) ByteCount);
+    if (FileBuffer == NULL) {
+      Print (L"Cannot allocate memory\n");
+      goto Error_Close_File;
+    }
+
+    if (WriteFlag || UpdateFlag) {
+      Status = FileHandleRead (FileHandle, &ByteCount, FileBuffer);
+      if (EFI_ERROR (Status)) {
+        Print (L"Read from file error\n");
+        goto Error_Free_Buffer;
+      } else if (ByteCount != (UINTN) FileSize) {
+        Print (L"Not whole file read. Abort\n");
+        goto Error_Free_Buffer;
+      }
     }
   }
 
@@ -272,6 +337,9 @@ ShellCommandRunSpiFlash (
   }
 
   Buffer = (UINT8 *) Address;
+  if (FileMode) {
+    Buffer = FileBuffer;
+  }
 
   Status = SpiFlashProtocol->Execute (
     Slave,
@@ -314,7 +382,29 @@ ShellCommandRunSpiFlash (
     }
   }
 
+  if (FileMode) {
+    if (ReadFlag) {
+      Status = FileHandleWrite (FileHandle, &ByteCount, FileBuffer);
+      if (EFI_ERROR(Status)) {
+        Print (L"Error while writing into file\n");
+        goto Error_Free_Buffer;
+      }
+    }
+
+    FreePool (FileBuffer);
+
+    if (FileHandle != NULL) {
+      ShellCloseFile (&FileHandle);
+    }
+  }
+
   return EFI_SUCCESS;
+
+Error_Free_Buffer:
+  FreePool (FileBuffer);
+Error_Close_File:
+  ShellCloseFile (&FileHandle);
+  return SHELL_ABORTED;
 }
 
 EFI_STATUS
