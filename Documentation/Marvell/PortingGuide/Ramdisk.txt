@@ -1,0 +1,7 @@
+Ramdisk configuration
+---------------------
+There is one PCD available for Ramdisk configuration
+
+  gMarvellTokenSpaceGuid.PcdRamDiskSize
+
+Defines size of Ramdisk
