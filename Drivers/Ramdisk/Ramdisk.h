@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 1999, 2000
  * Intel Corporation.
+ * Copyright (C) 2016 Marvell International Ltd.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -36,93 +37,106 @@
  *
  */
 
+#define END_DEVICE_PATH_LENGTH (sizeof(EFI_DEVICE_PATH_PROTOCOL))
+
 #pragma pack(1)
 
-/* RAM disk device path structure.
- * Will use Vendor Messaging Device Path.
- */
-typedef struct sRAM_DISK_DEVICE_PATH
-{
-	EFI_DEVICE_PATH Header;
-	EFI_GUID        Guid;
-	UINT8			DiskId[8];
-	EFI_DEVICE_PATH EndDevicePath;
+//
+// RAM disk device path structure.
+// Will use Vendor Messaging Device Path.
+//
+typedef struct {
+  EFI_DEVICE_PATH_PROTOCOL Header;
+  EFI_GUID                 Guid;
+  UINT8                    DiskId[8];
+  EFI_DEVICE_PATH_PROTOCOL EndDevicePath;
 } RAM_DISK_DEVICE_PATH;
 
-/* FAT16 boot sector definition */
-typedef struct sBOOTSEC
-{
-	UINT8  BS_jmpBoot[3];
-	UINT8  BS_OEMName[8];
-	UINT16 BPB_BytsPerSec;
-	UINT8  BPB_SecPerClus;
-	UINT16 BPB_RsvdSecCnt;
-	UINT8  BPB_NumFATs;
-	UINT16 BPB_RootEntCnt;
-	UINT16 BPB_TotSec16;
-	UINT8  BPB_Media;
-	UINT16 BPB_FATSz16;
-	UINT16 BPB_SecPerTrk;
-	UINT16 BPB_NumHeads;
-	UINT32 BPB_HiddSec;
-	UINT32 BPB_TotSec32;
-	UINT8  BS_DrvNum;
-	UINT8  BS_Reserved1;
-	UINT8  BS_BootSig;
-	UINT32 BS_VolID;
-	UINT8  BS_VolLab[11];
-	UINT8  BS_FilSysType[8];
-	UINT8  BS_Code[448];
-	UINT16 BS_Sig;
+// FAT16 boot sector definition
+typedef struct {
+  UINT8  BS_jmpBoot[3];
+  UINT8  BS_OEMName[8];
+  UINT16 BPB_BytsPerSec;
+  UINT8  BPB_SecPerClus;
+  UINT16 BPB_RsvdSecCnt;
+  UINT8  BPB_NumFATs;
+  UINT16 BPB_RootEntCnt;
+  UINT16 BPB_TotSec16;
+  UINT8  BPB_Media;
+  UINT16 BPB_FATSz16;
+  UINT16 BPB_SecPerTrk;
+  UINT16 BPB_NumHeads;
+  UINT32 BPB_HiddSec;
+  UINT32 BPB_TotSec32;
+  UINT8  BS_DrvNum;
+  UINT8  BS_Reserved1;
+  UINT8  BS_BootSig;
+  UINT32 BS_VolID;
+  UINT8  BS_VolLab[11];
+  UINT8  BS_FilSysType[8];
+  UINT8  BS_Code[448];
+  UINT16 BS_Sig;
 } BOOTSEC;
 
 #pragma pack()
 
-/* structure for total sectors to cluster size lookup */
-typedef struct sFAT16TABLE
-{
-	UINTN size;
-	UINT8  spc;
+// structure for total sectors to cluster size lookup
+typedef struct {
+  UINTN Size;
+  UINT8 Spc;
 } FAT16TABLE;
 
-#define PBLOCK_DEVICE_SIGNATURE 'rdsk'
+#define PBLOCK_DEVICE_SIGNATURE SIGNATURE_32  ('r', 'd', 's', 'k')
 
-/* Ramdisk device info structure */
-typedef struct sRAM_DISKDEV
-{
-	UINTN                Signature;
-	EFI_HANDLE           Handle;
-	EFI_PHYSICAL_ADDRESS Start;
-	EFI_BLOCK_IO         BlkIo;
-	EFI_BLOCK_IO_MEDIA   Media;
-	EFI_DEVICE_PATH      *DevicePath;
+// Ramdisk device info structure
+typedef struct {
+  UINTN                    Signature;
+  EFI_HANDLE               Handle;
+  EFI_PHYSICAL_ADDRESS     Start;
+  EFI_BLOCK_IO_PROTOCOL    BlkIo;
+  EFI_BLOCK_IO_MEDIA       Media;
+  EFI_DEVICE_PATH_PROTOCOL *DevicePath;
 } RAM_DISK_DEV;
 
-/* Macro finds the device info structure given a ramdisk BlkIo interface */
-#define RAM_DISK_FROM_THIS(a) CR(a,RAM_DISK_DEV,BlkIo,PBLOCK_DEVICE_SIGNATURE)
+// Macro finds the device info structure given a ramdisk BlkIo interface
+#define RAM_DISK_FROM_THIS(a) CR(a, RAM_DISK_DEV, BlkIo, PBLOCK_DEVICE_SIGNATURE)
 
-/* Prototypes */
-EFI_STATUS InitializeRamDiskDriver(
-	IN EFI_HANDLE       ImageHandle,
-	IN EFI_SYSTEM_TABLE *SystemTable);
+// Prototypes
+EFI_STATUS
+InitializeRamDiskDriver (
+  IN EFI_HANDLE       ImageHandle,
+  IN EFI_SYSTEM_TABLE *SystemTable
+);
 
-STATIC VOID FormatRamdisk(
-	IN VOID*  pStart,
-	IN UINT32 Size);
+STATIC
+VOID
+FormatRamdisk (
+  IN VOID*  Start,
+  IN UINT32 Size
+);
 
-STATIC EFI_STATUS RamDiskReadBlocks(
-	IN EFI_BLOCK_IO *This,
-	IN UINT32       MediaId,
-	IN EFI_LBA      LBA,
-	IN UINTN        BufferSize,
-	OUT VOID        *Buffer);
+STATIC
+EFI_STATUS
+RamDiskReadBlocks (
+  IN EFI_BLOCK_IO *This,
+  IN UINT32       MediaId,
+  IN EFI_LBA      LBA,
+  IN UINTN        BufferSize,
+  OUT VOID        *Buffer
+);
 
-STATIC EFI_STATUS RamDiskWriteBlocks(
-	IN EFI_BLOCK_IO *This,
-	IN UINT32       MediaId,
-	IN EFI_LBA      LBA,
-	IN UINTN        BufferSize,
-	IN VOID         *Buffer);
+STATIC
+EFI_STATUS
+RamDiskWriteBlocks (
+  IN EFI_BLOCK_IO *This,
+  IN UINT32       MediaId,
+  IN EFI_LBA      LBA,
+  IN UINTN        BufferSize,
+  IN VOID         *Buffer
+);
 
-STATIC EFI_STATUS RamDiskFlushBlocks(
-	IN EFI_BLOCK_IO *This);
+STATIC
+EFI_STATUS
+RamDiskFlushBlocks (
+  IN EFI_BLOCK_IO *This
+);
