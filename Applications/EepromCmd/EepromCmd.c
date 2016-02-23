@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/PrintLib.h>
+#include <Library/HiiLib.h>
 
 #include <Library/UefiLib.h>
 #include <Library/ShellCEntryLib.h>
@@ -53,6 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Protocol/Eeprom.h>
 
 CONST CHAR16 gShellEepromFileName[] = L"ShellCommand";
+EFI_HANDLE gShellEepromHiiHandle = NULL;
 
 STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
   {L"-a", TypeValue},
@@ -323,9 +325,18 @@ EepromCmdConstructor (
   )
 {
 
+  gShellEepromHiiHandle = NULL;
+
+  gShellEepromHiiHandle = HiiAddPackages (
+			  &gShellEepromHiiGuid, gImageHandle,
+			  EepromToolShellStrings, NULL
+			  );
+  if (gShellEepromHiiHandle == NULL) {
+    return EFI_DEVICE_ERROR;
+  }
   ShellCommandRegisterCommandName (
      L"eeprom", ShellCommandRunEeprom, ShellCommandGetManFileNameEeprom, 0,
-     L"eeprom", TRUE , NULL, STRING_TOKEN (0x0011)
+     L"eeprom", TRUE , gShellEepromHiiHandle, STRING_TOKEN (STR_GET_HELP_EEPROM)
      );
 
   return EFI_SUCCESS;
@@ -339,5 +350,8 @@ EepromCmdDestructor (
   )
 {
 
+  if (gShellEepromHiiHandle != NULL) {
+    HiiRemovePackages (gShellEepromHiiHandle);
+  }
   return EFI_SUCCESS;
 }

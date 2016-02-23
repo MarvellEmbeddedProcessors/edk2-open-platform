@@ -45,6 +45,7 @@
 #
 [Sources]
   EepromCmd.c
+  EepromCmd.uni
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -68,3 +69,6 @@
 
 [Protocols]
  gEfiEepromProtocolGuid
+
+[Guids]
+  gShellEepromHiiGuid
