@@ -41,19 +41,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/ShellCommandLib.h>
 #include <Library/ShellLib.h>
 #include <Library/UefiLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/PrintLib.h>
-#include <Library/UefiLib.h>
 #include <Library/ShellCEntryLib.h>
-#include <Guid/ShellLibHiiGuid.h>
 #include <Library/HiiLib.h>
 
 #include "../../Drivers/Spi/Devices/A8kSpiFlash.h"
 
 EFI_SPI_FLASH_PROTOCOL *SpiFlashProtocol;
 EFI_SPI_MASTER_PROTOCOL *SpiMasterProtocol;
+
 CONST CHAR16 gShellSpiFlashFileName[] = L"ShellCommand";
+EFI_HANDLE gShellSfHiiHandle = NULL;
 
 BOOLEAN InitFlag = 1;
 
@@ -228,7 +227,7 @@ ShellCommandRunSpiFlash (
     (VOID **)&SpiFlashProtocol
   );
   if (Status != EFI_SUCCESS) {
-    Print (L"FLASH PROT error!\n");
+    Print (L"Flash protocol error!\n");
     return SHELL_ABORTED;
   }
 
@@ -325,10 +324,19 @@ SpiFlashConstructor (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
+  gShellSfHiiHandle = NULL;
+
+  gShellSfHiiHandle = HiiAddPackages (
+			  &gShellSfHiiGuid, gImageHandle,
+			  SpiFlashShellStrings, NULL
+			  );
+  if (gShellSfHiiHandle == NULL) {
+    return EFI_DEVICE_ERROR;
+  }
 
   ShellCommandRegisterCommandName (
      L"sf", ShellCommandRunSpiFlash, ShellCommandGetManFileNameSpiFlash, 0,
-     L"sf", TRUE , NULL, STRING_TOKEN (0)
+     L"sf", TRUE , gShellSfHiiHandle, STRING_TOKEN (STR_GET_HELP_SF)
      );
 
   return EFI_SUCCESS;
@@ -342,5 +350,8 @@ SpiFlashDestructor (
   )
 {
 
+  if (gShellSfHiiHandle != NULL) {
+    HiiRemovePackages (gShellSfHiiHandle);
+  }
   return EFI_SUCCESS;
 }

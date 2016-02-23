@@ -23,6 +23,7 @@
 
 [Sources]
  SpiFlashCmd.c
+ SpiFlashCmd.uni
 
 [Packages]
  MdePkg/MdePkg.dec
@@ -53,3 +54,6 @@
 [Protocols]
  gEfiSpiFlashProtocolGuid
  gEfiSpiMasterProtocolGuid
+
+[Guids]
+ gShellSfHiiGuid
