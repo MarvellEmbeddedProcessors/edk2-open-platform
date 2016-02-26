@@ -1,31 +1,34 @@
+#Copyright (C) 2016 Marvell International Ltd.
 #
-#  Copyright (C) Marvell International Ltd. and its affiliates
+#Marvell BSD License Option
 #
-#  This program and the accompanying materials
-#  are licensed and made available under the terms and conditions of the BSD License
-#  which accompanies this distribution.  The full text of the license may be found at
-#  http://opensource.org/licenses/bsd-license.php
+#If you received this File from Marvell, you may opt to use, redistribute and/or
+#modify this File under the following licensing terms.
+#Redistribution and use in source and binary forms, with or without modification,
+#are permitted provided that the following conditions are met:
 #
-#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+# * Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
 #
+# * Redistributions in binary form must reproduce the above copyright
+# notice, this list of conditions and the following disclaimer in the
+# documentation and/or other materials provided with the distribution.
 #
-################################################################################
+# * Neither the name of Marvell nor the names of its contributors may be
+# used to endorse or promote products derived from this software without
+# specific prior written permission.
 #
-# Defines Section - statements that will be processed to create a Makefile.
+#THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+#ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+#ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+#ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-################################################################################
-[Defines]
-  PLATFORM_NAME                  = Armada7040
-  PLATFORM_GUID                  = c372916e-83ad-4b2a-8410-bbc31bd9e68f
-  PLATFORM_VERSION               = 0.1
-  DSC_SPECIFICATION              = 0x00010005
-  OUTPUT_DIRECTORY               = Build/$(PLATFORM_NAME)
-  SUPPORTED_ARCHITECTURES        = AARCH64
-  BUILD_TARGETS                  = DEBUG|RELEASE
-  SKUID_IDENTIFIER               = DEFAULT
-  FLASH_DEFINITION               = OpenPlatformPkg/Platforms/Marvell/Armada7040/Armada7040.fdf
-
 [LibraryClasses.common]
   ArmPlatformLib|OpenPlatformPkg/Platforms/Marvell/Armada7040/Library/Armada7040Lib/Armada7040Lib.inf
   PinMuxLib|OpenPlatformPkg/Platforms/Marvell/Armada7040/Library/Armada7040PinMuxLib/Armada7040PinMuxLib.inf
@@ -150,7 +153,7 @@
   PerformanceLib|MdeModulePkg/Library/PeiPerformanceLib/PeiPerformanceLib.inf
   PlatformPeiLib|ArmPlatformPkg/PlatformPei/PlatformPeiLib.inf
   ArmGicArchLib|ArmPkg/Library/ArmGicArchSecLib/ArmGicArchSecLib.inf
-  
+
   # Trustzone Support
   ArmTrustedMonitorLib|ArmPlatformPkg/Library/ArmTrustedMonitorLibNull/ArmTrustedMonitorLibNull.inf
 
@@ -259,7 +262,7 @@
 !endif
   gArmPlatformTokenSpaceGuid.PcdCoreCount|4
   # gArmPlatformTokenSpaceGuid.PcdClusterCount|1
-  
+
   ## Use the serial console (ConIn & ConOut) and the Graphic driver (ConOut)
   gArmPlatformTokenSpaceGuid.PcdDefaultConOutPaths|L"VenHw(D3987D4B-971A-435F-8CAF-4967EB627241)/Uart(115200,8,N,1)/VenPcAnsi()"
   gArmPlatformTokenSpaceGuid.PcdDefaultConInPaths|L"VenHw(D3987D4B-971A-435F-8CAF-4967EB627241)/Uart(115200,8,N,1)/VenPcAnsi()"
@@ -282,7 +285,7 @@
 
   ## Trustzone enable (to make the transition from EL3 to NS EL2 in ArmPlatformPkg/Sec)
   gArmTokenSpaceGuid.PcdTrustzoneSupport|TRUE
-  
+
   # ARM Generic Interrupt Controller
   gArmTokenSpaceGuid.PcdGicDistributorBase|0xF0210000
   gArmTokenSpaceGuid.PcdGicInterruptInterfaceBase|0xF0220000
@@ -367,29 +370,6 @@
   gArmTokenSpaceGuid.PcdSystemMemorySize|0x40000000
   gArmTokenSpaceGuid.PcdArmScr|0x531
 
-  # Marvell Pcds
-  gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0x50, 0x57, 0x60  }
-  gMarvellTokenSpaceGuid.PcdEepromI2cAddresses|{ 0x50, 0x57 }
-  gMarvellTokenSpaceGuid.PcdI2cBaseAddress|0xF0511000
-  gMarvellTokenSpaceGuid.PcdTclkFrequency|200000000
-
-  gMarvellTokenSpaceGuid.PcdApPinMuxChipCount|1
-
-  # APN806-Z1 MPP SET
-  gMarvellTokenSpaceGuid.PcdAp0PinMuxReverseFlag|TRUE
-  gMarvellTokenSpaceGuid.PcdAp0PinMuxBaseAddress|0xF06F008C
-  gMarvellTokenSpaceGuid.PcdAp0MppRegCount|2
-  gMarvellTokenSpaceGuid.PcdAp0MppSel0|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 }
-  gMarvellTokenSpaceGuid.PcdAp0MppSel1|{ 0x1, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0 }
-
-  # APN806-A0 MPP SET
-  #gMarvellTokenSpaceGuid.PcdAp0PinMuxReverseFlag|FALSE
-  #gMarvellTokenSpaceGuid.PcdAp0PinMuxBaseAddress|0xF06F4000
-  #gMarvellTokenSpaceGuid.PcdAp0MppRegCount|2
-  #gMarvellTokenSpaceGuid.PcdAp0MppSel0|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 }
-  #gMarvellTokenSpaceGuid.PcdAp0MppSel1|{ 0x1, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0 }
-  #gMarvellTokenSpaceGuid.PcdAp0MppSel2|{ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
-
 ################################################################################
 #
 # Components Section - list of all EDK II Modules needed by this Platform
@@ -417,10 +397,6 @@
       NULL|MdeModulePkg/Library/DxeCrc32GuidedSectionExtractLib/DxeCrc32GuidedSectionExtractLib.inf
   }
 
-# SPI
-  OpenPlatformPkg/Drivers/Spi/A8kSpiDxe.inf
-  OpenPlatformPkg/Drivers/Spi/Devices/A8kSpiFlash.inf
-
   # Architectural Protocols DXE
   ArmPkg/Drivers/CpuDxe/CpuDxe.inf
   ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
@@ -431,6 +407,9 @@
   OpenPlatformPkg/Drivers/I2c/A8kI2cDxe/A8kI2cDxe.inf
   MdeModulePkg/Bus/I2c/I2cDxe/I2cDxe.inf
   OpenPlatformPkg/Drivers/I2c/Devices/A8kEeprom/A8kEeprom.inf
+
+  OpenPlatformPkg/Drivers/Spi/A8kSpiDxe.inf
+  OpenPlatformPkg/Drivers/Spi/Devices/A8kSpiFlash.inf
 
   MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf

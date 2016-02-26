@@ -58,23 +58,24 @@
   gShellFUpdateHiiGuid		     = { 0x9b5d2176, 0x590a, 0x49db, { 0x89, 0x5d, 0x4a, 0x70, 0xfe, 0xad, 0xbe, 0x24 } }
 
 [PcdsFixedAtBuild.common]
-  gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0 }|VOID*|0x40000005
-  gMarvellTokenSpaceGuid.PcdEepromI2cAddresses|{ 0 }|VOID*|0x40000009
-  gMarvellTokenSpaceGuid.PcdI2cBaseAddress|0|UINT64|0x135
-  gMarvellTokenSpaceGuid.PcdTclkFrequency|0|UINT32|0x137
+#I2C
+  gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0 }|VOID*|0x3000001
+  gMarvellTokenSpaceGuid.PcdEepromI2cAddresses|{ 0 }|VOID*|0x3000002
+  gMarvellTokenSpaceGuid.PcdI2cBaseAddress|0|UINT64|0x3000011
+  gMarvellTokenSpaceGuid.PcdTclkFrequency|0|UINT32|0x3000013
 
 #SPI
-  gMarvellTokenSpaceGuid.PcdSpiRegBase|0xF0510600|UINT32|0x1
-  gMarvellTokenSpaceGuid.PcdSpiTimerClock|200000000|UINT32|0x2
-  gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|10000000|UINT32|0x3
-  gMarvellTokenSpaceGuid.PcdSpiTimeout|100000|UINT64|0x6
+  gMarvellTokenSpaceGuid.PcdSpiRegBase|0|UINT32|0x3000014
+  gMarvellTokenSpaceGuid.PcdSpiTimerClock|0|UINT32|0x3000015
+  gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|0|UINT32|0x3000016
+  gMarvellTokenSpaceGuid.PcdSpiTimeout|0|UINT64|0x3000017
 
-  gMarvellTokenSpaceGuid.PcdSpiFlashAddressCycles|4|UINT32|0x11
-  gMarvellTokenSpaceGuid.PcdSpiFlashEraseSize|65536|UINT64|0x12
-  gMarvellTokenSpaceGuid.PcdSpiFlashPageSize|256|UINT32|0x13
-  gMarvellTokenSpaceGuid.PcdSpiFlashMode|0|UINT8|0x14
-  gMarvellTokenSpaceGuid.PcdSpiFlashCs|0|UINT32|0x15
-  gMarvellTokenSpaceGuid.PcdSpiFlashId|0x20BA21|UINT32|0x17
+  gMarvellTokenSpaceGuid.PcdSpiFlashAddressCycles|0|UINT32|0x3000018
+  gMarvellTokenSpaceGuid.PcdSpiFlashEraseSize|0|UINT64|0x3000019
+  gMarvellTokenSpaceGuid.PcdSpiFlashPageSize|0|UINT32|0x3000020
+  gMarvellTokenSpaceGuid.PcdSpiFlashMode|0|UINT8|0x3000021
+  gMarvellTokenSpaceGuid.PcdSpiFlashCs|0|UINT32|0x3000022
+  gMarvellTokenSpaceGuid.PcdSpiFlashId|0|UINT32|0x3000023
 
 #RamDisk
   gMarvellTokenSpaceGuid.PcdRamDiskSize|64|UINT32|0x200 #64MB

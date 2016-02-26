@@ -8,16 +8,17 @@ Build instructions
 Set GCC48_AARCH64_PREFIX to path to your cross compiler, i.e.:
   export GCC48_AARCH64_PREFIX=/opt/gcc-linaro-aarch64-none-elf-4.8-2014.04_linux/bin/aarch64-none-elf-
 4. Run edk2-build.sh:
-  ./edk2-build.sh -b DEBUG -p Armada7040
+  ./edk2-build.sh -b DEBUG -p <platform>
+Replace <platform> with "Apn806" or "Armada7040_rz".
 5. Copy image into TFTP location:
-  scp Build/Armada7040/DEBUG_GCC48/FV/ARMADA7040_EFI.bin /tftp_directory
+  scp Build/<platform>/DEBUG_GCC48/FV/<platform>_EFI.bin /tftp_directory
 
 Apart from .bin file, .img file is created for SPI Flash.
 
 Launching in U-Boot
 -------------------
 After these steps UEFI can be launched from U-Boot:
-  tftpboot 0x0 ARMADA7040_EFI.bin
+  tftpboot 0x0 <platform>_EFI.bin
   go 0x0
 
 Embedding files in FV
