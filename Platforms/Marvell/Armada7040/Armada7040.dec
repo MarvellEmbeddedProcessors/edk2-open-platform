@@ -89,6 +89,25 @@
   gMarvellTokenSpaceGuid.PcdAp0MppSel0|{ 0 }|VOID*|0x30000005
   gMarvellTokenSpaceGuid.PcdAp0MppSel1|{ 0 }|VOID*|0x30000006
   gMarvellTokenSpaceGuid.PcdAp0MppSel2|{ 0 }|VOID*|0x30000007
+  gMarvellTokenSpaceGuid.PcdAp0MppSel3|{ 0 }|VOID*|0x30000008
+  gMarvellTokenSpaceGuid.PcdAp0MppSel4|{ 0 }|VOID*|0x30000009
+  gMarvellTokenSpaceGuid.PcdAp0MppSel5|{ 0 }|VOID*|0x30000010
+  gMarvellTokenSpaceGuid.PcdAp0MppSel6|{ 0 }|VOID*|0x30000011
+  gMarvellTokenSpaceGuid.PcdAp0MppSel7|{ 0 }|VOID*|0x30000012
+
+  gMarvellTokenSpaceGuid.PcdCpPinMuxChipCount|0|UINT32|0x40000001
+
+  gMarvellTokenSpaceGuid.PcdCp0PinMuxReverseFlag|FALSE|BOOLEAN|0x40000002
+  gMarvellTokenSpaceGuid.PcdCp0PinMuxBaseAddress|0|UINT64|0x40000003
+  gMarvellTokenSpaceGuid.PcdCp0MppRegCount|0|UINT32|0x40000004
+  gMarvellTokenSpaceGuid.PcdCp0MppSel0|{ 0 }|VOID*|0x40000005
+  gMarvellTokenSpaceGuid.PcdCp0MppSel1|{ 0 }|VOID*|0x40000006
+  gMarvellTokenSpaceGuid.PcdCp0MppSel2|{ 0 }|VOID*|0x40000007
+  gMarvellTokenSpaceGuid.PcdCp0MppSel3|{ 0 }|VOID*|0x40000008
+  gMarvellTokenSpaceGuid.PcdCp0MppSel4|{ 0 }|VOID*|0x40000009
+  gMarvellTokenSpaceGuid.PcdCp0MppSel5|{ 0 }|VOID*|0x40000010
+  gMarvellTokenSpaceGuid.PcdCp0MppSel6|{ 0 }|VOID*|0x40000011
+  gMarvellTokenSpaceGuid.PcdCp0MppSel7|{ 0 }|VOID*|0x40000012
 
 [Protocols]
   gEfiEepromProtocolGuid               = { 0xcd728a1f, 0x45b5, 0x4feb, { 0x98, 0xc8, 0x31, 0x3d, 0xa8, 0x11, 0x74, 0x62 }}

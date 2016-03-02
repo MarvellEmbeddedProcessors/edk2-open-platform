@@ -40,11 +40,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/IoLib.h>
 
 #define MPP_PIN_VAL(pin,func)    (((func) & 0xf) << ((pin) * 4))
+#define MPP_MAX_REGS             8
 #define MPP_PINS_PER_REG         8
 
 #define AP_CHIP_NAME             Ap
-#define AP_MAX_CHIPS             4
-#define AP_MPP_MAX_REGS          3
+#define CP_CHIP_NAME             Cp
+#define MAX_CHIPS                1
 
 #define GET_PCD_PTR(chip,id,num) _PCD_GET_MODE_PTR_##Pcd##chip##id##MppSel##num
 #define GET_REG_COUNT(chip,id)   _PCD_GET_MODE_32_Pcd##chip##id##MppRegCount
@@ -56,6 +57,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   RegCount[id] = GET_REG_COUNT(chip,id);       \
 /* Fall through */                             \
   switch (RegCount[id]) {                      \
+  case 8:                                      \
+    MppRegPcd[id][7] = GET_PCD_PTR(chip,id,7); \
+  case 7:                                      \
+    MppRegPcd[id][6] = GET_PCD_PTR(chip,id,6); \
+  case 6:                                      \
+    MppRegPcd[id][5] = GET_PCD_PTR(chip,id,5); \
+  case 5:                                      \
+    MppRegPcd[id][4] = GET_PCD_PTR(chip,id,4); \
+  case 4:                                      \
+    MppRegPcd[id][3] = GET_PCD_PTR(chip,id,3); \
   case 3:                                      \
     MppRegPcd[id][2] = GET_PCD_PTR(chip,id,2); \
   case 2:                                      \
@@ -107,18 +118,37 @@ EFI_STATUS
 PinMuxInitialize (
   )
 {
-  UINTN BaseAddr[AP_MAX_CHIPS], RegCount[AP_MAX_CHIPS];
-  BOOLEAN ReverseFlag[AP_MAX_CHIPS];
-  UINT8 *MppRegPcd[AP_MAX_CHIPS][AP_MPP_MAX_REGS];
-  UINT32 i, ApChipCount;
+  UINTN BaseAddr[MAX_CHIPS], RegCount[MAX_CHIPS];
+  BOOLEAN ReverseFlag[MAX_CHIPS];
+  UINT8 *MppRegPcd[MAX_CHIPS][MPP_MAX_REGS];
+  UINT32 i, ApChipCount, CpChipCount;
 
+  /* Obtain number of APN806 and CP110 chips in the system */
   ApChipCount = PcdGet32 (PcdApPinMuxChipCount);
+  CpChipCount = PcdGet32 (PcdCpPinMuxChipCount);
 
   /* Read all needed PCD for MPP configuration for APN806 chips */
   GetMppPcd(AP_CHIP_NAME, 0);
 
-  for (i = 0; i < AP_MAX_CHIPS; i++) {
+  for (i = 0; i < MAX_CHIPS; i++) {
     if (i == ApChipCount)
+      break;
+    if (ReverseFlag[i]) {
+      SetRegisterValueInv (RegCount[i], MppRegPcd[i], BaseAddr[i]);
+    } else {
+      SetRegisterValue (RegCount[i], MppRegPcd[i], BaseAddr[i]);
+    }
+  }
+
+  if (CpChipCount == 0) {
+    return EFI_SUCCESS;
+  }
+
+  /* Process CP110 chips' MPP configuration */
+  GetMppPcd(CP_CHIP_NAME, 0);
+
+  for (i = 0; i < MAX_CHIPS; i++) {
+    if (i == CpChipCount)
       break;
     if (ReverseFlag[i]) {
       SetRegisterValueInv (RegCount[i], MppRegPcd[i], BaseAddr[i]);

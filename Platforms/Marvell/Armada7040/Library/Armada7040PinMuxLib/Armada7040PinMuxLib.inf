@@ -57,6 +57,7 @@
 
 [FixedPcd]
   gMarvellTokenSpaceGuid.PcdApPinMuxChipCount
+  gMarvellTokenSpaceGuid.PcdCpPinMuxChipCount
 
   gMarvellTokenSpaceGuid.PcdAp0PinMuxReverseFlag
   gMarvellTokenSpaceGuid.PcdAp0PinMuxBaseAddress
@@ -64,3 +65,20 @@
   gMarvellTokenSpaceGuid.PcdAp0MppSel0
   gMarvellTokenSpaceGuid.PcdAp0MppSel1
   gMarvellTokenSpaceGuid.PcdAp0MppSel2
+  gMarvellTokenSpaceGuid.PcdAp0MppSel3
+  gMarvellTokenSpaceGuid.PcdAp0MppSel4
+  gMarvellTokenSpaceGuid.PcdAp0MppSel5
+  gMarvellTokenSpaceGuid.PcdAp0MppSel6
+  gMarvellTokenSpaceGuid.PcdAp0MppSel7
+
+  gMarvellTokenSpaceGuid.PcdCp0PinMuxReverseFlag
+  gMarvellTokenSpaceGuid.PcdCp0PinMuxBaseAddress
+  gMarvellTokenSpaceGuid.PcdCp0MppRegCount
+  gMarvellTokenSpaceGuid.PcdCp0MppSel0
+  gMarvellTokenSpaceGuid.PcdCp0MppSel1
+  gMarvellTokenSpaceGuid.PcdCp0MppSel2
+  gMarvellTokenSpaceGuid.PcdCp0MppSel3
+  gMarvellTokenSpaceGuid.PcdCp0MppSel4
+  gMarvellTokenSpaceGuid.PcdCp0MppSel5
+  gMarvellTokenSpaceGuid.PcdCp0MppSel6
+  gMarvellTokenSpaceGuid.PcdCp0MppSel7
