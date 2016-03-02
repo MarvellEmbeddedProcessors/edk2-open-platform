@@ -49,6 +49,7 @@
   CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
   PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
   PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
+  FileExplorerLib|MdeModulePkg/Library/FileExplorerLib/FileExplorerLib.inf
 
 # Basic UEFI services libraries
   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
@@ -391,6 +392,7 @@
   OpenPlatformPkg/Drivers/Spi/SpiDxe.inf
   OpenPlatformPkg/Drivers/Spi/Devices/MvSpiFlash.inf
 
+  MdeModulePkg/Universal/Disk/RamDiskDxe/RamDiskDxe.inf
   MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf
   MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf
