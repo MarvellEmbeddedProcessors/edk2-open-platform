@@ -86,3 +86,6 @@
   gMarvellTokenSpaceGuid.PcdSpiFlashEraseSize|65536
   gMarvellTokenSpaceGuid.PcdSpiFlashPageSize|256
   gMarvellTokenSpaceGuid.PcdSpiFlashId|0x20BA21
+
+  #RamDisk
+  gMarvellTokenSpaceGuid.PcdRamDiskSize|64 #64MB
