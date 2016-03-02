@@ -75,6 +75,9 @@
   gMarvellTokenSpaceGuid.PcdSpiFlashCs|0|UINT32|0x15
   gMarvellTokenSpaceGuid.PcdSpiFlashId|0x20BA21|UINT32|0x17
 
+#RamDisk
+  gMarvellTokenSpaceGuid.PcdRamDiskSize|64|UINT32|0x200 #64MB
+
 #MPP
   gMarvellTokenSpaceGuid.PcdApPinMuxChipCount|0|UINT32|0x30000001
 

@@ -144,6 +144,7 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   INF OpenPlatformPkg/Drivers/I2c/Devices/A8kEeprom/A8kEeprom.inf
   INF OpenPlatformPkg/Drivers/Spi/A8kSpiDxe.inf
   INF OpenPlatformPkg/Drivers/Spi/Devices/A8kSpiFlash.inf
+  INF OpenPlatformPkg/Drivers/Ramdisk/Ramdisk.inf
 
   # Multiple Console IO support
   INF MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
