@@ -117,6 +117,18 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   INF MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
   INF MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
 
+  # Network support
+  INF MdeModulePkg/Universal/Network/SnpDxe/SnpDxe.inf
+  INF MdeModulePkg/Universal/Network/DpcDxe/DpcDxe.inf
+  INF MdeModulePkg/Universal/Network/MnpDxe/MnpDxe.inf
+  INF MdeModulePkg/Universal/Network/VlanConfigDxe/VlanConfigDxe.inf
+  INF MdeModulePkg/Universal/Network/ArpDxe/ArpDxe.inf
+  INF MdeModulePkg/Universal/Network/Dhcp4Dxe/Dhcp4Dxe.inf
+  INF MdeModulePkg/Universal/Network/Ip4Dxe/Ip4Dxe.inf
+  INF MdeModulePkg/Universal/Network/Mtftp4Dxe/Mtftp4Dxe.inf
+  INF MdeModulePkg/Universal/Network/Udp4Dxe/Udp4Dxe.inf
+  INF MdeModulePkg/Universal/Network/Tcp4Dxe/Tcp4Dxe.inf
+
   # Multiple Console IO support
   INF MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
   INF MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
