@@ -31,6 +31,7 @@
 #
 [LibraryClasses.common]
   ArmPlatformLib|OpenPlatformPkg/Platforms/Marvell/Armada/Library/Armada7040Lib/Armada7040Lib.inf
+  MppLib|OpenPlatformPkg/Platforms/Marvell/Library/MppLib/MppLib.inf
 
   DebugLib|MdePkg/Library/BaseDebugLibSerialPort/BaseDebugLibSerialPort.inf
   UncachedMemoryAllocationLib|ArmPkg/Library/UncachedMemoryAllocationLib/UncachedMemoryAllocationLib.inf
