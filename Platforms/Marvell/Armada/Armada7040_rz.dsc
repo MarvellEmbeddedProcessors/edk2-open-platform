@@ -46,3 +46,40 @@
   FLASH_DEFINITION               = OpenPlatformPkg/Platforms/Marvell/Armada/Armada7040.fdf
 
 !include Armada.dsc.inc
+
+################################################################################
+#
+# Pcd Section - list of all EDK II PCD Entries defined by this Platform
+#
+################################################################################
+[PcdsFixedAtBuild.common]
+  #MPP
+  gMarvellTokenSpaceGuid.PcdMppChipCount|2
+
+  # APN806-Z1 MPP SET
+  gMarvellTokenSpaceGuid.PcdChip0MppReverseFlag|TRUE
+  gMarvellTokenSpaceGuid.PcdChip0MppBaseAddress|0xF06F008C
+  gMarvellTokenSpaceGuid.PcdChip0MppRegCount|2
+  gMarvellTokenSpaceGuid.PcdChip0MppSel0|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 }
+  gMarvellTokenSpaceGuid.PcdChip0MppSel1|{ 0x1, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0 }
+
+  # APN806-A0 MPP SET
+  #gMarvellTokenSpaceGuid.PcdChip0MppReverseFlag|FALSE
+  #gMarvellTokenSpaceGuid.PcdChip0MppBaseAddress|0xF06F4000
+  #gMarvellTokenSpaceGuid.PcdChip0MppRegCount|3
+  #gMarvellTokenSpaceGuid.PcdChip0MppSel0|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 }
+  #gMarvellTokenSpaceGuid.PcdChip0MppSel1|{ 0x1, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0 }
+  #gMarvellTokenSpaceGuid.PcdChip0MppSel2|{ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
+
+  # CP110 MPP SET - Router configuration
+  gMarvellTokenSpaceGuid.PcdChip1MppReverseFlag|FALSE
+  gMarvellTokenSpaceGuid.PcdChip1MppBaseAddress|0xF2440000
+  gMarvellTokenSpaceGuid.PcdChip1MppRegCount|8
+  gMarvellTokenSpaceGuid.PcdChip1MppSel0|{ 0x3, 0x3, 0x3, 0x3, 0x3, 0x3, 0x3, 0x3 }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel1|{ 0x3, 0x3, 0x3, 0x3, 0x0, 0x3, 0x3, 0x3 }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel2|{ 0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel3|{ 0x0, 0x0, 0x0, 0x0, 0x9, 0xA, 0xA, 0x0 }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel4|{ 0x7, 0x0, 0x7, 0x0, 0x6, 0x2, 0x2, 0x0 }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel5|{ 0x7, 0x7, 0x8, 0x8, 0x1, 0x1, 0x1, 0x1 }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel6|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel7|{ 0xE, 0xE, 0xE, 0xE, 0xE, 0xE, 0xE, 0x0 }

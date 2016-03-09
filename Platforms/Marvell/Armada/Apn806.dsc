@@ -46,3 +46,27 @@
   FLASH_DEFINITION               = OpenPlatformPkg/Platforms/Marvell/Armada/Armada7040.fdf
 
 !include Armada.dsc.inc
+
+################################################################################
+#
+# Pcd Section - list of all EDK II PCD Entries defined by this Platform
+#
+################################################################################
+[PcdsFixedAtBuild.common]
+  # MPP
+  gMarvellTokenSpaceGuid.PcdMppChipCount|1
+
+  # APN806-Z1 MPP SET
+  gMarvellTokenSpaceGuid.PcdChip0MppReverseFlag|TRUE
+  gMarvellTokenSpaceGuid.PcdChip0MppBaseAddress|0xF06F008C
+  gMarvellTokenSpaceGuid.PcdChip0MppRegCount|2
+  gMarvellTokenSpaceGuid.PcdChip0MppSel0|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 }
+  gMarvellTokenSpaceGuid.PcdChip0MppSel1|{ 0x1, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0 }
+
+  # APN806-A0 MPP SET
+  #gMarvellTokenSpaceGuid.PcdChip0MppReverseFlag|FALSE
+  #gMarvellTokenSpaceGuid.PcdChip0MppBaseAddress|0xF06F4000
+  #gMarvellTokenSpaceGuid.PcdChip0MppRegCount|3
+  #gMarvellTokenSpaceGuid.PcdChip0MppSel0|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 }
+  #gMarvellTokenSpaceGuid.PcdChip0MppSel1|{ 0x1, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0 }
+  #gMarvellTokenSpaceGuid.PcdChip0MppSel2|{ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }

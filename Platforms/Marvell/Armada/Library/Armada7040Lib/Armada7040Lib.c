@@ -14,6 +14,7 @@
 
 #include <Library/ArmLib.h>
 #include <Library/ArmPlatformLib.h>
+#include <Library/MppLib.h>
 #include <Ppi/ArmMpCoreInfo.h>
 
 
@@ -92,6 +93,7 @@ ArmPlatformInitialize (
 
   //TODO: Add basic platfrom initialization
 
+  MppInitialize ();
   return RETURN_SUCCESS;
 }
 
