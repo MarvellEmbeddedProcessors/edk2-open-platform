@@ -58,7 +58,7 @@
 
   gMarvellTokenSpaceGuid.PcdChip0MppReverseFlag|FALSE|BOOLEAN|0x30000002
   gMarvellTokenSpaceGuid.PcdChip0MppBaseAddress|0|UINT64|0x30000003
-  gMarvellTokenSpaceGuid.PcdChip0MppRegCount|0|UINT32|0x30000004
+  gMarvellTokenSpaceGuid.PcdChip0MppPinCount|0|UINT32|0x30000004
   gMarvellTokenSpaceGuid.PcdChip0MppSel0|{ 0 }|VOID*|0x30000005
   gMarvellTokenSpaceGuid.PcdChip0MppSel1|{ 0 }|VOID*|0x30000006
   gMarvellTokenSpaceGuid.PcdChip0MppSel2|{ 0 }|VOID*|0x30000007
@@ -70,7 +70,7 @@
 
   gMarvellTokenSpaceGuid.PcdChip1MppReverseFlag|FALSE|BOOLEAN|0x30000013
   gMarvellTokenSpaceGuid.PcdChip1MppBaseAddress|0|UINT64|0x30000014
-  gMarvellTokenSpaceGuid.PcdChip1MppRegCount|0|UINT32|0x30000015
+  gMarvellTokenSpaceGuid.PcdChip1MppPinCount|0|UINT32|0x30000015
   gMarvellTokenSpaceGuid.PcdChip1MppSel0|{ 0 }|VOID*|0x30000016
   gMarvellTokenSpaceGuid.PcdChip1MppSel1|{ 0 }|VOID*|0x30000017
   gMarvellTokenSpaceGuid.PcdChip1MppSel2|{ 0 }|VOID*|0x30000018
@@ -82,7 +82,7 @@
 
   gMarvellTokenSpaceGuid.PcdChip2MppReverseFlag|FALSE|BOOLEAN|0x30000024
   gMarvellTokenSpaceGuid.PcdChip2MppBaseAddress|0|UINT64|0x30000025
-  gMarvellTokenSpaceGuid.PcdChip2MppRegCount|0|UINT32|0x30000026
+  gMarvellTokenSpaceGuid.PcdChip2MppPinCount|0|UINT32|0x30000026
   gMarvellTokenSpaceGuid.PcdChip2MppSel0|{ 0 }|VOID*|0x30000027
   gMarvellTokenSpaceGuid.PcdChip2MppSel1|{ 0 }|VOID*|0x30000028
   gMarvellTokenSpaceGuid.PcdChip2MppSel2|{ 0 }|VOID*|0x30000029
@@ -94,7 +94,7 @@
 
   gMarvellTokenSpaceGuid.PcdChip3MppReverseFlag|FALSE|BOOLEAN|0x30000035
   gMarvellTokenSpaceGuid.PcdChip3MppBaseAddress|0|UINT64|0x30000036
-  gMarvellTokenSpaceGuid.PcdChip3MppRegCount|0|UINT32|0x30000037
+  gMarvellTokenSpaceGuid.PcdChip3MppPinCount|0|UINT32|0x30000037
   gMarvellTokenSpaceGuid.PcdChip3MppSel0|{ 0 }|VOID*|0x30000038
   gMarvellTokenSpaceGuid.PcdChip3MppSel1|{ 0 }|VOID*|0x30000039
   gMarvellTokenSpaceGuid.PcdChip3MppSel2|{ 0 }|VOID*|0x30000040

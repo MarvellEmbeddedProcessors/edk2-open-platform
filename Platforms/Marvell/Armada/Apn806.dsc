@@ -46,3 +46,19 @@
   FLASH_DEFINITION               = OpenPlatformPkg/Platforms/Marvell/Armada/Armada7040.fdf
 
 !include Armada.dsc.inc
+
+################################################################################
+#
+# Pcd Section - list of all EDK II PCD Entries defined by this Platform
+#
+################################################################################
+[PcdsFixedAtBuild.common]
+  # MPP
+  gMarvellTokenSpaceGuid.PcdMppChipCount|1
+
+  # APN806-Z1 MPP SET
+  gMarvellTokenSpaceGuid.PcdChip0MppReverseFlag|TRUE
+  gMarvellTokenSpaceGuid.PcdChip0MppBaseAddress|0xF06F008C
+  gMarvellTokenSpaceGuid.PcdChip0MppPinCount|16
+  gMarvellTokenSpaceGuid.PcdChip0MppSel0|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x0 }
+  gMarvellTokenSpaceGuid.PcdChip0MppSel1|{ 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
