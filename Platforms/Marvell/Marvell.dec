@@ -106,7 +106,11 @@
 
 #I2C
   gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0 }|VOID*|0x3000046
+  gMarvellTokenSpaceGuid.PcdEepromI2cAddresses|{ 0 }|VOID*|0x3000050
   gMarvellTokenSpaceGuid.PcdI2cBaseAddress|0|UINT64|0x3000047
   gMarvellTokenSpaceGuid.PcdI2cClockFrequency|0|UINT32|0x3000048
   gMarvellTokenSpaceGuid.PcdI2cBaudRate|0|UINT32|0x3000049
+
+[Protocols]
+  gEfiEepromProtocolGuid               = { 0xcd728a1f, 0x45b5, 0x4feb, { 0x98, 0xc8, 0x31, 0x3d, 0xa8, 0x11, 0x74, 0x62 }}
 
