@@ -11,4 +11,5 @@ Table of contents:
  mpp - PortingGuide/Mpp.txt
 
 3. Drivers guidelines
+ eeprom - Drivers/EepromDriver.txt
  i2c - Drivers/I2cDriver.txt
