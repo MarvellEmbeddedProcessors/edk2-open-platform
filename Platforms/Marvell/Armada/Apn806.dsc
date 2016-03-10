@@ -62,3 +62,9 @@
   gMarvellTokenSpaceGuid.PcdChip0MppPinCount|16
   gMarvellTokenSpaceGuid.PcdChip0MppSel0|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x0 }
   gMarvellTokenSpaceGuid.PcdChip0MppSel1|{ 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
+
+  # I2C
+  gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0x50, 0x57, 0x60 }
+  gMarvellTokenSpaceGuid.PcdI2cBaseAddress|0xF0511000
+  gMarvellTokenSpaceGuid.PcdI2cClockFrequency|200000000
+  gMarvellTokenSpaceGuid.PcdI2cBaudRate|100000
