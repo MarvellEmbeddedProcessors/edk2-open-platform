@@ -384,6 +384,10 @@
   ArmPkg/Drivers/TimerDxe/TimerDxe.inf
   ArmPkg/Drivers/GenericWatchdogDxe/GenericWatchdogDxe.inf
 
+  # Platform drivers
+  OpenPlatformPkg/Drivers/I2c/MvI2cDxe/MvI2cDxe.inf
+  MdeModulePkg/Bus/I2c/I2cDxe/I2cDxe.inf
+
   MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf
   MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf
