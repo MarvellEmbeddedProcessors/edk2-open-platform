@@ -95,7 +95,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
-#include "mvpp2.h"
+#include "Pp2Dxe.h"
 #include "mvpp2_lib.h"
 
 /* Parser configuration routines */
@@ -106,7 +106,7 @@ static MV_32 mvpp2_prs_hw_write(struct mvpp2 *priv, struct mvpp2_prs_entry *pe)
 	MV_32 i;
 
 	if (pe->index > MVPP2_PRS_TCAM_SRAM_SIZE - 1)
-		return -MVPP2_EINVAL;
+		return MVPP2_EINVAL;
 
 	/* Clear entry invalidation bit */
 	pe->tcam.word[MVPP2_PRS_TCAM_INV_WORD] &= ~MVPP2_PRS_TCAM_INV_MASK;
@@ -130,7 +130,7 @@ static MV_32 mvpp2_prs_hw_read(struct mvpp2 *priv, struct mvpp2_prs_entry *pe)
 	MV_32 i;
 
 	if (pe->index > MVPP2_PRS_TCAM_SRAM_SIZE - 1)
-		return -MVPP2_EINVAL;
+		return MVPP2_EINVAL;
 
 	/* Write tcam index - indirect access */
 	mvpp2_write(priv, MVPP2_PRS_TCAM_IDX_REG, pe->index);
@@ -496,7 +496,7 @@ static MV_32 mvpp2_prs_tcam_first_free(struct mvpp2 *priv, MV_U8 start,
 			return tid;
 	}
 
-	return -MVPP2_EINVAL;
+	return MVPP2_EINVAL;
 }
 
 /* Enable/disable dropping all mac da's */
@@ -824,7 +824,7 @@ MV_32 mvpp2_prs_vlan_add(struct mvpp2 *priv, MV_U16 tpid, MV_32 ai,
 
 		pe = mvpp2_alloc(sizeof(*pe));
 		if (!pe)
-			return -MVPP2_ENOMEM;
+			return MVPP2_ENOMEM;
 
 		/* Get last double vlan tid */
 		for (tid_aux = MVPP2_PE_LAST_FREE_TID;
@@ -844,7 +844,7 @@ MV_32 mvpp2_prs_vlan_add(struct mvpp2 *priv, MV_U16 tpid, MV_32 ai,
 		}
 
 		if (tid <= tid_aux) {
-			ret = -MVPP2_EINVAL;
+			ret = MVPP2_EINVAL;
 			goto error;
 		}
 
@@ -894,7 +894,7 @@ MV_32 mvpp2_prs_double_vlan_ai_free_get(struct mvpp2 *priv)
 			return i;
 	}
 
-	return -MVPP2_EINVAL;
+	return MVPP2_EINVAL;
 }
 
 /* Search for existing double vlan entry */
@@ -957,7 +957,7 @@ MV_32 mvpp2_prs_double_vlan_add(struct mvpp2 *priv, MV_U16 tpid1,
 
 		pe = mvpp2_alloc(sizeof(*pe));
 		if (!pe)
-			return -MVPP2_ENOMEM;
+			return MVPP2_ENOMEM;
 
 		/* Set ai value for new double vlan entry */
 		ai = mvpp2_prs_double_vlan_ai_free_get(priv);
@@ -985,7 +985,7 @@ MV_32 mvpp2_prs_double_vlan_add(struct mvpp2 *priv, MV_U16 tpid1,
 		}
 
 		if (tid >= tid_aux) {
-			ret = -MVPP2_ERANGE;
+			ret = MVPP2_ERANGE;
 			goto error;
 		}
 
@@ -1028,7 +1028,7 @@ static MV_32 mvpp2_prs_ip4_proto(struct mvpp2 *priv, MV_U16 proto,
 
 	if ((proto != MV_IPPR_TCP) && (proto != MV_IPPR_UDP) &&
 	    (proto != MV_IPPR_IGMP))
-		return -MVPP2_EINVAL;
+		return MVPP2_EINVAL;
 
 	/* Fragmented packet */
 	tid = mvpp2_prs_tcam_first_free(priv, MVPP2_PE_FIRST_FREE_TID,
@@ -1045,7 +1045,7 @@ static MV_32 mvpp2_prs_ip4_proto(struct mvpp2 *priv, MV_U16 proto,
 	mvpp2_prs_sram_shift_set(&pe, 12, MVPP2_PRS_SRAM_OP_SEL_SHIFT_ADD);
 	/* Set L4 offset */
 	mvpp2_prs_sram_offset_set(&pe, MVPP2_PRS_SRAM_UDF_TYPE_L4,
-				  sizeof(struct mvpp2_iphdr) - 4,
+				  sizeof(mvpp2_iphdr) - 4,
 				  MVPP2_PRS_SRAM_OP_SEL_UDF_ADD);
 	mvpp2_prs_sram_ai_update(&pe, MVPP2_PRS_IPV4_DIP_AI_BIT,
 				 MVPP2_PRS_IPV4_DIP_AI_BIT);
@@ -1115,7 +1115,7 @@ static MV_32 mvpp2_prs_ip4_cast(struct mvpp2 *priv, MV_U16 l3_cast)
 					 MVPP2_PRS_RI_L3_ADDR_MASK);
 		break;
 	default:
-		return -MVPP2_EINVAL;
+		return MVPP2_EINVAL;
 	}
 
 	/* Finished: go to flowid generation */
@@ -1143,7 +1143,7 @@ static MV_32 mvpp2_prs_ip6_proto(struct mvpp2 *priv, MV_U16 proto,
 
 	if ((proto != MV_IPPR_TCP) && (proto != MV_IPPR_UDP) &&
 	    (proto != MV_IPPR_ICMPV6) && (proto != MV_IPPR_IPIP))
-		return -MVPP2_EINVAL;
+		return MVPP2_EINVAL;
 
 	tid = mvpp2_prs_tcam_first_free(priv, MVPP2_PE_FIRST_FREE_TID,
 					MVPP2_PE_LAST_FREE_TID);
@@ -1159,7 +1159,7 @@ static MV_32 mvpp2_prs_ip6_proto(struct mvpp2 *priv, MV_U16 proto,
 	mvpp2_prs_sram_bits_set(&pe, MVPP2_PRS_SRAM_LU_GEN_BIT, 1);
 	mvpp2_prs_sram_ri_update(&pe, ri, ri_mask);
 	mvpp2_prs_sram_offset_set(&pe, MVPP2_PRS_SRAM_UDF_TYPE_L4,
-				  sizeof(struct mvpp2_ipv6hdr) - 6,
+				  sizeof(mvpp2_ipv6hdr) - 6,
 				  MVPP2_PRS_SRAM_OP_SEL_UDF_ADD);
 
 	mvpp2_prs_tcam_data_byte_set(&pe, 0, proto, MVPP2_PRS_TCAM_PROTO_MASK);
@@ -1182,7 +1182,7 @@ static MV_32 mvpp2_prs_ip6_cast(struct mvpp2 *priv, MV_U16 l3_cast)
 	MV_32 tid;
 
 	if (l3_cast != MVPP2_PRS_L3_MULTI_CAST)
-		return -MVPP2_EINVAL;
+		return MVPP2_EINVAL;
 
 	tid = mvpp2_prs_tcam_first_free(priv, MVPP2_PE_FIRST_FREE_TID,
 					MVPP2_PE_LAST_FREE_TID);
@@ -1827,7 +1827,7 @@ static MV_32 mvpp2_prs_ip4_init(struct mvpp2 *priv)
 	mvpp2_prs_sram_shift_set(&pe, 12, MVPP2_PRS_SRAM_OP_SEL_SHIFT_ADD);
 	/* Set L4 offset */
 	mvpp2_prs_sram_offset_set(&pe, MVPP2_PRS_SRAM_UDF_TYPE_L4,
-				  sizeof(struct mvpp2_iphdr) - 4,
+				  sizeof(mvpp2_iphdr) - 4,
 				  MVPP2_PRS_SRAM_OP_SEL_UDF_ADD);
 	mvpp2_prs_sram_ai_update(&pe, MVPP2_PRS_IPV4_DIP_AI_BIT,
 				 MVPP2_PRS_IPV4_DIP_AI_BIT);
@@ -1943,7 +1943,7 @@ static MV_32 mvpp2_prs_ip6_init(struct mvpp2 *priv)
 				 MVPP2_PRS_RI_L4_PROTO_MASK);
 	/* Set L4 offset relatively to our current place */
 	mvpp2_prs_sram_offset_set(&pe, MVPP2_PRS_SRAM_UDF_TYPE_L4,
-				  sizeof(struct mvpp2_ipv6hdr) - 4,
+				  sizeof(mvpp2_ipv6hdr) - 4,
 				  MVPP2_PRS_SRAM_OP_SEL_UDF_ADD);
 
 	mvpp2_prs_tcam_ai_update(&pe, MVPP2_PRS_IPV6_NO_EXT_AI_BIT,
@@ -2284,7 +2284,7 @@ MV_32 mvpp2_prs_tag_mode_set(struct mvpp2 *priv, MV_32 port, MV_32 type)
 
 	default:
 		if ((type < 0) || (type > MVPP2_TAG_TYPE_EDSA))
-			return -MVPP2_EINVAL;
+			return MVPP2_EINVAL;
 	}
 
 	return 0;
@@ -2309,7 +2309,7 @@ MV_32 mvpp2_prs_def_flow(struct mvpp2_port *port)
 
 		pe = mvpp2_alloc(sizeof(*pe));
 		if (!pe)
-			return -MVPP2_ENOMEM;
+			return MVPP2_ENOMEM;
 
 		mvpp2_prs_tcam_lu_set(pe, MVPP2_PRS_LU_FLOWS);
 		pe->index = tid;
@@ -2412,17 +2412,18 @@ MV_VOID mvpp2_cls_port_config(struct mvpp2_port *port)
 /* Set CPU queue number for oversize packets */
 MV_VOID mvpp2_cls_oversize_rxq_set(struct mvpp2_port *port)
 {
-	MV_U32 val;
 
 	mvpp2_write(port->priv, MVPP2_CLS_OVERSIZE_RXQ_LOW_REG(port->id),
 		    port->first_rxq & MVPP2_CLS_OVERSIZE_RXQ_LOW_MASK);
 
+#ifdef MVPP2_V1
 	mvpp2_write(port->priv, MVPP2_CLS_SWFWD_P2HQ_REG(port->id),
 		    (port->first_rxq >> MVPP2_CLS_OVERSIZE_RXQ_LOW_BITS));
 
 	val = mvpp2_read(port->priv, MVPP2_CLS_SWFWD_PCTRL_REG);
 	val |= MVPP2_CLS_SWFWD_PCTRL_MASK(port->id);
 	mvpp2_write(port->priv, MVPP2_CLS_SWFWD_PCTRL_REG, val);
+#endif
 }
 
 /* BM helper routines */
@@ -2431,6 +2432,7 @@ MV_VOID mvpp2_cls_oversize_rxq_set(struct mvpp2_port *port)
 MV_VOID mvpp2_bm_pool_hw_create(struct mvpp2 *priv,
 			     struct mvpp2_bm_pool *bm_pool, MV_32 size)
 {
+#ifdef MVPP2_V1
 	MV_U32 val;
 
 	mvpp2_write(priv, MVPP2_BM_POOL_BASE_REG(bm_pool->id),
@@ -2445,6 +2447,18 @@ MV_VOID mvpp2_bm_pool_hw_create(struct mvpp2 *priv,
 	bm_pool->size = size;
 	bm_pool->pkt_size = 0;
 	bm_pool->buf_num = 0;
+#else
+	bm_pool->size = size;
+
+	mvpp2_write(priv, MVPP2_BM_POOL_BASE_REG(bm_pool->id),
+				lower_32_bits(bm_pool->phys_addr));
+
+	mvpp2_write(priv, MVPP22_BM_POOL_BASE_HIGH_REG,
+	(upper_32_bits(bm_pool->phys_addr)&
+			MVPP22_BM_POOL_BASE_HIGH_REG));
+	mvpp2_write(priv, MVPP2_BM_POOL_SIZE_REG(bm_pool->id),
+					bm_pool->size);
+#endif
 }
 
 /* Set pool buffer size */
@@ -2486,7 +2500,7 @@ MV_VOID mvpp2_rxq_long_pool_set(struct mvpp2_port *port,
 	MV_32 prxq;
 
 	/* Get queue physical ID */
-	prxq = port->rxqs[lrxq]->id;
+	prxq = port->rxqs[lrxq].id;
 
 	val = mvpp2_read(port->priv, MVPP2_RXQ_CONFIG_REG(prxq));
 	val &= ~MVPP2_RXQ_POOL_LONG_MASK;
@@ -2504,7 +2518,7 @@ MV_VOID mvpp2_rxq_short_pool_set(struct mvpp2_port *port,
 	MV_32 prxq;
 
 	/* Get queue physical ID */
-	prxq = port->rxqs[lrxq]->id;
+	prxq = port->rxqs[lrxq].id;
 
 	val = mvpp2_read(port->priv, MVPP2_RXQ_CONFIG_REG(prxq));
 	val &= ~MVPP2_RXQ_POOL_SHORT_MASK;
@@ -2616,13 +2630,14 @@ static MV_VOID mvpp2_port_periodic_xon_disable(struct mvpp2_port *port)
 }
 
 /* Configure loopback port */
+#ifdef MVPP2_V1
 static MV_VOID mvpp2_port_loopback_set(struct mvpp2_port *port)
 {
 	MV_U32 val;
 
 	val = mvpp2_gmac_read(port, MVPP2_GMAC_CTRL_1_REG);
 
-	if (port->speed == 1000)
+	if (port->speed == SPEED_1000)
 		val |= MVPP2_GMAC_GMII_LB_EN_MASK;
 	else
 		val &= ~MVPP2_GMAC_GMII_LB_EN_MASK;
@@ -2634,6 +2649,7 @@ static MV_VOID mvpp2_port_loopback_set(struct mvpp2_port *port)
 
 	mvpp2_gmac_write(port, MVPP2_GMAC_CTRL_1_REG, val);
 }
+#endif
 
 static MV_VOID mvpp2_port_reset(struct mvpp2_port *port)
 {
@@ -2651,8 +2667,9 @@ static MV_VOID mvpp2_port_reset(struct mvpp2_port *port)
 /* Set defaults to the MVPP2 port */
 MV_VOID mvpp2_defaults_set(struct mvpp2_port *port)
 {
-	MV_32 tx_port_num, val, queue, ptxq, lrxq;
+	MV_32 tx_port_num, val, queue, ptxq;
 
+#ifdef MVPP2_V1
 	/* Configure port to loopback if needed */
 	if (port->flags & MVPP2_F_LOOPBACK)
 		mvpp2_port_loopback_set(port);
@@ -2663,6 +2680,7 @@ MV_VOID mvpp2_defaults_set(struct mvpp2_port *port)
 	/* Min. TX threshold must be less than minimal packet length */
 	val |= MVPP2_GMAC_TX_FIFO_MIN_TH_MASK(64 - 4 - 2);
 	mvpp2_gmac_write(port, MVPP2_GMAC_PORT_FIFO_CFG_1_REG, val);
+#endif
 
 	/* Disable Legacy WRR, Disable EJP, Release from reset */
 	tx_port_num = mvpp2_egress_port(port);
@@ -2695,14 +2713,21 @@ MV_VOID mvpp2_defaults_set(struct mvpp2_port *port)
 		    MVPP2_RX_USE_PSEUDO_FOR_CSUM_MASK |
 		    MVPP2_RX_LOW_LATENCY_PKT_SIZE(256));
 
+#ifdef MVPP2_V1
 	/* Enable Rx cache snoop */
+	MV_32 lrxq;
 	for (lrxq = 0; lrxq < rxq_number; lrxq++) {
-		queue = port->rxqs[lrxq]->id;
+		queue = port->rxqs[lrxq].id;
 		val = mvpp2_read(port->priv, MVPP2_RXQ_CONFIG_REG(queue));
 		val |= MVPP2_SNOOP_PKT_SIZE_MASK |
 			   MVPP2_SNOOP_BUF_HDR_MASK;
 		mvpp2_write(port->priv, MVPP2_RXQ_CONFIG_REG(queue), val);
 	}
+#else
+	/* Mask all interrupts to all present cpus */
+	mvpp2_interrupts_disable(port, 0x1);
+#endif
+
 }
 
 /* Enable/disable receiving packets */
@@ -2712,7 +2737,7 @@ MV_VOID mvpp2_ingress_enable(struct mvpp2_port *port)
 	MV_32 lrxq, queue;
 
 	for (lrxq = 0; lrxq < rxq_number; lrxq++) {
-		queue = port->rxqs[lrxq]->id;
+		queue = port->rxqs[lrxq].id;
 		val = mvpp2_read(port->priv, MVPP2_RXQ_CONFIG_REG(queue));
 		val &= ~MVPP2_RXQ_DISABLE_MASK;
 		mvpp2_write(port->priv, MVPP2_RXQ_CONFIG_REG(queue), val);
@@ -2725,7 +2750,7 @@ MV_VOID mvpp2_ingress_disable(struct mvpp2_port *port)
 	MV_32 lrxq, queue;
 
 	for (lrxq = 0; lrxq < rxq_number; lrxq++) {
-		queue = port->rxqs[lrxq]->id;
+		queue = port->rxqs[lrxq].id;
 		val = mvpp2_read(port->priv, MVPP2_RXQ_CONFIG_REG(queue));
 		val |= MVPP2_RXQ_DISABLE_MASK;
 		mvpp2_write(port->priv, MVPP2_RXQ_CONFIG_REG(queue), val);
@@ -2744,7 +2769,7 @@ MV_VOID mvpp2_egress_enable(struct mvpp2_port *port)
 	/* Enable all initialized TXs. */
 	qmap = 0;
 	for (queue = 0; queue < txq_number; queue++) {
-		struct mvpp2_tx_queue *txq = port->txqs[queue];
+		struct mvpp2_tx_queue *txq = &port->txqs[queue];
 
 		if (txq->descs != MVPP2_NULL)
 			qmap |= (1 << queue);
@@ -2822,16 +2847,22 @@ MV_U32 mvpp2_bm_cookie_build(struct mvpp2_rx_desc *rx_desc, MV_32 cpu)
 
 /* Tx descriptors helper methods */
 
-MV_32 mvpp2_txq_hw_clean(struct mvpp2_port *port, struct mvpp2_tx_queue *txq)
+MV_32 mvpp2_txq_drain_set(struct mvpp2_port *port, MV_32 txq, MV_BOOL en)
 {
-	MV_U32 val;
+	MV_U32 reg_val;
+	MV_32 ptxq = mvpp2_txq_phys(port->id, txq);
 
-	mvpp2_write(port->priv, MVPP2_TXQ_NUM_REG, txq->id);
-	val = mvpp2_read(port->priv, MVPP2_TXQ_PREF_BUF_REG);
-	val |= MVPP2_TXQ_DRAIN_EN_MASK;
-	mvpp2_write(port->priv, MVPP2_TXQ_PREF_BUF_REG, val);
+	mvpp2_write(port->priv, MVPP2_TXQ_NUM_REG, ptxq);
+	reg_val = mvpp2_read(port->priv, MVPP2_TXQ_PREF_BUF_REG);
 
-	return val;
+	if (en)
+		reg_val |= MVPP2_TXQ_DRAIN_EN_MASK;
+	else
+		reg_val &= ~MVPP2_TXQ_DRAIN_EN_MASK;
+
+	mvpp2_write(port->priv, MVPP2_TXQ_PREF_BUF_REG, reg_val);
+
+	return 0;
 }
 
 /* Get number of Tx descriptors waiting to be transmitted by HW */
@@ -2846,7 +2877,17 @@ MV_32 mvpp2_txq_pend_desc_num_get(struct mvpp2_port *port,
 	return val & MVPP2_TXQ_PENDING_MASK;
 }
 
-/* Get poMV_32er to next Tx descriptor to be processed (send) by HW */
+/* Get number of occupied aggregated Tx descriptors */
+MV_U32 mvpp2_aggr_txq_pend_desc_num_get(struct mvpp2 *pp2, int cpu)
+{
+	MV_U32 reg_val;
+
+	reg_val = mvpp2_read(pp2, MVPP2_AGGR_TXQ_STATUS_REG(cpu));
+
+	return reg_val & MVPP2_AGGR_TXQ_PENDING_MASK;
+}
+
+/* Get pointer to next Tx descriptor to be processed (send) by HW */
 struct mvpp2_tx_desc *
 mvpp2_txq_next_desc_get(struct mvpp2_tx_queue *txq)
 {
@@ -2878,7 +2919,7 @@ MV_32 mvpp2_aggr_desc_num_check(struct mvpp2 *priv,
 	}
 
 	if ((aggr_txq->count + num) > aggr_txq->size)
-		return -MVPP2_ENOMEM;
+		return MVPP2_ENOMEM;
 
 	return 0;
 }
@@ -2947,7 +2988,7 @@ MV_VOID mvpp2_txq_sent_counter_clear(MV_VOID *arg)
 	MV_32 queue;
 
 	for (queue = 0; queue < txq_number; queue++) {
-		MV_32 id = port->txqs[queue]->id;
+		MV_32 id = port->txqs[queue].id;
 
 		mvpp2_read(port->priv, MVPP2_TXQ_SENT_REG(id));
 	}
@@ -3053,7 +3094,13 @@ MV_VOID mvpp2_rxq_hw_init(struct mvpp2_port *port,
 
 	/* Set Rx descriptors queue starting address - indirect access */
 	mvpp2_write(port->priv, MVPP2_RXQ_NUM_REG, rxq->id);
-	mvpp2_write(port->priv, MVPP2_RXQ_DESC_ADDR_REG, rxq->descs_phys);
+#ifdef MVPP2_V1
+	mvpp2_write(port->priv, MVPP2_RXQ_DESC_ADDR_REG,
+			rxq->descs_phys >> MVPP21_DESC_ADDR_SHIFT);
+#else
+	mvpp2_write(port->priv, MVPP2_RXQ_DESC_ADDR_REG,
+			rxq->descs_phys >> MVPP22_DESC_ADDR_SHIFT);
+#endif
 	mvpp2_write(port->priv, MVPP2_RXQ_DESC_SIZE_REG, rxq->size);
 	mvpp2_write(port->priv, MVPP2_RXQ_INDEX_REG, 0);
 
@@ -3073,12 +3120,14 @@ MV_VOID mvpp2_rxq_drop_pkts(struct mvpp2_port *port,
 			 struct mvpp2_rx_queue *rxq,
 			 MV_32 cpu)
 {
-	MV_32 rx_received, i;
+	MV_32 rx_received;
 
 	rx_received = mvpp2_rxq_received(port, rxq->id);
 	if (!rx_received)
 		return;
 
+#ifdef MVPP2_V1
+	MV_32 i;
 	for (i = 0; i < rx_received; i++) {
 		struct mvpp2_rx_desc *rx_desc = mvpp2_rxq_next_desc_get(rxq);
 		MV_U32 bm = mvpp2_bm_cookie_build(rx_desc, cpu);
@@ -3086,6 +3135,7 @@ MV_VOID mvpp2_rxq_drop_pkts(struct mvpp2_port *port,
 		mvpp2_pool_refill(port, bm, rx_desc->buf_phys_addr,
 				  rx_desc->buf_cookie);
 	}
+#endif
 	mvpp2_rxq_status_update(port, rxq->id, rx_received, rx_received);
 }
 
@@ -3184,9 +3234,16 @@ MV_VOID mvpp2_aggr_txq_hw_init(struct mvpp2_tx_queue *aggr_txq,
 
 	/* Set Tx descriptors queue starting address */
 	/* indirect access */
-	mvpp2_write(priv, MVPP2_AGGR_TXQ_DESC_ADDR_REG(cpu),
-		    aggr_txq->descs_phys);
-	mvpp2_write(priv, MVPP2_AGGR_TXQ_DESC_SIZE_REG(cpu), desc_num);
+#ifndef MVPP2_V1
+	mvpp2_write(priv, MVPP2_AGGR_TXQ_DESC_ADDR_REG(cpu), aggr_txq->descs_phys
+			>> MVPP22_DESC_ADDR_SHIFT);
+#else
+	mvpp2_write(priv, MVPP2_AGGR_TXQ_DESC_ADDR_REG(cpu), aggr_txq->descs_phys
+			>> MVPP21_DESC_ADDR_SHIFT);
+#endif
+	mvpp2_write(priv, MVPP2_AGGR_TXQ_DESC_SIZE_REG(cpu), desc_num
+			& MVPP2_AGGR_TXQ_DESC_SIZE_MASK);
+
 }
 
 /* Enable gmac */
@@ -3213,4 +3270,818 @@ MV_VOID mvpp2_rx_fifo_init(struct mvpp2 *priv)
 	mvpp2_write(priv, MVPP2_RX_MIN_PKT_SIZE_REG,
 		    MVPP2_RX_FIFO_PORT_MIN_PKT);
 	mvpp2_write(priv, MVPP2_RX_FIFO_INIT_REG, 0x1);
+}
+
+MV_VOID mv_gop110_netc_active_port(struct mvpp2_port *pp2_port, MV_U32 port, MV_U32 val)
+{
+	MV_U32 reg;
+
+	reg = mvpp2_rfu1_read(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_1);
+	reg &= ~(NETC_PORTS_ACTIVE_MASK(port));
+
+	val <<= NETC_PORTS_ACTIVE_OFFSET(port);
+	val &= NETC_PORTS_ACTIVE_MASK(port);
+
+	reg |= val;
+
+	mvpp2_rfu1_write(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_1, reg);
+}
+
+static MV_VOID mv_gop110_netc_xaui_enable(struct mvpp2_port *pp2_port, MV_U32 port, MV_U32 val)
+{
+	MV_U32 reg;
+
+	reg = mvpp2_rfu1_read(pp2_port->priv, SD1_CONTROL_1_REG);
+	reg &= ~SD1_CONTROL_XAUI_EN_MASK;
+
+	val <<= SD1_CONTROL_XAUI_EN_OFFSET;
+	val &= SD1_CONTROL_XAUI_EN_MASK;
+
+	reg |= val;
+
+	mvpp2_rfu1_write(pp2_port->priv, SD1_CONTROL_1_REG, reg);
+}
+
+static MV_VOID mv_gop110_netc_rxaui0_enable(struct mvpp2_port *pp2_port, MV_U32 port, MV_U32 val)
+{
+	MV_U32 reg;
+
+	reg = mvpp2_rfu1_read(pp2_port->priv, SD1_CONTROL_1_REG);
+	reg &= ~SD1_CONTROL_RXAUI0_L23_EN_MASK;
+
+	val <<= SD1_CONTROL_RXAUI0_L23_EN_OFFSET;
+	val &= SD1_CONTROL_RXAUI0_L23_EN_MASK;
+
+	reg |= val;
+
+	mvpp2_rfu1_write(pp2_port->priv, SD1_CONTROL_1_REG, reg);
+}
+
+static MV_VOID mv_gop110_netc_rxaui1_enable(struct mvpp2_port *pp2_port, MV_U32 port, MV_U32 val)
+{
+	MV_U32 reg;
+
+	reg = mvpp2_rfu1_read(pp2_port->priv, SD1_CONTROL_1_REG);
+	reg &= ~SD1_CONTROL_RXAUI1_L45_EN_MASK;
+
+	val <<= SD1_CONTROL_RXAUI1_L45_EN_OFFSET;
+	val &= SD1_CONTROL_RXAUI1_L45_EN_MASK;
+
+	reg |= val;
+
+	mvpp2_rfu1_write(pp2_port->priv, SD1_CONTROL_1_REG, reg);
+}
+
+static MV_VOID mv_gop110_netc_mii_mode(struct mvpp2_port *pp2_port, MV_U32 port, MV_U32 val)
+{
+	MV_U32 reg;
+
+	reg = mvpp2_rfu1_read(pp2_port->priv, MV_NETCOMP_CONTROL_0);
+	reg &= ~NETC_GBE_PORT1_MII_MODE_MASK;
+
+	val <<= NETC_GBE_PORT1_MII_MODE_OFFSET;
+	val &= NETC_GBE_PORT1_MII_MODE_MASK;
+
+	reg |= val;
+
+	mvpp2_rfu1_write(pp2_port->priv, MV_NETCOMP_CONTROL_0, reg);
+}
+
+static MV_VOID mv_gop110_netc_gop_reset(struct mvpp2_port *pp2_port, MV_U32 val)
+{
+	MV_U32 reg;
+
+	reg = mvpp2_rfu1_read(pp2_port->priv, MV_GOP_SOFT_RESET_1_REG);
+	reg &= ~NETC_GOP_SOFT_RESET_MASK;
+
+	val <<= NETC_GOP_SOFT_RESET_OFFSET;
+	val &= NETC_GOP_SOFT_RESET_MASK;
+
+	reg |= val;
+
+	mvpp2_rfu1_write(pp2_port->priv, MV_GOP_SOFT_RESET_1_REG, reg);
+}
+
+static MV_VOID mv_gop110_netc_gop_clock_logic_set(struct mvpp2_port *pp2_port, MV_U32 val)
+{
+	MV_U32 reg;
+
+	reg = mvpp2_rfu1_read(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_0);
+	reg &= ~NETC_CLK_DIV_PHASE_MASK;
+
+	val <<= NETC_CLK_DIV_PHASE_OFFSET;
+	val &= NETC_CLK_DIV_PHASE_MASK;
+
+	reg |= val;
+
+	mvpp2_rfu1_write(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_0, reg);
+}
+
+static MV_VOID mv_gop110_netc_port_rf_reset(struct mvpp2_port *pp2_port, MV_U32 port, MV_U32 val)
+{
+	MV_U32 reg;
+
+	reg = mvpp2_rfu1_read(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_1);
+	reg &= ~(NETC_PORT_GIG_RF_RESET_MASK(port));
+
+	val <<= NETC_PORT_GIG_RF_RESET_OFFSET(port);
+	val &= NETC_PORT_GIG_RF_RESET_MASK(port);
+
+	reg |= val;
+
+	mvpp2_rfu1_write(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_1, reg);
+}
+
+static MV_VOID mv_gop110_netc_gbe_sgmii_mode_select(struct mvpp2_port *pp2_port, MV_U32 port,
+						MV_U32 val)
+{
+	MV_U32 reg, mask, offset;
+
+	if (port == 2) {
+		mask = NETC_GBE_PORT0_SGMII_MODE_MASK;
+		offset = NETC_GBE_PORT0_SGMII_MODE_OFFSET;
+	} else {
+		mask = NETC_GBE_PORT1_SGMII_MODE_MASK;
+		offset = NETC_GBE_PORT1_SGMII_MODE_OFFSET;
+	}
+	reg = mvpp2_rfu1_read(pp2_port->priv, MV_NETCOMP_CONTROL_0);
+	reg &= ~mask;
+
+	val <<= offset;
+	val &= mask;
+
+	reg |= val;
+
+	mvpp2_rfu1_write(pp2_port->priv, MV_NETCOMP_CONTROL_0, reg);
+}
+
+static MV_VOID mv_gop110_netc_bus_width_select(struct mvpp2_port *pp2_port, MV_U32 val)
+{
+	MV_U32 reg;
+
+	reg = mvpp2_rfu1_read(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_0);
+	reg &= ~NETC_BUS_WIDTH_SELECT_MASK;
+
+	val <<= NETC_BUS_WIDTH_SELECT_OFFSET;
+	val &= NETC_BUS_WIDTH_SELECT_MASK;
+
+	reg |= val;
+
+	mvpp2_rfu1_write(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_0, reg);
+}
+
+static MV_VOID mv_gop110_netc_sample_stages_timing(struct mvpp2_port *pp2_port, MV_U32 val)
+{
+	MV_U32 reg;
+
+	reg = mvpp2_rfu1_read(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_0);
+	reg &= ~NETC_GIG_RX_DATA_SAMPLE_MASK;
+
+	val <<= NETC_GIG_RX_DATA_SAMPLE_OFFSET;
+	val &= NETC_GIG_RX_DATA_SAMPLE_MASK;
+
+	reg |= val;
+
+	mvpp2_rfu1_write(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_0, reg);
+}
+
+static MV_VOID mv_gop110_netc_mac_to_xgmii(struct mvpp2_port *pp2_port, MV_U32 port,
+					enum mv_netc_phase phase)
+{
+	switch (phase) {
+	case MV_NETC_FIRST_PHASE:
+		/* Set Bus Width to HB mode = 1 */
+		mv_gop110_netc_bus_width_select(pp2_port, 1);
+		/* Select RGMII mode */
+		mv_gop110_netc_gbe_sgmii_mode_select(pp2_port, port,
+							MV_NETC_GBE_XMII);
+		break;
+	case MV_NETC_SECOND_PHASE:
+		/* De-assert the relevant port HB reset */
+		mv_gop110_netc_port_rf_reset(pp2_port, port, 1);
+		break;
+	}
+}
+
+static MV_VOID mv_gop110_netc_mac_to_sgmii(struct mvpp2_port *pp2_port, MV_U32 port,
+					enum mv_netc_phase phase)
+{
+	switch (phase) {
+	case MV_NETC_FIRST_PHASE:
+		/* Set Bus Width to HB mode = 1 */
+		mv_gop110_netc_bus_width_select(pp2_port, 1);
+		/* Select SGMII mode */
+		if (port >= 1)
+			mv_gop110_netc_gbe_sgmii_mode_select(pp2_port, port,
+			MV_NETC_GBE_SGMII);
+
+		/* Configure the sample stages */
+		mv_gop110_netc_sample_stages_timing(pp2_port, 0);
+		/* Configure the ComPhy Selector */
+		/* mv_gop110_netc_com_phy_selector_config(netComplex); */
+		break;
+	case MV_NETC_SECOND_PHASE:
+		/* De-assert the relevant port HB reset */
+		mv_gop110_netc_port_rf_reset(pp2_port, port, 1);
+		break;
+	}
+}
+
+static MV_VOID mv_gop110_netc_mac_to_rxaui(struct mvpp2_port *pp2_port, MV_U32 port,
+					enum mv_netc_phase phase,
+					enum mv_netc_lanes lanes)
+{
+	/* Currently only RXAUI0 supported */
+	if (port != 0)
+		return;
+
+	switch (phase) {
+	case MV_NETC_FIRST_PHASE:
+		/* RXAUI Serdes/s Clock alignment */
+		if (lanes == MV_NETC_LANE_23)
+			mv_gop110_netc_rxaui0_enable(pp2_port, port, 1);
+		else
+			mv_gop110_netc_rxaui1_enable(pp2_port, port, 1);
+		break;
+	case MV_NETC_SECOND_PHASE:
+		/* De-assert the relevant port HB reset */
+		mv_gop110_netc_port_rf_reset(pp2_port, port, 1);
+		break;
+	}
+}
+
+static MV_VOID mv_gop110_netc_mac_to_xaui(struct mvpp2_port *pp2_port, MV_U32 port,
+					enum mv_netc_phase phase)
+{
+	switch (phase) {
+	case MV_NETC_FIRST_PHASE:
+		/* RXAUI Serdes/s Clock alignment */
+		mv_gop110_netc_xaui_enable(pp2_port, port, 1);
+		break;
+	case MV_NETC_SECOND_PHASE:
+		/* De-assert the relevant port HB reset */
+		mv_gop110_netc_port_rf_reset(pp2_port, port, 1);
+		break;
+	}
+}
+
+MV_32 mv_gop110_netc_init(struct mvpp2_port *pp2_port,
+			MV_U32 net_comp_config, enum mv_netc_phase phase)
+{
+	MV_U32 c = net_comp_config;
+
+	if (c & MV_NETC_GE_MAC0_RXAUI_L23)
+		mv_gop110_netc_mac_to_rxaui(pp2_port, 0, phase, MV_NETC_LANE_23);
+
+	if (c & MV_NETC_GE_MAC0_RXAUI_L45)
+		mv_gop110_netc_mac_to_rxaui(pp2_port, 0, phase, MV_NETC_LANE_45);
+
+	if (c & MV_NETC_GE_MAC0_XAUI)
+		mv_gop110_netc_mac_to_xaui(pp2_port, 0, phase);
+
+	if (c & MV_NETC_GE_MAC2_SGMII)
+		mv_gop110_netc_mac_to_sgmii(pp2_port, 2, phase);
+	else
+		mv_gop110_netc_mac_to_xgmii(pp2_port, 2, phase);
+	if (c & MV_NETC_GE_MAC3_SGMII)
+		mv_gop110_netc_mac_to_sgmii(pp2_port, 3, phase);
+	else {
+		mv_gop110_netc_mac_to_xgmii(pp2_port, 3, phase);
+		if (c & MV_NETC_GE_MAC3_RGMII)
+			mv_gop110_netc_mii_mode(pp2_port, 3, MV_NETC_GBE_RGMII);
+		else
+			mv_gop110_netc_mii_mode(pp2_port, 3, MV_NETC_GBE_MII);
+	}
+
+	/* Activate gop ports 0, 2, 3 */
+	mv_gop110_netc_active_port(pp2_port, 0, 1);
+	mv_gop110_netc_active_port(pp2_port, 2, 1);
+	mv_gop110_netc_active_port(pp2_port, 3, 1);
+
+	if (phase == MV_NETC_SECOND_PHASE) {
+		/* Enable the GOP internal clock logic */
+		mv_gop110_netc_gop_clock_logic_set(pp2_port, 1);
+		/* De-assert GOP unit reset */
+		mv_gop110_netc_gop_reset(pp2_port, 1);
+	}
+	return 0;
+}
+MV_U32 mvp_pp2x_gop110_netc_cfg_create(struct mvpp2_port *pp2_port)
+{
+	MV_U32 val = 0;
+
+		if (pp2_port->gop_index == 0) {
+			if (pp2_port->phy_interface ==
+				MV_MODE_XAUI)
+				val |= MV_NETC_GE_MAC0_XAUI;
+			else if (pp2_port->phy_interface ==
+				MV_MODE_RXAUI)
+				val |= MV_NETC_GE_MAC0_RXAUI_L23;
+		}
+		if (pp2_port->gop_index == 2) {
+			if (pp2_port->phy_interface ==
+				MV_MODE_SGMII)
+				val |= MV_NETC_GE_MAC2_SGMII;
+		}
+		if (pp2_port->gop_index == 3) {
+			if (pp2_port->phy_interface ==
+				MV_MODE_SGMII)
+				val |= MV_NETC_GE_MAC3_SGMII;
+			else if (pp2_port->phy_interface ==
+				MV_MODE_RGMII)
+				val |= MV_NETC_GE_MAC3_RGMII;
+		}
+
+	return val;
+}
+
+/*
+* mv_port_init
+*       Init physical port. Configures the port mode and all it's elements
+*       accordingly.
+*       Does not verify that the selected mode/port number is valid at the
+*       core level.
+*/
+MV_32 mv_gop110_port_init(struct mvpp2_port *pp2_port)
+{
+
+	switch (pp2_port->phy_interface) {
+	case MV_MODE_RGMII:
+		mv_gop110_gmac_reset(pp2_port, RESET);
+		/* configure PCS */
+		mv_gop110_gpcs_mode_cfg(pp2_port, MV_FALSE);
+		mv_gop110_bypass_clk_cfg(pp2_port, MV_TRUE);
+
+		/* configure MAC */
+		mv_gop110_gmac_mode_cfg(pp2_port);
+		/* pcs unreset */
+		mv_gop110_gpcs_reset(pp2_port, UNRESET);
+		/* mac unreset */
+		mv_gop110_gmac_reset(pp2_port, UNRESET);
+	break;
+	case MV_MODE_SGMII:
+	case MV_MODE_QSGMII:
+		/* configure PCS */
+		mv_gop110_gpcs_mode_cfg(pp2_port, MV_TRUE);
+
+		/* configure MAC */
+		mv_gop110_gmac_mode_cfg(pp2_port);
+		/* select proper Mac mode */
+		mv_gop110_xlg_2_gig_mac_cfg(pp2_port);
+
+		/* pcs unreset */
+		mv_gop110_gpcs_reset(pp2_port, UNRESET);
+		/* mac unreset */
+		mv_gop110_gmac_reset(pp2_port, UNRESET);
+	break;
+	default:
+		return -1;
+	}
+
+	return 0;
+}
+
+/* Set the MAC to reset or exit from reset */
+MV_32 mv_gop110_gmac_reset(struct mvpp2_port *pp2_port, enum mv_reset reset)
+{
+	MV_U32 reg_addr;
+	MV_U32 val;
+
+	reg_addr = MVPP2_PORT_CTRL2_REG;
+
+	/* read - modify - write */
+	val = mv_gop110_gmac_read(pp2_port, reg_addr);
+	if (reset == RESET)
+		val |= MVPP2_PORT_CTRL2_PORTMACRESET_MASK;
+	else
+		val &= ~MVPP2_PORT_CTRL2_PORTMACRESET_MASK;
+	mv_gop110_gmac_write(pp2_port, reg_addr, val);
+
+	return 0;
+}
+/*
+* mv_gop110_gpcs_mode_cfg
+*Configure port to working with Gig PCS or don't.
+*/
+MV_32 mv_gop110_gpcs_mode_cfg(struct mvpp2_port *pp2_port, MV_BOOL en)
+{
+	MV_U32 val;
+
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL2_REG);
+
+	if (en)
+		val |= MVPP2_PORT_CTRL2_PCS_EN_MASK;
+	else
+		val &= ~MVPP2_PORT_CTRL2_PCS_EN_MASK;
+
+	/* enable / disable PCS on this port */
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL2_REG, val);
+
+	return 0;
+}
+
+MV_32 mv_gop110_bypass_clk_cfg(struct mvpp2_port *pp2_port, MV_BOOL en)
+{
+	MV_U32 val;
+
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL2_REG);
+
+	if (en)
+		val |= MVPP2_PORT_CTRL2_CLK_125_BYPS_EN_MASK;
+	else
+		val &= ~MVPP2_PORT_CTRL2_CLK_125_BYPS_EN_MASK;
+
+	/* enable / disable PCS on this port */
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL2_REG, val);
+
+	return 0;
+}
+
+MV_32 mv_gop110_gpcs_reset(struct mvpp2_port *pp2_port, enum mv_reset act)
+{
+	MV_U32 reg_data;
+
+	reg_data = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL2_REG);
+	if (act == RESET)
+		U32_SET_FIELD(reg_data, MVPP2_PORT_CTRL2_SGMII_MODE_MASK, 0);
+	else
+		U32_SET_FIELD(reg_data, MVPP2_PORT_CTRL2_SGMII_MODE_MASK,
+			1 << MVPP2_PORT_CTRL2_SGMII_MODE_OFFS);
+
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL2_REG, reg_data);
+	return 0;
+}
+
+MV_VOID mv_gop110_xlg_2_gig_mac_cfg(struct mvpp2_port *pp2_port)
+{
+	MV_U32 reg_val;
+
+	/* relevant only for MAC0 (XLG0 and GMAC0) */
+	if (pp2_port->gop_index > 0)
+		return;
+
+	/* configure 1Gig MAC mode */
+	reg_val = mvpp2_xlg_read(pp2_port,
+					MV_XLG_PORT_MAC_CTRL3_REG);
+	U32_SET_FIELD(reg_val, MV_XLG_MAC_CTRL3_MACMODESELECT_MASK,
+		(0 << MV_XLG_MAC_CTRL3_MACMODESELECT_OFFS));
+	mvpp2_xlg_write(pp2_port, MV_XLG_PORT_MAC_CTRL3_REG,
+				reg_val);
+}
+/* Set the internal mux's to the required MAC in the GOP */
+MV_32 mv_gop110_gmac_mode_cfg(struct mvpp2_port *pp2_port)
+{
+	MV_U32 reg_addr;
+	MV_U32 val;
+
+	/* Set TX FIFO thresholds */
+	switch (pp2_port->phy_interface) {
+	case MV_MODE_SGMII:
+		if (pp2_port->speed == 2500)
+			mv_gop110_gmac_sgmii2_5_cfg(pp2_port);
+		else
+			mv_gop110_gmac_sgmii_cfg(pp2_port);
+	break;
+	case MV_MODE_RGMII:
+		mv_gop110_gmac_rgmii_cfg(pp2_port);
+	break;
+	case MV_MODE_QSGMII:
+		mv_gop110_gmac_qsgmii_cfg(pp2_port);
+	break;
+	default:
+		return -1;
+	}
+
+	/* Jumbo frame support - 0x1400*2= 0x2800 bytes */
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL0_REG);
+	U32_SET_FIELD(val, MVPP2_PORT_CTRL0_FRAMESIZELIMIT_MASK,
+		(0x1400 << MVPP2_PORT_CTRL0_FRAMESIZELIMIT_OFFS));
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL0_REG, val);
+
+	/* PeriodicXonEn disable */
+	reg_addr = MVPP2_PORT_CTRL1_REG;
+	val = mv_gop110_gmac_read(pp2_port, reg_addr);
+	val &= ~MVPP2_PORT_CTRL1_EN_PERIODIC_FC_XON_MASK;
+	mv_gop110_gmac_write(pp2_port, reg_addr, val);
+
+	/* mask all ports interrupts */
+	mv_gop110_gmac_port_link_event_mask(pp2_port);
+
+#if MV_PP2x_INTERRUPT
+	/* unmask link change interrupt */
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_INTERRUPT_MASK_REG);
+	val |= MVPP2_INTERRUPT_CAUSE_LINK_CHANGE_MASK;
+	val |= 1; /* unmask summary bit */
+	mv_gop110_gmac_write(pp2_port, MVPP2_INTERRUPT_MASK_REG, val);
+#endif
+	return 0;
+}
+
+MV_VOID mv_gop110_gmac_rgmii_cfg(struct mvpp2_port *pp2_port)
+{
+	MV_U32 val, thresh, an;
+
+	/*configure minimal level of the Tx FIFO before the lower part starts to read a packet*/
+	thresh = MV_RGMII_TX_FIFO_MIN_TH;
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_FIFO_CFG_1_REG);
+	U32_SET_FIELD(val, MVPP2_PORT_FIFO_CFG_1_TX_FIFO_MIN_TH_MASK,
+		(thresh << MVPP2_PORT_FIFO_CFG_1_TX_FIFO_MIN_TH_OFFS));
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_FIFO_CFG_1_REG, val);
+
+	/* Disable bypass of sync module */
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL4_REG);
+	val |= MVPP2_PORT_CTRL4_SYNC_BYPASS_MASK;
+	/* configure DP clock select according to mode */
+	val &= ~MVPP2_PORT_CTRL4_DP_CLK_SEL_MASK;
+	val |= MVPP2_PORT_CTRL4_QSGMII_BYPASS_ACTIVE_MASK;
+	val |= MVPP2_PORT_CTRL4_EXT_PIN_GMII_SEL_MASK;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL4_REG, val);
+
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL2_REG);
+	val &= ~MVPP2_PORT_CTRL2_DIS_PADING_OFFS;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL2_REG, val);
+
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL0_REG);
+	/* configure GIG MAC to SGMII mode */
+	val &= ~MVPP2_PORT_CTRL0_PORTTYPE_MASK;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL0_REG, val);
+
+	/* configure AN 0xb8e8 */
+	an = MVPP2_PORT_AUTO_NEG_CFG_AN_BYPASS_EN_MASK |
+		MVPP2_PORT_AUTO_NEG_CFG_EN_AN_SPEED_MASK   |
+		MVPP2_PORT_AUTO_NEG_CFG_EN_FC_AN_MASK      |
+		MVPP2_PORT_AUTO_NEG_CFG_EN_FDX_AN_MASK     |
+		MVPP2_PORT_AUTO_NEG_CFG_CHOOSE_SAMPLE_TX_CONFIG_MASK;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_AUTO_NEG_CFG_REG, an);
+}
+MV_VOID mv_gop110_gmac_sgmii2_5_cfg(struct mvpp2_port *pp2_port)
+{
+	MV_U32 val, thresh, an;
+
+	/*configure minimal level of the Tx FIFO before the lower part starts to read a packet*/
+	thresh = MV_SGMII2_5_TX_FIFO_MIN_TH;
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_FIFO_CFG_1_REG);
+	U32_SET_FIELD(val, MVPP2_PORT_FIFO_CFG_1_TX_FIFO_MIN_TH_MASK,
+		(thresh << MVPP2_PORT_FIFO_CFG_1_TX_FIFO_MIN_TH_OFFS));
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_FIFO_CFG_1_REG, val);
+
+	/* Disable bypass of sync module */
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL4_REG);
+	val |= MVPP2_PORT_CTRL4_SYNC_BYPASS_MASK;
+	/* configure DP clock select according to mode */
+	val |= MVPP2_PORT_CTRL4_DP_CLK_SEL_MASK;
+	/* configure QSGMII bypass according to mode */
+	val |= MVPP2_PORT_CTRL4_QSGMII_BYPASS_ACTIVE_MASK;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL4_REG, val);
+
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL2_REG);
+	val |= MVPP2_PORT_CTRL2_DIS_PADING_OFFS;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL2_REG, val);
+
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL0_REG);
+	/* configure GIG MAC to 1000Base-X mode connected to a fiber transceiver */
+	val |= MVPP2_PORT_CTRL0_PORTTYPE_MASK;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL0_REG, val);
+
+	/* configure AN 0x9268 */
+	an = MVPP2_PORT_AUTO_NEG_CFG_AN_BYPASS_EN_MASK |
+		MVPP2_PORT_AUTO_NEG_CFG_SET_MII_SPEED_MASK  |
+		MVPP2_PORT_AUTO_NEG_CFG_SET_GMII_SPEED_MASK     |
+		MVPP2_PORT_AUTO_NEG_CFG_ADV_PAUSE_MASK    |
+		MVPP2_PORT_AUTO_NEG_CFG_SET_FULL_DX_MASK  |
+		MVPP2_PORT_AUTO_NEG_CFG_CHOOSE_SAMPLE_TX_CONFIG_MASK;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_AUTO_NEG_CFG_REG, an);
+}
+MV_VOID mv_gop110_gmac_sgmii_cfg(struct mvpp2_port *pp2_port)
+{
+	MV_U32 val, thresh, an;
+
+	/*configure minimal level of the Tx FIFO before the lower part starts to read a packet*/
+	thresh = MV_SGMII_TX_FIFO_MIN_TH;
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_FIFO_CFG_1_REG);
+	U32_SET_FIELD(val, MVPP2_PORT_FIFO_CFG_1_TX_FIFO_MIN_TH_MASK,
+		(thresh << MVPP2_PORT_FIFO_CFG_1_TX_FIFO_MIN_TH_OFFS));
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_FIFO_CFG_1_REG, val);
+
+	/* Disable bypass of sync module */
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL4_REG);
+	val |= MVPP2_PORT_CTRL4_SYNC_BYPASS_MASK;
+	/* configure DP clock select according to mode */
+	val &= ~MVPP2_PORT_CTRL4_DP_CLK_SEL_MASK;
+	/* configure QSGMII bypass according to mode */
+	val |= MVPP2_PORT_CTRL4_QSGMII_BYPASS_ACTIVE_MASK;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL4_REG, val);
+
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL2_REG);
+	val |= MVPP2_PORT_CTRL2_DIS_PADING_OFFS;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL2_REG, val);
+
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL0_REG);
+	/* configure GIG MAC to SGMII mode */
+	val &= ~MVPP2_PORT_CTRL0_PORTTYPE_MASK;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL0_REG, val);
+
+	/* configure AN */
+	an = MVPP2_PORT_AUTO_NEG_CFG_EN_PCS_AN_MASK |
+		MVPP2_PORT_AUTO_NEG_CFG_AN_BYPASS_EN_MASK |
+		MVPP2_PORT_AUTO_NEG_CFG_EN_AN_SPEED_MASK  |
+		MVPP2_PORT_AUTO_NEG_CFG_EN_FC_AN_MASK     |
+		MVPP2_PORT_AUTO_NEG_CFG_EN_FDX_AN_MASK    |
+		MVPP2_PORT_AUTO_NEG_CFG_CHOOSE_SAMPLE_TX_CONFIG_MASK;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_AUTO_NEG_CFG_REG, an);
+}
+
+MV_VOID mv_gop110_gmac_qsgmii_cfg(struct mvpp2_port *pp2_port)
+{
+	MV_U32 val, thresh, an;
+
+	/*configure minimal level of the Tx FIFO before the lower part starts to read a packet*/
+	thresh = MV_SGMII_TX_FIFO_MIN_TH;
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_FIFO_CFG_1_REG);
+	U32_SET_FIELD(val, MVPP2_PORT_FIFO_CFG_1_TX_FIFO_MIN_TH_MASK,
+		(thresh << MVPP2_PORT_FIFO_CFG_1_TX_FIFO_MIN_TH_OFFS));
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_FIFO_CFG_1_REG, val);
+
+	/* Disable bypass of sync module */
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL4_REG);
+	val |= MVPP2_PORT_CTRL4_SYNC_BYPASS_MASK;
+	/* configure DP clock select according to mode */
+	val &= ~MVPP2_PORT_CTRL4_DP_CLK_SEL_MASK;
+	val &= ~MVPP2_PORT_CTRL4_EXT_PIN_GMII_SEL_MASK;
+	/* configure QSGMII bypass according to mode */
+	val &= ~MVPP2_PORT_CTRL4_QSGMII_BYPASS_ACTIVE_MASK;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL4_REG, val);
+
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL2_REG);
+	val &= ~MVPP2_PORT_CTRL2_DIS_PADING_OFFS;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL2_REG, val);
+
+	val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL0_REG);
+	/* configure GIG MAC to SGMII mode */
+	val &= ~MVPP2_PORT_CTRL0_PORTTYPE_MASK;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL0_REG, val);
+
+	/* configure AN 0xB8EC */
+	an = MVPP2_PORT_AUTO_NEG_CFG_EN_PCS_AN_MASK |
+		MVPP2_PORT_AUTO_NEG_CFG_AN_BYPASS_EN_MASK |
+		MVPP2_PORT_AUTO_NEG_CFG_EN_AN_SPEED_MASK  |
+		MVPP2_PORT_AUTO_NEG_CFG_EN_FC_AN_MASK     |
+		MVPP2_PORT_AUTO_NEG_CFG_EN_FDX_AN_MASK    |
+		MVPP2_PORT_AUTO_NEG_CFG_CHOOSE_SAMPLE_TX_CONFIG_MASK;
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_AUTO_NEG_CFG_REG, an);
+}
+/*
+* mv_gop_phy_addr_cfg
+*/
+MV_32 mvpp2_smi_phy_addr_cfg(struct mvpp2_port *pp2_port, MV_32 port, MV_32 addr)
+{
+	mvpp2_smi_write(pp2_port->priv, MV_SMI_PHY_ADDRESS_REG(port), addr);
+
+	return 0;
+}
+MV_BOOL mv_gop110_port_is_link_up(struct mvpp2_port *pp2_port)
+{
+	switch (pp2_port->phy_interface) {
+	case MV_MODE_RGMII:
+	case MV_MODE_SGMII:
+	case MV_MODE_QSGMII:
+		return mv_gop110_gmac_link_status_get(pp2_port);
+	break;
+	case MV_MODE_XAUI:
+	case MV_MODE_RXAUI:
+		gBS->Stall(1000);
+//		return mv_gop110_xlg_mac_link_status_get(pp2_port);
+		return MV_FALSE;
+	break;
+	default:
+		return MV_FALSE;
+	}
+}
+/* Get MAC link status */
+MV_BOOL mv_gop110_gmac_link_status_get(struct mvpp2_port *pp2_port)
+{
+	MV_U32 reg_addr;
+	MV_U32 val;
+
+	reg_addr = MVPP2_PORT_STATUS0_REG;
+
+	val = mv_gop110_gmac_read(pp2_port, reg_addr);
+	return (val & 1) ? MV_TRUE : MV_FALSE;
+}
+
+/* BM */
+INTN mvpp2_bm_pool_ctrl(struct mvpp2 *pp2, INTN pool, enum mvpp2_command cmd)
+{
+	MV_U32 reg_val = 0;
+	reg_val = mvpp2_read(pp2, MVPP2_BM_POOL_CTRL_REG(pool));
+
+	switch (cmd) {
+	case MVPP2_START:
+		reg_val |= MVPP2_BM_START_MASK;
+		break;
+
+	case MVPP2_STOP:
+		reg_val |= MVPP2_BM_STOP_MASK;
+		break;
+
+	default:
+		return -1;
+	}
+	mvpp2_write(pp2, MVPP2_BM_POOL_CTRL_REG(pool), reg_val);
+
+	return 0;
+}
+
+MV_VOID mv_gop110_port_disable(struct mvpp2_port *pp2_port)
+{
+
+	switch (pp2_port->phy_interface) {
+	case MV_MODE_RGMII:
+	case MV_MODE_SGMII:
+	case MV_MODE_QSGMII:
+		mv_gop110_gmac_port_disable(pp2_port);
+	break;
+/*
+	case MV_MODE_XAUI:
+	case MV_MODE_RXAUI:
+		mv_gop110_xlg_mac_port_disable(gop, port_num);
+	break;
+	*/
+
+	default:
+		return;
+	}
+}
+
+MV_VOID mv_gop110_port_enable(struct mvpp2_port *pp2_port)
+{
+
+	switch (pp2_port->phy_interface) {
+	case MV_MODE_RGMII:
+	case MV_MODE_SGMII:
+	case MV_MODE_QSGMII:
+		mv_gop110_gmac_port_enable(pp2_port);
+	break;
+/*
+	case MV_MODE_XAUI:
+	case MV_MODE_RXAUI:
+		mv_gop110_xlg_mac_port_disable(gop, port_num);
+	break;
+	*/
+
+	default:
+		return;
+	}
+}
+
+/* Enable port and MIB counters */
+MV_VOID mv_gop110_gmac_port_enable(struct mvpp2_port *pp2_port)
+{
+	MV_U32 reg_val;
+
+	reg_val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL0_REG);
+	reg_val |= MVPP2_PORT_CTRL0_PORTEN_MASK;
+	reg_val |= MVPP2_PORT_CTRL0_COUNT_EN_MASK;
+
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL0_REG, reg_val);
+}
+
+/* Disable port */
+MV_VOID mv_gop110_gmac_port_disable(struct mvpp2_port *pp2_port)
+{
+	MV_U32 reg_val;
+
+	/* mask all ports interrupts */
+	mv_gop110_gmac_port_link_event_mask(pp2_port);
+
+	reg_val = mv_gop110_gmac_read(pp2_port, MVPP2_PORT_CTRL0_REG);
+	reg_val &= ~MVPP2_PORT_CTRL0_PORTEN_MASK;
+
+	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL0_REG, reg_val);
+}
+
+MV_VOID mv_gop110_gmac_port_link_event_mask(struct mvpp2_port *pp2_port)
+{
+	MV_U32 reg_val;
+
+	reg_val = mv_gop110_gmac_read(pp2_port,
+				MV_GMAC_INTERRUPT_SUM_MASK_REG);
+	reg_val &= ~MV_GMAC_INTERRUPT_SUM_CAUSE_LINK_CHANGE_MASK;
+	mv_gop110_gmac_write(pp2_port, MV_GMAC_INTERRUPT_SUM_MASK_REG,
+			reg_val);
+}
+
+MV_32 mv_gop110_port_events_mask(struct mvpp2_port *pp2_port)
+{
+
+	switch (pp2_port->phy_interface) {
+	case MV_MODE_RGMII:
+	case MV_MODE_SGMII:
+	case MV_MODE_QSGMII:
+		mv_gop110_gmac_port_link_event_mask(pp2_port);
+	break;
+	default:
+		return -1;
+	}
+	return 0;
 }
