@@ -84,3 +84,8 @@
   gMarvellTokenSpaceGuid.PcdI2cClockFrequency|250000000
   gMarvellTokenSpaceGuid.PcdI2cBaudRate|100000
   gMarvellTokenSpaceGuid.PcdI2cBusCount|2
+
+  #SPI
+  gMarvellTokenSpaceGuid.PcdSpiRegBase|0xF2700680
+  gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|10000000
+  gMarvellTokenSpaceGuid.PcdSpiClockFrequency|200000000
