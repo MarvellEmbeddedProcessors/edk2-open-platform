@@ -104,3 +104,9 @@
   gMarvellTokenSpaceGuid.PcdChip3MppSel6|{ 0 }|VOID*|0x30000044
   gMarvellTokenSpaceGuid.PcdChip3MppSel7|{ 0 }|VOID*|0x30000045
 
+#I2C
+  gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0 }|VOID*|0x3000046
+  gMarvellTokenSpaceGuid.PcdI2cBaseAddress|0|UINT64|0x3000047
+  gMarvellTokenSpaceGuid.PcdI2cClockFrequency|0|UINT32|0x3000048
+  gMarvellTokenSpaceGuid.PcdI2cBaudRate|0|UINT32|0x3000049
+
