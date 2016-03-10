@@ -113,6 +113,11 @@
   gMarvellTokenSpaceGuid.PcdI2cClockFrequency|0|UINT32|0x3000048
   gMarvellTokenSpaceGuid.PcdI2cBaudRate|0|UINT32|0x3000049
 
+#SPI
+  gMarvellTokenSpaceGuid.PcdSpiRegBase|0|UINT32|0x3000051
+  gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|0|UINT32|0x30000052
+  gMarvellTokenSpaceGuid.PcdSpiClockFrequency|0|UINT32|0x30000053
+
 [Protocols]
   gEfiEepromProtocolGuid               = { 0xcd728a1f, 0x45b5, 0x4feb, { 0x98, 0xc8, 0x31, 0x3d, 0xa8, 0x11, 0x74, 0x62 }}
   gEfiSpiMasterProtocolGuid            = { 0x23de66a3, 0xf666, 0x4b3e, { 0xaa, 0xa2, 0x68, 0x9b, 0x18, 0xae, 0x2e, 0x19 }}
