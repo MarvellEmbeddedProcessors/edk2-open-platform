@@ -125,7 +125,7 @@
   BdsLib|ArmPkg/Library/BdsLib/BdsLib.inf
   CapsuleLib|MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf
   GenericBdsLib|IntelFrameworkModulePkg/Library/GenericBdsLib/GenericBdsLib.inf
-  PlatformBdsLib|ArmPlatformPkg/Library/PlatformIntelBdsLib/PlatformIntelBdsLib.inf
+  PlatformBdsLib|OpenPlatformPkg/Platforms/Marvell/Armada/Library/Armada7040BdsLib/Armada7040BdsLib.inf
   CustomizedDisplayLib|MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf
   FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
 
