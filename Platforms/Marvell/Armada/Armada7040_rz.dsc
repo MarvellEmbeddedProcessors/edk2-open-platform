@@ -90,3 +90,7 @@
   gMarvellTokenSpaceGuid.PcdI2cBaseAddress|0xF0511000
   gMarvellTokenSpaceGuid.PcdTclkFrequency|200000000
   gMarvellTokenSpaceGuid.PcdI2cBaudRate|100000
+
+  #SPI
+  gMarvellTokenSpaceGuid.PcdSpiRegBase|0xF2700680
+  gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|10000000
