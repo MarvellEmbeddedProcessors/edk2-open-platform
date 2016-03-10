@@ -7,4 +7,8 @@ Table of contents:
  Build.txt
 
 2. Porting guide
+ i2c - PortingGuide/I2c.txt
  mpp - PortingGuide/Mpp.txt
+
+3. Drivers guidelines
+ i2c - Drivers/I2cDriver.txt
