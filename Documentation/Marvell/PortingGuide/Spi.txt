@@ -1,0 +1,15 @@
+Spi driver configuration
+------------------------
+Following PCDs are available for configuration of spi driver:
+
+ gMarvellTokenSpaceGuid.PcdTclkFrequency
+
+Frequency (in Hz) of tclk
+
+ gMarvellTokenSpaceGuid.PcdSpiMaxFrequency
+
+Max SCLK line frequency (in Hz) (max transfer frequency)
+
+ gMarvellTokenSpaceGuid.PcdSpiDefaultMode
+
+default SCLK mode (see SPI_MODE enum in file OpenPlatformPkg/Drivers/Spi/MvSpi.h)
