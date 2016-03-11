@@ -86,3 +86,8 @@
   gMarvellTokenSpaceGuid.PcdSpiRegBase|0xF2700680
   gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|10000000
   gMarvellTokenSpaceGuid.PcdSpiClockFrequency|200000000
+
+  gMarvellTokenSpaceGuid.PcdSpiFlashAddressCycles|3
+  gMarvellTokenSpaceGuid.PcdSpiFlashEraseSize|65536
+  gMarvellTokenSpaceGuid.PcdSpiFlashPageSize|256
+  gMarvellTokenSpaceGuid.PcdSpiFlashId|0x20BA18
