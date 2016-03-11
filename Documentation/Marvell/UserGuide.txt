@@ -19,3 +19,4 @@ Table of contents:
 
 4. Commands
  eeprom - Commands/Eeprom.txt
+ sf - Commands/Sf.txt

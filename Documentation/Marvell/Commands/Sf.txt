@@ -1,0 +1,64 @@
+Syntax
+------
+sf [probe | read | readfile | write | writefile | erase |
+    update | updatefile] [<Address> | <FilePath>] <Offset> <Length>
+
+Usage
+-----
+  sf probe
+check response from SPI flash by reading its ID
+
+  sf read <Address> <Offset> <Length>
+read from SPI flash Offset into RAM at Address
+
+  sf readfile <FilePath> <Offset> <Length>
+read from SPI flash Offset into file placed at FilePath
+If file doesn't exists, command creates one
+
+  sf write <Address> <Offset> <Length>
+write data from RAM Address into SPI flash at Offset
+
+  sf writefile <FilePath> <Offset>
+write data from file placed at FilePath into SPI flash at Offset
+
+  sf erase <Offset> <Length>
+erase data in SPI flash at Offset (must be 0x10000 aligned)
+
+  sf update <Address> <Offset> <Length>
+update data from RAM Address into SPI flash at Offset,
+it firstly erases target sector, then writes data
+
+  sf updatefile <FilePath> <Offset>
+update data from file placed at FilePath into SPI flash at Offset
+it firstly erases target sector, then writes data
+
+Address  - address in RAM of data to be copied/stored (in hex)
+Offset   - offset in SPI flash to read/write (in hex)
+Length   - number of bytes to read/write/erase (in hex or dec)
+FilePath - path to file to read data into or write/update data from
+
+Examples
+--------
+Check if there is response from SPI flash
+  sf probe
+Read 32 bytes from 0xe00000 of SPI flash into RAM at address 0x100000
+  sf read 0x100000 0xe00000 32
+Read 0x20 bytes from 0x200000 of SPI flash into RAM at address 0x300000
+  sf read 0x300000 0x200000 0x20
+Erase 0x10000 bytes from offset 0x100000 of SPI flash
+  sf erase 0x100000 0x100000
+Write 16 bytes from 0x200000 at RAM into SPI flash at address 0x4000000
+  sf write 0x200000 0x4000000 16
+Update 100 bytes from 0x100000 at RAM in SPI flash at address 0xe00000
+  sf update 0x100000 0xe00000 100
+Read 0x3000 bytes from 0x0 of SPI flash into file fs2:file.bin
+  sf readfile fs2:file.bin 0x0 0x3000 
+Update data in SPI flash at 0x3000000 from file Linux.efi
+  sf update Linux.efi 0x3000000
+
+Notes
+-----
+1. Reading from SPI flash into file which does not exist, creates one.
+2. Reading from SPI flash into file which has smaller size than Length
+   parameter, enlarges this file.
+3. Reading into file overrides its previous content.
