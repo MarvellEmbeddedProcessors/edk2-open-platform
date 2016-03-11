@@ -395,6 +395,7 @@
   MdeModulePkg/Bus/I2c/I2cDxe/I2cDxe.inf
   OpenPlatformPkg/Drivers/I2c/Devices/MvEeprom/MvEeprom.inf
   OpenPlatformPkg/Drivers/Spi/SpiDxe.inf
+  OpenPlatformPkg/Drivers/Spi/Devices/MvSpiFlash.inf
 
   MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf
