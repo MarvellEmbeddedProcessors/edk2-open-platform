@@ -10,6 +10,7 @@ Table of contents:
  i2c - PortingGuide/I2c.txt
  mpp - PortingGuide/Mpp.txt
  spi - PortingGuide/Spi.txt
+ spi flash - PortingGuide/SpiFlash.txt
 
 3. Drivers guidelines
  eeprom - Drivers/EepromDriver.txt
