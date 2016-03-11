@@ -117,6 +117,11 @@
   gMarvellTokenSpaceGuid.PcdSpiRegBase|0|UINT32|0x3000051
   gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|0|UINT32|0x30000052
 
+  gMarvellTokenSpaceGuid.PcdSpiFlashAddressCycles|0|UINT32|0x3000053
+  gMarvellTokenSpaceGuid.PcdSpiFlashEraseSize|0|UINT64|0x3000054
+  gMarvellTokenSpaceGuid.PcdSpiFlashPageSize|0|UINT32|0x3000055
+  gMarvellTokenSpaceGuid.PcdSpiFlashId|0|UINT32|0x3000056
+
 [Protocols]
   gEfiEepromProtocolGuid               = { 0xcd728a1f, 0x45b5, 0x4feb, { 0x98, 0xc8, 0x31, 0x3d, 0xa8, 0x11, 0x74, 0x62 }}
   gEfiSpiMasterProtocolGuid            = { 0x23de66a3, 0xf666, 0x4b3e, { 0xaa, 0xa2, 0x68, 0x9b, 0x18, 0xae, 0x2e, 0x19 }}
