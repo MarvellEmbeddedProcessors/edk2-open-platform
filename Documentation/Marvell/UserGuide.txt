@@ -20,4 +20,5 @@ Table of contents:
 
 4. Commands
  eeprom - Commands/Eeprom.txt
+ fupdate - Commands/Fupdate.txt
  sf - Commands/Sf.txt

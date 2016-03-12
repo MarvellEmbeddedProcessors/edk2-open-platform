@@ -1,0 +1,25 @@
+FUpdate (Firmware Update) command
+---------------------------------
+fupdate UEFI command is used to update firmware.
+
+Syntax
+------
+fupdate [-f <LocalFilePath>] [-t <Host> <RemoteFilePath>]
+
+Usage
+-----
+One of the -f or -t modes must be specified. -f flag requires LocalFilePath
+parameter, while -t flag requires Host and RemoteFilePath parameters.
+-f             - update firmware from locally placed file
+-t             - update firmware from remote file located on TFTP server
+RemoteFilePath - path to firmware image file on TFTP server\n"
+Host           - IPV4 number of TFTP server\n"
+LocalFilePath  - path to local firmware image file\n"
+help           - show help message
+
+Examples
+--------
+Update firmware from file fs2:Uefi.img
+  fupdate -f fs2:Uefi.img
+Update firmware from file path/Uefi.img TFTP server with IP address 10.0.0.200
+  fupdate -t 10.0.0.200 path/Uefi.imgL"JSD: ERROR IMAGE!!\n");
