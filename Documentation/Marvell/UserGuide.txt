@@ -1,0 +1,19 @@
+User Guide
+----------
+User guide for building, launching and using UEFI.
+
+Table of contents:
+1. Build instructions
+ Build.txt
+
+2. Porting guide
+ i2c - PortingGuide/I2c.txt
+ mpp - PortingGuide/Mpp.txt
+ ramdisk - PortingGuide/Ramdisk.txt
+ spi - PortingGuide/Spi.txt
+ spi flash - PortingGuide/SpiFlash.txt
+
+3. Drivers guidelines
+ eeprom - Drivers/EepromDriver.txt
+ i2c - Drivers/I2cDriver.txt
+ spi - Drivers/SpiDriver.txt
