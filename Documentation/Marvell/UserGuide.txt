@@ -9,6 +9,7 @@ Table of contents:
 2. Porting guide
  i2c - PortingGuide/I2c.txt
  mpp - PortingGuide/Mpp.txt
+ pci emulation - PortingGuide/PciEmulation.txt
  ramdisk - PortingGuide/Ramdisk.txt
  spi - PortingGuide/Spi.txt
  spi flash - PortingGuide/SpiFlash.txt
