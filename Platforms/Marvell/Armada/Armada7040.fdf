@@ -109,6 +109,9 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   INF OpenPlatformPkg/Drivers/Spi/Devices/MvSpiFlash.inf
   INF OpenPlatformPkg/Drivers/Ramdisk/Ramdisk.inf
 
+  # PciEmulation
+  INF OpenPlatformPkg/Platforms/Marvell/PciEmulation/PciEmulation.inf
+
   # Multiple Console IO support
   INF MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
   INF MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
