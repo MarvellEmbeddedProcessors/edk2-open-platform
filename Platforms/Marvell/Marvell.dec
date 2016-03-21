@@ -209,6 +209,12 @@
   gMarvellTokenSpaceGuid.PcdPp2XlgBaseAddress|0|UINT64|0x3000031
   gMarvellTokenSpaceGuid.PcdPp2XlgDevSize|0|UINT32|0x3000032
 
+#PciEmulation
+  gMarvellTokenSpaceGuid.PcdPciEDevBaseAddress|{ 0x0 }|VOID*|0x30000058
+  gMarvellTokenSpaceGuid.PcdPciEDevCount|0|UINT32|0x30000059
+  gMarvellTokenSpaceGuid.PcdPciEDevType|{ 0x0 }|VOID*|0x3000005A
+  gMarvellTokenSpaceGuid.PcdPciEDmaType|{ 0x0 }|VOID*|0x3000005B
+
 #ResetLib
   gMarvellTokenSpaceGuid.PcdResetRegAddress|0|UINT64|0x40000050
   gMarvellTokenSpaceGuid.PcdResetRegMask|0|UINT32|0x4000051
