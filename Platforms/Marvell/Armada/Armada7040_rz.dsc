@@ -94,3 +94,6 @@
 
   #RamDisk
   gMarvellTokenSpaceGuid.PcdRamDiskSize|64 #64MB
+
+[Components.common]
+  OpenPlatformPkg/Platforms/Marvell/PciEmulation/PciEmulation.inf
