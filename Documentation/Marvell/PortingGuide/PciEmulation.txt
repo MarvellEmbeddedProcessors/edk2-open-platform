@@ -1,0 +1,53 @@
+PciEmulation configuration
+--------------------------
+Instalation of various Pci devices via PciEmulation driver is performed via set
+of PCDs. Following are available:
+
+ gMarvellTokenSpaceGuid.PcdPciEDevCount
+
+Indicates how many fake Pci devices are placed on board.
+
+Next five PCDs are in unicode string format containing settings for all devices
+separated with semicolon.
+
+ gMarvellTokenSpaceGuid.PcdPciEDevBaseAddress
+
+Indicates base address of Pci device register space.
+
+ gMarvellTokenSpaceGuid.PcdPciEDevRegSize
+
+Indicates size of Pci device register space.
+
+ gMarvellTokenSpaceGuid.PcdPciEDevClassCode1
+
+Indicates device subclass code.
+
+ gMarvellTokenSpaceGuid.PcdPciEDevClassCode2
+
+Indicates device class code.
+
+ gMarvellTokenSpaceGuid.PcdPciEDevClassCode3
+
+Indicates Pci device class code.
+
+Examples
+--------
+Assuming that there is two fake Pci xHCI controllers with register space
+0xF2500000 - 0xF2510000 and 0xF2510000 - 0xF2520000 following PCDs values should
+be set:
+
+  gMarvellTokenSpaceGuid.PcdPciEDevCount|2
+  gMarvellTokenSpaceGuid.PcdPciEDevBaseAddress|L"0xF2500000;0xF2510000"
+  gMarvellTokenSpaceGuid.PcdPciEDevRegSize|L"0x10000;0x10000"
+  ## XHCI subclass
+  gMarvellTokenSpaceGuid.PcdPciEDevClassCode1|L"0x30;0x30"
+  ## USB controller class
+  gMarvellTokenSpaceGuid.PcdPciEDevClassCode2|L"0x03;0x03"
+  ## Serial bus controller Pci device class
+  gMarvellTokenSpaceGuid.PcdPciEDevClassCode3|L"0x0C;0x0C"
+
+Notes
+-----
+1.In order to find proper values for Pci class codes, please refer to
+  PCI Local Bus Specification.
+2.PCDs are configured via UNICODE strings - remember to add L marker.
