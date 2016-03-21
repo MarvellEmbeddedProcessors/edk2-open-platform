@@ -1,0 +1,46 @@
+PciEmulation configuration
+--------------------------
+Installation of various NonDiscoverable devices via PciEmulation driver is performed
+via set of PCDs. Following are available:
+
+ gMarvellTokenSpaceGuid.PcdPciEDevCount
+
+Indicates amount of used devices.
+
+Below PCD is an unicode string format, containing settings for all devices
+separated with semicolon. It indicates base address of register space:
+
+ gMarvellTokenSpaceGuid.PcdPciEDevBaseAddress
+
+Devices' types are represented in an array comprising hexadecimal values:
+
+ gMarvellTokenSpaceGuid.PcdPciEDevType
+
+They correspond to DEV_TYPE enum:
+  typedef enum {
+  0 DEV_XHCI,
+  1 DEV_AHCI,
+  2 DEV_SDHCI,
+  3 DEV_MAX
+  } DEV_TYPE;
+
+Devices' DMA types are represented in an array comprising hexadecimal values:
+
+ gMarvellTokenSpaceGuid.PcdPciEDmaType
+
+They correspond to DMA_TYPE enum:
+  typedef enum {
+  0 DMA_COHERENT,
+  1 DMA_NONCOHERENT,
+  2 DMA_TYPE_MAX
+  } DMA_TYPE;
+
+Examples
+--------
+Assuming that there are two XHCI controllers with register space starting at
+0xF2500000 and 0xF2510000, with coherent DMA, following PCD values should be set:
+
+  gMarvellTokenSpaceGuid.PcdPciEDevCount|2
+  gMarvellTokenSpaceGuid.PcdPciEDevBaseAddress|L"0xF2500000;0xF2510000"
+  gMarvellTokenSpaceGuid.PcdPciEDevType|{ 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPciEDmaType|{ 0x0, 0x0 }
