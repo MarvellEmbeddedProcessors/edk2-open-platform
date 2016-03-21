@@ -139,6 +139,13 @@
   gMarvellTokenSpaceGuid.PcdPp2XlgBaseAddress|0xf2130f00
   gMarvellTokenSpaceGuid.PcdPp2XlgDevSize|0x1000
 
+  #PciEmulation
+  gMarvellTokenSpaceGuid.PcdPciEDevCount|2
+                                                ## XHCI1       XHCI2
+  gMarvellTokenSpaceGuid.PcdPciEDevBaseAddress|L"0xF2500000;0xF2510000"
+  gMarvellTokenSpaceGuid.PcdPciEDevType|{ 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPciEDmaType|{ 0x0, 0x0 }
+
   #ResetLib
   gMarvellTokenSpaceGuid.PcdResetRegAddress|0xf06f0084
   gMarvellTokenSpaceGuid.PcdResetRegMask|0x1
