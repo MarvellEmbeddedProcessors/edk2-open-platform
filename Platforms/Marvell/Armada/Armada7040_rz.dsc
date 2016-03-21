@@ -97,3 +97,6 @@
 
 [Components.common]
   OpenPlatformPkg/Platforms/Marvell/PciEmulation/PciEmulation.inf
+  MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
+  MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
+  MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
