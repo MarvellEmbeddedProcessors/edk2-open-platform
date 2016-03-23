@@ -94,3 +94,7 @@
 
   #RamDisk
   gMarvellTokenSpaceGuid.PcdRamDiskSize|64 #64MB
+
+  #ResetLib
+  gMarvellTokenSpaceGuid.PcdResetRegAddress|0xf06f0084
+  gMarvellTokenSpaceGuid.PcdResetRegMask|0x1
