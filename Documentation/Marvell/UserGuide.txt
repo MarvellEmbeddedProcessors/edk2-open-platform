@@ -15,6 +15,7 @@ Table of contents:
  pci emulation - PortingGuide/PciEmulation.txt
  phy - PortingGuide/Phy.txt
  ramdisk - PortingGuide/Ramdisk.txt
+ reset library - PortingGuide/Reset.txt
  spi - PortingGuide/Spi.txt
  spi flash - PortingGuide/SpiFlash.txt
  usb - PortingGuide/PciEmulation.txt
