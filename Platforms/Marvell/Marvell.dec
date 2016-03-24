@@ -346,6 +346,20 @@
   gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0 }|VOID*|0x3000044
   gMarvellTokenSpaceGuid.PcdPhyStartupAutoneg|FALSE|BOOLEAN|0x3000070
 #
+#NET
+  gMarvellTokenSpaceGuid.PcdPhySmiAddresses|{ 0 }|VOID*|0x3000024
+  gMarvellTokenSpaceGuid.PcdPp2SharedAddress|0|UINT64|0x40000026
+  gMarvellTokenSpaceGuid.PcdPp2PortNumber|0|UINT32|0x40000013
+  gMarvellTokenSpaceGuid.PcdPp2PortIds|{ 0 }|VOID*|0x3000025
+  gMarvellTokenSpaceGuid.PcdPp2GopIndexes|{ 0 }|VOID*|0x3000041
+  gMarvellTokenSpaceGuid.PcdPp2GmacBaseAddress|0|UINT64|0x40000028
+  gMarvellTokenSpaceGuid.PcdPp2GmacObjSize|0|UINT32|0x3000026
+  gMarvellTokenSpaceGuid.PcdPp2XlgBaseAddress|0|UINT64|0x40000031
+  gMarvellTokenSpaceGuid.PcdPp2XlgObjSize|0|UINT32|0x3000030
+  gMarvellTokenSpaceGuid.PcdPp2Rfu1BaseAddress|0|UINT64|0x40000029
+  gMarvellTokenSpaceGuid.PcdPp2SmiBaseAddress|0|UINT64|0x40000030
+  gMarvellTokenSpaceGuid.PcdPp2ClockFrequency|0|UINT32|0x3000042
+
 [Protocols]
   gEfiEepromProtocolGuid               = { 0xcd728a1f, 0x45b5, 0x4feb, { 0x98, 0xc8, 0x31, 0x3d, 0xa8, 0x11, 0x74, 0x62 }}
   gEfiSpiMasterProtocolGuid            = { 0x23de66a3, 0xf666, 0x4b3e, { 0xaa, 0xa2, 0x68, 0x9b, 0x18, 0xae, 0x2e, 0x19 }}

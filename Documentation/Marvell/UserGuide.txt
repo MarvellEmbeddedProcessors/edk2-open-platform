@@ -15,6 +15,7 @@ Table of contents:
  mpp - PortingGuide/Mpp.txt
  pci emulation - PortingGuide/PciEmulation.txt
  phy - PortingGuide/Phy.txt
+ pp2 - PortingGuide/Pp2.txt
  ramdisk - PortingGuide/Ramdisk.txt
  spi - PortingGuide/Spi.txt
  spi flash - PortingGuide/SpiFlash.txt
