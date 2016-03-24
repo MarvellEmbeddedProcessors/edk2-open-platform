@@ -110,3 +110,8 @@
 
   #MDIO
   gMarvellTokenSpaceGuid.PcdMdioBaseAddress|0xF212A200
+
+  #PHY
+  gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPhyDeviceIds|{ 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPhyStartupAutoneg|FALSE

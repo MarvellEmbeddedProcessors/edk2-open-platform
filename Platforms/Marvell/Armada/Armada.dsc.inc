@@ -404,6 +404,7 @@
   MdeModulePkg/Universal/Network/Udp4Dxe/Udp4Dxe.inf
   MdeModulePkg/Universal/Network/Tcp4Dxe/Tcp4Dxe.inf
   OpenPlatformPkg/Drivers/Net/MvMdioDxe/MvMdioDxe.inf
+  OpenPlatformPkg/Drivers/Net/Phy/MvPhyDxe/MvPhyDxe.inf
 
   MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf
