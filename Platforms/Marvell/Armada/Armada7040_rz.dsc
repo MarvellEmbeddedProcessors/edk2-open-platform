@@ -145,3 +145,6 @@
   gMarvellTokenSpaceGuid.PcdIcuCpBase|0xF2000000
   gMarvellTokenSpaceGuid.PcdIcuSpiBase|64
   gMarvellTokenSpaceGuid.PcdIcuSpiOffset|0
+
+#MDIO
+  gMarvellTokenSpaceGuid.PcdMdioBaseAddress|0xF212A200
