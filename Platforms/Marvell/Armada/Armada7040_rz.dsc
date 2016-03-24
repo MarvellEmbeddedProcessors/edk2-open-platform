@@ -138,3 +138,6 @@
   gMarvellTokenSpaceGuid.PcdUtmiPhyRegUsbCfg|L"0xF2440420;0xF2440420"
   gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiCfg|L"0xF2440440;0xF2440444"
   gMarvellTokenSpaceGuid.PcdUtmiPhyUtmiPort|L"0x0;0x1"
+
+  #MDIO
+  gMarvellTokenSpaceGuid.PcdMdioBaseAddress|0xF212A200
