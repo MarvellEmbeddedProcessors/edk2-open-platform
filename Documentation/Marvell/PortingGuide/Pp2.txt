@@ -1,0 +1,43 @@
+Pp2Dxe porting guide
+--------------------
+Pp2Dxe is driver supporting PP2 NIC on Marvell platforms. Following PCDs
+are required to operate:
+
+  gMarvellTokenSpaceGuid.PcdPp2PortNumber
+  (number of ports/network interfaces)
+
+  gMarvellTokenSpaceGuid.PcdPhySmiAddresses
+  (addresses of PHY devices)
+
+  gMarvellTokenSpaceGuid.PcdPp2PortIds
+  (identificators of PP2 ports)
+
+  gMarvellTokenSpaceGuid.PcdPp2GopIndexes
+  (indexes used in GOP operation)
+
+  gMarvellTokenSpaceGuid.PcdPp2SharedAddress
+  (base address of shared register space of PP2)
+
+  gMarvellTokenSpaceGuid.PcdPp2GmacObjSize
+  (spacing between consecutive GMAC register spaces)
+
+  gMarvellTokenSpaceGuid.PcdPp2GmacBaseAddress
+  (base address of GMAC)
+
+  gMarvellTokenSpaceGuid.PcdPp2XlgObjSize
+  (spacing between consecutive XLG register spaces)
+
+  gMarvellTokenSpaceGuid.PcdPp2XlgBaseAddress
+  (base address of XLG)
+
+  gMarvellTokenSpaceGuid.PcdPp2Rfu1BaseAddress
+  (base address of RFU1)
+
+  gMarvellTokenSpaceGuid.PcdPp2SmiBaseAddress
+  (base address of SMI)
+
+  gMarvellTokenSpaceGuid.PcdPp2ClockFrequency
+  (TCLK frequency)
+
+GMAC and XLG addresses are computed as follows:
+  address = base_address + obj_size * gop_index
