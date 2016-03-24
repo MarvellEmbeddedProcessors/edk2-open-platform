@@ -152,3 +152,17 @@
 #PHY
   gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdPhyStartupAutoneg|FALSE
+
+#NET
+  gMarvellTokenSpaceGuid.PcdPhySmiAddresses|{ 0x0, 0x1 }
+  gMarvellTokenSpaceGuid.PcdPp2PortNumber|2
+  gMarvellTokenSpaceGuid.PcdPp2PortIds|{ 0x1, 0x2 }
+  gMarvellTokenSpaceGuid.PcdPp2GopIndexes|{ 0x2, 0x3 }
+  gMarvellTokenSpaceGuid.PcdPp2SharedAddress|0xf2000000
+  gMarvellTokenSpaceGuid.PcdPp2GmacBaseAddress|0xf2130e00
+  gMarvellTokenSpaceGuid.PcdPp2GmacObjSize|0x1000
+  gMarvellTokenSpaceGuid.PcdPp2XlgBaseAddress|0xf2130f00
+  gMarvellTokenSpaceGuid.PcdPp2XlgObjSize|0x1000
+  gMarvellTokenSpaceGuid.PcdPp2Rfu1BaseAddress|0xf2441000
+  gMarvellTokenSpaceGuid.PcdPp2SmiBaseAddress|0xf212A200
+  gMarvellTokenSpaceGuid.PcdPp2ClockFrequency|200000000
