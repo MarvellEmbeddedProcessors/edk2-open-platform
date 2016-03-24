@@ -128,6 +128,7 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   INF MdeModulePkg/Universal/Network/Mtftp4Dxe/Mtftp4Dxe.inf
   INF MdeModulePkg/Universal/Network/Udp4Dxe/Udp4Dxe.inf
   INF MdeModulePkg/Universal/Network/Tcp4Dxe/Tcp4Dxe.inf
+  INF OpenPlatformPkg/Drivers/Net/Pp2Dxe/Pp2Dxe.inf
   INF OpenPlatformPkg/Drivers/Net/MdioDxe/MdioDxe.inf
   INF OpenPlatformPkg/Drivers/Net/MvPhyDxe/MvPhyDxe.inf
 
