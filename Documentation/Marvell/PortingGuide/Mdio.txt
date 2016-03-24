@@ -1,0 +1,7 @@
+MDIO driver configuration
+-------------------------
+MDIO driver provides access to PHYs' registers via EFI_MDIO_READ and
+EFI_MDIO_WRITE functions (EFI_MDIO_PROTOCOL). Following PCD is required:
+
+  gMarvellTokenSpaceGuid.PcdMdioBaseAddress
+  (base address of SMI management register)
