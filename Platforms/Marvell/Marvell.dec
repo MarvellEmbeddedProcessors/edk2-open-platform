@@ -136,6 +136,204 @@
   gMarvellTokenSpaceGuid.PcdPciEDevClassCode2|{ 0 }|VOID*|0x30000062
   gMarvellTokenSpaceGuid.PcdPciEDevClassCode3|{ 0 }|VOID*|0x30000063
 
+#ComPhy
+  #Chip0
+  gMarvellTokenSpaceGuid.PcdComPhyChipCount|0|UINT32|0x30000098
+
+  gMarvellTokenSpaceGuid.PcdChip0Type|{ 0 }|VOID*|0x30000064
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyBaseAddress|0|UINT64|0x30000065
+  gMarvellTokenSpaceGuid.PcdChip0Hpipe3BaseAddress|0|UINT64|0x30000066
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyMuxBitCount|0|UINT32|0x30000067
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyMaxLanes|0|UINT32|0x30001267
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane0|{ 0 }|VOID*|0x30000068
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane0|0|UINT32|0x30000069
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag0|FALSE|BOOLEAN|0x30000070
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane1|{ 0 }|VOID*|0x30000071
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane1|0|UINT32|0x30000072
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag1|FALSE|BOOLEAN|0x30000073
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane2|{ 0 }|VOID*|0x30000074
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane2|0|UINT32|0x30000075
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag2|FALSE|BOOLEAN|0x30000076
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane3|{ 0 }|VOID*|0x30000077
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane3|0|UINT32|0x30000078
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag3|FALSE|BOOLEAN|0x30000079
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane4|{ 0 }|VOID*|0x30000080
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane4|0|UINT32|0x30000081
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag4|FALSE|BOOLEAN|0x30000082
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane5|{ 0 }|VOID*|0x30000083
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane5|0|UINT32|0x30000084
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag5|FALSE|BOOLEAN|0x30000085
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane6|{ 0 }|VOID*|0x30000086
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane6|0|UINT32|0x30000087
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag6|FALSE|BOOLEAN|0x30000088
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane7|{ 0 }|VOID*|0x30000089
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane7|0|UINT32|0x30000090
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag7|FALSE|BOOLEAN|0x30000091
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane8|{ 0 }|VOID*|0x30000092
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane8|0|UINT32|0x30000093
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag8|FALSE|BOOLEAN|0x30000094
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane9|{ 0 }|VOID*|0x30000095
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane9|0|UINT32|0x30000096
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag9|FALSE|BOOLEAN|0x30000097
+
+  #Chip1
+  gMarvellTokenSpaceGuid.PcdChip1Type|{ 0 }|VOID*|0x30000100
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyBaseAddress|0|UINT64|0x30000101
+  gMarvellTokenSpaceGuid.PcdChip1Hpipe3BaseAddress|0|UINT64|0x30000102
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyMuxBitCount|0|UINT32|0x30000103
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyMaxLanes|0|UINT32|0x30001304
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane0|{ 0 }|VOID*|0x30000105
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane0|0|UINT32|0x30000106
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag0|FALSE|BOOLEAN|0x30000107
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane1|{ 0 }|VOID*|0x30000108
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane1|0|UINT32|0x30000109
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag1|FALSE|BOOLEAN|0x30000110
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane2|{ 0 }|VOID*|0x30000111
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane2|0|UINT32|0x30000112
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag2|FALSE|BOOLEAN|0x30000113
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane3|{ 0 }|VOID*|0x30000114
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane3|0|UINT32|0x30000115
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag3|FALSE|BOOLEAN|0x30000116
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane4|{ 0 }|VOID*|0x30000117
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane4|0|UINT32|0x30000118
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag4|FALSE|BOOLEAN|0x30000119
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane5|{ 0 }|VOID*|0x30000120
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane5|0|UINT32|0x30000121
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag5|FALSE|BOOLEAN|0x30000122
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane6|{ 0 }|VOID*|0x30000123
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane6|0|UINT32|0x30000124
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag6|FALSE|BOOLEAN|0x30000125
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane7|{ 0 }|VOID*|0x30000126
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane7|0|UINT32|0x30000127
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag7|FALSE|BOOLEAN|0x30000128
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane8|{ 0 }|VOID*|0x30000129
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane8|0|UINT32|0x30000130
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag8|FALSE|BOOLEAN|0x30000131
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane9|{ 0 }|VOID*|0x30000132
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane9|0|UINT32|0x30000133
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag9|FALSE|BOOLEAN|0x30000134
+
+  #Chip2
+  gMarvellTokenSpaceGuid.PcdChip2Type|{ 0 }|VOID*|0x30000135
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyBaseAddress|0|UINT64|0x30000136
+  gMarvellTokenSpaceGuid.PcdChip2Hpipe3BaseAddress|0|UINT64|0x30000137
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyMuxBitCount|0|UINT32|0x30000138
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyMaxLanes|0|UINT32|0x30000139
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane0|{ 0 }|VOID*|0x30000140
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane0|0|UINT32|0x30000141
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag0|FALSE|BOOLEAN|0x30000142
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane1|{ 0 }|VOID*|0x30000143
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane1|0|UINT32|0x30000144
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag1|FALSE|BOOLEAN|0x30000145
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane2|{ 0 }|VOID*|0x30000146
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane2|0|UINT32|0x30000147
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag2|FALSE|BOOLEAN|0x30000148
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane3|{ 0 }|VOID*|0x30000149
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane3|0|UINT32|0x30000150
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag3|FALSE|BOOLEAN|0x30000151
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane4|{ 0 }|VOID*|0x30000152
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane4|0|UINT32|0x30000153
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag4|FALSE|BOOLEAN|0x30000154
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane5|{ 0 }|VOID*|0x30000155
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane5|0|UINT32|0x30000156
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag5|FALSE|BOOLEAN|0x30000157
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane6|{ 0 }|VOID*|0x30000158
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane6|0|UINT32|0x30000159
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag6|FALSE|BOOLEAN|0x30000160
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane7|{ 0 }|VOID*|0x30000161
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane7|0|UINT32|0x30000162
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag7|FALSE|BOOLEAN|0x30000163
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane8|{ 0 }|VOID*|0x30000164
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane8|0|UINT32|0x30000165
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag8|FALSE|BOOLEAN|0x30000166
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane9|{ 0 }|VOID*|0x30000167
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane9|0|UINT32|0x30000168
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag9|FALSE|BOOLEAN|0x30000169
+
+  #Chip3
+  gMarvellTokenSpaceGuid.PcdChip3Type|{ 0 }|VOID*|0x30000170
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyBaseAddress|0|UINT64|0x30000171
+  gMarvellTokenSpaceGuid.PcdChip3Hpipe3BaseAddress|0|UINT64|0x30000172
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyMuxBitCount|0|UINT32|0x30000173
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyMaxLanes|0|UINT32|0x30000174
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane0|{ 0 }|VOID*|0x30000175
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane0|0|UINT32|0x30000176
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag0|FALSE|BOOLEAN|0x30000177
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane1|{ 0 }|VOID*|0x30000178
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane1|0|UINT32|0x30000179
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag1|FALSE|BOOLEAN|0x30000180
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane2|{ 0 }|VOID*|0x30000181
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane2|0|UINT32|0x30000182
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag2|FALSE|BOOLEAN|0x30000183
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane3|{ 0 }|VOID*|0x30000184
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane3|0|UINT32|0x30000185
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag3|FALSE|BOOLEAN|0x30000186
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane4|{ 0 }|VOID*|0x30000187
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane4|0|UINT32|0x30000188
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag4|FALSE|BOOLEAN|0x30000189
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane5|{ 0 }|VOID*|0x30000190
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane5|0|UINT32|0x30000191
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag5|FALSE|BOOLEAN|0x30000192
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane6|{ 0 }|VOID*|0x30000193
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane6|0|UINT32|0x30000194
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag6|FALSE|BOOLEAN|0x30000195
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane7|{ 0 }|VOID*|0x30000196
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane7|0|UINT32|0x30000197
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag7|FALSE|BOOLEAN|0x30000198
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane8|{ 0 }|VOID*|0x30000199
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane8|0|UINT32|0x30000200
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag8|FALSE|BOOLEAN|0x30000201
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane9|{ 0 }|VOID*|0x30000202
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane9|0|UINT32|0x30000203
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag9|FALSE|BOOLEAN|0x30000204
+
+  #UtmiPhy
+  gMarvellTokenSpaceGuid.PcdUtmiPhyCount|0|UINT32|0x30000205
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiUnit|{ 0 }|VOID*|0x30000206
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUsbCfg|{ 0 }|VOID*|0x30000207
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiCfg|{ 0 }|VOID*|0x30000208
+  gMarvellTokenSpaceGuid.PcdUtmiPhyUtmiPort|{ 0 }|VOID*|0x30000209
+
 [Protocols]
   gEfiEepromProtocolGuid               = { 0xcd728a1f, 0x45b5, 0x4feb, { 0x98, 0xc8, 0x31, 0x3d, 0xa8, 0x11, 0x74, 0x62 }}
   gEfiSpiMasterProtocolGuid            = { 0x23de66a3, 0xf666, 0x4b3e, { 0xaa, 0xa2, 0x68, 0x9b, 0x18, 0xae, 0x2e, 0x19 }}

@@ -1,0 +1,87 @@
+COMPHY configuration
+---------------------------
+In order to configure ComPhy library, following PCDs are available:
+
+  gMarvellTokenSpaceGuid.PcdComPhyChipCount
+
+Indicates how many different chips are placed on board. So far, up to 4 chips
+are supported.
+
+Every ComPhy PCD has <Num> part where <Num> stands for chip ID (order is not
+important, but configuration will be set for first PcdComPhyChipCount chips).
+
+Every chip has 5 general PCDs and up to 10 sets of lane configuration PCDs.
+Below is example for the first chip (Chip0).
+
+General PCDs:
+
+  gMarvellTokenSpaceGuid.PcdChip0Type
+
+Unicode string indicating type of chip - currently supported are L"Ap806" and
+L"Cp110".
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyBaseAddress
+
+Indicates COMPHY unit base address.
+
+  gMarvellTokenSpaceGuid.PcdChip0Hpipe3BaseAddress
+
+Indicates Hpipe3 unit base address.
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyMuxBitCount
+
+Indicates number of bits that are allocated for every MUX in the
+COMPHY-selector register.
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyMaxLanes
+
+Indicates maximum ComPhy lanes number.
+
+Lane configuration is performed via 3 PCD, which have format
+
+  PcdChip<Num>ComPhy<Setting><LaneNum>
+
+Below is example for the first chip (Chip0) and second Lane (Lane1).
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane1
+
+Unicode string indicating PHY type. For supported strings please refer to
+/path/to/opp/Platforms/Marvell/Library/ComPhyLib/ComPhyLib.c .
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane1
+
+Indicates PHY speed in MHz. For supported values please refer to
+/path/to/opp/Platforms/Marvell/Library/ComPhyLib/ComPhyLib.c .
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag1
+
+Indicates lane polarity invert.
+
+Example
+-------
+#ComPhy
+  gMarvellTokenSpaceGuid.PcdComPhyChipCount|1
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyMaxLanes|6
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyBaseAddress|0xF2441000
+  gMarvellTokenSpaceGuid.PcdChip0Hpipe3BaseAddress|0xF2120000
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyMuxBitCount|4
+  gMarvellTokenSpaceGuid.PcdChip0Type|L"Cp110"
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane0|L"SGMII2"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane0|1250
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane1|L"USB3_HOST0"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane1|5000
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane2|L"SGMII0"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane2|1250
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane3|L"SATA1"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane3|5000
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane4|L"USB3_HOST1"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane4|5000
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane5|L"PEX2"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane5|5000

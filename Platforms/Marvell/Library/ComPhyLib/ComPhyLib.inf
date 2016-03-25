@@ -1,0 +1,257 @@
+# Copyright (C) 2016 Marvell International Ltd.
+#
+# Marvell BSD License Option
+#
+# If you received this File from Marvell, you may opt to use, redistribute and/or
+# modify this File under the following licensing terms.
+# Redistribution and use in source and binary forms, with or without modification,
+# are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice,
+#   this list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright
+#   notice, this list of conditions and the following disclaimer in the
+#   documentation and/or other materials provided with the distribution.
+#
+# * Neither the name of Marvell nor the names of its contributors may be
+#   used to endorse or promote products derived from this software without
+#   specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+# ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = MarvellComPhyLib
+  FILE_GUID                      = 3314541a-9647-4a37-b8c6-24e000900e4e
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = ComPhyLib
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  ArmPkg/ArmPkg.dec
+  ShellPkg/ShellPkg.dec
+  ArmPlatformPkg/ArmPlatformPkg.dec
+  OpenPlatformPkg/Platforms/Marvell/Marvell.dec
+
+[LibraryClasses]
+  ArmLib
+  DebugLib
+  MemoryAllocationLib
+  PcdLib
+  IoLib
+  ParsePcdLib
+
+[Sources.common]
+  ComPhyLib.c
+  ComPhyCp110.c
+  ComPhyAp806.c
+  ComPhyMux.c
+
+[FixedPcd]
+  gMarvellTokenSpaceGuid.PcdUtmiPhyCount
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiUnit
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUsbCfg
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiCfg
+  gMarvellTokenSpaceGuid.PcdUtmiPhyUtmiPort
+
+  gMarvellTokenSpaceGuid.PcdComPhyChipCount
+
+  gMarvellTokenSpaceGuid.PcdChip0Type
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyBaseAddress
+  gMarvellTokenSpaceGuid.PcdChip0Hpipe3BaseAddress
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyMuxBitCount
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyMaxLanes
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane0
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane0
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag0
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane1
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane1
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag1
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane2
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane2
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag2
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane3
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane3
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag3
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane4
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane4
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag4
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane5
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane5
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag5
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane6
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane6
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag6
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane7
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane7
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag7
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane8
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane8
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag8
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane9
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane9
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlag9
+
+  #Chi
+  gMarvellTokenSpaceGuid.PcdChip1Type
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyBaseAddress
+  gMarvellTokenSpaceGuid.PcdChip1Hpipe3BaseAddress
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyMuxBitCount
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyMaxLanes
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane0
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane0
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag0
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane1
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane1
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag1
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane2
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane2
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag2
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane3
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane3
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag3
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane4
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane4
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag4
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane5
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane5
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag5
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane6
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane6
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag6
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane7
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane7
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag7
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane8
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane8
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag8
+
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyLane9
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeedLane9
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlag9
+
+  #Chi
+  gMarvellTokenSpaceGuid.PcdChip2Type
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyBaseAddress
+  gMarvellTokenSpaceGuid.PcdChip2Hpipe3BaseAddress
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyMuxBitCount
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyMaxLanes
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane0
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane0
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag0
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane1
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane1
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag1
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane2
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane2
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag2
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane3
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane3
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag3
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane4
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane4
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag4
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane5
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane5
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag5
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane6
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane6
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag6
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane7
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane7
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag7
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane8
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane8
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag8
+
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyLane9
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeedLane9
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlag9
+
+  #Chi
+  gMarvellTokenSpaceGuid.PcdChip3Type
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyBaseAddress
+  gMarvellTokenSpaceGuid.PcdChip3Hpipe3BaseAddress
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyMuxBitCount
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyMaxLanes
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane0
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane0
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag0
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane1
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane1
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag1
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane2
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane2
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag2
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane3
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane3
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag3
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane4
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane4
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag4
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane5
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane5
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag5
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane6
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane6
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag6
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane7
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane7
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag7
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane8
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane8
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag8
+
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyLane9
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeedLane9
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlag9
