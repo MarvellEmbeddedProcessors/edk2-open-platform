@@ -119,3 +119,15 @@
   #SATA
   gMarvellTokenSpaceGuid.PcdSataBaseAddress|0xF2540000
   gMarvellTokenSpaceGuid.PcdSataMapPortAddress|TRUE
+
+  #ComPhy
+  gMarvellTokenSpaceGuid.PcdComPhyChipCount|1
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyMaxLanes|6
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyBaseAddress|0xF2441000
+  gMarvellTokenSpaceGuid.PcdChip0Hpipe3BaseAddress|0xF2120000
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyMuxBitCount|4
+  gMarvellTokenSpaceGuid.PcdChip0Compatible|L"Cp110"
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|L"SGMII2;USB3_HOST0;SGMII0;SATA1;USB3_HOST1;PCIE2"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|L"1250;5000;1250;5000;5000;5000"

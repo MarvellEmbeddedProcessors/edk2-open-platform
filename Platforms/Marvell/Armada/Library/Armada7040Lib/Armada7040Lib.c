@@ -15,6 +15,7 @@
 #include <Library/ArmLib.h>
 #include <Library/ArmPlatformLib.h>
 #include <Library/MppLib.h>
+#include <Library/ComPhyLib.h>
 #include <Ppi/ArmMpCoreInfo.h>
 #include "Armada7040IcuLib.h"
 
@@ -92,6 +93,7 @@ ArmPlatformInitialize (
   }
 
   IcuInit ();
+  ComPhyInit ();
   MppInitialize ();
   return RETURN_SUCCESS;
 }
