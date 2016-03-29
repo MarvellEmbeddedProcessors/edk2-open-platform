@@ -47,6 +47,7 @@
 
 [LibraryClasses]
   ArmLib
+  ComPhyLib
   DebugLib
   MemoryAllocationLib
   MppLib
