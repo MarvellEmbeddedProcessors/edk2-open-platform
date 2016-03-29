@@ -106,3 +106,37 @@
   gMarvellTokenSpaceGuid.PcdPciEDevClassCode2|L"0x03;0x03"
   ## ClassCode3
   gMarvellTokenSpaceGuid.PcdPciEDevClassCode3|L"0x0C;0x0C"
+
+  #ComPhy
+  gMarvellTokenSpaceGuid.PcdComPhyChipCount|1
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyMaxLanes|6
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyBaseAddress|0xF2441000
+  gMarvellTokenSpaceGuid.PcdChip0Hpipe3BaseAddress|0xF2120000
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyMuxBitCount|4
+  gMarvellTokenSpaceGuid.PcdChip0Type|L"Cp110"
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane0|L"SGMII2"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane0|1250
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane1|L"USB3_HOST0"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane1|5000
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane2|L"SGMII0"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane2|1250
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane3|L"SATA1"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane3|5000
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane4|L"USB3_HOST1"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane4|5000
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane5|L"PEX2"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane5|5000
+
+  #UtmiPhy
+  gMarvellTokenSpaceGuid.PcdUtmiPhyCount|2
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiUnit|L"0xF2580000;0xF2581000"
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUsbCfg|L"0xF2440420;0xF2440420"
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiCfg|L"0xF2440440;0xF2440444"
+  gMarvellTokenSpaceGuid.PcdUtmiPhyUtmiPort|L"0x0;0x1"
