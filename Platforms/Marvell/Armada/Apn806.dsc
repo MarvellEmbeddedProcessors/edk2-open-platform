@@ -82,3 +82,24 @@
 
   #RamDisk
   gMarvellTokenSpaceGuid.PcdRamDiskSize|64 #64MB
+
+  #ComPhy
+  gMarvellTokenSpaceGuid.PcdComPhyChipCount|1
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyMaxLanes|4
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyBaseAddress|0xF06F0000
+  gMarvellTokenSpaceGuid.PcdChip0Hpipe3BaseAddress|0xF0070000
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyMuxBitCount|1
+  gMarvellTokenSpaceGuid.PcdChip0Type|L"Ap806"
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane0|L"PEX0"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane0|5000
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane1|L"PEX0"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane1|5000
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane2|L"PEX0"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane2|5000
+
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyLane3|L"PEX0"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeedLane3|5000
