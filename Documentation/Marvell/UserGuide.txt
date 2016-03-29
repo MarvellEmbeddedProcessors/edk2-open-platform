@@ -9,6 +9,7 @@ Table of contents:
 2. Porting guide
  comphy - PortingGuide/ComPhy.txt
  i2c - PortingGuide/I2c.txt
+ icu - PortingGuide/IcuLib.txt
  mpp - PortingGuide/Mpp.txt
  pci emulation - PortingGuide/PciEmulation.txt
  ramdisk - PortingGuide/Ramdisk.txt
