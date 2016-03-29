@@ -36,6 +36,7 @@
 [Sources.common]
   Armada7040Lib.c
   Armada7040LibMem.c
+  Armada7040IcuLib.c
 
 [Sources.AArch64]
   AArch64/ArmPlatformHelper.S
@@ -46,3 +47,7 @@
 
   gArmTokenSpaceGuid.PcdArmPrimaryCoreMask
   gArmTokenSpaceGuid.PcdArmPrimaryCore
+
+  gMarvellTokenSpaceGuid.PcdIcuCpBase
+  gMarvellTokenSpaceGuid.PcdIcuSpiBase
+  gMarvellTokenSpaceGuid.PcdIcuSpiOffset

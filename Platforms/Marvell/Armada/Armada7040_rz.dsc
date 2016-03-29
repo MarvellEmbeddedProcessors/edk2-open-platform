@@ -140,3 +140,8 @@
   gMarvellTokenSpaceGuid.PcdUtmiPhyRegUsbCfg|L"0xF2440420;0xF2440420"
   gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiCfg|L"0xF2440440;0xF2440444"
   gMarvellTokenSpaceGuid.PcdUtmiPhyUtmiPort|L"0x0;0x1"
+
+  #IcuLib
+  gMarvellTokenSpaceGuid.PcdIcuCpBase|0xF2000000
+  gMarvellTokenSpaceGuid.PcdIcuSpiBase|64
+  gMarvellTokenSpaceGuid.PcdIcuSpiOffset|0
