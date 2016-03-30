@@ -89,7 +89,6 @@
   PlatformHookLib|MdeModulePkg/Library/BasePlatformHookLibNull/BasePlatformHookLibNull.inf
 
   # Reset and Time libraries
-  EfiResetSystemLib|EmbeddedPkg/Library/TemplateResetSystemLib/TemplateResetSystemLib.inf
   RealTimeClockLib|EmbeddedPkg/Library/TemplateRealTimeClockLib/TemplateRealTimeClockLib.inf
 
   # Network support
@@ -411,7 +410,7 @@
   MdeModulePkg/Universal/Variable/EmuRuntimeDxe/EmuVariableRuntimeDxe.inf
 
   EmbeddedPkg/EmbeddedMonotonicCounter/EmbeddedMonotonicCounter.inf
-  EmbeddedPkg/ResetRuntimeDxe/ResetRuntimeDxe.inf
+  OpenPlatformPkg/Drivers/ResetSystem/MvResetSystem.inf
   EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
   EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
 

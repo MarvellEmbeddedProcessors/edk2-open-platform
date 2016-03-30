@@ -122,3 +122,7 @@
   gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdPhyDeviceIds|{ 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdPhyStartupAutoneg|FALSE
+
+  #ResetLib
+  gMarvellTokenSpaceGuid.PcdResetRegAddress|0xf06f0084
+  gMarvellTokenSpaceGuid.PcdResetRegMask|0x1
