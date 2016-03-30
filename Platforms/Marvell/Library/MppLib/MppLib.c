@@ -89,23 +89,17 @@ SetRegisterValue (
   )
 {
   UINT32 i, j, CtrlVal;
+  INTN Sign;
 
-  if (ReverseFlag) {
-    for (i = 0; i < RegCount; i++) {
-      CtrlVal = 0;
-      for (j = 0; j < MPP_PINS_PER_REG; j++) {
-        CtrlVal |= MPP_PIN_VAL(7 - j, MppRegPcd[i][7 - j]);
-      }
-      MmioWrite32 (BaseAddr - 4 * i, CtrlVal);
+  Sign = ReverseFlag ? -1 : 1;
+
+  for (i = 0; i < RegCount; i++) {
+    CtrlVal = 0;
+    for (j = 0; j < MPP_PINS_PER_REG; j++) {
+      CtrlVal |= MPP_PIN_VAL(7 * (UINTN) ReverseFlag + j * Sign,
+        MppRegPcd[i][7 * (UINTN) ReverseFlag + j * Sign]);
     }
-  } else {
-    for (i = 0; i < RegCount; i++) {
-      CtrlVal = 0;
-      for (j = 0; j < MPP_PINS_PER_REG; j++) {
-        CtrlVal |= MPP_PIN_VAL(j, MppRegPcd[i][j]);
-      }
-      MmioWrite32 (BaseAddr + 4 * i, CtrlVal);
-    }
+    MmioWrite32 (BaseAddr + 4 * i * Sign, CtrlVal);
   }
 }
 
