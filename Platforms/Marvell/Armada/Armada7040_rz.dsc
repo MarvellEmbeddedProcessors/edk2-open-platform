@@ -141,7 +141,7 @@
 
 #NET
   gMarvellTokenSpaceGuid.PcdPhySmiAddresses|{ 0x0, 0x1 }
-  gMarvellTokenSpaceGuid.PcdPp2PortNumber|2
+  gMarvellTokenSpaceGuid.PcdPp2PortNumber|1
   gMarvellTokenSpaceGuid.PcdPp2PortIds|{ 0x1, 0x2 }
   gMarvellTokenSpaceGuid.PcdPp2GopIndexes|{ 0x2, 0x3 }
   gMarvellTokenSpaceGuid.PcdPp2SharedAddress|0xf2000000
