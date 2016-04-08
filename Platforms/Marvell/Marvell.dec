@@ -183,6 +183,13 @@
   gMarvellTokenSpaceGuid.PcdChip3ComPhySpeeds|{ 0 }|VOID*|0x30000176
   gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlags|{ 0 }|VOID*|0x30000177
 
+  #UtmiPhy
+  gMarvellTokenSpaceGuid.PcdUtmiPhyCount|0|UINT32|0x30000205
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiUnit|{ 0 }|VOID*|0x30000206
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUsbCfg|{ 0 }|VOID*|0x30000207
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiCfg|{ 0 }|VOID*|0x30000208
+  gMarvellTokenSpaceGuid.PcdUtmiPhyUtmiPort|{ 0 }|VOID*|0x30000209
+
 [Protocols]
   gEfiEepromProtocolGuid               = { 0xcd728a1f, 0x45b5, 0x4feb, { 0x98, 0xc8, 0x31, 0x3d, 0xa8, 0x11, 0x74, 0x62 }}
   gEfiSpiMasterProtocolGuid            = { 0x23de66a3, 0xf666, 0x4b3e, { 0xaa, 0xa2, 0x68, 0x9b, 0x18, 0xae, 0x2e, 0x19 }}
