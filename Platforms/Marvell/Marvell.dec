@@ -178,6 +178,13 @@
 #SATA
   gMarvellTokenSpaceGuid.PcdSataBaseAddress|0|UINT32|0x4000052
 
+#UtmiPhy
+  gMarvellTokenSpaceGuid.PcdUtmiPhyCount|0|UINT32|0x30000205
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUsbCfg|{ 0 }|VOID*|0x30000206
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiCfg|{ 0 }|VOID*|0x30000207
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiUnit|{ 0 }|VOID*|0x30000208
+  gMarvellTokenSpaceGuid.PcdUtmiPhyUtmiPort|{ 0 }|VOID*|0x30000209
+
 #MDIO
   gMarvellTokenSpaceGuid.PcdMdioBaseAddress|0|UINT64|0x3000043
 
