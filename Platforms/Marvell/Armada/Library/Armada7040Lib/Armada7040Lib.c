@@ -19,6 +19,8 @@
 #include <Ppi/ArmMpCoreInfo.h>
 #include <Library/UtmiPhyLib.h>
 
+#include "Armada7040IcuLib.h"
+
 
 ARM_CORE_INFO mArmPlatformNullMpCoreInfoTable[] = {
   {
@@ -97,6 +99,7 @@ ArmPlatformInitialize (
 
   ComPhyInit ();
   UtmiPhyInit ();
+  IcuInit ();
   MppInitialize ();
   return RETURN_SUCCESS;
 }
