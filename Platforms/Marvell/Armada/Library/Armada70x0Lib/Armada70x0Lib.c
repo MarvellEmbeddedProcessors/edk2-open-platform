@@ -17,6 +17,7 @@
 #include <Library/ArmPlatformLib.h>
 #include <Library/MppLib.h>
 #include <Library/MvComPhyLib.h>
+#include <Library/UtmiPhyLib.h>
 #include <Ppi/ArmMpCoreInfo.h>
 
 
@@ -94,6 +95,7 @@ ArmPlatformInitialize (
   }
 
   MvComPhyInit ();
+  UtmiPhyInit ();
   MppInitialize ();
   return RETURN_SUCCESS;
 }
