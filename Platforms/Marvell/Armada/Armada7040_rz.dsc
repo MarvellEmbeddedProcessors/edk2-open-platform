@@ -98,3 +98,8 @@
   #ResetLib
   gMarvellTokenSpaceGuid.PcdResetRegAddress|0xf06f0084
   gMarvellTokenSpaceGuid.PcdResetRegMask|0x1
+
+  #IcuLib
+  gMarvellTokenSpaceGuid.PcdIcuCpBase|0xF2000000
+  gMarvellTokenSpaceGuid.PcdIcuSpiBase|64
+  gMarvellTokenSpaceGuid.PcdIcuSpiOffset|0
