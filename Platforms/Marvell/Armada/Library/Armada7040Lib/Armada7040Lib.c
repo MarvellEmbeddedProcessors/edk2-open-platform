@@ -17,6 +17,7 @@
 #include <Library/MppLib.h>
 #include <Library/ComPhyLib.h>
 #include <Ppi/ArmMpCoreInfo.h>
+#include <Library/UtmiPhyLib.h>
 
 
 ARM_CORE_INFO mArmPlatformNullMpCoreInfoTable[] = {
@@ -95,6 +96,7 @@ ArmPlatformInitialize (
   //TODO: Add basic platfrom initialization
 
   ComPhyInit ();
+  UtmiPhyInit ();
   MppInitialize ();
   return RETURN_SUCCESS;
 }
