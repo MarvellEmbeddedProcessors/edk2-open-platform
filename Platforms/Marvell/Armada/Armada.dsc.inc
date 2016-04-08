@@ -36,13 +36,8 @@
   ParsePcdLib|OpenPlatformPkg/Platforms/Marvell/Library/ParsePcdLib/ParsePcdLib.inf
   UtmiPhyLib|OpenPlatformPkg/Platforms/Marvell/Library/UtmiPhyLib/UtmiPhyLib.inf
 
-!if $(TARGET) == RELEASE
-  DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
-  UncachedMemoryAllocationLib|ArmPkg/Library/UncachedMemoryAllocationLib/UncachedMemoryAllocationLib.inf
-!else
   DebugLib|MdePkg/Library/BaseDebugLibSerialPort/BaseDebugLibSerialPort.inf
   UncachedMemoryAllocationLib|ArmPkg/Library/UncachedMemoryAllocationLib/UncachedMemoryAllocationLib.inf
-!endif
   DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
 
 # Basic utility libraries
@@ -256,9 +251,7 @@
 
 [PcdsFixedAtBuild.common]
   gArmPlatformTokenSpaceGuid.PcdFirmwareVendor|"Marvell"
-!ifdef $(FIRMWARE_VER)
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"$(FIRMWARE_VER)"
-!endif
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"MARVELL_EFI"
   gArmPlatformTokenSpaceGuid.PcdCoreCount|4
   # gArmPlatformTokenSpaceGuid.PcdClusterCount|1
 
@@ -312,11 +305,8 @@
   # CLEAR_MEMORY_ENABLED       0x08
   # ASSERT_BREAKPOINT_ENABLED  0x10
   # ASSERT_DEADLOOP_ENABLED    0x20
-!if $(TARGET) == RELEASE
-  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x21
-!else
+
   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x2f
-!endif
 
   #  DEBUG_INIT      0x00000001  // Initialization
   #  DEBUG_WARN      0x00000002  // Warnings
@@ -334,7 +324,12 @@
   #  DEBUG_LOADFILE  0x00020000  // UNDI Driver
   #  DEBUG_EVENT     0x00080000  // Event messages
   #  DEBUG_ERROR     0x80000000  // Error
+
+!if $(TARGET) == RELEASE
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000000
+!else
   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x8000000F
+!endif
   gEfiMdePkgTokenSpaceGuid.PcdReportStatusCodePropertyMask|0x07
 
   gEmbeddedTokenSpaceGuid.PcdEmbeddedAutomaticBootCommand|""
