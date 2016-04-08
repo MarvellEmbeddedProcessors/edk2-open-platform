@@ -32,6 +32,7 @@
   DebugLib
   MemoryAllocationLib
   MppLib
+  UtmiPhyLib
 
 [Sources.common]
   Armada7040Lib.c
