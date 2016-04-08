@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Guid/ShellLibHiiGuid.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/FileHandleLib.h>
+#include "../../../ShellPkg/Application/Shell/Shell.h"
 
 #define TFTP_CMD_STRING       L"tftp "
 #define SPACE_STRING          L" "
@@ -154,7 +155,7 @@ CheckFirmwareImage (
   Status = ShellOpenFileByName (FirmwareImage, &FileHandle, OpenMode, 0);
     if (EFI_ERROR (Status)) {
       Print (L"fupdate: Cannot open Image file\n");
-      return SHELL_ABORTED;
+      return EFI_DEVICE_ERROR;
     }
 
   // Read Image header into buffer
@@ -163,7 +164,7 @@ CheckFirmwareImage (
       Print (L"fupdate: Cannot read Image file header\n");
       ShellCloseFile (&FileHandle);
       FreePool (FileBuffer);
-      return SHELL_ABORTED;
+      return EFI_DEVICE_ERROR;
     }
 
   Status = CheckImageHeader (FileBuffer);
@@ -338,7 +339,7 @@ ShellCommandRunFUpdate (
     StrCatS (TftpCmd, CmdLen / sizeof(CHAR16), SPACE_STRING);
     StrCatS (TftpCmd, CmdLen / sizeof(CHAR16), (CHAR16 *)RemoteFilePath);
 
-    ShellExecute (ImageHandle, TftpCmd, FALSE, NULL, &Status);
+    RunShellCommand (TftpCmd, &Status);
     FreePool (TftpCmd);
     if (EFI_ERROR(Status)) {
       Print (L"fupdate: Error while performing tftp command\n");
@@ -358,7 +359,7 @@ ShellCommandRunFUpdate (
   }
 
   // Probe spi bus
-  ShellExecute (ImageHandle, SF_PROBE_CMD_STRING, FALSE, NULL, &Status);
+  RunShellCommand (SF_PROBE_CMD_STRING, &Status);
   if (EFI_ERROR(Status)) {
     Print (L"fupdate: Error while performing sf probe\n");
     return SHELL_ABORTED;
@@ -380,7 +381,7 @@ ShellCommandRunFUpdate (
   StrCatS (SfCmd, CmdLen / sizeof(CHAR16), SF_LOAD_ADDR_STRING);
 
   // Update firmware image in flash
-  ShellExecute (ImageHandle, SfCmd, TRUE, NULL, &Status);
+  RunShellCommand (SfCmd, &Status);
   FreePool (SfCmd);
   if (EFI_ERROR(Status)) {
     Print (L"fupdate: Error while performing sf update\n");
