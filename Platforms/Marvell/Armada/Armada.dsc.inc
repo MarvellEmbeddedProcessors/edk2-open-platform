@@ -431,9 +431,6 @@
   IntelFrameworkModulePkg/Universal/BdsDxe/BdsDxe.inf
   #ArmPlatformPkg/Bds/Bds.inf
 
-  # Legacy Linux Loader
-  ArmPkg/Application/LinuxLoader/LinuxLoader.inf
-
   # UEFI application (Shell Embedded Boot Loader)
   ShellPkg/Application/Shell/Shell.inf {
     <LibraryClasses>
