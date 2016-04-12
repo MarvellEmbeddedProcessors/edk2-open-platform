@@ -20,22 +20,24 @@ Supported {target} are
  - RELEASE
 
 Prerequisites:
-1. Clone into edk2 and opp repositories.
+1. Please refer to Release notes.
 
-2. Link opp as OpenPlatformPkg in edk2:
+2. Clone into edk2 and opp repositories.
+
+3. Link opp as OpenPlatformPkg in edk2:
  ln -s /path/to/opp /path/to/edk2/OpenPlatformPkg
 
-3. Prepare environment:
- 3.1 Several packages will be needed to fully set up an edk2 build environment
+4. Prepare environment:
+ 4.1 Several packages will be needed to fully set up an edk2 build environment
   sudo apt-get install build-essential uuid-dev
 
- 3.2 Set up EDK2 environment
+ 4.2 Set up EDK2 environment
   source edksetup.sh
 
- 3.3 Build base tools
+ 4.3 Build base tools
   make -C BaseTools
 
- 3.4 Set {toolchain_name}_AARCH64_PREFIX to path to your cross compiler
+ 4.4 Set {toolchain_name}_AARCH64_PREFIX to path to your cross compiler
   export {toolchain_name}_AARCH64_PREFIX=/path/to/toolchain
 
 Example:
