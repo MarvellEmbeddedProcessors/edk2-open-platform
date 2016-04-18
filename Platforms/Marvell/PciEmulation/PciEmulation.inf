@@ -61,5 +61,7 @@
   gMarvellTokenSpaceGuid.PcdPciEDevClassCode2
   gMarvellTokenSpaceGuid.PcdPciEDevClassCode3
 
+  gMarvellTokenSpaceGuid.PcdSataMapPortAddress
+
 [Depex]
   TRUE
