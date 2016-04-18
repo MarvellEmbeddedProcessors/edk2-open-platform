@@ -123,6 +123,15 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   INF OpenPlatformPkg/Drivers/Net/Phy/MvPhyDxe/MvPhyDxe.inf
   INF OpenPlatformPkg/Drivers/Net/Pp2Dxe/Pp2Dxe.inf
 
+  # SCSI
+  INF MdeModulePkg/Bus/Scsi/ScsiBusDxe/ScsiBusDxe.inf
+  INF MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf
+
+  # SATA
+  INF MdeModulePkg/Bus/Ata/AtaAtapiPassThru/AtaAtapiPassThru.inf
+  INF MdeModulePkg/Bus/Ata/AtaBusDxe/AtaBusDxe.inf
+  INF OvmfPkg/SataControllerDxe/SataControllerDxe.inf
+
   # USB
   INF MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
   INF MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
