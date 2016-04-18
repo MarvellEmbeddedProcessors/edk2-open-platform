@@ -1,0 +1,16 @@
+SATA configuration
+------------------
+In order to add new SATA device, please refer to document describing
+PciEmulation - /path/to/opp/Documenation/Marvell/PortingGuide/PciEmulation.txt
+
+There are also two additional PCDs:
+
+  gMarvellTokenSpaceGuid.PcdSataBaseAddress
+
+Base address of SATA controller register space - used in SATA ComPhy init
+sequence.
+
+  gMarvellTokenSpaceGuid.PcdSataMapPortAddress
+
+Boolean indicating if controller on platform needs specific address mapping for
+SATA ports.

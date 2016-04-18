@@ -12,6 +12,7 @@ Table of contents:
  mpp - PortingGuide/Mpp.txt
  ramdisk - PortingGuide/Ramdisk.txt
  reset library - PortingGuide/Reset.txt
+ sata - PortingGuide/Sata.txt
  spi - PortingGuide/Spi.txt
  spi flash - PortingGuide/SpiFlash.txt
  usb - PortingGuide/PciEmulation.txt
