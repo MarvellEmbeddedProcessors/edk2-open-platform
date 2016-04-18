@@ -105,3 +105,6 @@
   gMarvellTokenSpaceGuid.PcdChip3ComPhyTypes
   gMarvellTokenSpaceGuid.PcdChip3ComPhySpeeds
   gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlags
+
+  #SATA
+  gMarvellTokenSpaceGuid.PcdSataBaseAddress

@@ -391,6 +391,167 @@ PollingWithTimeout (
 
 STATIC
 UINTN
+ComPhySataPowerUp (
+  IN UINT32 Lane,
+  IN EFI_PHYSICAL_ADDRESS HpipeBase,
+  IN EFI_PHYSICAL_ADDRESS ComPhyBase
+  )
+{
+  EFI_STATUS Status;
+  UINT32 Mask, Data;
+  EFI_PHYSICAL_ADDRESS HpipeAddr = HPIPE_ADDR(HpipeBase, Lane);
+  EFI_PHYSICAL_ADDRESS SdIpAddr = SD_ADDR(HpipeBase, Lane);
+  EFI_PHYSICAL_ADDRESS ComPhyAddr = COMPHY_ADDR(ComPhyBase, Lane);
+  EFI_PHYSICAL_ADDRESS SataBase;
+
+  SataBase = PcdGet32 (PcdSataBaseAddress);
+  if (SataBase == 0) {
+    DEBUG((DEBUG_INFO, "ComPhy: SATA address not found in FDT\n"));
+    return EFI_D_ERROR;
+  }
+
+  DEBUG((DEBUG_INFO, "ComPhy: stage: MAC configuration - power down "
+    "ComPhy\n"));
+  /*
+   * MAC configuration - power down ComPhy
+   * Use indirect address for vendor specific SATA control register
+   */
+  RegSet (SataBase + SATA3_VENDOR_ADDRESS,
+    SATA_CONTROL_REG << SATA3_VENDOR_ADDR_OFSSET, SATA3_VENDOR_ADDR_MASK);
+  /* SATA 0 power down */
+  Mask = SATA3_CTRL_SATA0_PD_MASK;
+  Data = 0x1 << SATA3_CTRL_SATA0_PD_OFFSET;
+  /* SATA 1 power down */
+  Mask |= SATA3_CTRL_SATA1_PD_MASK;
+  Data |= 0x1 << SATA3_CTRL_SATA1_PD_OFFSET;
+  /* SATA SSU disable */
+  Mask |= SATA3_CTRL_SATA1_ENABLE_MASK;
+  Data |= 0x0 << SATA3_CTRL_SATA1_ENABLE_OFFSET;
+  /* SATA port 1 disable */
+  Mask |= SATA3_CTRL_SATA_SSU_MASK;
+  Data |= 0x0 << SATA3_CTRL_SATA_SSU_OFFSET;
+  RegSet (SataBase + SATA3_VENDOR_DATA, Data, Mask);
+
+  DEBUG((DEBUG_INFO, "ComPhy: stage: RFU configurations - hard reset "
+    "ComPhy\n"));
+  /* RFU configurations - hard reset ComPhy */
+  Mask = COMMON_PHY_CFG1_PWR_UP_MASK;
+  Data = 0x1 << COMMON_PHY_CFG1_PWR_UP_OFFSET;
+  Mask |= COMMON_PHY_CFG1_PIPE_SELECT_MASK;
+  Data |= 0x0 << COMMON_PHY_CFG1_PIPE_SELECT_OFFSET;
+  Mask |= COMMON_PHY_CFG1_PWR_ON_RESET_MASK;
+  Data |= 0x0 << COMMON_PHY_CFG1_PWR_ON_RESET_OFFSET;
+  Mask |= COMMON_PHY_CFG1_CORE_RSTN_MASK;
+  Data |= 0x0 << COMMON_PHY_CFG1_CORE_RSTN_OFFSET;
+  RegSet (ComPhyAddr + COMMON_PHY_CFG1_REG, Data, Mask);
+
+  /* Set select Data  width 40Bit - SATA mode only */
+  RegSet (ComPhyAddr + COMMON_PHY_CFG6_REG,
+    0x1 << COMMON_PHY_CFG6_IF_40_SEL_OFFSET, COMMON_PHY_CFG6_IF_40_SEL_MASK);
+
+  /* Release from hard reset in SD external */
+  Mask = SD_EXTERNAL_CONFIG1_RESET_IN_MASK;
+  Data = 0x1 << SD_EXTERNAL_CONFIG1_RESET_IN_OFFSET;
+  Mask |= SD_EXTERNAL_CONFIG1_RESET_CORE_MASK;
+  Data |= 0x1 << SD_EXTERNAL_CONFIG1_RESET_CORE_OFFSET;
+  RegSet (SdIpAddr + SD_EXTERNAL_CONFIG1_REG, Data, Mask);
+
+  /* Wait 1ms - until band gap and ref clock ready */
+  MicroSecondDelay (1000);
+
+  DEBUG((DEBUG_INFO, "ComPhy: stage: Comphy configuration\n"));
+  /* Start ComPhy Configuration */
+  /* Set reference clock to comes from group 1 - choose 25Mhz */
+  RegSet (HpipeAddr + HPIPE_MISC_REG,
+    0x0 << HPIPE_MISC_REFCLK_SEL_OFFSET, HPIPE_MISC_REFCLK_SEL_MASK);
+  /* Reference frequency select set 1 (for SATA = 25Mhz) */
+  Mask = HPIPE_PWR_PLL_REF_FREQ_MASK;
+  Data = 0x1 << HPIPE_PWR_PLL_REF_FREQ_OFFSET;
+  /* PHY mode select (set SATA = 0x0 */
+  Mask |= HPIPE_PWR_PLL_PHY_MODE_MASK;
+  Data |= 0x0 << HPIPE_PWR_PLL_PHY_MODE_OFFSET;
+  RegSet (HpipeAddr + HPIPE_PWR_PLL_REG, Data, Mask);
+  /* Set max PHY generation setting - 6Gbps */
+  RegSet (HpipeAddr + HPIPE_INTERFACE_REG,
+    0x2 << HPIPE_INTERFACE_GEN_MAX_OFFSET, HPIPE_INTERFACE_GEN_MAX_MASK);
+  /* Set select Data  width 40Bit (SEL_BITS[2:0]) */
+  RegSet (HpipeAddr + HPIPE_LOOPBACK_REG,
+    0x2 << HPIPE_LOOPBACK_SEL_OFFSET, HPIPE_LOOPBACK_SEL_MASK);
+
+  DEBUG((DEBUG_INFO, "ComPhy: stage: Analog paramters from ETP(HW)\n"));
+
+  /* DFE reset sequence */
+  RegSet (HpipeAddr + HPIPE_PWR_CTR_REG,
+    0x1 << HPIPE_PWR_CTR_RST_DFE_OFFSET, HPIPE_PWR_CTR_RST_DFE_MASK);
+  RegSet (HpipeAddr + HPIPE_PWR_CTR_REG,
+    0x0 << HPIPE_PWR_CTR_RST_DFE_OFFSET, HPIPE_PWR_CTR_RST_DFE_MASK);
+  /* SW reset for interupt logic */
+  RegSet (HpipeAddr + HPIPE_PWR_CTR_REG,
+    0x1 << HPIPE_PWR_CTR_SFT_RST_OFFSET, HPIPE_PWR_CTR_SFT_RST_MASK);
+  RegSet (HpipeAddr + HPIPE_PWR_CTR_REG,
+    0x0 << HPIPE_PWR_CTR_SFT_RST_OFFSET, HPIPE_PWR_CTR_SFT_RST_MASK);
+
+  DEBUG((DEBUG_INFO, "ComPhy: stage: ComPhy power up\n"));
+  /*
+   * MAC configuration - power up ComPhy - power up PLL/TX/RX
+   * Use indirect address for vendor specific SATA control register
+   */
+  RegSet (SataBase + SATA3_VENDOR_ADDRESS,
+    SATA_CONTROL_REG << SATA3_VENDOR_ADDR_OFSSET, SATA3_VENDOR_ADDR_MASK);
+  /* SATA 0 power up */
+  Mask = SATA3_CTRL_SATA0_PD_MASK;
+  Data = 0x0 << SATA3_CTRL_SATA0_PD_OFFSET;
+  /* SATA 1 power up */
+  Mask |= SATA3_CTRL_SATA1_PD_MASK;
+  Data |= 0x0 << SATA3_CTRL_SATA1_PD_OFFSET;
+  /* SATA SSU enable */
+  Mask |= SATA3_CTRL_SATA1_ENABLE_MASK;
+  Data |= 0x1 << SATA3_CTRL_SATA1_ENABLE_OFFSET;
+  /* SATA port 1 enable */
+  Mask |= SATA3_CTRL_SATA_SSU_MASK;
+  Data |= 0x1 << SATA3_CTRL_SATA_SSU_OFFSET;
+  RegSet (SataBase + SATA3_VENDOR_DATA, Data, Mask);
+
+  /* Wait 15ms - Wait for ComPhy calibration done */
+  MicroSecondDelay (15000);
+
+  /*
+   * Reduce read & write burst size to 64 byte due to bug in
+   * AP-806-Z Aurora 2 that prohibits writes larger than 64 byte
+   */
+  MmioWrite32(SataBase + SATA3_VENDOR_ADDRESS, 0x4);
+  Mask = 0x77;
+  Data = 0x44; /* 4 = 64 bytes burst */
+  RegSet (SataBase + SATA3_VENDOR_DATA, Data, Mask);
+
+  /* MBUS request size and interface select register */
+  RegSet (SataBase + SATA3_VENDOR_ADDRESS,
+    SATA_MBUS_SIZE_SELECT_REG << SATA3_VENDOR_ADDR_OFSSET,
+      SATA3_VENDOR_ADDR_MASK);
+  /* Mbus regret enable */
+  RegSet (SataBase + SATA3_VENDOR_DATA, 0x1 << SATA_MBUS_REGRET_EN_OFFSET,
+    SATA_MBUS_REGRET_EN_MASK);
+
+  DEBUG((DEBUG_INFO, "ComPhy: stage: Check PLL\n"));
+  Data = MmioRead32(SdIpAddr + SD_EXTERNAL_STATUS0_REG);
+
+  /* Check the PLL TX */
+  if ((Data & SD_EXTERNAL_STATUS0_PLL_TX_MASK) == 0) {
+    DEBUG((DEBUG_ERROR, "ComPhy: SD_EXTERNAL_STATUS0_PLL_TX is 0\n"));
+    Status = EFI_D_ERROR;
+  }
+
+  /* Check the PLL RX */
+  if ((Data & SD_EXTERNAL_STATUS0_PLL_RX_MASK) == 0) {
+    DEBUG((DEBUG_ERROR, "ComPhy: SD_EXTERNAL_STATUS0_PLL_RX is 0\n"));
+    Status = EFI_D_ERROR;
+  }
+
+  return Status;
+}
+
+STATIC
+UINTN
 ComPhySgmiiPowerUp (
   IN UINT32 Lane,
   IN UINT32 SgmiiSpeed,
@@ -619,6 +780,12 @@ ComPhyCp110Init (
     case PHY_TYPE_PCIE2:
     case PHY_TYPE_PCIE3:
       Status = ComPhyPciePowerUp(Lane, PcieBy4, HpipeBaseAddr, ComPhyBaseAddr);
+      break;
+    case PHY_TYPE_SATA0:
+    case PHY_TYPE_SATA1:
+    case PHY_TYPE_SATA2:
+    case PHY_TYPE_SATA3:
+      Status = ComPhySataPowerUp(Lane, HpipeBaseAddr, ComPhyBaseAddr);
       break;
     case PHY_TYPE_USB3_HOST0:
     case PHY_TYPE_USB3_HOST1:
