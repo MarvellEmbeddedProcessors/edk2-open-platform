@@ -69,6 +69,30 @@ EFI_PCI_IO_DEVICE_PATH PciIoDevicePathTemplate =
   }
 };
 
+STATIC
+UINT64
+MapSataPortAddress (
+  IN UINT64 Offset
+  )
+{
+
+  //
+  // Since AHCI controller in CP110 isn't compatible with AHCI specification,
+  // below workaround is necessary. It maps PORT address' offsets.
+  //
+  //  PORT  |     AHCI port offset     |    CP110 port offset
+  // --------------------------------------------------------
+  //   1    |       100h - 180h        |     10000h - 1080h
+  //   2    |       180h - 260h        |     20000h - 2080h
+  //
+  if ((Offset > 0x100) && (Offset < 0x180))
+    Offset = (Offset - 0x100) + 0x10000;
+  if ((Offset > 0x180) && (Offset < 0x260))
+    Offset = (Offset - 0x180) + 0x20000;
+
+  return Offset;
+}
+
 EFI_STATUS
 PciIoPollMem (
   IN EFI_PCI_IO_PROTOCOL           *This,
@@ -113,6 +137,10 @@ PciIoMemRead (
 {
   EFI_PCI_IO_PRIVATE_DATA *Private = EFI_PCI_IO_PRIVATE_DATA_FROM_THIS(This);
 
+  if (BarIndex == EFI_AHCI_BAR_INDEX && PcdGetBool (PcdSataMapPortAddress)) {
+    Offset = MapSataPortAddress (Offset);
+  }
+
   return PciRootBridgeIoMemRead (&Private->RootBridge.Io,
            (EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_WIDTH) Width,
            Private->ConfigSpace->Device.Bar[BarIndex] + Offset,
@@ -131,6 +159,10 @@ PciIoMemWrite (
   )
 {
   EFI_PCI_IO_PRIVATE_DATA *Private = EFI_PCI_IO_PRIVATE_DATA_FROM_THIS(This);
+
+  if (BarIndex == EFI_AHCI_BAR_INDEX && PcdGetBool (PcdSataMapPortAddress)) {
+    Offset = MapSataPortAddress (Offset);
+  }
 
   return PciRootBridgeIoMemWrite (&Private->RootBridge.Io,
            (EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_WIDTH) Width,
@@ -526,6 +558,7 @@ InstallDevices (
   EFI_STATUS              Status;
   EFI_HANDLE              Handle;
   EFI_PCI_IO_PRIVATE_DATA *Private;
+  UINT32                  ClassCodes;
 
   // Create a private structure
   Private = AllocatePool(sizeof(EFI_PCI_IO_PRIVATE_DATA));
@@ -556,7 +589,26 @@ InstallDevices (
   Private->ConfigSpace->Hdr.ClassCode[0] = ClassCode1;
   Private->ConfigSpace->Hdr.ClassCode[1] = ClassCode2;
   Private->ConfigSpace->Hdr.ClassCode[2] = ClassCode3;
-  Private->ConfigSpace->Device.Bar[0] = Private->RootBridge.MemoryStart;
+
+  //
+  // Concatenate ClassCodes into single number, which will be next used to
+  // recognize device add fill proper BAR
+  //
+  ClassCodes = (ClassCode1 << 16) + (ClassCode2 << 8) + ClassCode3;
+
+  switch (ClassCodes) {
+  case XHCI_PCI_CLASS_CODE_NR:
+    Private->ConfigSpace->Device.Bar[EFI_XHCI_BAR_INDEX] =
+      Private->RootBridge.MemoryStart;
+    break;
+  case AHCI_PCI_CLASS_CODE_NR:
+    Private->ConfigSpace->Device.Bar[EFI_AHCI_BAR_INDEX] =
+      Private->RootBridge.MemoryStart;
+    break;
+  default:
+    DEBUG((EFI_D_ERROR, "PciEmulation: Unknown PCI device. Abort.\n"));
+    return EFI_D_ERROR;
+  }
 
   Handle = NULL;
 
