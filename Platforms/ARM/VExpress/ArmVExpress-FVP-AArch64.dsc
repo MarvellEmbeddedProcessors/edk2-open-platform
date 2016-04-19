@@ -90,9 +90,8 @@
   gArmPlatformTokenSpaceGuid.PcdFirmwareVendor|"ARM Fixed Virtual Platform"
   gEmbeddedTokenSpaceGuid.PcdEmbeddedPrompt|"ARM-FVP"
 
-  # Up to 8 cores on Base models. This works fine if model happens to have less.
-  gArmPlatformTokenSpaceGuid.PcdCoreCount|8
-  gArmPlatformTokenSpaceGuid.PcdClusterCount|2
+  # Only one core enters UEFI, and PSCI is implemented in EL3 by ATF
+  gArmPlatformTokenSpaceGuid.PcdCoreCount|1
 
   #
   # NV Storage PCDs. Use base of 0x0C000000 for NOR1
@@ -106,18 +105,11 @@
 
   gArmTokenSpaceGuid.PcdVFPEnabled|1
 
-  # FVP models can have 2 clusters with 4 cpus each
-  # Stacks for MPCores in Secure World
-  # Trusted SRAM (DRAM on Foundation model)
-  gArmPlatformTokenSpaceGuid.PcdCPUCoresSecStackBase|0x04000000
-  gArmPlatformTokenSpaceGuid.PcdCPUCoreSecPrimaryStackSize|0x1000
-  gArmPlatformTokenSpaceGuid.PcdCPUCoreSecSecondaryStackSize|0x800
-
   # Stacks for MPCores in Normal World
   # Non-Trusted SRAM
   gArmPlatformTokenSpaceGuid.PcdCPUCoresStackBase|0x2E000000
   gArmPlatformTokenSpaceGuid.PcdCPUCorePrimaryStackSize|0x4000
-  gArmPlatformTokenSpaceGuid.PcdCPUCoreSecondaryStackSize|0x1000
+  gArmPlatformTokenSpaceGuid.PcdCPUCoreSecondaryStackSize|0x0
 
   # System Memory (2GB - 16MB of Trusted DRAM at the top of the 32bit address space)
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0x80000000
@@ -213,14 +205,14 @@
   #
 !ifdef EDK2_SKIP_PEICORE
   # UEFI is placed in RAM by bootloader
-  ArmPlatformPkg/PrePi/PeiMPCore.inf {
+  ArmPlatformPkg/PrePi/PeiUniCore.inf {
     <LibraryClasses>
       ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64Lib.inf
       ArmPlatformLib|ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressLibRTSM/ArmVExpressLib.inf
   }
 !else
   # UEFI lives in FLASH and copies itself to RAM
-  ArmPlatformPkg/PrePeiCore/PrePeiCoreMPCore.inf
+  ArmPlatformPkg/PrePeiCore/PrePeiCoreUniCore.inf
   MdeModulePkg/Core/Pei/PeiMain.inf
   MdeModulePkg/Universal/PCD/Pei/Pcd.inf  {
     <LibraryClasses>
