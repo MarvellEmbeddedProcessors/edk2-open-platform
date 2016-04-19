@@ -273,6 +273,22 @@ static MV_32 mvpp2_prs_tcam_ai_get(struct mvpp2_prs_entry *pe)
 	return pe->tcam.byte[MVPP2_PRS_TCAM_AI_BYTE];
 }
 
+/* Get dword of data and its enable bits from tcam sw entry */
+static MV_VOID mvpp2_prs_tcam_data_dword_get(struct mvpp2_prs_entry *pe,
+					 MV_U32 offs, MV_U32 *word,
+					 MV_U32 *enable)
+{
+	MV_32 index, offset;
+	MV_U8 byte, mask;
+
+	for (index = 0; index < 4; index++) {
+		offset = (offs * 4) + index;
+		mvpp2_prs_tcam_data_byte_get(pe, offset,  &byte, &mask);
+		((MV_U8 *)word)[index] = byte;
+		((MV_U8 *)enable)[index] = mask;
+	}
+}
+
 /* Set ethertype in tcam sw entry */
 static MV_VOID mvpp2_prs_match_etype(struct mvpp2_prs_entry *pe, MV_32 offset,
 				  MV_U16 ethertype)
@@ -452,6 +468,7 @@ static struct mvpp2_prs_entry *mvpp2_prs_flow_find(struct mvpp2 *priv,
 {
 	struct mvpp2_prs_entry *pe;
 	MV_32 tid;
+	MV_U32 dword, enable;
 
 	pe = mvpp2_alloc(sizeof(*pe));
 	if (!pe)
@@ -468,6 +485,13 @@ static struct mvpp2_prs_entry *mvpp2_prs_flow_find(struct mvpp2 *priv,
 
 		pe->index = tid;
 		mvpp2_prs_hw_read(priv, pe);
+
+		/* Check result info, because there maybe
+		*   several TCAM lines to generate the same flow */
+		mvpp2_prs_tcam_data_dword_get(pe, 0, &dword, &enable);
+		if ((dword != 0) || (enable != 0))
+			continue;
+
 		bits = mvpp2_prs_sram_ai_get(pe);
 
 		/* Sram store classification lookup ID in AI bits [5:0] */
@@ -2476,7 +2500,10 @@ MV_VOID mvpp2_bm_pool_bufsize_set(struct mvpp2 *priv,
 
 MV_VOID mvpp2_bm_stop(struct mvpp2 *priv, MV_32 pool)
 {
-	MV_U32 val;
+	MV_U32 val, i;
+
+	for (i = 0; i < MVPP2_BM_SIZE; i++)
+		mvpp2_read(priv, MVPP2_BM_PHY_ALLOC_REG(0));
 
 	val = mvpp2_read(priv, MVPP2_BM_POOL_CTRL_REG(pool));
 	val |= MVPP2_BM_STOP_MASK;
@@ -3737,7 +3764,7 @@ MV_32 mv_gop110_gmac_mode_cfg(struct mvpp2_port *pp2_port)
 	/* Set TX FIFO thresholds */
 	switch (pp2_port->phy_interface) {
 	case MV_MODE_SGMII:
-		if (pp2_port->speed == 2500)
+		if (pp2_port->speed == MV_PORT_SPEED_2500)
 			mv_gop110_gmac_sgmii2_5_cfg(pp2_port);
 		else
 			mv_gop110_gmac_sgmii_cfg(pp2_port);
@@ -3844,7 +3871,8 @@ MV_VOID mv_gop110_gmac_sgmii2_5_cfg(struct mvpp2_port *pp2_port)
 	mv_gop110_gmac_write(pp2_port, MVPP2_PORT_CTRL0_REG, val);
 
 	/* configure AN 0x9268 */
-	an = MVPP2_PORT_AUTO_NEG_CFG_AN_BYPASS_EN_MASK |
+	an = MVPP2_PORT_AUTO_NEG_CFG_EN_PCS_AN_MASK |
+		MVPP2_PORT_AUTO_NEG_CFG_AN_BYPASS_EN_MASK |
 		MVPP2_PORT_AUTO_NEG_CFG_SET_MII_SPEED_MASK  |
 		MVPP2_PORT_AUTO_NEG_CFG_SET_GMII_SPEED_MASK     |
 		MVPP2_PORT_AUTO_NEG_CFG_ADV_PAUSE_MASK    |
@@ -4086,15 +4114,122 @@ MV_32 mv_gop110_port_events_mask(struct mvpp2_port *pp2_port)
 	return 0;
 }
 
+MV_32 mv_gop110_fl_cfg(struct mvpp2_port *pp2_port)
+{
+
+	switch (pp2_port->phy_interface) {
+	case MV_MODE_RGMII:
+	case MV_MODE_SGMII:
+	case MV_MODE_QSGMII:
+		/* disable AN */
+		mv_gop110_speed_duplex_set(pp2_port, pp2_port->speed,
+							MV_PORT_DUPLEX_FULL);
+	break;
+
+	case MV_MODE_XAUI:
+	case MV_MODE_RXAUI:
+		return 0;
+
+	default:
+		return -1;
+	}
+	return 0;
+}
+/* set port speed and duplex */
+MV_32 mv_gop110_speed_duplex_set(struct mvpp2_port *pp2_port,
+			MV_32 speed, enum mv_port_duplex duplex)
+{
+
+	switch (pp2_port->phy_interface) {
+	case MV_MODE_RGMII:
+	case MV_MODE_SGMII:
+	case MV_MODE_QSGMII:
+		mv_gop110_gmac_speed_duplex_set(pp2_port, speed, duplex);
+	break;
+
+	case MV_MODE_XAUI:
+	case MV_MODE_RXAUI:
+	break;
+
+	default:
+		return -1;
+	}
+	return 0;
+}
+
+/* Sets port speed to Auto Negotiation / 1000 / 100 / 10 Mbps.
+*  Sets port duplex to Auto Negotiation / Full / Half Duplex.
+*/
+MV_32 mv_gop110_gmac_speed_duplex_set(struct mvpp2_port *pp2_port,
+	MV_32 speed, enum mv_port_duplex duplex)
+{
+	MV_U32 reg_val;
+
+	reg_val = mvpp2_gmac_read(pp2_port,
+					MVPP2_PORT_AUTO_NEG_CFG_REG);
+
+	switch (speed) {
+	case MV_PORT_SPEED_2500:
+	case MV_PORT_SPEED_1000:
+		reg_val &= ~MVPP2_PORT_AUTO_NEG_CFG_EN_AN_SPEED_MASK;
+		reg_val |= MVPP2_PORT_AUTO_NEG_CFG_SET_GMII_SPEED_MASK;
+		/* the 100/10 bit doesn't matter in this case */
+		break;
+	case MV_PORT_SPEED_100:
+		reg_val &= ~MVPP2_PORT_AUTO_NEG_CFG_EN_AN_SPEED_MASK;
+		reg_val &= ~MVPP2_PORT_AUTO_NEG_CFG_SET_GMII_SPEED_MASK;
+		reg_val |= MVPP2_PORT_AUTO_NEG_CFG_SET_MII_SPEED_MASK;
+		break;
+	case MV_PORT_SPEED_10:
+		reg_val &= ~MVPP2_PORT_AUTO_NEG_CFG_EN_AN_SPEED_MASK;
+		reg_val &= ~MVPP2_PORT_AUTO_NEG_CFG_SET_GMII_SPEED_MASK;
+		reg_val &= ~MVPP2_PORT_AUTO_NEG_CFG_SET_MII_SPEED_MASK;
+		break;
+	default:
+		return MVPP2_EINVAL;
+	}
+
+	switch (duplex) {
+	case MV_PORT_DUPLEX_AN:
+		reg_val  |= MVPP2_PORT_AUTO_NEG_CFG_EN_FDX_AN_MASK;
+		/* the other bits don't matter in this case */
+		break;
+	case MV_PORT_DUPLEX_HALF:
+		reg_val &= ~MVPP2_PORT_AUTO_NEG_CFG_EN_FDX_AN_MASK;
+		reg_val &= ~MVPP2_PORT_AUTO_NEG_CFG_SET_FULL_DX_MASK;
+		break;
+	case MV_PORT_DUPLEX_FULL:
+		reg_val &= ~MVPP2_PORT_AUTO_NEG_CFG_EN_FDX_AN_MASK;
+		reg_val |= MVPP2_PORT_AUTO_NEG_CFG_SET_FULL_DX_MASK;
+		break;
+	default:
+		return MVPP2_EINVAL;
+	}
+
+	mvpp2_gmac_write(pp2_port, MVPP2_PORT_AUTO_NEG_CFG_REG,
+				reg_val);
+	return 0;
+}
+
 MV_VOID mvpp2_axi_config(struct mvpp2 *pp2)
 {
   /* Config AXI Read&Write Normal and Soop mode  */
-  mvpp2_write(pp2, MVPP22_AXI_RD_NORMAL_CODE_REG,
-    MVPP22_AXI_RD_CODE_MASK);
-  mvpp2_write(pp2, MVPP22_AXI_RD_SNP_CODE_REG, MVPP22_AXI_RD_CODE_MASK);
-  mvpp2_write(pp2, MVPP22_AXI_WR_NORMAL_CODE_REG,
-    MVPP22_AXI_WR_CODE_MASK);
-  mvpp2_write(pp2, MVPP22_AXI_WR_SNP_CODE_REG, MVPP22_AXI_WR_CODE_MASK);
+  mvpp2_write(pp2, MVPP22_AXI_BM_WR_ATTR_REG,
+    MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
+  mvpp2_write(pp2, MVPP22_AXI_BM_RD_ATTR_REG,
+    MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
+  mvpp2_write(pp2, MVPP22_AXI_AGGRQ_DESCR_RD_ATTR_REG,
+    MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
+  mvpp2_write(pp2, MVPP22_AXI_TXQ_DESCR_WR_ATTR_REG,
+    MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
+  mvpp2_write(pp2, MVPP22_AXI_TXQ_DESCR_RD_ATTR_REG,
+    MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
+  mvpp2_write(pp2, MVPP22_AXI_RXQ_DESCR_WR_ATTR_REG,
+    MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
+  mvpp2_write(pp2, MVPP22_AXI_RX_DATA_WR_ATTR_REG,
+    MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
+  mvpp2_write(pp2, MVPP22_AXI_TX_DATA_RD_ATTR_REG,
+    MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
 }
 
 /* Cleanup Tx ports */

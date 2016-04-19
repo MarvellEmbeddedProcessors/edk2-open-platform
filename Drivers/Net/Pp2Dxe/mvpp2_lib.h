@@ -2087,6 +2087,12 @@ enum mv_netc_lanes {
 #define MV_SMI_PHY_ADDRESS_PHYAD_MASK					\
 	(0x1F << MV_SMI_PHY_ADDRESS_PHYAD_OFFS)
 
+enum mv_port_duplex {
+	MV_PORT_DUPLEX_AN,
+	MV_PORT_DUPLEX_HALF,
+	MV_PORT_DUPLEX_FULL
+};
+
 /* Static declaractions */
 
 /* Number of RXQs used by single port */
@@ -2197,6 +2203,11 @@ MV_VOID mv_gop110_gmac_port_enable(struct mvpp2_port *pp2_port);
 MV_VOID mv_gop110_gmac_port_disable(struct mvpp2_port *pp2_port);
 MV_VOID mv_gop110_gmac_port_link_event_mask(struct mvpp2_port *pp2_port);
 MV_32 mv_gop110_port_events_mask(struct mvpp2_port *pp2_port);
+MV_32 mv_gop110_fl_cfg(struct mvpp2_port *pp2_port);
+MV_32 mv_gop110_speed_duplex_set(struct mvpp2_port *pp2_port,
+			MV_32 speed, enum mv_port_duplex duplex);
+MV_32 mv_gop110_gmac_speed_duplex_set(struct mvpp2_port *pp2_port,
+	MV_32 speed, enum mv_port_duplex duplex);
 MV_VOID mvpp2_axi_config(struct mvpp2 *pp2);
 MV_VOID mvpp2_txp_clean(struct mvpp2_port *pp, MV_32 txp,
 			    struct mvpp2_tx_queue *txq);
