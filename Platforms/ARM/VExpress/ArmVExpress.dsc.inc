@@ -443,7 +443,10 @@
 !endif
 
 [Components.common]
-  MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
+  MdeModulePkg/Universal/PCD/Dxe/Pcd.inf {
+    <LibraryClasses>
+      PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+  }
 
   # Versatile Express FileSystem
   ArmPlatformPkg/FileSystem/BootMonFs/BootMonFs.inf
