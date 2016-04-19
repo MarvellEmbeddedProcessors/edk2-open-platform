@@ -424,6 +424,7 @@ struct buffer_location {
 };
 typedef struct buffer_location BUFFER_LOCATION;
 
+#define QUEUE_DEPTH 64
 typedef struct {
   UINT32                      Signature;
   INTN                        Instance;
@@ -435,6 +436,9 @@ typedef struct {
   PP2DXE_PORT                 Port;
   BOOLEAN                     Initialized;
   BOOLEAN                     LateInitialized;
+  VOID			      *CompletionQueue[QUEUE_DEPTH];
+  UINTN			      CompletionQueueHead;
+  UINTN			      CompletionQueueTail;
 } PP2DXE_CONTEXT;
 
 static inline MV_VOID mvpp2_write(struct mvpp2 *priv, MV_U32 offset,

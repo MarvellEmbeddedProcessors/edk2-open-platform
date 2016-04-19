@@ -51,6 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Pp2Dxe.h"
 #include "mvpp2_lib.h"
 
+#define ReturnUnlock(tpl, status) do { gBS->RestoreTPL (tpl); return (status); } while(0)
 typedef struct {
   MAC_ADDR_DEVICE_PATH      Pp2Mac;
   EFI_DEVICE_PATH_PROTOCOL  End;
@@ -74,6 +75,46 @@ PP2_DEVICE_PATH Pp2DevicePathTemplate = {
     { sizeof(EFI_DEVICE_PATH_PROTOCOL), 0 }
   }
 };
+
+#define QueueNext(off)  ((((off) + 1) >= QUEUE_DEPTH) ? 0 : ((off) + 1))
+
+STATIC
+EFI_STATUS
+QueueInsert (
+  IN PP2DXE_CONTEXT *Pp2Context,
+  IN VOID *Buffer
+  )
+{
+
+  if (QueueNext (Pp2Context->CompletionQueueTail) ==
+      Pp2Context->CompletionQueueHead) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Pp2Context->CompletionQueue[Pp2Context->CompletionQueueTail] = Buffer;
+  Pp2Context->CompletionQueueTail = QueueNext (Pp2Context->CompletionQueueTail);
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+VOID *
+QueueRemove (
+  IN PP2DXE_CONTEXT *Pp2Context
+  )
+{
+  VOID *Buffer;
+
+  if (Pp2Context->CompletionQueueTail == Pp2Context->CompletionQueueHead) {
+    return NULL;
+  }
+
+  Buffer = Pp2Context->CompletionQueue[Pp2Context->CompletionQueueHead];
+  Pp2Context->CompletionQueue[Pp2Context->CompletionQueueHead] = NULL;
+  Pp2Context->CompletionQueueHead = QueueNext (Pp2Context->CompletionQueueHead);
+
+  return Buffer;
+}
 
 STATIC
 EFI_STATUS
@@ -240,7 +281,6 @@ Pp2DxeSetupAggrTxqs (
 
 }
 
-#define ETH_ALEN 6
 STATIC
 EFI_STATUS
 Pp2DxeOpen (
@@ -379,11 +419,8 @@ Pp2DxeLateInitialize (
     Pp2Context->LateInitialized = TRUE;
   } else {
     /* Upon all following calls, this is enough */
-    mvpp2_txq_drain_set(Port, 0, FALSE);
     mv_gop110_port_events_mask(Port);
     mv_gop110_port_enable(Port);
-    mvpp2_ingress_enable(Port);
-    mvpp2_egress_enable(Port);
   }
   return 0;
 }
@@ -440,6 +477,7 @@ Pp2DxeSnpInitialize (
   EFI_STATUS Status;
   PP2DXE_CONTEXT *Pp2Context;
   Pp2Context = INSTANCE_FROM_SNP(This);
+  EFI_TPL SavedTpl;
 
   DEBUG((DEBUG_INFO, "Pp2Dxe%d: initialize\n", Pp2Context->Instance));
   if (ExtraRxBufferSize != 0 || ExtraTxBufferSize != 0) {
@@ -447,33 +485,35 @@ Pp2DxeSnpInitialize (
     return EFI_UNSUPPORTED;
   }
 
+  SavedTpl = gBS->RaiseTPL (TPL_CALLBACK);
+
   switch (This->Mode->State) {
   case EfiSimpleNetworkStarted:
   DEBUG((DEBUG_INFO, "Pp2Dxe%d: started state\n", Pp2Context->Instance));
     break;
   case EfiSimpleNetworkInitialized:
     DEBUG((DEBUG_INFO, "Pp2Dxe%d: already initialized\n", Pp2Context->Instance));
-    return (EFI_SUCCESS);
+    ReturnUnlock (SavedTpl, EFI_SUCCESS);
   case EfiSimpleNetworkStopped:
     DEBUG((DEBUG_INFO, "Pp2Dxe%d: network stopped\n", Pp2Context->Instance));
-    return (EFI_NOT_STARTED);
+    ReturnUnlock (SavedTpl, EFI_NOT_STARTED);
   default:
     DEBUG((DEBUG_INFO, "Pp2Dxe%d: wrong state\n", Pp2Context->Instance));
-    return (EFI_DEVICE_ERROR);
+    ReturnUnlock (SavedTpl, EFI_DEVICE_ERROR);
   }
 
   This->Mode->State = EfiSimpleNetworkInitialized;
 
   if (Pp2Context->Initialized)
-    return EFI_SUCCESS;
+    ReturnUnlock(SavedTpl, EFI_SUCCESS);
 
   Pp2Context->Initialized = TRUE;
 
   Status = Pp2DxePhyInitialize(Pp2Context);
   if (EFI_ERROR(Status))
-    return Status;
+    ReturnUnlock (SavedTpl, Status);
 
-  return Pp2DxeLateInitialize(Pp2Context);
+  ReturnUnlock (SavedTpl, Pp2DxeLateInitialize(Pp2Context));
 }
 
 EFI_STATUS
@@ -483,7 +523,11 @@ Pp2SnpStart (
   )
 {
   PP2DXE_CONTEXT *Pp2Context;
+  EFI_TPL SavedTpl;
+
+  SavedTpl = gBS->RaiseTPL (TPL_CALLBACK);
   Pp2Context = INSTANCE_FROM_SNP(This);
+
   DEBUG((DEBUG_INFO, "Pp2Dxe%d: started\n", Pp2Context->Instance));
   switch (This->Mode->State) {
   case EfiSimpleNetworkStopped:
@@ -492,14 +536,14 @@ Pp2SnpStart (
   case EfiSimpleNetworkStarted:
   case EfiSimpleNetworkInitialized:
     DEBUG((DEBUG_INFO, "Pp2Dxe: Driver already started\n"));
-    return (EFI_ALREADY_STARTED);
+    ReturnUnlock (SavedTpl, EFI_ALREADY_STARTED);
   default:
     DEBUG((DEBUG_ERROR, "Pp2Dxe: Driver in an invalid state: %u\n",
           (UINTN)This->Mode->State));
-    return (EFI_DEVICE_ERROR);
+    ReturnUnlock (SavedTpl, EFI_DEVICE_ERROR);
   }
   This->Mode->State = EfiSimpleNetworkStarted;
-  return EFI_SUCCESS;
+  ReturnUnlock (SavedTpl, EFI_SUCCESS);
 }
 
 EFI_STATUS
@@ -508,18 +552,21 @@ Pp2SnpStop (
   IN EFI_SIMPLE_NETWORK_PROTOCOL  *This
   )
 {
+  EFI_TPL SavedTpl;
+  SavedTpl = gBS->RaiseTPL (TPL_CALLBACK);
+
   DEBUG((DEBUG_INFO, "Pp2SnpStop \n"));
   switch (This->Mode->State) {
   case EfiSimpleNetworkStarted:
   case EfiSimpleNetworkInitialized:
     break;
   case EfiSimpleNetworkStopped:
-    return (EFI_NOT_STARTED);
+    ReturnUnlock (SavedTpl, EFI_NOT_STARTED);
   default:
-    return (EFI_DEVICE_ERROR);
+    ReturnUnlock (SavedTpl, EFI_DEVICE_ERROR);
   }
   This->Mode->State = EfiSimpleNetworkStopped;
-  return EFI_SUCCESS;
+  ReturnUnlock (SavedTpl, EFI_SUCCESS);
 }
 
 EFI_STATUS
@@ -539,18 +586,21 @@ Pp2SnpShutdown (
   IN EFI_SIMPLE_NETWORK_PROTOCOL  *This
   )
 {
+  EFI_TPL SavedTpl;
+  SavedTpl = gBS->RaiseTPL (TPL_CALLBACK);
+
   switch (This->Mode->State) {
   case EfiSimpleNetworkInitialized:
     break;
   case EfiSimpleNetworkStarted:
-    return (EFI_DEVICE_ERROR);
+    ReturnUnlock (SavedTpl, EFI_DEVICE_ERROR);
   case EfiSimpleNetworkStopped:
-    return (EFI_NOT_STARTED);
+    ReturnUnlock (SavedTpl, EFI_NOT_STARTED);
   default:
-    return (EFI_DEVICE_ERROR);
+    ReturnUnlock (SavedTpl, EFI_DEVICE_ERROR);
   }
 
-  return EFI_SUCCESS;
+  ReturnUnlock (SavedTpl, EFI_SUCCESS);
 }
 
 EFI_STATUS
@@ -618,16 +668,25 @@ Pp2SnpGetStatus (
 {
   PP2DXE_CONTEXT *Pp2Context = INSTANCE_FROM_SNP(Snp);
   BOOLEAN LinkUp;
+  EFI_TPL SavedTpl;
+
+  SavedTpl = gBS->RaiseTPL (TPL_CALLBACK);
 
   if (!Pp2Context->Initialized)
-    return EFI_NOT_READY;
+    ReturnUnlock(SavedTpl, EFI_NOT_READY);
+
   LinkUp = mv_gop110_port_is_link_up(&Pp2Context->Port);
   if (LinkUp != Snp->Mode->MediaPresent) {
     DEBUG((DEBUG_INFO, "Pp2Dxe%d: Link ", Pp2Context->Instance));
     DEBUG((DEBUG_INFO, LinkUp ? "up\n" : "down\n"));
   }
   Snp->Mode->MediaPresent = LinkUp;
-  return EFI_SUCCESS;
+
+  if (TxBuf != NULL) {
+    *TxBuf = QueueRemove (Pp2Context);
+  }
+
+  ReturnUnlock(SavedTpl, EFI_SUCCESS);
 }
 
 EFI_STATUS
@@ -650,6 +709,7 @@ Pp2SnpTransmit (
   INTN tx_done;
   UINT8 *DataPtr = Buffer;
   UINT16 Protocol;
+  EFI_TPL SavedTpl;
 
   if (This == NULL || Buffer == NULL) {
     DEBUG((DEBUG_ERROR, "Pp2Dxe: null Snp or Buffer\n"));
@@ -662,23 +722,25 @@ Pp2SnpTransmit (
     ASSERT (DestAddr != NULL);
   }
 
+  SavedTpl = gBS->RaiseTPL (TPL_CALLBACK);
+
   switch (This->Mode->State) {
   case EfiSimpleNetworkInitialized:
     break;
   case EfiSimpleNetworkStarted:
     DEBUG((DEBUG_WARN, "Pp2Dxe: Driver not yet initialized\n"));
-    return EFI_DEVICE_ERROR;
+    ReturnUnlock(SavedTpl, EFI_DEVICE_ERROR);
   case EfiSimpleNetworkStopped:
     DEBUG((DEBUG_WARN, "Pp2Dxe: Driver not started\n"));
-    return EFI_NOT_STARTED;
+    ReturnUnlock(SavedTpl, EFI_NOT_STARTED);
   default:
     DEBUG((DEBUG_ERROR, "Pp2Dxe: Driver in an invalid state\n"));
-    return EFI_DEVICE_ERROR;
+    ReturnUnlock(SavedTpl, EFI_DEVICE_ERROR);
   }
 
   if (!This->Mode->MediaPresent) {
     DEBUG((DEBUG_ERROR, "Pp2Dxe: link not ready\n"));
-    return EFI_NOT_READY;
+    ReturnUnlock(SavedTpl, EFI_NOT_READY);
   }
 
   Protocol = HTONS(*ProtocolPtr);
@@ -687,7 +749,7 @@ Pp2SnpTransmit (
 
   if (!tx_desc) {
     DEBUG((DEBUG_ERROR, "No tx descriptor to use\n"));
-    return EFI_OUT_OF_RESOURCES;
+    ReturnUnlock(SavedTpl, EFI_OUT_OF_RESOURCES);
   }
 
   if (HeaderSize != 0) {
@@ -725,7 +787,7 @@ Pp2SnpTransmit (
   do {
     if (timeout++ > MVPP2_TX_SEND_TIMEOUT) {
       DEBUG((DEBUG_ERROR, "Pp2Dxe: transmit timeout\n"));
-      return EFI_TIMEOUT;
+      ReturnUnlock(SavedTpl, EFI_TIMEOUT);
     }
     tx_done = mvpp2_aggr_txq_pend_desc_num_get(Mvpp2Shared, 0);
   } while (tx_done);
@@ -736,13 +798,14 @@ Pp2SnpTransmit (
   while (!tx_done) {
     if (timeout++ > MVPP2_TX_SEND_TIMEOUT) {
       DEBUG((DEBUG_ERROR, "Pp2Dxe: transmit timeout\n"));
-      return EFI_TIMEOUT;
+      ReturnUnlock(SavedTpl, EFI_TIMEOUT);
     }
     tx_done = mvpp2_txq_sent_desc_proc(Port, &Port->txqs[0]);
   }
   /* tx_done has increased - hw sent packet */
 
-  return EFI_SUCCESS;
+  /* add buffer to completion queue and return */
+  ReturnUnlock (SavedTpl, QueueInsert (Pp2Context, Buffer));
 }
 
 EFI_STATUS
@@ -761,23 +824,26 @@ Pp2SnpReceive (
   PP2DXE_CONTEXT *Pp2Context = INSTANCE_FROM_SNP(This);
   PP2DXE_PORT *Port = &Pp2Context->Port;
   UINT64 PhysAddr, VirtAddr;
-  UINT32 Status;
+  EFI_STATUS Status = EFI_SUCCESS;
+  EFI_TPL SavedTpl;
+  UINT32 StatusReg;
   INTN PoolId;
   UINTN PktLength;
   UINT8 *DataPtr;
   struct mvpp2_rx_desc *RxDesc;
   struct mvpp2_rx_queue *Rxq = &Port->rxqs[0];
 
+  SavedTpl = gBS->RaiseTPL (TPL_CALLBACK);
   ReceivedPackets = mvpp2_rxq_received(Port, Rxq->id);
 
   if (ReceivedPackets == 0) {
-    return EFI_NOT_READY;
+    ReturnUnlock(SavedTpl, EFI_NOT_READY);
   }
 
   /* process one packet per call */
   RxDesc = mvpp2_rxq_next_desc_get(Rxq);
 
-  Status = RxDesc->status;
+  StatusReg = RxDesc->status;
 
   /* extract addresses from descriptor */
   PhysAddr = RxDesc->buf_phys_addr_key_hash &
@@ -786,9 +852,10 @@ Pp2SnpReceive (
   MVPP22_ADDR_MASK;
 
   /* drop packets with error or with buffer header (MC, SG) */
-  if ((Status & MVPP2_RXD_BUF_HDR) ||
-    (Status & MVPP2_RXD_ERR_SUMMARY)) {
+  if ((StatusReg & MVPP2_RXD_BUF_HDR) ||
+    (StatusReg & MVPP2_RXD_ERR_SUMMARY)) {
     DEBUG((DEBUG_WARN, "Pp2Dxe: dropping packet\n"));
+    Status = EFI_DEVICE_ERROR;
     goto drop;
   }
 
@@ -796,7 +863,7 @@ Pp2SnpReceive (
   if (PktLength > *BufferSize) {
     *BufferSize = PktLength;
     DEBUG((DEBUG_ERROR, "Pp2Dxe: buffer too small\n"));
-    return EFI_BUFFER_TOO_SMALL;
+    ReturnUnlock(SavedTpl, EFI_BUFFER_TOO_SMALL);
   }
 
   CopyMem (Buffer, (VOID*) (PhysAddr + 2), PktLength);
@@ -827,15 +894,17 @@ Pp2SnpReceive (
 
 drop:
   /* refill: pass packet back to BM */
-  PoolId = (Status & MVPP2_RXD_BM_POOL_ID_MASK) >>
+  PoolId = (StatusReg & MVPP2_RXD_BM_POOL_ID_MASK) >>
   MVPP2_RXD_BM_POOL_ID_OFFS;
   mvpp2_bm_pool_put(Mvpp2Shared, PoolId, PhysAddr, VirtAddr);
 
   /* iowmb */
   __asm__ __volatile__ ("" : : : "memory");
 
+  ASSERT (Port != NULL);
+  ASSERT (Rxq != NULL);
   mvpp2_rxq_status_update(Port, Rxq->id, 1, 1);
-  return EFI_SUCCESS;
+  ReturnUnlock(SavedTpl, Status);
 }
 
 EFI_STATUS
