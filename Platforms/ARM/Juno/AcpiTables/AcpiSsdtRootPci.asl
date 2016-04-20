@@ -135,10 +135,11 @@ DefinitionBlock("SsdtPci.aml", "SSDT", 1, "ARMLTD", "ARM-JUNO", EFI_ACPI_ARM_OEM
 					PosDecode,
 					EntireRange,
 					0x00000000, 							// Granularity
-					0x5f800000, 							// Min Base Address
-					0x5fffffff, 							// Max Base Address
+					0x00000000, 							// Min Base Address
+					0x007fffff, 							// Max Base Address
 					0x5f800000, 							// Translate
-					0x00800000  							// Length
+					0x00800000,  							// Length
+					,,,TypeTranslation
 				)
 			}) // Name(RBUF)
 
