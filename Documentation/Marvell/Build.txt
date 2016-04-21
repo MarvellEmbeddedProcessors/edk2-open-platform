@@ -14,6 +14,7 @@ Fully supported are gcc4.5 - gcc4.9, so possible {toolchain_name} are:
 Supported {platform} are:
  - Apn806
  - Armada7040_rz
+ - Armada70x0
 
 Supported {target} are
  - DEBUG
