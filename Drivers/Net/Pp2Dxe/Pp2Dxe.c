@@ -442,9 +442,14 @@ Pp2DxePhyInitialize (
   if (EFI_ERROR(Status))
     return Status;
 
+  if (PhyAddresses[Pp2Context->Instance] == 0xff)
+    /* PHY iniitalization not required */
+    return EFI_SUCCESS;
+
   Status = Pp2Context->Phy->Init(
             Pp2Context->Phy,
             PhyAddresses[Pp2Context->Instance],
+	    Pp2Context->Port.phy_interface,
             &Pp2Context->PhyDev
             );
   if (EFI_ERROR(Status) && Status != EFI_TIMEOUT)
@@ -980,11 +985,12 @@ Pp2DxeInitialise (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  PP2DXE_CONTEXT *Pp2Context;
+  PP2DXE_CONTEXT *Pp2Context = NULL;
   EFI_STATUS Status;
   INTN i;
   UINT8 *PortIds, *GopIndexes, *PhyConnectionTypes, *AlwaysUp;
   VOID *BufferSpace;
+  UINT32 NetCompConfig = 0;
 
   Mvpp2Shared = AllocateZeroPool (sizeof (MVPP2_SHARED));
   if (Mvpp2Shared == NULL) {
@@ -1075,8 +1081,12 @@ Pp2DxeInitialise (
   Mvpp2Shared->aggr_txqs->log_id = 0;
   Mvpp2Shared->aggr_txqs->size = MVPP2_AGGR_TXQ_SIZE;
 
+  if (PcdGet32 (PcdPp2PortNumber) == 0) {
+    DEBUG((DEBUG_ERROR, "Pp2Dxe: port number set to 0\n"));
+    return EFI_INVALID_PARAMETER;
+  }
+
   for (i = 0; i < PcdGet32 (PcdPp2PortNumber); i++) {
-    UINT32 NetCompConfig;
 
     Pp2Context = AllocateZeroPool (sizeof (PP2DXE_CONTEXT));
     if (Pp2Context == NULL) {
@@ -1107,6 +1117,7 @@ Pp2DxeInitialise (
     Pp2Context->Port.gop_index = GopIndexes[Pp2Context->Instance];
     Pp2Context->Port.phy_interface = PhyConnectionTypes[Pp2Context->Instance];
     Pp2Context->Port.always_up = AlwaysUp[Pp2Context->Instance];
+    Pp2Context->Port.speed = MV_PORT_SPEED_2500;
     Pp2Context->Port.txp_num = 1;
     Pp2Context->Port.priv = Mvpp2Shared;
     Pp2Context->Port.first_rxq = 4 * Pp2Context->Instance;
@@ -1117,15 +1128,16 @@ Pp2DxeInitialise (
     DEBUG((DEBUG_INFO, "Pp2Dxe%d: port%d - gmac at 0x%lx, xlg at 0x%lx\n", Pp2Context->Instance, Pp2Context->Port.id,
       Pp2Context->Port.gmac_base, Pp2Context->Port.xlg_base));
 
-    NetCompConfig = mvp_pp2x_gop110_netc_cfg_create(&Pp2Context->Port);
-    mv_gop110_netc_init(&Pp2Context->Port, NetCompConfig,
-      MV_NETC_FIRST_PHASE);
-    mv_gop110_netc_init(&Pp2Context->Port, NetCompConfig,
-      MV_NETC_SECOND_PHASE);
+    NetCompConfig |= mvp_pp2x_gop110_netc_cfg_create(&Pp2Context->Port);
 
     mv_gop110_port_init(&Pp2Context->Port);
     mv_gop110_fl_cfg(&Pp2Context->Port);
   }
+
+  mv_gop110_netc_init(&Pp2Context->Port, NetCompConfig,
+    MV_NETC_FIRST_PHASE);
+  mv_gop110_netc_init(&Pp2Context->Port, NetCompConfig,
+    MV_NETC_SECOND_PHASE);
 
   return EFI_SUCCESS;
 }
