@@ -62,7 +62,7 @@ COMPHY_MUX_DATA Cp110ComPhyMuxData[] = {
     {PHY_TYPE_XAUI0, 0x1}, {PHY_TYPE_RXAUI0, 0x1}, {PHY_TYPE_KR, 0x1},
     {PHY_TYPE_XAUI1, 0x1}, {PHY_TYPE_RXAUI1, 0x1}, {PHY_TYPE_SATA1, 0x4} } },
   /* Lane 4 */
-  {7, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII0, 0x1},
+  {7, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII0, 0x2},
     {PHY_TYPE_XAUI0, 0x1}, {PHY_TYPE_RXAUI0, 0x1}, {PHY_TYPE_KR, 0x1},
     {PHY_TYPE_SGMII2, 0x1}, {PHY_TYPE_XAUI2, 0x1} } },
   /* Lane 5 */
@@ -369,6 +369,27 @@ ComphyUsb3PowerUp (
 }
 
 STATIC
+UINT32
+PollingWithTimeout (
+  IN EFI_PHYSICAL_ADDRESS addr,
+  IN UINT32 val,
+  IN UINT32 mask,
+  IN UINT64 usec_timeout
+  )
+{
+  UINT32 data;
+
+  do {
+    MicroSecondDelay(1);
+    data = MmioRead32(addr) & mask;
+  } while (data != val  && --usec_timeout > 0);
+
+  if (usec_timeout == 0)
+    return data;
+  return 0;
+}
+
+STATIC
 UINTN
 ComPhySgmiiPowerUp (
   IN UINT32 Lane,
@@ -382,6 +403,7 @@ ComPhySgmiiPowerUp (
   EFI_PHYSICAL_ADDRESS HpipeAddr = HPIPE_ADDR(HpipeBase, Lane);
   EFI_PHYSICAL_ADDRESS SdIpAddr = SD_ADDR(HpipeBase, Lane);
   EFI_PHYSICAL_ADDRESS ComPhyAddr = COMPHY_ADDR(ComPhyBase, Lane);
+  EFI_PHYSICAL_ADDRESS Addr;
 
   DEBUG((DEBUG_INFO, "ComPhy: stage: RFU configurations - hard reset "
     "ComPhy\n"));
@@ -476,13 +498,12 @@ ComPhySgmiiPowerUp (
   Data |= 0x1 << SD_EXTERNAL_CONFIG0_SD_PU_TX_OFFSET;
   RegSet (SdIpAddr + SD_EXTERNAL_CONFIG0_REG, Data, Mask);
 
-  /* Wait 15ms - for ComPhy calibration done */
-  MicroSecondDelay (15000);
-
   /* Check PLL rx & tx ready */
-  Data = MmioRead32 (SdIpAddr + SD_EXTERNAL_STATUS0_REG);
-  if (((Data & SD_EXTERNAL_STATUS0_PLL_RX_MASK) == 0) ||
-    ((Data & SD_EXTERNAL_STATUS0_PLL_TX_MASK) == 0)) {
+  Addr = SdIpAddr + SD_EXTERNAL_STATUS0_REG;
+  Data = SD_EXTERNAL_STATUS0_PLL_RX_MASK | SD_EXTERNAL_STATUS0_PLL_TX_MASK;
+  Mask = Data;
+  Data = PollingWithTimeout (Addr, Data, Mask, 15000);
+  if (Data != 0) {
     DEBUG((DEBUG_ERROR, "ComPhy: Read from reg = %p - value = 0x%x\n",
       SdIpAddr + SD_EXTERNAL_STATUS0_REG, Data));
     DEBUG((DEBUG_ERROR, "ComPhy: SD_EXTERNAL_STATUS0_PLL_RX is %d, "
@@ -497,12 +518,12 @@ ComPhySgmiiPowerUp (
   Data = 0x1 << SD_EXTERNAL_CONFIG1_RX_INIT_OFFSET;
   RegSet (SdIpAddr + SD_EXTERNAL_CONFIG1_REG, Data, Mask);
 
-  /* Wait 100us */
-  MicroSecondDelay (100);
-
   /* Check that RX init done */
-  Data = MmioRead32 (SdIpAddr + SD_EXTERNAL_STATUS0_REG);
-  if ((Data & SD_EXTERNAL_STATUS0_RX_INIT_MASK) == 0) {
+  Addr = SdIpAddr + SD_EXTERNAL_STATUS0_REG;
+  Data = SD_EXTERNAL_STATUS0_RX_INIT_MASK;
+  Mask = Data;
+  Data = PollingWithTimeout (Addr, Data, Mask, 100);
+  if (Data != 0) {
     DEBUG((DEBUG_ERROR, "ComPhy: Read from reg = %p - value = 0x%x\n",
       SdIpAddr + SD_EXTERNAL_STATUS0_REG, Data));
     DEBUG((DEBUG_ERROR, "ComPhy: SD_EXTERNAL_STATUS0_RX_INIT is 0\n"));
