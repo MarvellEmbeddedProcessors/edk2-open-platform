@@ -434,7 +434,6 @@ Pp2DxePhyInitialize (
   UINT8 *PhyAddresses;
 
   PhyAddresses = PcdGetPtr (PcdPhySmiAddresses);
-  DEBUG((DEBUG_INFO, "PhyAddresses are: %d %d\n", PhyAddresses[0], PhyAddresses[1]));
   Status = gBS->LocateProtocol (
       &gEfiPhyProtocolGuid,
       NULL,
@@ -667,6 +666,7 @@ Pp2SnpGetStatus (
   )
 {
   PP2DXE_CONTEXT *Pp2Context = INSTANCE_FROM_SNP(Snp);
+  PP2DXE_PORT *Port = &Pp2Context->Port;
   BOOLEAN LinkUp;
   EFI_TPL SavedTpl;
 
@@ -675,7 +675,8 @@ Pp2SnpGetStatus (
   if (!Pp2Context->Initialized)
     ReturnUnlock(SavedTpl, EFI_NOT_READY);
 
-  LinkUp = mv_gop110_port_is_link_up(&Pp2Context->Port);
+  LinkUp = Port->always_up ? TRUE : mv_gop110_port_is_link_up(Port);
+
   if (LinkUp != Snp->Mode->MediaPresent) {
     DEBUG((DEBUG_INFO, "Pp2Dxe%d: Link ", Pp2Context->Instance));
     DEBUG((DEBUG_INFO, LinkUp ? "up\n" : "down\n"));
@@ -982,7 +983,7 @@ Pp2DxeInitialise (
   PP2DXE_CONTEXT *Pp2Context;
   EFI_STATUS Status;
   INTN i;
-  UINT8 *PortIds, *GopIndexes;
+  UINT8 *PortIds, *GopIndexes, *PhyConnectionTypes, *AlwaysUp;
   VOID *BufferSpace;
 
   Mvpp2Shared = AllocateZeroPool (sizeof (MVPP2_SHARED));
@@ -1099,12 +1100,15 @@ Pp2DxeInitialise (
     /* Inlined mv_pp2x_initialize_dev */
     PortIds = PcdGetPtr (PcdPp2PortIds);
     GopIndexes = PcdGetPtr (PcdPp2GopIndexes);
+    PhyConnectionTypes = PcdGetPtr (PcdPhyConnectionTypes);
+    AlwaysUp = PcdGetPtr (PcdPp2InterfaceAlwaysUp);
     ASSERT (PcdGetSize (PcdPp2GopIndexes) == PcdGetSize (PcdPp2PortIds));
     Pp2Context->Port.id = PortIds[Pp2Context->Instance];
-    Pp2Context->Port.txp_num = 1;
     Pp2Context->Port.gop_index = GopIndexes[Pp2Context->Instance];
+    Pp2Context->Port.phy_interface = PhyConnectionTypes[Pp2Context->Instance];
+    Pp2Context->Port.always_up = AlwaysUp[Pp2Context->Instance];
+    Pp2Context->Port.txp_num = 1;
     Pp2Context->Port.priv = Mvpp2Shared;
-    Pp2Context->Port.phy_interface = MV_MODE_RGMII;
     Pp2Context->Port.first_rxq = 4 * Pp2Context->Instance;
     Pp2Context->Port.gmac_base = PcdGet64 (PcdPp2GmacBaseAddress) +
       PcdGet32 (PcdPp2GmacObjSize) * Pp2Context->Port.gop_index;
@@ -1120,6 +1124,7 @@ Pp2DxeInitialise (
       MV_NETC_SECOND_PHASE);
 
     mv_gop110_port_init(&Pp2Context->Port);
+    mv_gop110_fl_cfg(&Pp2Context->Port);
   }
 
   return EFI_SUCCESS;

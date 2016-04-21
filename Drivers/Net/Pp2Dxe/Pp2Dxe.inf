@@ -71,10 +71,12 @@
   gEfiCpuArchProtocolGuid
 
 [Pcd]
+  gMarvellTokenSpaceGuid.PcdPhyConnectionTypes
   gMarvellTokenSpaceGuid.PcdPp2PortNumber
   gMarvellTokenSpaceGuid.PcdPhySmiAddresses
   gMarvellTokenSpaceGuid.PcdPp2PortIds
   gMarvellTokenSpaceGuid.PcdPp2GopIndexes
+  gMarvellTokenSpaceGuid.PcdPp2InterfaceAlwaysUp
   gMarvellTokenSpaceGuid.PcdPp2SharedAddress
   gMarvellTokenSpaceGuid.PcdPp2GmacObjSize
   gMarvellTokenSpaceGuid.PcdPp2GmacBaseAddress

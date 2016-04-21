@@ -287,6 +287,7 @@ struct mvpp2_port {
   MV_32 phy_interface;
   BOOLEAN link;
   BOOLEAN duplex;
+  BOOLEAN always_up;
   PHY_SPEED speed;
 
   struct mvpp2_bm_pool *pool_long;
