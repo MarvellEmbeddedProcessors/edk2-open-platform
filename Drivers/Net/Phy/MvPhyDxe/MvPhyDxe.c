@@ -93,19 +93,19 @@ MvPhyM88e1111sConfig (
 {
   UINT32 Reg;
 
-  if ((PhyDev->Connection == PHY_INTERFACE_MODE_RGMII) ||
-      (PhyDev->Connection == PHY_INTERFACE_MODE_RGMII_ID) ||
-      (PhyDev->Connection == PHY_INTERFACE_MODE_RGMII_RXID) ||
-      (PhyDev->Connection == PHY_INTERFACE_MODE_RGMII_TXID)) {
+  if ((PhyDev->Connection == PHY_CONNECTION_RGMII) ||
+      (PhyDev->Connection == PHY_CONNECTION_RGMII_ID) ||
+      (PhyDev->Connection == PHY_CONNECTION_RGMII_RXID) ||
+      (PhyDev->Connection == PHY_CONNECTION_RGMII_TXID)) {
     Reg = Mdio->Read(Mdio, PhyDev->Addr,
       MIIM_88E1111_PHY_EXT_CR);
-    if ((PhyDev->Connection == PHY_INTERFACE_MODE_RGMII) ||
-      (PhyDev->Connection == PHY_INTERFACE_MODE_RGMII_ID)) {
+    if ((PhyDev->Connection == PHY_CONNECTION_RGMII) ||
+      (PhyDev->Connection == PHY_CONNECTION_RGMII_ID)) {
       Reg |= (MIIM_88E1111_RX_DELAY | MIIM_88E1111_TX_DELAY);
-    } else if (PhyDev->Connection == PHY_INTERFACE_MODE_RGMII_RXID) {
+    } else if (PhyDev->Connection == PHY_CONNECTION_RGMII_RXID) {
       Reg &= ~MIIM_88E1111_TX_DELAY;
       Reg |= MIIM_88E1111_RX_DELAY;
-    } else if (PhyDev->Connection == PHY_INTERFACE_MODE_RGMII_TXID) {
+    } else if (PhyDev->Connection == PHY_CONNECTION_RGMII_TXID) {
       Reg &= ~MIIM_88E1111_RX_DELAY;
       Reg |= MIIM_88E1111_TX_DELAY;
     }
@@ -127,7 +127,7 @@ MvPhyM88e1111sConfig (
       MIIM_88E1111_PHY_EXT_SR, Reg);
   }
 
-  if (PhyDev->Connection == PHY_INTERFACE_MODE_SGMII) {
+  if (PhyDev->Connection == PHY_CONNECTION_SGMII) {
     Reg = Mdio->Read(Mdio, PhyDev->Addr,
       MIIM_88E1111_PHY_EXT_SR);
 
@@ -139,7 +139,7 @@ MvPhyM88e1111sConfig (
       MIIM_88E1111_PHY_EXT_SR, Reg);
   }
 
-  if (PhyDev->Connection == PHY_INTERFACE_MODE_RTBI) {
+  if (PhyDev->Connection == PHY_CONNECTION_RTBI) {
     Reg = Mdio->Read(Mdio, PhyDev->Addr,
       MIIM_88E1111_PHY_EXT_CR);
     Reg |= (MIIM_88E1111_RX_DELAY | MIIM_88E1111_TX_DELAY);
@@ -249,6 +249,30 @@ MvPhyParseStatus (
 }
 
 STATIC
+VOID
+MvPhy1518WriteBits (
+  IN UINT32 PhyAddr,
+  IN UINT8 RegNum,
+  IN UINT16 Offset,
+  IN UINT16 Len,
+  IN UINT16 Data)
+{
+  UINT16 Reg, Mask;
+
+  if ((Len + Offset) >= 16)
+    Mask = 0 - (1 << Offset);
+  else
+    Mask = (1 << (Len + Offset)) - (1 << Offset);
+
+  Reg = Mdio->Read(Mdio, PhyAddr, RegNum);
+
+  Reg &= ~Mask;
+  Reg |= Data << Offset;
+
+  Mdio->Write(Mdio, PhyAddr, RegNum, Reg);
+}
+
+STATIC
 EFI_STATUS
 MvPhyInit1512 (
     IN CONST EFI_PHY_PROTOCOL *Snp,
@@ -258,6 +282,27 @@ MvPhyInit1512 (
 {
   UINT32 Data;
   INTN i;
+
+  if (PhyDev->Connection == PHY_CONNECTION_SGMII) {
+    Mdio->Write(Mdio, PhyAddr, 22, 0x00ff);  /* page 0xff */
+    Mdio->Write(Mdio, PhyAddr, 17, 0x214B);
+    Mdio->Write(Mdio, PhyAddr, 16, 0x2144);
+    Mdio->Write(Mdio, PhyAddr, 17, 0x0C28);
+    Mdio->Write(Mdio, PhyAddr, 16, 0x2146);
+    Mdio->Write(Mdio, PhyAddr, 17, 0xB233);
+    Mdio->Write(Mdio, PhyAddr, 16, 0x214D);
+    Mdio->Write(Mdio, PhyAddr, 17, 0xCC0C);
+    Mdio->Write(Mdio, PhyAddr, 16, 0x2159);
+    Mdio->Write(Mdio, PhyAddr, 22, 0x0000);  /* reg page 0 */
+    Mdio->Write(Mdio, PhyAddr, 22, 18);    /* reg page 18 */
+    /* Write HWCFG_MODE = SGMII to Copper */
+    MvPhy1518WriteBits(PhyAddr, 20, 0, 3, 1);
+
+    /* Phy reset */
+    MvPhy1518WriteBits(PhyAddr, 20, 15, 1, 1);
+    Mdio->Write(Mdio, PhyAddr, 22, 0);     /* reg page 18 */
+    gBS->Stall(100);
+  }
 
   MvPhyM88e1111sConfig (PhyDev);
 
