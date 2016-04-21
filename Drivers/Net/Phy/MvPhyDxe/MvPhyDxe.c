@@ -347,12 +347,12 @@ EFI_STATUS
 MvPhyInit (
   IN CONST EFI_PHY_PROTOCOL *Snp,
   IN UINT32 PhyAddr,
+  IN PHY_CONNECTION PhyConnection,
   IN OUT PHY_DEVICE **OutPhyDev
   )
 {
   EFI_STATUS Status;
   PHY_DEVICE *PhyDev;
-  UINT8 *ConnectionTypes;
   UINT8 *DeviceIds;
   INTN i;
 
@@ -367,14 +367,9 @@ MvPhyInit (
   /* perform setup common for all PHYs */
   PhyDev = AllocateZeroPool (sizeof (PHY_DEVICE));
   PhyDev->Addr = PhyAddr;
-  DEBUG((DEBUG_INFO, "MvPhyDxe: PhyAddr is %d\n", PhyAddr));
-  ConnectionTypes = PcdGetPtr (PcdPhyConnectionTypes);
-  if (PhyAddr >= PcdGetSize (PcdPhyConnectionTypes)) {
-    DEBUG((DEBUG_ERROR, "MvPhyDxe: wrong phy address\n"));
-    Status = EFI_INVALID_PARAMETER;
-    goto error;
-  }
-  PhyDev->Connection = ConnectionTypes[PhyAddr];
+  PhyDev->Connection = PhyConnection;
+  DEBUG((DEBUG_INFO, "MvPhyDxe: PhyAddr is %d, connection %d\n",
+        PhyAddr, PhyConnection));
   *OutPhyDev = PhyDev;
 
   DeviceIds = PcdGetPtr (PcdPhyDeviceIds);
@@ -389,7 +384,6 @@ MvPhyInit (
 
   /* if we are here, no matching DevId was found */
   Status = EFI_INVALID_PARAMETER;
-error:
   FreePool (PhyDev);
   return Status;
 }
