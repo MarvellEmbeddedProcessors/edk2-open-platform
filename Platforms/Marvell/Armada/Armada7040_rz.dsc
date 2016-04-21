@@ -67,8 +67,8 @@
   gMarvellTokenSpaceGuid.PcdChip1MppReverseFlag|FALSE
   gMarvellTokenSpaceGuid.PcdChip1MppBaseAddress|0xF2440000
   gMarvellTokenSpaceGuid.PcdChip1MppPinCount|64
-  gMarvellTokenSpaceGuid.PcdChip1MppSel0|{ 0x3, 0x3, 0x3, 0x3, 0x3, 0x3, 0x3, 0x3, 0x3, 0x3 }
-  gMarvellTokenSpaceGuid.PcdChip1MppSel1|{ 0x3, 0x3, 0x0, 0x3, 0x3, 0x3, 0x3, 0x0, 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel0|{ 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4 }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel1|{ 0x4, 0x4, 0x0, 0x3, 0x3, 0x3, 0x3, 0x0, 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdChip1MppSel2|{ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x9, 0xA }
   gMarvellTokenSpaceGuid.PcdChip1MppSel3|{ 0xA, 0x0, 0x7, 0x0, 0x7, 0x0, 0x6, 0x2, 0x2, 0x0 }
   gMarvellTokenSpaceGuid.PcdChip1MppSel4|{ 0x7, 0x7, 0x8, 0x8, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 }
@@ -117,7 +117,7 @@
   gMarvellTokenSpaceGuid.PcdChip0Compatible|L"Cp110"
 
   gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|L"SGMII2;USB3_HOST0;SGMII0;SATA1;USB3_HOST1;PCIE2"
-  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|L"1250;5000;1250;5000;5000;5000"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|L"3125;5000;1250;5000;5000;5000"
 
   #UtmiPhy
   gMarvellTokenSpaceGuid.PcdUtmiPhyCount|2
@@ -135,15 +135,16 @@
   gMarvellTokenSpaceGuid.PcdMdioBaseAddress|0xF212A200
 
 #PHY
-  gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0x4, 0x4, 0x0 }
   gMarvellTokenSpaceGuid.PcdPhyDeviceIds|{ 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdPhyStartupAutoneg|FALSE
 
 #NET
-  gMarvellTokenSpaceGuid.PcdPhySmiAddresses|{ 0x0, 0x1 }
-  gMarvellTokenSpaceGuid.PcdPp2PortNumber|2
-  gMarvellTokenSpaceGuid.PcdPp2PortIds|{ 0x1, 0x2 }
-  gMarvellTokenSpaceGuid.PcdPp2GopIndexes|{ 0x2, 0x3 }
+  gMarvellTokenSpaceGuid.PcdPhySmiAddresses|{ 0xff, 0x0, 0x1 }
+  gMarvellTokenSpaceGuid.PcdPp2PortNumber|3
+  gMarvellTokenSpaceGuid.PcdPp2PortIds|{ 0x0, 0x1, 0x2 }
+  gMarvellTokenSpaceGuid.PcdPp2GopIndexes|{ 0x0, 0x2, 0x3 }
+  gMarvellTokenSpaceGuid.PcdPp2InterfaceAlwaysUp|{ 0x1, 0x1, 0x0 }
   gMarvellTokenSpaceGuid.PcdPp2SharedAddress|0xf2000000
   gMarvellTokenSpaceGuid.PcdPp2GmacBaseAddress|0xf2130e00
   gMarvellTokenSpaceGuid.PcdPp2GmacObjSize|0x1000
