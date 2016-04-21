@@ -675,6 +675,10 @@ InstallDevices (
     Private->PciIoProtocol.Mem.Read = PciIoSataMemRead;
     Private->PciIoProtocol.Mem.Write = PciIoSataMemWrite;
     break;
+  case SD_MMC_PCI_CLASS_CODE_NR:
+    Private->ConfigSpace->Device.Bar[EFI_SD_MMC_BAR_INDEX] =
+      Private->RootBridge.MemoryStart;
+    break;
   default:
     DEBUG((EFI_D_ERROR, "PciEmulation: Unknown PCI device. Abort.\n"));
     return EFI_D_ERROR;
