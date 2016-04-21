@@ -605,6 +605,10 @@ InstallDevices (
     Private->ConfigSpace->Device.Bar[EFI_AHCI_BAR_INDEX] =
       Private->RootBridge.MemoryStart;
     break;
+  case SD_MMC_PCI_CLASS_CODE_NR:
+    Private->ConfigSpace->Device.Bar[EFI_SD_MMC_BAR_INDEX] =
+      Private->RootBridge.MemoryStart;
+    break;
   default:
     DEBUG((EFI_D_ERROR, "PciEmulation: Unknown PCI device. Abort.\n"));
     return EFI_D_ERROR;
