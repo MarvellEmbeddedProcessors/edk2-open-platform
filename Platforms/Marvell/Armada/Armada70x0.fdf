@@ -49,7 +49,7 @@ NumBlocks     = 0x400
 #
 ################################################################################
 
-0x00000000|0x000E0000
+0x00000000|0x000E6000
 gArmTokenSpaceGuid.PcdFvBaseAddress|gArmTokenSpaceGuid.PcdFvSize
 FV = FVMAIN_COMPACT
 
@@ -136,6 +136,11 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   INF MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
   INF MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
   INF MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
+
+  # SD/MMC
+  INF MdeModulePkg/Bus/Sd/EmmcDxe/EmmcDxe.inf
+  INF MdeModulePkg/Bus/Sd/SdDxe/SdDxe.inf
+  INF OpenPlatformPkg/Drivers/SdMmc/XenonDxe/SdMmcPciHcDxe.inf
 
   # Multiple Console IO support
   INF MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
