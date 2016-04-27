@@ -570,6 +570,8 @@ MvI2cStartRequest (
   0x391fc679, 0x6cb0, 0x4f01, { 0x9a, 0xc7, 0x8e, 0x1b, 0x78, 0x6b, 0x7a, 0x00 } \
   }
 
+STATIC CONST EFI_GUID DevGuid = I2C_GUID;
+
 STATIC
 EFI_STATUS
 MvI2cAllocDevice (
@@ -580,10 +582,7 @@ MvI2cAllocDevice (
   EFI_STATUS Status;
   EFI_I2C_DEVICE *Dev;
   UINT32 *TmpSlaveArray;
-  EFI_GUID DevGuid = I2C_GUID;
   EFI_GUID *TmpGuidP;
-
-  DevGuid.Data4[7] = SlaveAddress;
 
   Status = gBS->AllocatePool ( EfiBootServicesData,
              sizeof(EFI_I2C_DEVICE),
