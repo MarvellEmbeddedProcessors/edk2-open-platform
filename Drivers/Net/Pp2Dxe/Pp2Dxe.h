@@ -117,6 +117,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define upper_32_bits(n) ((MV_U32)(((n) >> 16) >> 16))
 #define lower_32_bits(n) ((MV_U32)(n))
 
+/* Port speeds */
+#define	MV_PORT_SPEED_10	SPEED_10
+#define	MV_PORT_SPEED_100	SPEED_100
+#define	MV_PORT_SPEED_1000	SPEED_1000
+#define	MV_PORT_SPEED_2500	SPEED_2500
+#define	MV_PORT_SPEED_10000	SPEED_10000
+
 /* L2 and L3 protocol macros */
 #define MV_IPPR_TCP    0
 #define MV_IPPR_UDP    1

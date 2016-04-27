@@ -978,6 +978,36 @@ Pp2DxeSnpInstall (
   return Status;
 }
 
+STATIC
+VOID
+Pp2DxeParsePortPcd (
+  IN PP2DXE_CONTEXT *Pp2Context
+  )
+{
+  UINT8 *PortIds, *GopIndexes, *PhyConnectionTypes, *AlwaysUp, *Speed;
+
+  PortIds = PcdGetPtr (PcdPp2PortIds);
+  GopIndexes = PcdGetPtr (PcdPp2GopIndexes);
+  PhyConnectionTypes = PcdGetPtr (PcdPhyConnectionTypes);
+  AlwaysUp = PcdGetPtr (PcdPp2InterfaceAlwaysUp);
+  Speed = PcdGetPtr (PcdPp2InterfaceSpeed);
+
+  ASSERT (PcdGetSize (PcdPp2GopIndexes) == PcdGetSize (PcdPp2PortIds));
+  ASSERT (PcdGetSize (PcdPhyConnectionTypes) == PcdGetSize (PcdPp2PortIds));
+  ASSERT (PcdGetSize (PcdPp2InterfaceAlwaysUp) == PcdGetSize (PcdPp2PortIds));
+  ASSERT (PcdGetSize (PcdPp2InterfaceSpeed) == PcdGetSize (PcdPp2PortIds));
+
+  Pp2Context->Port.id = PortIds[Pp2Context->Instance];
+  Pp2Context->Port.gop_index = GopIndexes[Pp2Context->Instance];
+  Pp2Context->Port.phy_interface = PhyConnectionTypes[Pp2Context->Instance];
+  Pp2Context->Port.always_up = AlwaysUp[Pp2Context->Instance];
+  Pp2Context->Port.speed = Speed[Pp2Context->Instance];
+  Pp2Context->Port.gmac_base = PcdGet64 (PcdPp2GmacBaseAddress) +
+    PcdGet32 (PcdPp2GmacObjSize) * Pp2Context->Port.gop_index;
+  Pp2Context->Port.xlg_base = PcdGet64 (PcdPp2XlgBaseAddress) +
+    PcdGet32 (PcdPp2XlgObjSize) * Pp2Context->Port.gop_index;
+}
+
 EFI_STATUS
 EFIAPI
 Pp2DxeInitialise (
@@ -988,7 +1018,6 @@ Pp2DxeInitialise (
   PP2DXE_CONTEXT *Pp2Context = NULL;
   EFI_STATUS Status;
   INTN i;
-  UINT8 *PortIds, *GopIndexes, *PhyConnectionTypes, *AlwaysUp;
   VOID *BufferSpace;
   UINT32 NetCompConfig = 0;
 
@@ -1107,24 +1136,10 @@ Pp2DxeInitialise (
     if (EFI_ERROR(Status))
       return Status;
 
-    /* Inlined mv_pp2x_initialize_dev */
-    PortIds = PcdGetPtr (PcdPp2PortIds);
-    GopIndexes = PcdGetPtr (PcdPp2GopIndexes);
-    PhyConnectionTypes = PcdGetPtr (PcdPhyConnectionTypes);
-    AlwaysUp = PcdGetPtr (PcdPp2InterfaceAlwaysUp);
-    ASSERT (PcdGetSize (PcdPp2GopIndexes) == PcdGetSize (PcdPp2PortIds));
-    Pp2Context->Port.id = PortIds[Pp2Context->Instance];
-    Pp2Context->Port.gop_index = GopIndexes[Pp2Context->Instance];
-    Pp2Context->Port.phy_interface = PhyConnectionTypes[Pp2Context->Instance];
-    Pp2Context->Port.always_up = AlwaysUp[Pp2Context->Instance];
-    Pp2Context->Port.speed = MV_PORT_SPEED_2500;
+    Pp2DxeParsePortPcd(Pp2Context);
     Pp2Context->Port.txp_num = 1;
     Pp2Context->Port.priv = Mvpp2Shared;
     Pp2Context->Port.first_rxq = 4 * Pp2Context->Instance;
-    Pp2Context->Port.gmac_base = PcdGet64 (PcdPp2GmacBaseAddress) +
-      PcdGet32 (PcdPp2GmacObjSize) * Pp2Context->Port.gop_index;
-    Pp2Context->Port.xlg_base = PcdGet64 (PcdPp2XlgBaseAddress) +
-      PcdGet32 (PcdPp2XlgObjSize) * Pp2Context->Port.gop_index;
     DEBUG((DEBUG_INFO, "Pp2Dxe%d: port%d - gmac at 0x%lx, xlg at 0x%lx\n", Pp2Context->Instance, Pp2Context->Port.id,
       Pp2Context->Port.gmac_base, Pp2Context->Port.xlg_base));
 

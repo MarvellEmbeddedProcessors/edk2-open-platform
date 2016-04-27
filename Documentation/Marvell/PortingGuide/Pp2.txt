@@ -3,41 +3,57 @@ Pp2Dxe porting guide
 Pp2Dxe is driver supporting PP2 NIC on Marvell platforms. Following PCDs
 are required to operate:
 
+Number of ports/network interfaces:
   gMarvellTokenSpaceGuid.PcdPp2PortNumber
-  (number of ports/network interfaces)
 
+Addresses of PHY devices:
   gMarvellTokenSpaceGuid.PcdPhySmiAddresses
-  (addresses of PHY devices)
 
+Identificators of PP2 ports:
   gMarvellTokenSpaceGuid.PcdPp2PortIds
-  (identificators of PP2 ports)
 
+Indexes used in GOP operation:
   gMarvellTokenSpaceGuid.PcdPp2GopIndexes
-  (indexes used in GOP operation)
 
+Set to 0x1 for always-up interface, 0x0 otherwise:
+  gMarvellTokenSpaceGuid.PcdPp2InterfaceAlwaysUp
+
+Values corresponding to PHY_SPEED enum:
+  gMarvellTokenSpaceGuid.PcdPp2InterfaceSpeed
+
+PHY_SPEED is defined as follows:
+  typedef enum {
+  0  NO_SPEED,
+  1  SPEED_10,
+  2  SPEED_100,
+  3  SPEED_1000,
+  4  SPEED_2500,
+  5  SPEED_10000
+  } PHY_SPEED;
+
+Base address of shared register space of PP2:
   gMarvellTokenSpaceGuid.PcdPp2SharedAddress
-  (base address of shared register space of PP2)
 
+Spacing between consecutive GMAC register spaces:
   gMarvellTokenSpaceGuid.PcdPp2GmacObjSize
-  (spacing between consecutive GMAC register spaces)
 
+Base address of GMAC:
   gMarvellTokenSpaceGuid.PcdPp2GmacBaseAddress
-  (base address of GMAC)
 
+Spacing between consecutive XLG register spaces:
   gMarvellTokenSpaceGuid.PcdPp2XlgObjSize
-  (spacing between consecutive XLG register spaces)
 
+Base address of XLG:
   gMarvellTokenSpaceGuid.PcdPp2XlgBaseAddress
-  (base address of XLG)
 
+Base address of RFU1:
   gMarvellTokenSpaceGuid.PcdPp2Rfu1BaseAddress
-  (base address of RFU1)
 
+Base address of SMI:
   gMarvellTokenSpaceGuid.PcdPp2SmiBaseAddress
-  (base address of SMI)
 
+TCLK frequency:
   gMarvellTokenSpaceGuid.PcdPp2ClockFrequency
-  (TCLK frequency)
 
 GMAC and XLG addresses are computed as follows:
   address = base_address + obj_size * gop_index
