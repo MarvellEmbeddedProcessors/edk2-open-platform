@@ -447,6 +447,7 @@ typedef struct {
   VOID			      *CompletionQueue[QUEUE_DEPTH];
   UINTN			      CompletionQueueHead;
   UINTN			      CompletionQueueTail;
+  EFI_EVENT		      EfiExitBootServicesEvent;
 } PP2DXE_CONTEXT;
 
 static inline MV_VOID mvpp2_write(struct mvpp2 *priv, MV_U32 offset,

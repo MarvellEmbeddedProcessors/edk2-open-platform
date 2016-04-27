@@ -584,6 +584,29 @@ Pp2SnpReset (
   return EFI_SUCCESS;
 }
 
+VOID
+EFIAPI
+Pp2DxeHalt (
+  IN EFI_EVENT Event,
+  IN VOID *Context
+  )
+{
+  PP2DXE_CONTEXT *Pp2Context = Context;
+  PP2DXE_PORT *Port = &Pp2Context->Port;
+  STATIC BOOLEAN CommonPartHalted = FALSE;
+
+  if (!CommonPartHalted) {
+    mvpp2_bm_stop(Mvpp2Shared, MVPP2_BM_POOL);
+    CommonPartHalted = TRUE;
+  }
+  mvpp2_txq_drain_set(Port, 0, TRUE);
+  mvpp2_ingress_disable(Port);
+  mvpp2_egress_disable(Port);
+
+  mv_gop110_port_events_mask(Port);
+  mv_gop110_port_disable(Port);
+}
+
 EFI_STATUS
 EFIAPI
 Pp2SnpShutdown (
@@ -1147,6 +1170,16 @@ Pp2DxeInitialise (
 
     mv_gop110_port_init(&Pp2Context->Port);
     mv_gop110_fl_cfg(&Pp2Context->Port);
+
+    Status = gBS->CreateEvent (
+	      EVT_SIGNAL_EXIT_BOOT_SERVICES,
+	      TPL_NOTIFY,
+	      Pp2DxeHalt,
+	      Pp2Context,
+	      &Pp2Context->EfiExitBootServicesEvent);
+
+    if (EFI_ERROR(Status))
+      return Status;
   }
 
   mv_gop110_netc_init(&Pp2Context->Port, NetCompConfig,
