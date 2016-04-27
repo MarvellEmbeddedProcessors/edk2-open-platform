@@ -52,32 +52,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define GET_REV_FLAG(id)         _PCD_GET_MODE_BOOL_PcdChip##id##MppReverseFlag
 
 /* We get chip number */
-#define GetMppPcd(id) {                   \
-  PinCount[id] = GET_PIN_COUNT(id);       \
-  PcdGroupCount = PinCount[id] / 10;      \
-  if ((PinCount[id] % 10) != 0)           \
-    PcdGroupCount += 1;                   \
-  /* Fall through */                      \
-  switch (PcdGroupCount) {                \
-  case 8:                                 \
-    MppRegPcd[id][7] = GET_PCD_PTR(id,7); \
-  case 7:                                 \
-    MppRegPcd[id][6] = GET_PCD_PTR(id,6); \
-  case 6:                                 \
-    MppRegPcd[id][5] = GET_PCD_PTR(id,5); \
-  case 5:                                 \
-    MppRegPcd[id][4] = GET_PCD_PTR(id,4); \
-  case 4:                                 \
-    MppRegPcd[id][3] = GET_PCD_PTR(id,3); \
-  case 3:                                 \
-    MppRegPcd[id][2] = GET_PCD_PTR(id,2); \
-  case 2:                                 \
-    MppRegPcd[id][1] = GET_PCD_PTR(id,1); \
-  case 1:                                 \
-    MppRegPcd[id][0] = GET_PCD_PTR(id,0); \
-  }                                       \
-  BaseAddr[id] = GET_BASE(id);            \
-  ReverseFlag[id] = GET_REV_FLAG(id);     \
+#define GetMppPcd(id) {                 \
+  PinCount[id] = GET_PIN_COUNT(id);     \
+  MppRegPcd[id][7] = GET_PCD_PTR(id,7); \
+  MppRegPcd[id][6] = GET_PCD_PTR(id,6); \
+  MppRegPcd[id][5] = GET_PCD_PTR(id,5); \
+  MppRegPcd[id][4] = GET_PCD_PTR(id,4); \
+  MppRegPcd[id][3] = GET_PCD_PTR(id,3); \
+  MppRegPcd[id][2] = GET_PCD_PTR(id,2); \
+  MppRegPcd[id][1] = GET_PCD_PTR(id,1); \
+  MppRegPcd[id][0] = GET_PCD_PTR(id,0); \
+  BaseAddr[id] = GET_BASE(id);          \
+  ReverseFlag[id] = GET_REV_FLAG(id);   \
 }
 
 VOID
@@ -151,7 +137,7 @@ EFI_STATUS
 MppInitialize (
   )
 {
-  UINTN BaseAddr[MAX_CHIPS], PinCount[MAX_CHIPS], RegCount, PcdGroupCount;
+  UINTN BaseAddr[MAX_CHIPS], PinCount[MAX_CHIPS], RegCount;
   BOOLEAN ReverseFlag[MAX_CHIPS];
   UINT8 *MppRegPcd[MAX_CHIPS][MPP_MAX_REGS];
   UINT32 i, ChipCount;
