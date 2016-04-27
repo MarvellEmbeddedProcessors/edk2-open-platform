@@ -13,7 +13,8 @@ additionally implements EFI_EEPROM_PROTOCOL.
   -------------------------------
   Driver Binding protocol is extensively covered in UEFI documentation, as
   it is not specific to I2C stack. The only difference is that Supported()
-  function should check if EFI_I2C_IO_PROTOCOL provides valid EFI_GUID value.
+  function should check if EFI_I2C_IO_PROTOCOL provides valid EFI_GUID and
+  DeviceIndex values.
   Excerpt from MvEepromSupported():
 
     Status = gBS->OpenProtocol (
@@ -37,10 +38,10 @@ additionally implements EFI_EEPROM_PROTOCOL.
 
     Status = EFI_UNSUPPORTED;
     for (i = 0; EepromAddresses[i] != '\0'; i++) {
-      /* last byte of GUID contains address on I2C bus */
-      EepromGuid.Data4[7] = EepromAddresses[i];
-      if (CompareGuid(TmpI2cIo->DeviceGuid, &EepromGuid)) {
-        DEBUG((DEBUG_INFO, "A8kEepromSupported: offered GUID fits desired\n"));
+      /* I2C guid must fit and valid DeviceIndex must be provided */
+      if (CompareGuid(TmpI2cIo->DeviceGuid, &I2cGuid) &&
+	  TmpI2cIo->DeviceIndex == EepromAddresses[i]) {
+        DEBUG((DEBUG_INFO, "A8kEepromSupported: attached to EEPROM device\n"));
         Status = EFI_SUCCESS;
         break;
       }
@@ -88,7 +89,7 @@ be created. Required steps follow.
      should be installed at driver's entry point.
   4. Add I2C address of device to PcdI2cSlaveAddresses in .dsc file.
   5. Test available EFI_I2C_IO_PROTOCOLs in Supported() - find instance
-     with valid GUID (consisting of I2C_GUID and slave I2C address).
+     with valid GUID and DeviceIndex (I2C slave address).
   6. Open EFI_I2C_IO_PROTOCOL for usage in Start(). After that, QueueRequest
      function should be available.
   7. Implement core functionality of driver (using QueueRequest to access I2C).

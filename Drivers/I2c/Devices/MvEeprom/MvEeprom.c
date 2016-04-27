@@ -55,6 +55,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   0x391fc679, 0x6cb0, 0x4f01, { 0x9a, 0xc7, 0x8e, 0x1b, 0x78, 0x6b, 0x7a, 0x00 } \
   }
 
+STATIC CONST EFI_GUID I2cGuid = I2C_GUID;
+
 EFI_DRIVER_BINDING_PROTOCOL gDriverBindingProtocol = {
   MvEepromSupported,
   MvEepromStart,
@@ -70,7 +72,6 @@ MvEepromSupported (
   )
 {
   EFI_STATUS Status = EFI_UNSUPPORTED;
-  EFI_GUID EepromGuid = I2C_GUID;
   EFI_I2C_IO_PROTOCOL *TmpI2cIo;
   UINT8 *EepromAddresses;
   UINTN i;
@@ -97,9 +98,9 @@ MvEepromSupported (
 
   Status = EFI_UNSUPPORTED;
   for (i = 0; EepromAddresses[i] != '\0'; i++) {
-    /* last byte of GUID contains address on I2C bus */
-    EepromGuid.Data4[7] = EepromAddresses[i];
-    if (CompareGuid(TmpI2cIo->DeviceGuid, &EepromGuid)) {
+    /* I2C guid must fit and valid DeviceIndex must be provided */
+    if (CompareGuid(TmpI2cIo->DeviceGuid, &I2cGuid) &&
+	TmpI2cIo->DeviceIndex == EepromAddresses[i]) {
       DEBUG((DEBUG_INFO, "MvEepromSupported: attached to EEPROM device\n"));
       Status = EFI_SUCCESS;
       break;
