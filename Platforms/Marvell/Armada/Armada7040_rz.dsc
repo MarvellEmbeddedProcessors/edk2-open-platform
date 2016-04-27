@@ -145,6 +145,7 @@
   gMarvellTokenSpaceGuid.PcdPp2PortIds|{ 0x0, 0x1, 0x2 }
   gMarvellTokenSpaceGuid.PcdPp2GopIndexes|{ 0x0, 0x2, 0x3 }
   gMarvellTokenSpaceGuid.PcdPp2InterfaceAlwaysUp|{ 0x1, 0x1, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPp2InterfaceSpeed|{ 0x3, 0x4, 0x3 }
   gMarvellTokenSpaceGuid.PcdPp2SharedAddress|0xf2000000
   gMarvellTokenSpaceGuid.PcdPp2GmacBaseAddress|0xf2130e00
   gMarvellTokenSpaceGuid.PcdPp2GmacObjSize|0x1000
