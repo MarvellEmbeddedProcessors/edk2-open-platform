@@ -55,7 +55,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SF_WRITE_CMD_STRING   L"sf updatefile "
 #define SF_LOAD_ADDR_STRING   L"0x0"
 
-#define HEADER_SIZE           49152
 #define MAIN_HDR_MAGIC        0xB105B002
 
 typedef struct {
@@ -144,13 +143,10 @@ CheckFirmwareImage (
   EFI_STATUS Status;
   VOID *FileBuffer;
   UINT64 OpenMode;
-  UINTN HeaderSize;
+  UINTN FileSize;
   SHELL_FILE_HANDLE FileHandle = NULL;
 
   OpenMode = EFI_FILE_MODE_READ;
-  HeaderSize = HEADER_SIZE;
-
-  FileBuffer = AllocateZeroPool (HEADER_SIZE);
 
   Status = ShellOpenFileByName (FirmwareImage, &FileHandle, OpenMode, 0);
     if (EFI_ERROR (Status)) {
@@ -158,8 +154,15 @@ CheckFirmwareImage (
       return EFI_DEVICE_ERROR;
     }
 
+  Status = FileHandleGetSize (FileHandle, &FileSize);
+    if (EFI_ERROR (Status)) {
+      Print (L"fupdate: Cannot get file size\n");
+    }
+
+  FileBuffer = AllocateZeroPool (FileSize);
+
   // Read Image header into buffer
-  Status = FileHandleRead (FileHandle, &HeaderSize, FileBuffer);
+  Status = FileHandleRead (FileHandle, &FileSize, FileBuffer);
     if (EFI_ERROR (Status)) {
       Print (L"fupdate: Cannot read Image file header\n");
       ShellCloseFile (&FileHandle);
