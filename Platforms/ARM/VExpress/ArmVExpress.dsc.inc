@@ -485,9 +485,6 @@
   #
   EmbeddedPkg/Drivers/FdtPlatformDxe/FdtPlatformDxe.inf
 
-  # Legacy Linux Loader
-  ArmPkg/Application/LinuxLoader/LinuxLoader.inf
-
   #
   # UEFI application (Shell Embedded Boot Loader)
   #
@@ -506,3 +503,7 @@
       PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
       BcfgCommandLib|ShellPkg/Library/UefiShellBcfgCommandLib/UefiShellBcfgCommandLib.inf
   }
+
+[Components.ARM]
+  # Legacy Linux Loader
+  ArmPkg/Application/LinuxLoader/LinuxLoader.inf
