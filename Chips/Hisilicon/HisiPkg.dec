@@ -52,10 +52,19 @@
   PlatformPciLib|Include/Library/PlatformPciLib.h
 
 [PcdsFixedAtBuild]
+  gHisiTokenSpaceGuid.PcdNORFlashBase|0x00000000|UINT64|0x01000008
+  gHisiTokenSpaceGuid.PcdNORFlashCachableSize|0x1000000|UINT32|0x0100000c
 
   gHisiTokenSpaceGuid.PcdSerialPortSendDelay|500000|UINT32|0x01000010
   gHisiTokenSpaceGuid.PcdUartClkInHz|24000000|UINT32|0x0100001F
   gHisiTokenSpaceGuid.PcdSerialRegisterSpaceSize|0x10000|UINT64|0x01000019
+
+  gHisiTokenSpaceGuid.PcdDsaSmmuBaseAddress|0|UINT64|0x00000047
+  gHisiTokenSpaceGuid.PcdPcieSmmuBaseAddress|0|UINT64|0x00000046
+  gHisiTokenSpaceGuid.PcdAlgSmmuBaseAddress|0|UINT64|0x00000048
+  gHisiTokenSpaceGuid.PcdM3SmmuBaseAddress|0|UINT64|0x00000049
+
+  gHisiTokenSpaceGuid.PcdSysControlBaseAddress|0|UINT64|0x01000023
   gHisiTokenSpaceGuid.PcdCpldBaseAddress|0|UINT64|0x01000024
   gHisiTokenSpaceGuid.PcdMailBoxAddress|0|UINT64|0x01000025
 
