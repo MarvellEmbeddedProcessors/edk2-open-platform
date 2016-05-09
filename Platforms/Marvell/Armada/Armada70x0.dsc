@@ -126,11 +126,6 @@
   gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiCfg|L"0xF2440440;0xF2440444"
   gMarvellTokenSpaceGuid.PcdUtmiPhyUtmiPort|L"0x0;0x1"
 
-  #IcuLib
-  gMarvellTokenSpaceGuid.PcdIcuCpBase|0xF2000000
-  gMarvellTokenSpaceGuid.PcdIcuSpiBase|0
-  gMarvellTokenSpaceGuid.PcdIcuSpiOffset|0
-
 #MDIO
   gMarvellTokenSpaceGuid.PcdMdioBaseAddress|0xF212A200
 
