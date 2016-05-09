@@ -7,6 +7,10 @@ In order to configure ComPhy library, following PCDs are available:
 Indicates how many different chips are placed on board. So far, up to 4 chips
 are supported.
 
+  gMarvellTokenSpaceGuid.PcdIsZVersionChip
+
+Indicates if Z1 chip version is used.
+
 Every ComPhy PCD has <Num> part where <Num> stands for chip ID (order is not
 important, but configuration will be set for first PcdComPhyChipCount chips).
 
@@ -66,6 +70,7 @@ Example
 -------
   #ComPhy
   gMarvellTokenSpaceGuid.PcdComPhyChipCount|1
+  gMarvellTokenSpaceGuid.PcdIsZVersionChip|FALSE
 
   gMarvellTokenSpaceGuid.PcdChip0ComPhyMaxLanes|6
   gMarvellTokenSpaceGuid.PcdChip0ComPhyBaseAddress|0xF2441000

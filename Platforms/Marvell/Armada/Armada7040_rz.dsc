@@ -55,6 +55,7 @@
 [PcdsFixedAtBuild.common]
   #MPP
   gMarvellTokenSpaceGuid.PcdMppChipCount|2
+  gMarvellTokenSpaceGuid.PcdIsZVersionChip|TRUE
 
   # APN806-Z1 MPP SET
   gMarvellTokenSpaceGuid.PcdChip0MppReverseFlag|TRUE

@@ -139,6 +139,7 @@
 #ComPhy
   #Chip0
   gMarvellTokenSpaceGuid.PcdComPhyChipCount|0|UINT32|0x30000098
+  gMarvellTokenSpaceGuid.PcdIsZVersionChip|FALSE|BOOLEAN|0x30000099
 
   gMarvellTokenSpaceGuid.PcdChip0Compatible|{ 0 }|VOID*|0x30000064
   gMarvellTokenSpaceGuid.PcdChip0ComPhyBaseAddress|0|UINT64|0x30000065

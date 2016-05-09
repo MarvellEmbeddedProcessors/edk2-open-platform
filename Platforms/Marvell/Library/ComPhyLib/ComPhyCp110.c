@@ -402,7 +402,7 @@ ComPhySataPowerUp (
   EFI_PHYSICAL_ADDRESS HpipeAddr = HPIPE_ADDR(HpipeBase, Lane);
   EFI_PHYSICAL_ADDRESS SdIpAddr = SD_ADDR(HpipeBase, Lane);
   EFI_PHYSICAL_ADDRESS ComPhyAddr = COMPHY_ADDR(ComPhyBase, Lane);
-  EFI_PHYSICAL_ADDRESS SataBase;
+  EFI_PHYSICAL_ADDRESS SataBase, Addr;
 
   SataBase = PcdGet32 (PcdSataBaseAddress);
   if (SataBase == 0) {
@@ -512,17 +512,16 @@ ComPhySataPowerUp (
   Data |= 0x1 << SATA3_CTRL_SATA_SSU_OFFSET;
   RegSet (SataBase + SATA3_VENDOR_DATA, Data, Mask);
 
-  /* Wait 15ms - Wait for ComPhy calibration done */
-  MicroSecondDelay (15000);
-
-  /*
-   * Reduce read & write burst size to 64 byte due to bug in
-   * AP-806-Z Aurora 2 that prohibits writes larger than 64 byte
-   */
-  MmioWrite32(SataBase + SATA3_VENDOR_ADDRESS, 0x4);
-  Mask = 0x77;
-  Data = 0x44; /* 4 = 64 bytes burst */
-  RegSet (SataBase + SATA3_VENDOR_DATA, Data, Mask);
+  if (PcdGetBool(PcdIsZVersionChip)) {
+    /*
+     * Reduce read & write burst size to 64 byte due to bug in
+     * AP-806-Z Aurora 2 that prohibits writes larger than 64 byte
+     */
+    MmioWrite32(SataBase + SATA3_VENDOR_ADDRESS, 0x4);
+    Mask = 0x77;
+    Data = 0x44; /* 4 = 64 bytes burst */
+    RegSet (SataBase + SATA3_VENDOR_DATA, Data, Mask);
+  }
 
   /* MBUS request size and interface select register */
   RegSet (SataBase + SATA3_VENDOR_ADDRESS,
@@ -533,17 +532,18 @@ ComPhySataPowerUp (
     SATA_MBUS_REGRET_EN_MASK);
 
   DEBUG((DEBUG_INFO, "ComPhy: stage: Check PLL\n"));
-  Data = MmioRead32(SdIpAddr + SD_EXTERNAL_STATUS0_REG);
+  Addr = SdIpAddr + SD_EXTERNAL_STATUS0_REG;
+  Data = SD_EXTERNAL_STATUS0_PLL_TX_MASK & SD_EXTERNAL_STATUS0_PLL_RX_MASK;
+  Mask = Data;
+  Data =  PollingWithTimeout (Addr, Data, Mask, 15000);
 
-  /* Check the PLL TX */
-  if ((Data & SD_EXTERNAL_STATUS0_PLL_TX_MASK) == 0) {
-    DEBUG((DEBUG_ERROR, "ComPhy: SD_EXTERNAL_STATUS0_PLL_TX is 0\n"));
-    Status = EFI_D_ERROR;
-  }
-
-  /* Check the PLL RX */
-  if ((Data & SD_EXTERNAL_STATUS0_PLL_RX_MASK) == 0) {
-    DEBUG((DEBUG_ERROR, "ComPhy: SD_EXTERNAL_STATUS0_PLL_RX is 0\n"));
+  if (Data != 0) {
+    DEBUG((DEBUG_INFO, "ComPhy: Read from reg = %p - value = 0x%x\n",
+      HpipeAddr + HPIPE_LANE_STATUS0_REG, Data));
+    DEBUG((DEBUG_ERROR, "ComPhy: SD_EXTERNAL_STATUS0_PLL_TX is %d,"
+      "SD_EXTERNAL_STATUS0_PLL_RX is %d\n",
+      (Data & SD_EXTERNAL_STATUS0_PLL_TX_MASK),
+      (Data & SD_EXTERNAL_STATUS0_PLL_RX_MASK)));
     Status = EFI_D_ERROR;
   }
 

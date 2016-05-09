@@ -61,6 +61,7 @@
 
 [FixedPcd]
   gMarvellTokenSpaceGuid.PcdComPhyChipCount
+  gMarvellTokenSpaceGuid.PcdIsZVersionChip
 
   #Chip0
   gMarvellTokenSpaceGuid.PcdChip0Compatible
