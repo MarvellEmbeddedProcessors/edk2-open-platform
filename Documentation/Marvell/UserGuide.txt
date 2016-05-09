@@ -9,7 +9,6 @@ Table of contents:
 2. Porting guide
  comphy - PortingGuide/ComPhy.txt
  i2c - PortingGuide/I2c.txt
- icu - PortingGuide/IcuLib.txt
  mdio - PortingGuide/Mdio.txt
  mpp - PortingGuide/Mpp.txt
  phy - PortingGuide/Phy.txt
