@@ -50,6 +50,7 @@
   OemMiscLib|Include/Library/OemMiscLib.h
   I2CLib|Include/Library/I2CLib.h
   PlatformPciLib|Include/Library/PlatformPciLib.h
+  FdtUpdateLib|Include/Library/FdtUpdateLib.h
 
 [PcdsFixedAtBuild]
   gHisiTokenSpaceGuid.PcdNORFlashBase|0x00000000|UINT64|0x01000008
@@ -90,6 +91,14 @@
   gHisiTokenSpaceGuid.PcdBottomOfHighMemory|0x0|UINT64|0x40000003
 
   gHisiTokenSpaceGuid.PcdSlotPerChannelNum|0x0|UINT32|0x40000004
+
+  #FDT File Address
+  gHisiTokenSpaceGuid.FdtFileAddress|0x0|UINT64|0x40000005
+
+  #Reserved for NVRAM
+  gHisiTokenSpaceGuid.PcdReservedNvramBase|0x0|UINT64|0x40000006
+  gHisiTokenSpaceGuid.PcdReservedNvramSize|0x0|UINT64|0x40000007
+
   gHisiTokenSpaceGuid.PcdTrustedFirmwareEnable|0x0|UINT64|0x40000008
   gHisiTokenSpaceGuid.PcdTrustedFirmwareBL1Base|0x0|UINT64|0x40000009
   gHisiTokenSpaceGuid.PcdTrustedFirmwareMagicNum|0x5A5A5A5A|UINT32|0x4000000a
