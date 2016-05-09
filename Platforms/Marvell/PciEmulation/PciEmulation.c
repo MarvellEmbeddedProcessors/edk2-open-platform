@@ -82,12 +82,12 @@ MapSataPortAddress (
   //
   //  PORT  |     AHCI port offset     |    CP110 port offset
   // --------------------------------------------------------
-  //   1    |       100h - 180h        |     10000h - 1080h
-  //   2    |       180h - 260h        |     20000h - 2080h
+  //   1    |       100h - 180h        |     10000h - 10080h
+  //   2    |       180h - 260h        |     20000h - 20080h
   //
-  if ((Offset > 0x100) && (Offset < 0x180))
+  if ((Offset >= 0x100) && (Offset < 0x180))
     Offset = (Offset - 0x100) + 0x10000;
-  if ((Offset > 0x180) && (Offset < 0x260))
+  if ((Offset >= 0x180) && (Offset < 0x260))
     Offset = (Offset - 0x180) + 0x20000;
 
   return Offset;
@@ -137,15 +137,48 @@ PciIoMemRead (
 {
   EFI_PCI_IO_PRIVATE_DATA *Private = EFI_PCI_IO_PRIVATE_DATA_FROM_THIS(This);
 
-  if (BarIndex == EFI_AHCI_BAR_INDEX && PcdGetBool (PcdSataMapPortAddress)) {
-    Offset = MapSataPortAddress (Offset);
-  }
-
   return PciRootBridgeIoMemRead (&Private->RootBridge.Io,
            (EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_WIDTH) Width,
            Private->ConfigSpace->Device.Bar[BarIndex] + Offset,
            Count,
            Buffer);
+}
+
+EFI_STATUS
+PciIoSataMemRead (
+  IN EFI_PCI_IO_PROTOCOL              *This,
+  IN     EFI_PCI_IO_PROTOCOL_WIDTH    Width,
+  IN     UINT8                        BarIndex,
+  IN     UINT64                       Offset,
+  IN     UINTN                        Count,
+  IN OUT VOID                         *Buffer
+  )
+{
+  EFI_PCI_IO_PRIVATE_DATA *Private = EFI_PCI_IO_PRIVATE_DATA_FROM_THIS(This);
+  EFI_STATUS Status;
+  UINT32 *TmpBuffer;
+
+  if (PcdGetBool(PcdSataMapPortAddress)) {
+    Offset = MapSataPortAddress (Offset);
+  }
+
+  Status = PciRootBridgeIoMemRead (&Private->RootBridge.Io,
+           (EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_WIDTH) Width,
+           Private->ConfigSpace->Device.Bar[BarIndex] + Offset,
+           Count,
+           Buffer);
+
+  //
+  // AE bit in Global HBA Control register is set only if SAM bit is cleared in
+  // CAP register. Below quirk makes PciIoMemRead to return value in this
+  // register with SAM bit unset.
+  //
+  if (Offset == 0) {
+    TmpBuffer = (UINT32 *) Buffer;
+    *TmpBuffer &= ~(1<<18);
+  }
+
+  return Status;
 }
 
 EFI_STATUS
@@ -161,6 +194,29 @@ PciIoMemWrite (
   EFI_PCI_IO_PRIVATE_DATA *Private = EFI_PCI_IO_PRIVATE_DATA_FROM_THIS(This);
 
   if (BarIndex == EFI_AHCI_BAR_INDEX && PcdGetBool (PcdSataMapPortAddress)) {
+    Offset = MapSataPortAddress (Offset);
+  }
+
+  return PciRootBridgeIoMemWrite (&Private->RootBridge.Io,
+           (EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_WIDTH) Width,
+           Private->ConfigSpace->Device.Bar[BarIndex] + Offset,
+           Count,
+           Buffer);
+}
+
+EFI_STATUS
+PciIoSataMemWrite (
+  IN EFI_PCI_IO_PROTOCOL              *This,
+  IN     EFI_PCI_IO_PROTOCOL_WIDTH    Width,
+  IN     UINT8                        BarIndex,
+  IN     UINT64                       Offset,
+  IN     UINTN                        Count,
+  IN OUT VOID                         *Buffer
+  )
+{
+  EFI_PCI_IO_PRIVATE_DATA *Private = EFI_PCI_IO_PRIVATE_DATA_FROM_THIS(This);
+
+  if (PcdGetBool (PcdSataMapPortAddress)) {
     Offset = MapSataPortAddress (Offset);
   }
 
@@ -590,6 +646,16 @@ InstallDevices (
   Private->ConfigSpace->Hdr.ClassCode[1] = ClassCode2;
   Private->ConfigSpace->Hdr.ClassCode[2] = ClassCode3;
 
+  Handle = NULL;
+
+  // Unique device path.
+  CopyMem(&Private->DevicePath, &PciIoDevicePathTemplate,
+    sizeof(PciIoDevicePathTemplate));
+  Private->DevicePath.AcpiDevicePath.UID = 0;
+  Private->DevicePath.PciDevicePath.Device = DeviceId;
+
+  // Copy protocol structure
+  CopyMem(&Private->PciIoProtocol, &PciIoTemplate, sizeof(PciIoTemplate));
   //
   // Concatenate ClassCodes into single number, which will be next used to
   // recognize device add fill proper BAR
@@ -604,6 +670,8 @@ InstallDevices (
   case AHCI_PCI_CLASS_CODE_NR:
     Private->ConfigSpace->Device.Bar[EFI_AHCI_BAR_INDEX] =
       Private->RootBridge.MemoryStart;
+    Private->PciIoProtocol.Mem.Read = PciIoSataMemRead;
+    Private->PciIoProtocol.Mem.Write = PciIoSataMemWrite;
     break;
   case SD_MMC_PCI_CLASS_CODE_NR:
     Private->ConfigSpace->Device.Bar[EFI_SD_MMC_BAR_INDEX] =
@@ -614,16 +682,6 @@ InstallDevices (
     return EFI_D_ERROR;
   }
 
-  Handle = NULL;
-
-  // Unique device path.
-  CopyMem(&Private->DevicePath, &PciIoDevicePathTemplate,
-    sizeof(PciIoDevicePathTemplate));
-  Private->DevicePath.AcpiDevicePath.UID = 0;
-  Private->DevicePath.PciDevicePath.Device = DeviceId;
-
-  // Copy protocol structure
-  CopyMem(&Private->PciIoProtocol, &PciIoTemplate, sizeof(PciIoTemplate));
 
   Status = gBS->InstallMultipleProtocolInterfaces(&Handle,
              &gEfiPciIoProtocolGuid,
