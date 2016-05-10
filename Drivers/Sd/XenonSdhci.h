@@ -34,6 +34,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../../../MdeModulePkg/Bus/Pci/SdMmcPciHcDxe/SdMmcPciHcDxe.h"
 
+#include <Library/IoLib.h>
+
 #define SD_BAR_INDEX 0
 
 /* Register Offset of SD Host Controller SOCP self-defined register */
@@ -154,6 +156,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EMMC_LOGIC_TIMING_ADJUST       (EMMC_PHY_REG_BASE + 0x18)
 #define EMMC_LOGIC_TIMING_ADJUST_LOW   (EMMC_PHY_REG_BASE + 0x1c)
 
+#define MVEBU_IP_CONFIG_REG	       (0xf0000000 + 0x6F4100)
+
 #define LOGIC_TIMING_VALUE             0x5a54 /* Recommend by HW team */
 
 /* Hyperion only have one slot 0 */
@@ -230,6 +234,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SDHCI_MAX_DIV_SPEC_300	2046
 
 VOID
+XenonSetMpp (
+  VOID
+  );
+
+VOID
 XenonReadVersion (
   IN  EFI_PCI_IO_PROTOCOL   *PciIo,
   OUT UINT32 *ControllerVersion
@@ -298,4 +307,36 @@ XenonSetParallelTransfer (
   IN EFI_PCI_IO_PROTOCOL   *PciIo,
   IN UINT8 Slot,
   IN BOOLEAN Enable
+  );
+
+VOID
+XenonPhyInit (
+  IN EFI_PCI_IO_PROTOCOL   *PciIo
+  );
+
+VOID
+XenonReset (
+  IN SD_MMC_HC_PRIVATE_DATA *Private,
+  IN UINT8 Slot,
+  IN UINT8 Mask
+  );
+
+VOID
+XenonTransferPio (
+  IN SD_MMC_HC_PRIVATE_DATA *Private,
+  IN UINT8 Slot,
+  IN OUT VOID *Buffer,
+  IN UINT16 BlockSize,
+  IN BOOLEAN Read
+  );
+
+EFI_STATUS
+XenonTransferData (
+  IN SD_MMC_HC_PRIVATE_DATA *Private,
+  IN UINT8 Slot,
+  IN OUT VOID *Buffer,
+  IN UINT32 DataLen,
+  IN UINT16 BlockSize,
+  IN UINT16 Blocks,
+  IN BOOLEAN Read
   );

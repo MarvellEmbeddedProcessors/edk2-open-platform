@@ -35,6 +35,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "XenonSdhci.h"
 
 VOID
+XenonSetMpp (
+  VOID
+  )
+{
+  UINT32 Reg;
+
+  // Set eMMC/SD PHY output instead of MPPs
+  Reg = MmioRead32 (MVEBU_IP_CONFIG_REG);
+  Reg &= ~(1 << 0);
+  MmioWrite32 (MVEBU_IP_CONFIG_REG, Reg);
+}
+
+VOID
 XenonReadVersion (
   IN  EFI_PCI_IO_PROTOCOL   *PciIo,
   OUT UINT32 *ControllerVersion
@@ -66,9 +79,9 @@ XenonSetAcg (
   SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SDHC_SYS_OP_CTRL, TRUE, 4, &Var);
 
   if (Enable) {
-    Var |= AUTO_CLKGATE_DISABLE_MASK;
+    Var &= ~AUTO_CLKGATE_DISABLE_MASK;
   } else {
-    Var |= ~AUTO_CLKGATE_DISABLE_MASK;
+    Var |= AUTO_CLKGATE_DISABLE_MASK;
   }
 
   SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SDHC_SYS_OP_CTRL, FALSE, 4, &Var);
@@ -83,7 +96,7 @@ XenonSetSlot (
 {
   UINT32 Var;
 
-  Var = SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SDHC_SYS_OP_CTRL, TRUE, 4, &Var);
+  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SDHC_SYS_OP_CTRL, TRUE, 4, &Var);
   if (Enable)
     Var |= ((0x1 << Slot) << SLOT_ENABLE_SHIFT);
   else
@@ -215,7 +228,6 @@ XenonSetClk (
   return 0;
 }
 
-STATIC
 VOID
 XenonPhyInit (
   IN EFI_PCI_IO_PROTOCOL   *PciIo
@@ -319,7 +331,7 @@ XenonSetPhy (
   UINT8 Timing
   )
 {
-  UINT32 Var;
+  UINT32 Var = 0;
 
   // Setup pad, set bit[30], bit[28] and bits[26:24]
   SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_PAD_CONTROL, TRUE, 4, &Var);
@@ -412,7 +424,7 @@ XenonSetTuning (
     Var |= RETUNING_COMPATIBLE;
   else
     Var &= ~RETUNING_COMPATIBLE;
-  SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, SDHC_SYS_EXT_OP_CTRL, FALSE, 4, &Var);
+  SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, SDHC_SLOT_RETUNING_REQ_CTRL, FALSE, 4, &Var);
 
   // Set the Re-tuning Event Signal Enable
   SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, SDHCI_SIGNAL_ENABLE, TRUE, 4, &Var);
@@ -420,5 +432,114 @@ XenonSetTuning (
     Var |= SDHCI_RETUNE_EVT_INTSIG;
   else
     Var &= ~SDHCI_RETUNE_EVT_INTSIG;
-  SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, SDHC_SYS_EXT_OP_CTRL, FALSE, 4, &Var);
+  SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, SDHCI_SIGNAL_ENABLE, FALSE, 4, &Var);
+}
+
+VOID
+XenonReset (
+  IN SD_MMC_HC_PRIVATE_DATA *Private,
+  IN UINT8 Slot,
+  IN UINT8 Mask
+  )
+{
+  UINT32 Timeout = 1000;
+  UINT8 SwReset;
+
+  SwReset = Mask;
+
+  SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_SW_RST, FALSE,
+    sizeof (SwReset), &SwReset);
+
+  SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_SW_RST, TRUE,
+    sizeof (SwReset), &SwReset);
+  while (SwReset & Mask) {
+    if (Timeout == 0) {
+      DEBUG((DEBUG_ERROR, "Reset never completed\n"));
+      return;
+    }
+    Timeout--;
+    gBS-> Stall (100);
+    SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_SW_RST, TRUE,
+      sizeof (SwReset), &SwReset);
+  }
+}
+
+VOID
+XenonTransferPio (
+  IN SD_MMC_HC_PRIVATE_DATA *Private,
+  IN UINT8 Slot,
+  IN OUT VOID *Buffer,
+  IN UINT16 BlockSize,
+  IN BOOLEAN Read
+  )
+{
+  UINTN i;
+  UINT8 *Offs;
+
+  //
+  // SD stack's intrinsic functions cannot perform properly reading/writing from
+  // buffer register, that is way MmioRead/MmioWrite are used. It is temporary
+  // solution.
+  //
+  for (i = 0; i < BlockSize; i += 4) {
+    Offs = Buffer + i;
+    if (Read) {
+      *(UINT32 *)Offs = MmioRead32 (0xf06e0020); // SDHCI_BUFFER
+    } else {
+      MmioWrite32 (0xf06e0020, *(UINT32 *)Offs); // SDHCI_BUFFER
+    }
+  }
+}
+
+EFI_STATUS
+XenonTransferData (
+  IN SD_MMC_HC_PRIVATE_DATA *Private,
+  IN UINT8 Slot,
+  IN OUT VOID *Buffer,
+  IN UINT32 DataLen,
+  IN UINT16 BlockSize,
+  IN UINT16 Blocks,
+  IN BOOLEAN Read
+  )
+{
+  UINT32 IntStatus, PresentState, Rdy, Mask, Timeout, Block = 0;
+
+  if (Buffer == NULL) {
+    return EFI_DEVICE_ERROR;
+  }
+
+  Timeout = 100000;
+  Rdy = 0x10 | 0x20; // SDHCI_INT_SPACE_AVAIL | SDHCI_INT_DATA_AVAIL
+  Mask = 0x800 | 0x400; // SDHCI_DATA_AVAILABLE | SDHCI_SPACE_AVAILABLE
+
+  do {
+    SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_NOR_INT_STS, TRUE,
+      sizeof (IntStatus), &IntStatus);
+    if (IntStatus & BIT15) { // SDHCI_INT_ERROR
+      DEBUG((DEBUG_INFO, "Error detected in status %0x\n", IntStatus));
+      return EFI_DEVICE_ERROR;
+    }
+
+    if (IntStatus & Rdy) {
+      SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_PRESENT_STATE, TRUE,
+	sizeof (PresentState), &PresentState);
+      if (!(PresentState & Mask))
+	continue;
+      SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_NOR_INT_STS, FALSE,
+	sizeof (Rdy), &Rdy);
+
+      XenonTransferPio (Private, Slot, Buffer, BlockSize, Read);
+
+      Buffer += BlockSize;
+      if (++Block >= Blocks)
+	break;
+    }
+    if (Timeout-- > 0) {
+      gBS->Stall (10);
+    } else {
+      DEBUG((DEBUG_INFO, "Transfer data timeout\n"));
+      return EFI_TIMEOUT;
+    }
+  } while (!(IntStatus & BIT1)); // SDHCI_INT_DATA_END
+  return EFI_SUCCESS;
 }

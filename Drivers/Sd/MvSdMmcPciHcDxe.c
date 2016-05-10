@@ -573,6 +573,8 @@ SdMmcPciHcDriverBindingStart (
   Private->PciAttributes    = PciAttributes;
   InitializeListHead (&Private->Queue);
 
+  XenonSetMpp ();
+
   XenonReadVersion (PciIo, &Private->ControllerVersion);
 
   XenonSetFifo (PciIo);
@@ -582,7 +584,7 @@ SdMmcPciHcDriverBindingStart (
   // Hyperion has only one port
   XenonSetSlot (PciIo, XENON_MMC_SLOT_ID_HYPERION, TRUE);
 
-  XenonSetPower (PciIo, MMC_VDD_32_33, eMMC_VCCQ_3_3V, XENON_MMC_MODE_SD_SDIO);
+  XenonSetPower (PciIo, MMC_VDD_165_195, eMMC_VCCQ_1_8V, XENON_MMC_MODE_SD_SDIO);
 
   XenonSetClk (PciIo, Private, XENON_MMC_MAX_CLK);
 
@@ -604,6 +606,7 @@ SdMmcPciHcDriverBindingStart (
     if (EFI_ERROR (Status)) {
       continue;
     }
+
     DumpCapabilityReg (Slot, &Private->Capability[Slot]);
 
     Status = SdMmcHcGetMaxCurrent (PciIo, Slot, &Private->MaxCurrent[Slot]);
@@ -614,19 +617,6 @@ SdMmcPciHcDriverBindingStart (
     Private->Slot[Slot].SlotType = Private->Capability[Slot].SlotType;
     if ((Private->Slot[Slot].SlotType != RemovableSlot) && (Private->Slot[Slot].SlotType != EmbeddedSlot)) {
       DEBUG ((EFI_D_INFO, "SdMmcPciHcDxe doesn't support the slot type [%d]!!!\n", Private->Slot[Slot].SlotType));
-      continue;
-    }
-
-    //
-    // Reset the specified slot of the SD/MMC Pci Host Controller
-    //
-    Status = SdMmcHcReset (PciIo, Slot);
-    if (EFI_ERROR (Status)) {
-      continue;
-    }
-
-    Status = SdMmcHcInitHost (PciIo, Slot, Private->Capability[Slot]);
-    if (EFI_ERROR (Status)) {
       continue;
     }
 
@@ -894,10 +884,19 @@ SdMmcPassThruPassThru (
   IN     EFI_EVENT                             Event    OPTIONAL
   )
 {
-  EFI_STATUS                      Status;
-  SD_MMC_HC_PRIVATE_DATA          *Private;
-  SD_MMC_HC_TRB                   *Trb;
-  EFI_TPL                         OldTpl;
+  EFI_STATUS Status;
+  SD_MMC_HC_PRIVATE_DATA *Private;
+  EFI_TPL OldTpl;
+  INTN Ret = 0;
+  BOOLEAN Read = FALSE, DataTransfer;
+  UINTN *Data, Index, DataLen = 0;
+  UINT32 Mask, PresentState, Argument, Time = 0;
+  UINT32 Response[4], Stat = 0, Retry = 1000;
+  UINT32 CmdTimeout = XENON_MMC_CMD_DEFAULT_TIMEOUT;
+  UINT16 Cmd, BlockSize = 0x200, BlkCount = 0;
+  UINT16 IntStatus, TimeoutCtrl, BlkSizeReg, Mode;
+
+  Data = NULL;
 
   if ((This == NULL) || (Packet == NULL)) {
     return EFI_INVALID_PARAMETER;
@@ -925,10 +924,240 @@ SdMmcPassThruPassThru (
     return EFI_NO_MEDIA;
   }
 
-  Trb = SdMmcCreateTrb (Private, Slot, Packet, Event);
-  if (Trb == NULL) {
-    return EFI_OUT_OF_RESOURCES;
+  // Currently we don't support SDIO
+  if (Packet->SdMmcCmdBlk->CommandIndex == SDIO_SEND_OP_COND) {
+    return EFI_DEVICE_ERROR;
   }
+
+  // Clear ERROR_IRQ status
+  IntStatus = 0xFFFF;
+  Status = SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_ERR_INT_STS, FALSE,
+    sizeof (IntStatus), &IntStatus);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  // Clear IRQ status
+  Status    = SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_NOR_INT_STS, FALSE,
+    sizeof (IntStatus), &IntStatus);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (((Packet->InTransferLength != 0) && (Packet->InDataBuffer != NULL)) || 
+   ((Packet->OutTransferLength != 0) && (Packet->OutDataBuffer != NULL))) {
+    DataTransfer = FALSE;
+  }
+
+  if ((Packet->InTransferLength != 0) && (Packet->InDataBuffer != NULL)) {
+    DataLen = Packet->InTransferLength;
+    Data = Packet->InDataBuffer;
+    Read = TRUE;
+    DataTransfer = TRUE;
+  }
+
+  if ((Packet->OutTransferLength != 0) && (Packet->OutDataBuffer != NULL)) {
+    DataLen = Packet->OutTransferLength;
+    Data = Packet->OutDataBuffer;
+    DataTransfer = TRUE;
+  }
+
+  if (Packet->SdMmcCmdBlk != NULL)
+    Mask = BIT0; // SDHCI_CMD_INHIBIT
+  if (DataTransfer != FALSE)
+    Mask = BIT1; // SDHCI_DATA_INHIBIT
+
+  //
+  // We shouldn't wait for data inihibit for stop commands, even
+  // though they might use busy signaling
+  //
+  if (Packet->SdMmcCmdBlk->CommandIndex == SD_STOP_TRANSMISSION)
+    Mask &= ~BIT1;
+
+  SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_PRESENT_STATE, TRUE,
+    sizeof (PresentState), &PresentState);
+  while (PresentState & Mask) {
+    if (Time >= CmdTimeout) {
+      DEBUG((DEBUG_INFO, "MMC busy\n"));
+      if (2 * CmdTimeout <= XENON_MMC_CMD_MAX_TIMEOUT) {
+        CmdTimeout += CmdTimeout;
+        DEBUG((DEBUG_INFO, "Timeout increasing to: %u ms\n", CmdTimeout));
+      } else {
+        DEBUG((DEBUG_INFO, "Timeout...\n"));
+        if (Packet->SdMmcCmdBlk != NULL)
+          XenonReset (Private, Slot, 0x02); // CMD reset
+        if (DataTransfer)
+          XenonReset (Private, Slot, 0x04); // DATA reset
+        return EFI_TIMEOUT;
+      }
+    }
+    Time++;
+    gBS->Stall (1000);
+    SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_PRESENT_STATE, TRUE,
+    sizeof (PresentState), &PresentState);
+  }
+
+  Mask = BIT0; // SDHCI_INT_RESPONSE
+  if (Packet->SdMmcCmdBlk->ResponseType == SdMmcResponseTypeR1b ||
+    Packet->SdMmcCmdBlk->ResponseType == SdMmcResponseTypeR5b) {
+    Mask |= BIT1;
+  }
+
+  Cmd = (UINT16)LShiftU64(Packet->SdMmcCmdBlk->CommandIndex, 8);
+  if (Packet->SdMmcCmdBlk->CommandType == SdMmcCommandTypeAdtc) {
+    Cmd |= BIT5;
+  }
+
+  if (Packet->SdMmcCmdBlk->CommandType != SdMmcCommandTypeBc) {
+    switch (Packet->SdMmcCmdBlk->ResponseType) {
+      case SdMmcResponseTypeR1:
+      case SdMmcResponseTypeR5:
+      case SdMmcResponseTypeR6:
+      case SdMmcResponseTypeR7:
+        Cmd |= (BIT1 | BIT3 | BIT4);
+        break;
+      case SdMmcResponseTypeR2:
+        Cmd |= (BIT0 | BIT3);
+       break;
+      case SdMmcResponseTypeR3:
+      case SdMmcResponseTypeR4:
+        Cmd |= BIT1;
+        break;
+      case SdMmcResponseTypeR1b:
+      case SdMmcResponseTypeR5b:
+        Cmd |= (BIT0 | BIT1 | BIT3 | BIT4);
+        break;
+      default:
+        ASSERT (FALSE);
+        break;
+    }
+  }
+
+  if ((DataLen % BlockSize) != 0) {
+    if (DataLen < BlockSize) {
+      BlockSize = (UINT16)DataLen;
+    }
+  }
+  BlkCount = (UINT16) (DataLen / BlockSize);
+
+  if (DataTransfer) {
+    // Set default timeout value
+    TimeoutCtrl = 0xE;
+    SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_TIMEOUT_CTRL, FALSE,
+      sizeof (TimeoutCtrl), &TimeoutCtrl);
+
+    Mode = 0x02; // SDHCI_TRNS_BLK_CNT_EN
+    if (BlkCount > 1) {
+      Mode |= 0x20; // SDHCI_TRNS_MULTI
+    }
+    if (Read) {
+      Mode |= 0x10; // SDHCI_TRNS_READ
+    }
+
+    // Fill BlockSize register
+    BlkSizeReg = (0x7 << 12) | (BlockSize & 0xFFF);
+    SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_BLK_SIZE, FALSE,
+      sizeof (BlkSizeReg), &BlkSizeReg);
+
+    SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_BLK_COUNT, FALSE,
+      sizeof (BlkCount), &BlkCount);
+
+    SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_TRANS_MOD, FALSE,
+      sizeof (Mode), &Mode);
+  }
+
+  Argument = Packet->SdMmcCmdBlk->CommandArgument;
+  SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_ARG1, FALSE, sizeof (Argument),
+    &Argument);
+
+  //
+  // Execute cmd
+  //
+  SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_COMMAND, FALSE, sizeof (Cmd),
+    &Cmd);
+
+  do {
+    Status = SdMmcHcRwMmio (
+               Private->PciIo,
+               Slot,
+               SD_MMC_HC_NOR_INT_STS,
+               TRUE,
+               sizeof (IntStatus),
+               &IntStatus
+               );
+    if (EFI_ERROR (Status)) {
+      return EFI_INVALID_PARAMETER;
+    }
+    if (IntStatus & BIT15) { // SDHCI_INT_STATUS
+      DEBUG((DEBUG_INFO, "SDHCI_INT_ERROR stat:%x\n", IntStatus));
+      break;
+    }
+
+    gBS->Stall (100);
+    if (--Retry == 0)
+      break;
+  } while ((IntStatus & Mask) != Mask);
+
+  if (Retry == 0) {
+    DEBUG((DEBUG_ERROR, "Rx timeout\n"));
+    return EFI_TIMEOUT;
+  }
+
+  if ((IntStatus & (BIT15 | Mask)) == Mask) {
+    if (Packet->SdMmcCmdBlk->CommandType != SdMmcCommandTypeBc) {
+      for (Index = 0; Index < 4; Index++) {
+        Status = SdMmcHcRwMmio (
+                   Private->PciIo,
+                   Slot,
+                   SD_MMC_HC_RESPONSE + Index * 4,
+                   TRUE,
+                   sizeof (UINT32),
+                   &Response[Index]
+                   );
+      }
+      CopyMem (Packet->SdMmcStatusBlk, Response, sizeof (Response));
+    }
+
+    IntStatus = Mask;
+    SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_NOR_INT_STS, FALSE,
+      sizeof (IntStatus), &IntStatus);
+  } else {
+    Ret = -1;
+  }
+
+  if (!Ret && DataTransfer) {
+    Status = XenonTransferData (Private, Slot, Data, DataLen, BlockSize,
+      BlkCount, Read);
+  }
+
+  // SDHCI_QUIRK_WAIT_SEND_CMD
+  gBS->Stall (1000);
+
+  SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_NOR_INT_STS, TRUE,
+      sizeof (IntStatus), &IntStatus);
+
+  Stat = 0xFFFF;
+  SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_NOR_INT_STS, FALSE,
+      sizeof (Stat), &Stat);
+
+  if (!EFI_ERROR(Status) && Read)
+    return EFI_SUCCESS;
+
+  if (IntStatus & BIT15) {
+    if (Packet->SdMmcCmdBlk != NULL)
+      XenonReset (Private, Slot, 0x02); // CMD
+    if (DataTransfer)
+      XenonReset (Private, Slot, 0x04); // DATA
+    if (IntStatus & (0x10000 | 0x100000)) { // SDHCI_INT_TIMEOUT
+      DEBUG((DEBUG_INFO, "Timeout!\n"));
+      return EFI_TIMEOUT;
+    } else {
+      return EFI_DEVICE_ERROR;
+    }
+  } else {
+    return EFI_SUCCESS;
+  }
+
   //
   // Immediately return for async I/O.
   //
@@ -946,30 +1175,6 @@ SdMmcPassThruPassThru (
       break;
     }
     gBS->RestoreTPL (OldTpl);
-  }
-
-  Status = SdMmcWaitTrbEnv (Private, Trb);
-  if (EFI_ERROR (Status)) {
-    goto Done;
-  }
-
-  Status = SdMmcExecTrb (Private, Trb);
-  if (EFI_ERROR (Status)) {
-    goto Done;
-  }
-
-  Status = SdMmcWaitTrbResult (Private, Trb);
-  if (EFI_ERROR (Status)) {
-    goto Done;
-  }
-
-Done:
-  if ((Trb != NULL) && (Trb->AdmaDesc != NULL)) {
-    FreePages (Trb->AdmaDesc, Trb->AdmaPages);
-  }
-
-  if (Trb != NULL) {
-    FreePool (Trb);
   }
 
   return Status;
