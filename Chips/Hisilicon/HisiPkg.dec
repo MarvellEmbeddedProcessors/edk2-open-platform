@@ -52,6 +52,7 @@
   I2CLib|Include/Library/I2CLib.h
   PlatformPciLib|Include/Library/PlatformPciLib.h
   FdtUpdateLib|Include/Library/FdtUpdateLib.h
+  LpcLib|Include/Library/LpcLib.h
 
 [PcdsFixedAtBuild]
   gHisiTokenSpaceGuid.PcdNORFlashBase|0x00000000|UINT64|0x01000008
@@ -155,6 +156,7 @@
 
   gHisiTokenSpaceGuid.Pcdsoctype|0|UINT32|0x00000061
   gHisiTokenSpaceGuid.PcdPcieMsiTargetAddress|0x0|UINT64|0x00000064
+  gHisiTokenSpaceGuid.PcdSerDesFlowCtrlFlag|0|UINT32|0x40000056
 
 [PcdsFeatureFlag]
 
