@@ -65,7 +65,7 @@ DefinitionBlock("DsdtTable.aml", "DSDT", 1, "ARMLTD", "ARM-JUNO", EFI_ACPI_ARM_O
       Name(_HID, "ARMH9118")
       Name(_UID, Zero)
       Name(_CRS, ResourceTemplate() {
-              Memory32Fixed(ReadWrite, 0x1A000000, 0x1000)
+              Memory32Fixed(ReadWrite, 0x18000000, 0x1000)
               Interrupt(ResourceConsumer, Level, ActiveHigh, Exclusive) { 192 }
       })
       Name(_DSD, Package() {
