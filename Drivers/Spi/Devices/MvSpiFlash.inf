@@ -65,6 +65,7 @@
   gMarvellTokenSpaceGuid.PcdSpiFlashAddressCycles
   gMarvellTokenSpaceGuid.PcdSpiFlashEraseSize
   gMarvellTokenSpaceGuid.PcdSpiFlashPageSize
+  gMarvellTokenSpaceGuid.PcdSpiFlashPollCmd
 
 [Protocols]
   gEfiSpiMasterProtocolGuid

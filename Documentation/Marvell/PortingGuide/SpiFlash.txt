@@ -17,3 +17,7 @@ Size of SPI flash page
  gMarvellTokenSpaceGuid.PcdSpiFlashId
 
 Id of SPI flash
+
+ gMarvellTokenSpaceGuid.PcdSpiFlashPollCmd
+
+Spi flash polling flag

@@ -51,6 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CMD_READ_ID                     0x9f
 #define READ_STATUS_REG_CMD             0x0b
 #define CMD_WRITE_ENABLE                0x06
+#define CMD_READ_STATUS                 0x05
 #define CMD_FLAG_STATUS                 0x70
 #define CMD_WRITE_STATUS_REG            0x01
 #define CMD_READ_ARRAY_FAST             0x0b
@@ -59,7 +60,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CMD_ERASE_64K                   0xd8
 #define CMD_4B_ADDR_ENABLE              0xb7
 
-#define STATUS_REG_POLL_BIT             (1 << 7)
+#define STATUS_REG_POLL_WIP             (1 << 0)
+#define STATUS_REG_POLL_PEC             (1 << 7)
 
 #define SPI_TRANSFER_BEGIN              0x01  // Assert CS before transfer
 #define SPI_TRANSFER_END                0x02  // Deassert CS after transfers

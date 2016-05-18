@@ -101,9 +101,17 @@ SpiFlashWriteCommon (
   IN UINT32 BufferLength
   )
 {
-  UINT8 CmdStatus = CMD_FLAG_STATUS;
+  UINT8 CmdStatus = CMD_READ_STATUS;
   UINT8 State;
   UINT32 Counter = 0xFFFFF;
+  UINT8 poll_bit = STATUS_REG_POLL_WIP;
+  UINT8 check_status = 0x0;
+
+  CmdStatus = (UINT8)PcdGet32 (PcdSpiFlashPollCmd);
+  if (CmdStatus == CMD_FLAG_STATUS) {
+    poll_bit = STATUS_REG_POLL_PEC;
+    check_status = poll_bit;
+  }
 
   // Send command
   SpiFlashWriteEnableCmd (Slave);
@@ -119,7 +127,7 @@ SpiFlashWriteCommon (
     SpiMasterProtocol->Transfer (SpiMasterProtocol, Slave, 1, NULL, &State,
       0);
     Counter--;
-    if (((State & STATUS_REG_POLL_BIT) == STATUS_REG_POLL_BIT))
+    if ((State & poll_bit) == check_status)
       break;
   } while (Counter > 0);
   if (Counter == 0) {

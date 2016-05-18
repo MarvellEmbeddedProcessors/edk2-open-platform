@@ -221,10 +221,11 @@ EfiSpiTransfer (
       DataToSend = *DataOutPtr & 0xFF;
     }
     // Transmit Data
+    MmioWrite32 (SpiRegBase + SPI_INT_CAUSE_REG, 0x0);
     MmioWrite32 (SpiRegBase + SPI_DATA_OUT_REG, DataToSend);
     // Wait for memory ready
     for (Iterator = 0; Iterator < SPI_TIMEOUT; Iterator++) {
-      if ((MmioRead32 (SpiRegBase + SPI_CTRL_REG) & SPI_MEM_READY_MASK) != 0) {
+      if (MmioRead32 (SpiRegBase + SPI_INT_CAUSE_REG)) {
         *DataInPtr = MmioRead32 (SpiRegBase + SPI_DATA_IN_REG);
 
         if (DataInPtr != NULL) {
