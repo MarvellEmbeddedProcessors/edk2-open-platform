@@ -1154,7 +1154,7 @@ SdMmcPassThruPassThru (
   SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_NOR_INT_STS, FALSE,
       sizeof (Stat), &Stat);
 
-  if (!EFI_ERROR(Status) && Read)
+  if (!Ret && DataTransfer)
     return EFI_SUCCESS;
 
   if (IntStatus & BIT15) {
