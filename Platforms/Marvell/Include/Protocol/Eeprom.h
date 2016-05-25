@@ -53,7 +53,7 @@ EFI_STATUS
 
 struct _EFI_EEPROM_PROTOCOL {
   EFI_EEPROM_TRANSFER Transfer;
-  UINT8 Identifier;
+  UINT32 Identifier;
 };
 
 extern EFI_GUID gEfiEepromProtocolGuid;
