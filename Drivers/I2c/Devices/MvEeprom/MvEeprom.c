@@ -49,11 +49,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "MvEeprom.h"
 
-/* Last byte of GUID will contain address of device */
 #define I2C_GUID \
   { \
   0x391fc679, 0x6cb0, 0x4f01, { 0x9a, 0xc7, 0x8e, 0x1b, 0x78, 0x6b, 0x7a, 0x00 } \
   }
+
+#define I2C_DEVICE_INDEX(bus, address) (((address) & 0xffff) | (bus) << 16)
 
 STATIC CONST EFI_GUID I2cGuid = I2C_GUID;
 
@@ -74,6 +75,7 @@ MvEepromSupported (
   EFI_STATUS Status = EFI_UNSUPPORTED;
   EFI_I2C_IO_PROTOCOL *TmpI2cIo;
   UINT8 *EepromAddresses;
+  UINT8 *EepromBuses;
   UINTN i;
 
   Status = gBS->OpenProtocol (
@@ -90,6 +92,7 @@ MvEepromSupported (
 
   /* get EEPROM devices' addresses from PCD */
   EepromAddresses = PcdGetPtr (PcdEepromI2cAddresses);
+  EepromBuses = PcdGetPtr (PcdEepromI2cBuses);
   if (EepromAddresses == 0) {
     Status = EFI_UNSUPPORTED;
     DEBUG((DEBUG_INFO, "MvEepromSupported: I2C device found, but it's not EEPROM\n"));
@@ -100,7 +103,8 @@ MvEepromSupported (
   for (i = 0; EepromAddresses[i] != '\0'; i++) {
     /* I2C guid must fit and valid DeviceIndex must be provided */
     if (CompareGuid(TmpI2cIo->DeviceGuid, &I2cGuid) &&
-	TmpI2cIo->DeviceIndex == EepromAddresses[i]) {
+	TmpI2cIo->DeviceIndex == I2C_DEVICE_INDEX(EepromBuses[i],
+	  EepromAddresses[i])) {
       DEBUG((DEBUG_INFO, "MvEepromSupported: attached to EEPROM device\n"));
       Status = EFI_SUCCESS;
       break;

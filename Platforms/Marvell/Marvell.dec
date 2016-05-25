@@ -112,6 +112,7 @@
   gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0 }|VOID*|0x3000046
   gMarvellTokenSpaceGuid.PcdI2cSlaveBuses|{ 0 }|VOID*|0x3000184
   gMarvellTokenSpaceGuid.PcdEepromI2cAddresses|{ 0 }|VOID*|0x3000050
+  gMarvellTokenSpaceGuid.PcdEepromI2cBuses|{ 0 }|VOID*|0x3000185
   gMarvellTokenSpaceGuid.PcdI2cBaseAddresses|{ 0 }|VOID*|0x3000047
   gMarvellTokenSpaceGuid.PcdI2cClockFrequency|0|UINT32|0x3000048
   gMarvellTokenSpaceGuid.PcdI2cBaudRate|0|UINT32|0x3000049

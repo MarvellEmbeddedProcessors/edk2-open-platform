@@ -65,6 +65,7 @@
 
 [Pcd]
   gMarvellTokenSpaceGuid.PcdEepromI2cAddresses
+  gMarvellTokenSpaceGuid.PcdEepromI2cBuses
 
 [Depex]
   TRUE
