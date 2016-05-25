@@ -53,6 +53,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <Protocol/Eeprom.h>
 
+#define I2C_DEVICE_INDEX(bus, address) (((address) & 0xffff) | (bus) << 16)
+#define I2C_DEVICE_ADDRESS(index) ((index) & 0xffff)
+#define I2C_DEVICE_BUS(index) ((index) >> 16)
+
 CONST CHAR16 gShellEepromFileName[] = L"ShellCommand";
 EFI_HANDLE gShellEepromHiiHandle = NULL;
 
@@ -86,13 +90,14 @@ Usage (
   )
 {
   Print (L"Basic EEPROM commands:\n"
-         "eeprom [read] [write] [list] [<Chip>] [<Address>] [<Length>] [-d <Data>] [-m <Source>]\n"
+         "eeprom [read] [write] [list] [<Chip>] [<Bus>][<Address>] [<Length>] [-d <Data>] [-m <Source>]\n"
          "All modes except 'list' require Address, Length and Chip set.\n\n"
          "read    - read from EEPROM\n"
          "write   - write Data to EEPROM, requires -d\n"
          "list    - list available EEPROM devices\n\n"
          "-m      - transfer from/to RAM memory\n\n"
          "Chip    - EEPROM bus address\n"
+         "Bus     - I2C bus address\n"
          "Address - address in EEPROM to read/write\n"
          "Data    - data byte to be written\n"
          "Length  - length of data to read/write/copy\n"
@@ -101,13 +106,13 @@ Usage (
          "List devices:\n"
          " eeprom list\n"
          "Read 16 bytes from address 0x0 in chip 0x57:\n"
-         " eeprom read 0x57 0x0 0x10\n"
+         " eeprom read 0x57 0x0 0x0 0x10\n"
          "Fill 16 bytes with 0xab at address 0x0 in chip 0x57:\n"
-         " eeprom write 0x57 0x0 0x10 -d 0xab\n"
+         " eeprom write 0x57 0x0 0x0 0x10 -d 0xab\n"
          "Copy 32 bytes from 0x2000000 in RAM to EEPROM:\n"
-         " eeprom write 0x57 0x0 0x20 -m 0x2000000\n"
+         " eeprom write 0x57 0x0 0x0 0x20 -m 0x2000000\n"
          "Copy 32 bytes from EEPROM to RAM:\n"
-         " eeprom read 0x57 0x0 0x20 -m 0x2000000\n"
+         " eeprom read 0x57 0x0 0x0 0x20 -m 0x2000000\n"
   );
 }
 
@@ -140,7 +145,8 @@ EepromList (
                     gImageHandle,
                     NULL,
                     EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL );
-    Print (L" 0x%x ", EepromProtocol->Identifier);
+    Print (L"0x%x at bus %d\n", I2C_DEVICE_ADDRESS(EepromProtocol->Identifier),
+	I2C_DEVICE_BUS(EepromProtocol->Identifier));
     Status = gBS->CloseProtocol ( HandleBuffer[i],
                                   &gEfiEepromProtocolGuid,
                                   gImageHandle,
@@ -204,7 +210,7 @@ ShellCommandRunEeprom (
   LIST_ENTRY              *CheckPackage;
   CHAR16                  *ProblemParam;
   CONST CHAR16            *ValueStr;
-  UINTN                   Address, Length, Chip, Source;
+  UINTN                   Address, Length, Chip, Source, Bus;
   UINT8                   Data;
   UINT8                   *Buffer;
   BOOLEAN                 ReadMode, MemMode;
@@ -262,9 +268,12 @@ ShellCommandRunEeprom (
   Chip = ShellHexStrToUintn (ValueStr);
 
   ValueStr = ShellCommandLineGetRawValue(CheckPackage, 2);
-  Address = ShellHexStrToUintn (ValueStr);
+  Bus = ShellHexStrToUintn (ValueStr);
 
   ValueStr = ShellCommandLineGetRawValue(CheckPackage, 3);
+  Address = ShellHexStrToUintn (ValueStr);
+
+  ValueStr = ShellCommandLineGetRawValue(CheckPackage, 4);
   Length = ShellHexStrToUintn (ValueStr);
 
   if (MemMode) {
@@ -276,7 +285,7 @@ ShellCommandRunEeprom (
     Source = ShellHexStrToUintn (ValueStr);
   }
 
-  EepromLocateProtocol (Chip, &Handle, &EepromProtocol);
+  EepromLocateProtocol (I2C_DEVICE_INDEX(Bus, Chip), &Handle, &EepromProtocol);
   if (EepromProtocol == NULL) {
     Print (L"Failed to locate EEPROM protocol.\n");
     return SHELL_INVALID_PARAMETER;
