@@ -85,6 +85,7 @@ typedef struct {
   EFI_LOCK    Lock;
   UINTN       TclkFrequency;
   UINTN       BaseAddress;
+  INTN	      Bus;
   EFI_I2C_MASTER_PROTOCOL I2cMaster;
   EFI_I2C_ENUMERATE_PROTOCOL I2cEnumerate;
   EFI_I2C_BUS_CONFIGURATION_MANAGEMENT_PROTOCOL I2cBusConf;

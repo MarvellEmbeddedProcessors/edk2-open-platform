@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/DebugLib.h>
 #include <Library/PcdLib.h>
 #include <Library/UefiLib.h>
+#include <Library/ParsePcdLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -94,13 +95,24 @@ I2C_WRITE (
 
 EFI_STATUS
 EFIAPI
-MvI2cInitialise (
+MvI2cInitialiseController (
   IN EFI_HANDLE  ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+  IN EFI_SYSTEM_TABLE  *SystemTable,
+  IN EFI_PHYSICAL_ADDRESS BaseAddress
   )
 {
   EFI_STATUS Status;
   I2C_MASTER_CONTEXT *I2cMasterContext;
+  STATIC INTN Bus = 0;
+  MV_I2C_DEVICE_PATH *DevicePath;
+
+  DevicePath = AllocateCopyPool (sizeof(gDevicePathProtocol),
+				 &gDevicePathProtocol);
+  if (DevicePath == NULL) {
+    DEBUG((DEBUG_ERROR, "MvI2cDxe: I2C device path allocation failed\n"));
+    return EFI_OUT_OF_RESOURCES;
+  }
+  DevicePath->Guid.Guid.Data4[0] = Bus;
 
   /* if attachment succeeds, this gets freed at ExitBootServices */
   I2cMasterContext = AllocateZeroPool (sizeof (I2C_MASTER_CONTEXT));
@@ -114,15 +126,10 @@ MvI2cInitialise (
   I2cMasterContext->I2cEnumerate.Enumerate = MvI2cEnumerate;
   I2cMasterContext->I2cBusConf.EnableI2cBusConfiguration = MvI2cEnableConf;
   I2cMasterContext->TclkFrequency = PcdGet32 (PcdI2cClockFrequency);
-  I2cMasterContext->BaseAddress = PcdGet64 (PcdI2cBaseAddress);
-
+  I2cMasterContext->BaseAddress = BaseAddress;
+  I2cMasterContext->Bus = Bus;
   /* I2cMasterContext->Lock is responsible for serializing I2C operations */
   EfiInitializeLock(&I2cMasterContext->Lock, TPL_NOTIFY);
-
-  /* Checks if protocol is *not yet* installed */
-  ASSERT_PROTOCOL_ALREADY_INSTALLED(NULL, &gEfiI2cMasterProtocolGuid);
-  ASSERT_PROTOCOL_ALREADY_INSTALLED(NULL, &gEfiI2cEnumerateProtocolGuid);
-  ASSERT_PROTOCOL_ALREADY_INSTALLED(NULL, &gEfiI2cBusConfigurationManagementProtocolGuid);
 
   MvI2cCalBaudRate( I2cMasterContext,
                     PcdGet32 (PcdI2cBaudRate),
@@ -139,18 +146,60 @@ MvI2cInitialise (
       &gEfiI2cBusConfigurationManagementProtocolGuid,
       &I2cMasterContext->I2cBusConf,
       &gEfiDevicePathProtocolGuid,
-      (EFI_DEVICE_PATH_PROTOCOL *) &gDevicePathProtocol,
+      (EFI_DEVICE_PATH_PROTOCOL *) DevicePath,
       NULL);
 
   if (EFI_ERROR(Status)) {
     DEBUG((DEBUG_ERROR, "MvI2cDxe: Installing protocol interfaces failed!\n"));
     goto fail;
   }
+  DEBUG((DEBUG_ERROR, "Succesfully installed controller %d at 0x%llx\n", Bus,
+	I2cMasterContext->BaseAddress));
+
+  Bus++;
 
   return EFI_SUCCESS;
 
 fail:
   FreePool(I2cMasterContext);
+  return Status;
+}
+
+EFI_STATUS
+EFIAPI
+MvI2cInitialise (
+  IN EFI_HANDLE  ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
+  )
+{
+  EFI_STATUS Status;
+  UINT32 BusCount;
+  EFI_PHYSICAL_ADDRESS I2cBaseAddresses[PcdGet32 (PcdI2cBusCount)];
+  INTN i;
+
+  BusCount = PcdGet32 (PcdI2cBusCount);
+  if (BusCount == 0)
+    return EFI_SUCCESS;
+
+  Status = ParsePcdString (
+      (CHAR16 *) PcdGetPtr (PcdI2cBaseAddresses),
+      BusCount,
+      I2cBaseAddresses,
+      NULL
+      );
+  if (EFI_ERROR(Status))
+    return Status;
+
+  for (i = 0; i < BusCount; i++) {
+    Status = MvI2cInitialiseController(
+	ImageHandle,
+	SystemTable,
+	I2cBaseAddresses[i]
+	);
+    if (EFI_ERROR(Status))
+      return Status;
+  }
+
   return Status;
 }
 
@@ -572,10 +621,12 @@ MvI2cStartRequest (
 
 STATIC CONST EFI_GUID DevGuid = I2C_GUID;
 
+#define I2C_DEVICE_INDEX(bus, address) (((address) & 0xffff) | (bus) << 16)
 STATIC
 EFI_STATUS
 MvI2cAllocDevice (
   IN UINT8 SlaveAddress,
+  IN UINT8 Bus,
   IN OUT CONST EFI_I2C_DEVICE **Device
   )
 {
@@ -593,6 +644,7 @@ MvI2cAllocDevice (
   }
   *Device = Dev;
   Dev->DeviceIndex = SlaveAddress;
+  Dev->DeviceIndex = I2C_DEVICE_INDEX(Bus, SlaveAddress);
   Dev->SlaveAddressCount = 1;
   Dev->I2cBusConfiguration = 0;
   Status = gBS->AllocatePool ( EfiBootServicesData,
@@ -643,11 +695,12 @@ MvI2cEnumerate (
   UINT8 *DevicesPcd;
   UINTN Index;
   UINT8 NextDeviceAddress;
+  I2C_MASTER_CONTEXT *I2cMasterContext = I2C_SC_FROM_ENUMERATE(This);
 
   DevicesPcd = PcdGetPtr (PcdI2cSlaveAddresses);
   if (*Device == NULL) {
     if (DevicesPcd[0] != '\0')
-      MvI2cAllocDevice (DevicesPcd[0], Device);
+      MvI2cAllocDevice (DevicesPcd[0], I2cMasterContext->Bus, Device);
     return EFI_SUCCESS;
   } else {
     /* Device is not NULL, so something was already allocated */
@@ -655,7 +708,7 @@ MvI2cEnumerate (
       if (DevicesPcd[Index] == (*Device)->DeviceIndex) {
         NextDeviceAddress = DevicesPcd[Index + 1];
         if (NextDeviceAddress != '\0') {
-          MvI2cAllocDevice(NextDeviceAddress, Device);
+          MvI2cAllocDevice(NextDeviceAddress, I2cMasterContext->Bus, Device);
           return EFI_SUCCESS;
         }
         break;

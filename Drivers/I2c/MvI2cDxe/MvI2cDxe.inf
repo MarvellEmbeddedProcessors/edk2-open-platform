@@ -56,6 +56,7 @@
   UefiLib
   UefiDriverEntryPoint
   UefiBootServicesTableLib
+  ParsePcdLib
 
 [Protocols]
   gEfiI2cMasterProtocolGuid
@@ -65,9 +66,10 @@
 
 [Pcd]
   gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses
-  gMarvellTokenSpaceGuid.PcdI2cBaseAddress
+  gMarvellTokenSpaceGuid.PcdI2cBaseAddresses
   gMarvellTokenSpaceGuid.PcdI2cClockFrequency
   gMarvellTokenSpaceGuid.PcdI2cBaudRate
+  gMarvellTokenSpaceGuid.PcdI2cBusCount
 
 [Depex]
   TRUE
