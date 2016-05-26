@@ -525,6 +525,7 @@ SdMmcPciHcDriverBindingStart (
                   EFI_OPEN_PROTOCOL_BY_DRIVER
                   );
   if (EFI_ERROR (Status)) {
+    DEBUG ((EFI_D_ERROR, "gBS->OpenProtocol: Status=%d\n", Status));
     return Status;
   }
 
@@ -540,6 +541,7 @@ SdMmcPciHcDriverBindingStart (
                      );
 
   if (EFI_ERROR (Status)) {
+    DEBUG ((EFI_D_ERROR, "gBS->Attributes: Status=%d\n", Status));
     goto Done;
   }
 
@@ -559,12 +561,14 @@ SdMmcPciHcDriverBindingStart (
                          NULL
                          );
   } else {
+    DEBUG ((EFI_D_ERROR, "gBS->Attributes2: Status=%d\n", Status));
     goto Done;
   }
 
   Private = AllocateCopyPool (sizeof (SD_MMC_HC_PRIVATE_DATA), &gSdMmcPciHcTemplate);
   if (Private == NULL) {
     Status = EFI_OUT_OF_RESOURCES;
+    DEBUG ((EFI_D_ERROR, "AllocateCopyPool: Status=%d\n", Status));
     goto Done;
   }
 
@@ -604,6 +608,7 @@ SdMmcPciHcDriverBindingStart (
 
     Status = SdMmcHcGetCapability (PciIo, Slot, &Private->Capability[Slot]);
     if (EFI_ERROR (Status)) {
+      DEBUG ((EFI_D_ERROR, "SdMmcHcGetCapability: status=%d!!!\n", Status));
       continue;
     }
 
@@ -618,12 +623,13 @@ SdMmcPciHcDriverBindingStart (
 
     Status = SdMmcHcGetMaxCurrent (PciIo, Slot, &Private->MaxCurrent[Slot]);
     if (EFI_ERROR (Status)) {
+      DEBUG ((EFI_D_ERROR, "SdMmcHcGetMaxCurrent: status=%d!!!\n", Status));
       continue;
     }
 
     Private->Slot[Slot].SlotType = Private->Capability[Slot].SlotType;
     if ((Private->Slot[Slot].SlotType != RemovableSlot) && (Private->Slot[Slot].SlotType != EmbeddedSlot)) {
-      DEBUG ((EFI_D_INFO, "SdMmcPciHcDxe doesn't support the slot type [%d]!!!\n", Private->Slot[Slot].SlotType));
+      DEBUG ((EFI_D_ERROR, "SdMmcPciHcDxe doesn't support the slot type [%d]!!!\n", Private->Slot[Slot].SlotType));
       continue;
     }
 
