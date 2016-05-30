@@ -607,6 +607,13 @@ SdMmcPciHcDriverBindingStart (
       continue;
     }
 
+    if (Private->Capability[Slot].BaseClkFreq == 0)
+      Private->Capability[Slot].BaseClkFreq = 0xff;
+
+    Private->Capability[Slot].Sdr104 = 0;
+    Private->Capability[Slot].Ddr50 = 0;
+    Private->Capability[Slot].BusWidth8 = 0;
+
     DumpCapabilityReg (Slot, &Private->Capability[Slot]);
 
     Status = SdMmcHcGetMaxCurrent (PciIo, Slot, &Private->MaxCurrent[Slot]);
@@ -619,6 +626,9 @@ SdMmcPciHcDriverBindingStart (
       DEBUG ((EFI_D_INFO, "SdMmcPciHcDxe doesn't support the slot type [%d]!!!\n", Private->Slot[Slot].SlotType));
       continue;
     }
+
+    XenonSetClk (PciIo, Private, XENON_MMC_MAX_CLK/2046);
+    XenonPhyInit(PciIo);
 
     Private->Slot[Slot].MediaPresent = TRUE;
     RoutineNum = sizeof (mCardTypeDetectRoutineTable) / sizeof (CARD_TYPE_DETECT_ROUTINE);
@@ -1034,9 +1044,7 @@ SdMmcPassThruPassThru (
   }
 
   if ((DataLen % BlockSize) != 0) {
-    if (DataLen < BlockSize) {
-      BlockSize = (UINT16)DataLen;
-    }
+    DataLen = (DataLen + BlockSize - 1) / BlockSize * BlockSize;
   }
   BlkCount = (UINT16) (DataLen / BlockSize);
 
@@ -1136,7 +1144,7 @@ SdMmcPassThruPassThru (
   SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_NOR_INT_STS, TRUE,
       sizeof (IntStatus), &IntStatus);
 
-  Stat = 0xFFFF;
+  Stat = 0xFFFFFFFF;
   SdMmcHcRwMmio (Private->PciIo, Slot, SD_MMC_HC_NOR_INT_STS, FALSE,
       sizeof (Stat), &Stat);
 
