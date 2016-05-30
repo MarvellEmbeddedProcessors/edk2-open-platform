@@ -13,4 +13,4 @@ sequence.
   gMarvellTokenSpaceGuid.PcdSataMapPortAddress
 
 Boolean indicating if controller on platform needs specific address mapping for
-SATA ports.
+SATA ports. Setting this flag is necessary for CP110-A0 revisions.

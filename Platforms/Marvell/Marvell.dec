@@ -224,6 +224,8 @@
 
 #SATA
   gMarvellTokenSpaceGuid.PcdSataBaseAddress|0|UINT32|0x4000052
+
+[PcdsFeatureFlag.common]
   gMarvellTokenSpaceGuid.PcdSataMapPortAddress|FALSE|BOOLEAN|0x4000053
 
 [Protocols]

@@ -158,7 +158,7 @@ PciIoSataMemRead (
   EFI_STATUS Status;
   UINT32 *TmpBuffer;
 
-  if (PcdGetBool(PcdSataMapPortAddress)) {
+  if (FeaturePcdGet (PcdSataMapPortAddress)) {
     Offset = MapSataPortAddress (Offset);
   }
 
@@ -193,8 +193,10 @@ PciIoMemWrite (
 {
   EFI_PCI_IO_PRIVATE_DATA *Private = EFI_PCI_IO_PRIVATE_DATA_FROM_THIS(This);
 
-  if (BarIndex == EFI_AHCI_BAR_INDEX && PcdGetBool (PcdSataMapPortAddress)) {
-    Offset = MapSataPortAddress (Offset);
+  if (FeaturePcdGet (PcdSataMapPortAddress)) {
+    if (BarIndex == EFI_AHCI_BAR_INDEX) {
+      Offset = MapSataPortAddress (Offset);
+    }
   }
 
   return PciRootBridgeIoMemWrite (&Private->RootBridge.Io,
@@ -216,7 +218,7 @@ PciIoSataMemWrite (
 {
   EFI_PCI_IO_PRIVATE_DATA *Private = EFI_PCI_IO_PRIVATE_DATA_FROM_THIS(This);
 
-  if (PcdGetBool (PcdSataMapPortAddress)) {
+  if (FeaturePcdGet (PcdSataMapPortAddress)) {
     Offset = MapSataPortAddress (Offset);
   }
 
