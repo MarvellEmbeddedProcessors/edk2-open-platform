@@ -1,0 +1,76 @@
+## @file
+#
+#  Copyright (c) 2016, Hisilicon Limited. All rights reserved.<BR>
+#  Copyright (c) 2016, Linaro Limited. All rights reserved.<BR>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution. The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = PlatformPciLib
+  FILE_GUID                      = 61b7276a-fc67-11e5-82fd-47ea9896dd5d
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+
+[Sources]
+  PlatformPciLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenPlatformPkg/Chips/Hisilicon/HisiPkg.dec
+
+[LibraryClasses]
+  PcdLib
+
+[FixedPcd]
+  gHisiTokenSpaceGuid.PcdHb1BaseAddress
+  gHisiTokenSpaceGuid.PcdHb0Rb0PciConfigurationSpaceBaseAddress
+  gHisiTokenSpaceGuid.PcdHb0Rb0PciConfigurationSpaceSize
+  gHisiTokenSpaceGuid.PcdHb0Rb1PciConfigurationSpaceBaseAddress
+  gHisiTokenSpaceGuid.PcdHb0Rb1PciConfigurationSpaceSize
+  gHisiTokenSpaceGuid.PcdHb0Rb2PciConfigurationSpaceBaseAddress
+  gHisiTokenSpaceGuid.PcdHb0Rb2PciConfigurationSpaceSize
+  gHisiTokenSpaceGuid.PcdHb0Rb3PciConfigurationSpaceBaseAddress
+  gHisiTokenSpaceGuid.PcdHb0Rb3PciConfigurationSpaceSize
+  gHisiTokenSpaceGuid.PciHb0Rb0Base
+  gHisiTokenSpaceGuid.PciHb0Rb1Base
+  gHisiTokenSpaceGuid.PciHb0Rb2Base
+  gHisiTokenSpaceGuid.PciHb0Rb3Base
+  gHisiTokenSpaceGuid.PcdHb0Rb0PciRegionBaseAddress
+  gHisiTokenSpaceGuid.PcdHb0Rb1PciRegionBaseAddress
+  gHisiTokenSpaceGuid.PcdHb0Rb2PciRegionBaseAddress
+  gHisiTokenSpaceGuid.PcdHb0Rb3PciRegionBaseAddress
+
+  gHisiTokenSpaceGuid.PcdHb0Rb0PciRegionSize
+  gHisiTokenSpaceGuid.PcdHb0Rb1PciRegionSize
+  gHisiTokenSpaceGuid.PcdHb0Rb2PciRegionSize
+  gHisiTokenSpaceGuid.PcdHb0Rb3PciRegionSize
+
+  gHisiTokenSpaceGuid.PcdHb0Rb0CpuMemRegionBase
+  gHisiTokenSpaceGuid.PcdHb0Rb1CpuMemRegionBase
+  gHisiTokenSpaceGuid.PcdHb0Rb2CpuMemRegionBase
+
+  gHisiTokenSpaceGuid.PcdHb0Rb0CpuIoRegionBase
+  gHisiTokenSpaceGuid.PcdHb0Rb1CpuIoRegionBase
+  gHisiTokenSpaceGuid.PcdHb0Rb2CpuIoRegionBase
+
+  gHisiTokenSpaceGuid.PcdHb0Rb1IoBase
+  gHisiTokenSpaceGuid.PcdHb0Rb1IoSize
+
+  gHisiTokenSpaceGuid.PcdHb0Rb2IoBase
+  gHisiTokenSpaceGuid.PcdHb0Rb2IoSize
+  gHisiTokenSpaceGuid.PcdHb0Rb0IoBase
+  gHisiTokenSpaceGuid.PcdHb0Rb0IoSize
+  gHisiTokenSpaceGuid.PcdHb0Rb1IoBase
+  gHisiTokenSpaceGuid.PcdHb0Rb1IoSize
+  gHisiTokenSpaceGuid.PcdHb0Rb2IoBase
+  gHisiTokenSpaceGuid.PcdHb0Rb2IoSize
+
