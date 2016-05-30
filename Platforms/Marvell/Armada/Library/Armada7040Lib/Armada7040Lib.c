@@ -18,6 +18,8 @@
 #include <Library/ComPhyLib.h>
 #include <Ppi/ArmMpCoreInfo.h>
 #include <Library/UtmiPhyLib.h>
+#include <Library/TimerLib.h>
+#include <Library/IoLib.h>
 
 
 ARM_CORE_INFO mArmPlatformNullMpCoreInfoTable[] = {
@@ -98,6 +100,13 @@ ArmPlatformInitialize (
   ComPhyInit ();
   UtmiPhyInit ();
   MppInitialize ();
+
+  /* Reset eMMC */
+  MmioWrite32(0xfa001104, 0x3);
+  MmioWrite32(0xfa001004, 0x390FAF0);
+  MicroSecondDelay(100);
+  MmioWrite32(0xfa001004, 0x310FAF0);
+
   return RETURN_SUCCESS;
 }
 
