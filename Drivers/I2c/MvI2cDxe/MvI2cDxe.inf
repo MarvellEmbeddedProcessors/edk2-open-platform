@@ -66,6 +66,7 @@
 
 [Pcd]
   gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses
+  gMarvellTokenSpaceGuid.PcdI2cSlaveBuses
   gMarvellTokenSpaceGuid.PcdI2cBaseAddresses
   gMarvellTokenSpaceGuid.PcdI2cClockFrequency
   gMarvellTokenSpaceGuid.PcdI2cBaudRate

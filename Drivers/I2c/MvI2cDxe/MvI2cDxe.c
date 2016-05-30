@@ -622,6 +622,7 @@ MvI2cStartRequest (
 STATIC CONST EFI_GUID DevGuid = I2C_GUID;
 
 #define I2C_DEVICE_INDEX(bus, address) (((address) & 0xffff) | (bus) << 16)
+#define I2C_DEVICE_ADDRESS(index) ((index) & 0xffff)
 STATIC
 EFI_STATUS
 MvI2cAllocDevice (
@@ -693,30 +694,41 @@ MvI2cEnumerate (
   )
 {
   UINT8 *DevicesPcd;
-  UINTN Index;
+  UINT8 *DeviceBusPcd;
+  UINTN Index, NextIndex;
   UINT8 NextDeviceAddress;
   I2C_MASTER_CONTEXT *I2cMasterContext = I2C_SC_FROM_ENUMERATE(This);
 
   DevicesPcd = PcdGetPtr (PcdI2cSlaveAddresses);
+  DeviceBusPcd = PcdGetPtr (PcdI2cSlaveBuses);
   if (*Device == NULL) {
-    if (DevicesPcd[0] != '\0')
-      MvI2cAllocDevice (DevicesPcd[0], I2cMasterContext->Bus, Device);
-    return EFI_SUCCESS;
+    for (Index = 0; DevicesPcd[Index] != '\0'; Index++) {
+      if (DeviceBusPcd[Index] != I2cMasterContext->Bus)
+        continue;
+      if (DevicesPcd[Index] != '\0')
+        MvI2cAllocDevice (DevicesPcd[Index], I2cMasterContext->Bus, Device);
+      return EFI_SUCCESS;
+    }
   } else {
     /* Device is not NULL, so something was already allocated */
     for (Index = 0; DevicesPcd[Index] != '\0'; Index++) {
-      if (DevicesPcd[Index] == (*Device)->DeviceIndex) {
-        NextDeviceAddress = DevicesPcd[Index + 1];
-        if (NextDeviceAddress != '\0') {
-          MvI2cAllocDevice(NextDeviceAddress, I2cMasterContext->Bus, Device);
+      if (DeviceBusPcd[Index] != I2cMasterContext->Bus)
+        continue;
+      if (DevicesPcd[Index] == I2C_DEVICE_ADDRESS((*Device)->DeviceIndex)) {
+        for (NextIndex = Index + 1; DevicesPcd[NextIndex] != '\0'; NextIndex++) {
+          if (DeviceBusPcd[NextIndex] != I2cMasterContext->Bus)
+            continue;
+          NextDeviceAddress = DevicesPcd[NextIndex];
+          if (NextDeviceAddress != '\0')
+            MvI2cAllocDevice(NextDeviceAddress, I2cMasterContext->Bus, Device);
           return EFI_SUCCESS;
         }
-        break;
       }
     }
     *Device = NULL;
     return EFI_SUCCESS;
   }
+  return EFI_SUCCESS;
 }
 
 STATIC
