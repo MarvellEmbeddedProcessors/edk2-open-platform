@@ -8,8 +8,12 @@ In order to enable driver on a new platform, following steps need to be taken:
  - add PCDs with relevant values to .dsc file:
      gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0x50, 0x57 }
    (addresses of I2C slave devices on bus)
-     gMarvellTokenSpaceGuid.PcdI2cBaseAddress|0xF0511000
-   (base address of I2C controller)
+     gMarvellTokenSpaceGuid.PcdI2cSlaveBuses|{ 0x0, 0x0 }
+   (buses to which accoring slaves are attached)
+     gMarvellTokenSpaceGuid.PcdI2cBusCount|2
+   (number of SoC's I2C buses)
+     gMarvellTokenSpaceGuid.PcdI2cBaseAddresses|L"0xF2701000;0xF2701100"
+   (base addresses of I2C controller buses)
      gMarvellTokenSpaceGuid.PcdI2cClockFrequency|200000000
    (I2C host controller clock frequency)
      gMarvellTokenSpaceGuid.PcdI2cBaudRate|100000
