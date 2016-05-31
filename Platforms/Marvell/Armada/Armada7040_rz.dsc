@@ -47,6 +47,9 @@
 
 !include Armada.dsc.inc
 
+[BuildOptions]
+  *_*_*_PLATFORM_FLAGS = -fno-unwind-tables
+
 ################################################################################
 #
 # Pcd Section - list of all EDK II PCD Entries defined by this Platform
