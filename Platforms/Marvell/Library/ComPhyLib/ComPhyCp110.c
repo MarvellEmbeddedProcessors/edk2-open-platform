@@ -794,6 +794,7 @@ ComPhyCp110Init (
     case PHY_TYPE_SGMII0:
     case PHY_TYPE_SGMII1:
     case PHY_TYPE_SGMII2:
+    case PHY_TYPE_SGMII3:
       Status = ComPhySgmiiPowerUp(Lane, PtrComPhyMap->Speed, HpipeBaseAddr,
         ComPhyBaseAddr);
       break;
