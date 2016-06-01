@@ -350,7 +350,7 @@ XenonSetPhy (
       (Timing == MMC_TIMING_UHS_SDR25)) {
     SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, TRUE, 4, &Var);
 
-    Var |= OUTPUT_QSN_PHASE_SELECT;
+    Var |= OUTPUT_QSN_PHASE_SELECT | (1 << 19);
     SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, FALSE, 4, &Var);
   }
 
