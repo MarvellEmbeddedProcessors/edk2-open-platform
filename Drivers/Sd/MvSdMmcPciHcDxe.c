@@ -1050,7 +1050,9 @@ SdMmcPassThruPassThru (
   }
 
   if ((DataLen % BlockSize) != 0) {
-    DataLen = (DataLen + BlockSize - 1) / BlockSize * BlockSize;
+    if (DataLen < BlockSize) {
+      BlockSize = (UINT16)DataLen;
+    }
   }
   BlkCount = (UINT16) (DataLen / BlockSize);
 
