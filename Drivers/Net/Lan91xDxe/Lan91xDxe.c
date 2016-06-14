@@ -1818,12 +1818,18 @@ SnpTransmit (
   PktNum &= ARR_PACKET;
 
   // Check for the nature of the frame
-  if (DstAddr->Addr[0] == 0xFF) {
-    LanDriver->Stats.TxBroadcastFrames += 1;
-  } else if ((DstAddr->Addr[0] & 0x1) == 1) {
-    LanDriver->Stats.TxMulticastFrames += 1;
+  // If no destination address, it's ARP broadcast
+  if(DstAddr != NULL)
+  {
+    if (DstAddr->Addr[0] == 0xFF) {
+      LanDriver->Stats.TxBroadcastFrames += 1;
+    } else if ((DstAddr->Addr[0] & 0x1) == 1) {
+      LanDriver->Stats.TxMulticastFrames += 1;
+    } else {
+      LanDriver->Stats.TxUnicastFrames += 1;
+    }
   } else {
-    LanDriver->Stats.TxUnicastFrames += 1;
+    LanDriver->Stats.TxBroadcastFrames += 1;
   }
 
   // Set the Packet Number and Pointer registers
