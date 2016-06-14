@@ -53,6 +53,11 @@
   UdpIoLib|MdeModulePkg/Library/DxeUdpIoLib/DxeUdpIoLib.inf
   IpIoLib|MdeModulePkg/Library/DxeIpIoLib/DxeIpIoLib.inf
 
+!ifdef $(FDT_ENABLE)
+  #FDTUpdateLib
+  FdtUpdateLib|OpenPlatformPkg/Platforms/Hisilicon/D02/FdtUpdateLibD02/FdtUpdateLib.inf
+!endif #$(FDT_ENABLE)
+
   CpldIoLib|OpenPlatformPkg/Chips/Hisilicon/Library/CpldIoLib/CpldIoLib.inf
 
   SerdesLib|OpenPlatformPkg/Chips/Hisilicon/Binary/Pv660/Library/Pv660Serdes/Pv660SerdesLib.inf
@@ -166,6 +171,10 @@
   gArmTokenSpaceGuid.PcdGicDistributorBase|0x8D000000
   gArmTokenSpaceGuid.PcdGicInterruptInterfaceBase|0xFE000000
   gArmTokenSpaceGuid.PcdGicRedistributorsBase|0x8D100000
+
+  ## DTB address at spi flash
+  gHisiTokenSpaceGuid.FdtFileAddress|0xA4B00000
+
   gHisiTokenSpaceGuid.PcdNORFlashBase|0x90000000
   gHisiTokenSpaceGuid.PcdNORFlashCachableSize|0x8000000
 
@@ -417,6 +426,10 @@
   OpenPlatformPkg/Chips/Hisilicon/Drivers/Smbios/SmbiosMiscDxe/SmbiosMiscDxe.inf
   OpenPlatformPkg/Chips/Hisilicon/Drivers/Smbios/MemorySubClassDxe/MemorySubClassDxe.inf
   OpenPlatformPkg/Chips/Hisilicon/Drivers/Smbios/ProcessorSubClassDxe/ProcessorSubClassDxe.inf
+
+!ifdef $(FDT_ENABLE)
+  OpenPlatformPkg/Chips/Hisilicon/Drivers/UpdateFdtDxe/UpdateFdtDxe.inf
+!endif #$(FDT_ENABLE)
 
   #
   # Memory test
