@@ -403,6 +403,11 @@
   MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
   MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
 
+  OpenPlatformPkg/Chips/Hisilicon/Drivers/SasV1Dxe/SasV1Dxe.inf
+  MdeModulePkg/Bus/Scsi/ScsiBusDxe/ScsiBusDxe.inf
+  MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf
+  OpenPlatformPkg/Chips/Hisilicon/Pv660/Drivers/SasInitDxe/SasV1Init.inf
+
   OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Ebl/Ebl.inf
   MdeModulePkg/Application/HelloWorld/HelloWorld.inf
   #
