@@ -280,11 +280,7 @@
   OpenPlatformPkg/Platforms/ARM/VExpress/AcpiTables/rtsm_ve-aemv8a/AcpiTables.inf
 
   ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
-!if $(SECURE_BOOT_ENABLE) == TRUE
-  ArmPlatformPkg/Drivers/NorFlashDxe/NorFlashAuthenticatedDxe.inf
-!else
   ArmPlatformPkg/Drivers/NorFlashDxe/NorFlashDxe.inf
-!endif
   ArmPkg/Drivers/TimerDxe/TimerDxe.inf
 !ifdef EDK2_ENABLE_PL111
   ArmPlatformPkg/Drivers/LcdGraphicsOutputDxe/PL111LcdGraphicsOutputDxe.inf

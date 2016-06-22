@@ -112,11 +112,7 @@ FvNameGuid         = 87940482-fc81-41c3-87e6-399cf85ac8a0
 
   INF ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
   INF ArmPkg/Drivers/TimerDxe/TimerDxe.inf
-!if $(SECURE_BOOT_ENABLE) == TRUE
-  INF ArmPlatformPkg/Drivers/NorFlashDxe/NorFlashAuthenticatedDxe.inf
-!else
   INF ArmPlatformPkg/Drivers/NorFlashDxe/NorFlashDxe.inf
-!endif
 !ifdef EDK2_ENABLE_PL111
   INF ArmPlatformPkg/Drivers/LcdGraphicsOutputDxe/PL111LcdGraphicsOutputDxe.inf
 !endif
