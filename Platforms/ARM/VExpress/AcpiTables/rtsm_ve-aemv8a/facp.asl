@@ -35,7 +35,7 @@
 
 [0004]                          Signature : "FACP"
 [0004]                       Table Length : 0000010C
-[0001]                           Revision : 05
+[0001]                           Revision : 06
 [0001]                           Checksum : 18
 [0006]                             Oem ID : "LINARO"
 [0008]                       Oem Table ID : "RTSMVEV8"
@@ -195,3 +195,4 @@
 [0001]               Encoded Access Width : 01 [Byte Access:8]
 [0008]                            Address : 0000000000000000
 
+[0008]                      Hypervisor ID : 0000000000000000
