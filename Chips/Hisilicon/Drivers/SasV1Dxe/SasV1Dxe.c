@@ -264,7 +264,6 @@ UINT32 status[260];
 
 struct hisi_sas_slot {
     BOOLEAN used;
-    struct hisi_sas_sts *sts;
 };
 
 struct hisi_hba {
@@ -353,7 +352,6 @@ STATIC EFI_STATUS prepare_cmd (
     ZeroMem (SensePtr, sizeof (EFI_SCSI_SENSE_DATA));
 
   slot->used = TRUE;
-  slot->sts = sts;
   hba->queue = (queue + 1) % QUEUE_CNT;
 
   // Only consider ssp
@@ -442,7 +440,7 @@ STATIC EFI_STATUS prepare_cmd (
   if (BufferMap)
        DmaUnmap (BufferMap);
 
-  p = (UINT8 *)&slot->sts->status[0];
+  p = (UINT8 *)&sts->status[0];
   if (p[SENSE_DATA_PRES]) {
     // Disk not ready normal return for ScsiDiskTestUnitReady do next try
     SensePtr->Sense_Key = EFI_SCSI_SK_NOT_READY;
