@@ -321,7 +321,7 @@ STATIC EFI_STATUS prepare_cmd (
   UINT32 base = hba->base;
   UINT8 *p;
   EFI_PHYSICAL_ADDRESS  BufferAddress;
-  EFI_STATUS            Status;
+  EFI_STATUS            Status = EFI_SUCCESS;
   VOID                  *BufferMap = NULL;
   DMA_MAP_OPERATION DmaOperation = MapOperationBusMasterCommonBuffer;
 
@@ -423,9 +423,28 @@ STATIC EFI_STATUS prepare_cmd (
   // Start dma
   WRITE_REG32(base, DLVRY_Q_0_WR_PTR + queue * 0x14, ++w % QUEUE_SLOTS);
 
-  // Wait for slot free, dma completed
+  // Wait for dma complete
   while (slot->used) {
     if (READ_REG32(base, OQ_INT_SRC) & BIT(queue)) {
+      struct hisi_sas_complete_hdr *complete_hdr;
+      UINT32 data, rd;
+      rd = READ_REG32(base, COMPL_Q_0_RD_PTR + (0x14 * queue));
+
+      complete_hdr = &hba->complete_hdr[queue][rd];
+      data = complete_hdr->data;
+
+      // Check whether dma transfer error
+      if ((data & CMPLT_HDR_ERR_RCRD_XFRD_MSK) &&
+        !(data & CMPLT_HDR_RSPNS_XFRD_MSK)) {
+        DEBUG ((EFI_D_VERBOSE, "sas retry data=0x%x\n", data));
+        DEBUG ((EFI_D_VERBOSE, "sts[0]=0x%x\n", sts->status[0]));
+        DEBUG ((EFI_D_VERBOSE, "sts[1]=0x%x\n", sts->status[1]));
+        DEBUG ((EFI_D_VERBOSE, "sts[2]=0x%x\n", sts->status[2]));
+        Status = EFI_NOT_READY;
+        // wait 1 second and retry, some disk need long time to be ready
+        // and ScsiDisk treat retry over 3 times as error
+        MicroSecondDelay(1000000);
+      }
        // Update read point
        WRITE_REG32(base, COMPL_Q_0_RD_PTR + (0x14 * queue), w);
        // Clear int
@@ -449,7 +468,7 @@ STATIC EFI_STATUS prepare_cmd (
     // wait 1 second for disk spin up, refer drivers/scsi/sd.c
     MicroSecondDelay(1000000);
   }
-  return EFI_SUCCESS;
+  return Status;
 }
 
 STATIC VOID hisi_sas_v1_init(struct hisi_hba *hba, PLATFORM_SAS_PROTOCOL *plat)
