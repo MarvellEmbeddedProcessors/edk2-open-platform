@@ -61,7 +61,9 @@
 
   typedef struct {
     EFI_ACPI_5_1_GENERIC_TIMER_DESCRIPTION_TABLE          Gtdt;
+#if (JUNO_WATCHDOG_COUNT != 0)
     EFI_ACPI_5_1_GTDT_SBSA_GENERIC_WATCHDOG_STRUCTURE     Watchdogs[JUNO_WATCHDOG_COUNT];
+#endif
   } EFI_ACPI_5_1_GENERIC_TIMER_DESCRIPTION_TABLES;
 
   #pragma pack ()
@@ -87,12 +89,14 @@
       JUNO_WATCHDOG_COUNT,                          // UINT32  PlatformTimerCount
       sizeof (EFI_ACPI_5_1_GENERIC_TIMER_DESCRIPTION_TABLE) // UINT32 PlatfromTimerOffset
     },
+#if (JUNO_WATCHDOG_COUNT != 0)
     {
       EFI_ACPI_5_1_SBSA_GENERIC_WATCHDOG_STRUCTURE_INIT(
           FixedPcdGet32 (PcdGenericWatchdogRefreshBase), FixedPcdGet32 (PcdGenericWatchdogControlBase), 93, 0),
       EFI_ACPI_5_1_SBSA_GENERIC_WATCHDOG_STRUCTURE_INIT(
           FixedPcdGet32 (PcdGenericWatchdogRefreshBase), FixedPcdGet32 (PcdGenericWatchdogControlBase), 94, EFI_ACPI_5_1_GTDT_SBSA_GENERIC_WATCHDOG_FLAG_SECURE_TIMER)
     }
+#endif
   };
 #endif
 
