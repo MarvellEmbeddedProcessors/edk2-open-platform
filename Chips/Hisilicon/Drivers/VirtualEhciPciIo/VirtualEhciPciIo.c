@@ -193,7 +193,7 @@ EhciPciIoMemWrite (
     return EFI_INVALID_PARAMETER;
   }
 
-  Width     = (EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_WIDTH) (Width & 0x03);
+  Width     = Width & 0x03;
 
   //
   // Loop for each iteration and move the data
