@@ -124,6 +124,7 @@
   gEfiMdePkgTokenSpaceGuid.PcdUartDefaultReceiveFifoDepth|0
   gArmPlatformTokenSpaceGuid.PL011UartInteger|4
   gArmPlatformTokenSpaceGuid.PL011UartFractional|0
+  gArmPlatformTokenSpaceGuid.PL011UartInterrupt|115
 
   ## PL031 RealTimeClock
   gArmPlatformTokenSpaceGuid.PcdPL031RtcBase|0x1C170000

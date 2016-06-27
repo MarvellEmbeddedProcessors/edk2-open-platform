@@ -51,3 +51,11 @@
 
   gArmTokenSpaceGuid.PcdGenericWatchdogControlBase
   gArmTokenSpaceGuid.PcdGenericWatchdogRefreshBase
+
+  #
+  # PL011 UART Settings for Serial Port Console Redirection
+  #
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase
+  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultBaudRate
+  gArmPlatformTokenSpaceGuid.PL011UartClkInHz
+  gArmPlatformTokenSpaceGuid.PL011UartInterrupt
