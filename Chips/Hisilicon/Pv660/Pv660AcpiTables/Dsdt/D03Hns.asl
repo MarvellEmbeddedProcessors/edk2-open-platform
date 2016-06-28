@@ -126,16 +126,16 @@ Scope(_SB)
     OperationRegion(H4LR, SystemMemory, 0xC2208100, 0x1000)
     Field(H4LR, DWordAcc, NoLock, Preserve) {
           H4L0, 16,    // port0
-          H4R0, 16,    //RESERVED
+          , 16,    //RESERVED
           Offset (0x400),
           H4L1, 16,    // port1
-          H4R1, 16,    //RESERVED
+          , 16,    //RESERVED
           Offset (0x800),
           H4L2, 16,    // port2
-          H4R2, 16,    //RESERVED
+          , 16,    //RESERVED
           Offset (0xc00),
           H4L3, 16,    // port3
-          H4R3, 16,    //RESERVED
+          , 16,    //RESERVED
         }
     OperationRegion(H3LR, SystemMemory, 0xC2208900, 0x800)
     Field(H3LR, DWordAcc, NoLock, Preserve) {
@@ -266,42 +266,42 @@ Scope(_SB)
           Store (H4L0, Local1)
           And (Local1, 0xfffffbff, Local1)
           Or (Local0, Local1, Local0)
-          Store (Local1, H4L0)
+          Store (Local0, H4L0)
         }
         case (0x1){
           Store (0, HSEL)
           Store (H4L1, Local1)
           And (Local1, 0xfffffbff, Local1)
           Or (Local0, Local1, Local0)
-          Store (Local1, H4L1)
+          Store (Local0, H4L1)
         }
         case (0x2){
           Store (0, HSEL)
           Store (H4L2, Local1)
           And (Local1, 0xfffffbff, Local1)
           Or (Local0, Local1, Local0)
-          Store (Local1, H4L2)
+          Store (Local0, H4L2)
         }
         case (0x3){
           Store (0, HSEL)
           Store (H4L3, Local1)
           And (Local1, 0xfffffbff, Local1)
           Or (Local0, Local1, Local0)
-          Store (Local1, H4L3)
+          Store (Local0, H4L3)
         }
         case (0x4){
           Store (3, HSEL)
           Store (H3L2, Local1)
           And (Local1, 0xfffffbff, Local1)
           Or (Local0, Local1, Local0)
-          Store (Local1, H3L2)
+          Store (Local0, H3L2)
         }
         case (0x5){
           Store (3, HSEL)
           Store (H3L3, Local1)
           And (Local1, 0xfffffbff, Local1)
           Or (Local0, Local1, Local0)
-          Store (Local1, H3L3)
+          Store (Local0, H3L3)
         }
       }
     }

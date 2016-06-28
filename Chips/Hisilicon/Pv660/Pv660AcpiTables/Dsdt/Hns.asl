@@ -250,37 +250,37 @@ Scope(_SB)
           Store (H4L0, Local1)
           And (Local1, 0xfffffbff, Local1)
           Or (Local0, Local1, Local0)
-          Store (Local1, H4L0)
+          Store (Local0, H4L0)
         }
         case (0x1){
           Store (H4L1, Local1)
           And (Local1, 0xfffffbff, Local1)
           Or (Local0, Local1, Local0)
-          Store (Local1, H4L1)
+          Store (Local0, H4L1)
         }
         case (0x2){
           Store (H4L2, Local1)
           And (Local1, 0xfffffbff, Local1)
           Or (Local0, Local1, Local0)
-          Store (Local1, H4L2)
+          Store (Local0, H4L2)
         }
         case (0x3){
           Store (H4L3, Local1)
           And (Local1, 0xfffffbff, Local1)
           Or (Local0, Local1, Local0)
-          Store (Local1, H4L3)
+          Store (Local0, H4L3)
         }
         case (0x4){
           Store (H3L2, Local1)
           And (Local1, 0xfffffbff, Local1)
           Or (Local0, Local1, Local0)
-          Store (Local1, H3L2)
+          Store (Local0, H3L2)
         }
         case (0x5){
           Store (H3L3, Local1)
           And (Local1, 0xfffffbff, Local1)
           Or (Local0, Local1, Local0)
-          Store (Local1, H3L3)
+          Store (Local0, H3L3)
         }
       }
     }
