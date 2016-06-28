@@ -466,6 +466,7 @@ Scope(_SB)
                         ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
             Package () {
                 Package () {"reg", 0},
+                Package () {"media-type", "fiber"},
                         }
                 })
     }
@@ -476,6 +477,7 @@ Scope(_SB)
                         ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
             Package () {
                 Package () {"reg", 1},
+                Package () {"media-type", "fiber"},
                         }
                 })
     }
@@ -489,6 +491,7 @@ Scope(_SB)
                                 Package () {"phy-mode", "sgmii"},
                 Package () {"phy-addr", 0},
                 Package () {"mdio-node", Package (){\_SB.MDIO}},
+                Package () {"media-type", "copper"},
                         }
                 })
     }
@@ -502,6 +505,7 @@ Scope(_SB)
                                 Package () {"phy-mode", "sgmii"},
                 Package () {"phy-addr", 1},
                 Package () {"mdio-node", Package (){\_SB.MDIO}},
+                Package () {"media-type", "copper"},
                         }
                 })
     }
