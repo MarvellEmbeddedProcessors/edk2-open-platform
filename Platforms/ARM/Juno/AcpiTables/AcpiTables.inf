@@ -59,3 +59,5 @@
   gEfiMdePkgTokenSpaceGuid.PcdUartDefaultBaudRate
   gArmPlatformTokenSpaceGuid.PL011UartClkInHz
   gArmPlatformTokenSpaceGuid.PL011UartInterrupt
+
+  gArmPlatformTokenSpaceGuid.PcdSerialDbgRegisterBase

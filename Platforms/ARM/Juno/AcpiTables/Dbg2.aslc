@@ -77,7 +77,7 @@ STATIC DBG2_TABLE Dbg2 = {
      */
     DBG2_DEBUG_PORT_DDI (DBG2_NUMBER_OF_GENERIC_ADDRESS_REGISTERS,
                           EFI_ACPI_DBG2_PORT_SUBTYPE_SERIAL_ARM_PL011_UART,
-                          0x7FF80000,
+                          FixedPcdGet64 (PcdSerialDbgRegisterBase),
                           PL011_UART_LENGTH,
                           NAME_STR_UART1),
   }

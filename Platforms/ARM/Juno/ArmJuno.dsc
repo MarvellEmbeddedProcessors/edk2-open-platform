@@ -121,10 +121,14 @@
 
   ## PL011 - Serial Terminal
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase|0x7FF80000
-  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultBaudRate|115200
   gEfiMdePkgTokenSpaceGuid.PcdUartDefaultReceiveFifoDepth|0
   gArmPlatformTokenSpaceGuid.PL011UartClkInHz|7372800
   gArmPlatformTokenSpaceGuid.PL011UartInterrupt|115
+
+  ## PL011 - Serial Debug UART
+  gArmPlatformTokenSpaceGuid.PcdSerialDbgRegisterBase|0x7FF80000
+  gArmPlatformTokenSpaceGuid.PcdSerialDbgUartClkInHz|7372800
+  gArmPlatformTokenSpaceGuid.PcdSerialDbgUartBaudRate|115200
 
   ## PL031 RealTimeClock
   gArmPlatformTokenSpaceGuid.PcdPL031RtcBase|0x1C170000
