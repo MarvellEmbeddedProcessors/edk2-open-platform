@@ -277,7 +277,7 @@
   #
   MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
   MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
-  OpenPlatformPkg/Platforms/ARM/VExpress/AcpiTables/rtsm_ve-aemv8a/AcpiTables.inf
+  OpenPlatformPkg/Platforms/ARM/VExpress/AcpiTables/AcpiTables.inf
 
   ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
   ArmPlatformPkg/Drivers/NorFlashDxe/NorFlashDxe.inf
