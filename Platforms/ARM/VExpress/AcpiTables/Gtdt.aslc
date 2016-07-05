@@ -1,0 +1,92 @@
+/** @file
+*  Generic Timer Description Table (GTDT)
+*
+*  Copyright (c) 2012 - 2014, ARM Limited. All rights reserved.
+*  Copyright (c) 2016, Linaro Ltd. All rights reserved
+*
+*  This program and the accompanying materials
+*  are licensed and made available under the terms and conditions of the BSD License
+*  which accompanies this distribution.  The full text of the license may be found at
+*  http://opensource.org/licenses/bsd-license.php
+*
+*  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+*
+**/
+
+#include "FvpPlatform.h"
+#include <Library/AcpiLib.h>
+#include <Library/PcdLib.h>
+#include <IndustryStandard/Acpi61.h>
+
+#define SECURE_TIMER_EL1_GSIV       0x1D
+#define NON_SECURE_TIMER_EL1_GSIV   0x1E
+#define VIRTUAL_TIMER_GSIV          0x1B
+#define NON_SECURE_EL2_GSIV         0x1A
+
+#define GT_BLOCK_CTL_BASE           0x000000002A810000
+#define GT_BLOCK_FRAME1_CTL_BASE    0x000000002A820000
+#define GT_BLOCK_FRAME1_GSIV        0x29
+
+#pragma pack (1)
+
+typedef struct {
+  EFI_ACPI_6_1_GENERIC_TIMER_DESCRIPTION_TABLE          Gtdt;
+  EFI_ACPI_6_1_GTDT_GT_BLOCK_STRUCTURE                  GtBlock;
+  EFI_ACPI_6_1_GTDT_GT_BLOCK_TIMER_STRUCTURE            Frames[1];
+} FVP_GENERIC_TIMER_DESCRIPTION_TABLES;
+
+#pragma pack ()
+
+FVP_GENERIC_TIMER_DESCRIPTION_TABLES Gtdt = {
+  {
+    ARM_ACPI_HEADER(
+      EFI_ACPI_6_1_GENERIC_TIMER_DESCRIPTION_TABLE_SIGNATURE,
+      FVP_GENERIC_TIMER_DESCRIPTION_TABLES,
+      EFI_ACPI_6_1_GENERIC_TIMER_DESCRIPTION_TABLE_REVISION
+    ),
+    0xFFFFFFFFFFFFFFFF,                                   // UINT64  PhysicalAddress
+    EFI_ACPI_RESERVED_DWORD,                              // UINT32  Reserved
+    SECURE_TIMER_EL1_GSIV,                                // UINT32  SecurePL1TimerGSIV
+    EFI_ACPI_6_1_GTDT_TIMER_FLAG_TIMER_INTERRUPT_MODE,    // UINT32  SecurePL1TimerFlags
+    NON_SECURE_TIMER_EL1_GSIV,                            // UINT32  NonSecurePL1TimerGSIV
+    EFI_ACPI_6_1_GTDT_TIMER_FLAG_TIMER_INTERRUPT_MODE,    // UINT32  NonSecurePL1TimerFlags
+    VIRTUAL_TIMER_GSIV,                                   // UINT32  VirtualTimerGSIV
+    EFI_ACPI_6_1_GTDT_TIMER_FLAG_TIMER_INTERRUPT_MODE,    // UINT32  VirtualTimerFlags
+    NON_SECURE_EL2_GSIV,                                  // UINT32  NonSecurePL2TimerGSIV
+    EFI_ACPI_6_1_GTDT_TIMER_FLAG_TIMER_INTERRUPT_MODE,    // UINT32  NonSecurePL2TimerFlags
+    0xFFFFFFFFFFFFFFFF,                                   // UINT64  CntReadBasePhysicalAddress
+    1,                                                    // UINT32  PlatformTimerCount
+    sizeof (EFI_ACPI_6_1_GENERIC_TIMER_DESCRIPTION_TABLE) // UINT32  PlatfromTimerOffset
+  },
+  {
+    EFI_ACPI_6_1_GTDT_GT_BLOCK,                           // UINT8 Type
+    sizeof(EFI_ACPI_6_1_GTDT_GT_BLOCK_STRUCTURE)          // UINT16 Length
+      + sizeof(EFI_ACPI_6_1_GTDT_GT_BLOCK_TIMER_STRUCTURE),
+    EFI_ACPI_RESERVED_BYTE,                               // UINT8 Reserved
+    GT_BLOCK_CTL_BASE,                                   // UINT64 CntCtlBase
+    1,                                                    // UINT32 GTBlockTimerCount
+    sizeof(EFI_ACPI_6_1_GTDT_GT_BLOCK_STRUCTURE)          // UINT32 GTBlockTimerOffset
+  },
+  {
+    {
+      0,                                                    // UINT8 GTFrameNumber
+      {EFI_ACPI_RESERVED_BYTE,
+       EFI_ACPI_RESERVED_BYTE,
+       EFI_ACPI_RESERVED_BYTE},                             // UINT8 Reserved[3]
+      GT_BLOCK_FRAME1_CTL_BASE,                             // UINT64 CntBaseX
+      0xFFFFFFFFFFFFFFFF,                                   // UINT64 CntEL0BaseX
+      GT_BLOCK_FRAME1_GSIV,                                 // UINT32 GTxPhysicalTimerGSIV
+      0,                                                    // UINT32 GTxPhysicalTimerFlags
+      0,                                                    // UINT32 GTxVirtualTimerGSIV
+      0,                                                    // UINT32 GTxVirtualTimerFlags
+      0                                                     // UINT32 GTxCommonFlags
+    }
+  }
+};
+
+//
+// Reference the table being generated to prevent the optimizer from removing the
+// data structure from the executable
+//
+VOID* CONST ReferenceAcpiTable = &Gtdt;
