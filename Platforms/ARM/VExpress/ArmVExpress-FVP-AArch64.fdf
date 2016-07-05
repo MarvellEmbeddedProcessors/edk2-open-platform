@@ -356,5 +356,6 @@ READ_LOCK_STATUS   = TRUE
 
 [Rule.Common.USER_DEFINED.ACPITABLE]
   FILE FREEFORM = $(NAMED_GUID) {
+    RAW ACPI               |.acpi
     RAW ASL                |.aml
   }
