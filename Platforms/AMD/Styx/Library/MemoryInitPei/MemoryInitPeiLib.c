@@ -20,6 +20,7 @@
 
 #include <PiPei.h>
 
+#include <Library/ArmMmuLib.h>
 #include <Library/ArmPlatformLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>

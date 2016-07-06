@@ -15,6 +15,7 @@
 #include <PiPei.h>
 
 #include <Library/ArmLib.h>
+#include <Library/ArmMmuLib.h>
 #include <Library/PrePiLib.h>
 #include <Library/PcdLib.h>
 

@@ -43,6 +43,7 @@
   BaseLib
   DebugLib
   ArmLib
+  ArmMmuLib
   IoLib
   ExtractGuidedSectionLib
   LzmaDecompressLib

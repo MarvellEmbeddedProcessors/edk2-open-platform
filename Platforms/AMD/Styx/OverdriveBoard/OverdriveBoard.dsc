@@ -104,6 +104,7 @@ DEFINE DO_KCS       = 1
 
   ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64Lib.inf
   ArmCpuLib|ArmPkg/Drivers/ArmCpuLib/ArmCortexA5xLib/ArmCortexA5xLib.inf
+  ArmMmuLib|ArmPkg/Library/ArmMmuLib/ArmMmuBaseLib.inf
   ArmPlatformLib|OpenPlatformPkg/Platforms/AMD/Styx/Library/AmdStyxLib/AmdStyxLib.inf
   TimerLib|ArmPkg/Library/ArmArchTimerLib/ArmArchTimerLib.inf
   UefiScsiLib|MdePkg/Library/UefiScsiLib/UefiScsiLib.inf
