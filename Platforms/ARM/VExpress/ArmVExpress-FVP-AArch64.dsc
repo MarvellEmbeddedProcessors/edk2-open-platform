@@ -82,10 +82,6 @@
   #  It could be set FALSE to save size.
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutGopSupport|TRUE
 
-!ifdef ARM_FVP_GICV3_WITH_V2_LEGACY
-  gArmTokenSpaceGuid.PcdArmGicV3WithV2Legacy|TRUE
-!endif
-
 [PcdsFixedAtBuild.common]
   gArmPlatformTokenSpaceGuid.PcdFirmwareVendor|"ARM Fixed Virtual Platform"
   gEmbeddedTokenSpaceGuid.PcdEmbeddedPrompt|"ARM-FVP"
@@ -154,14 +150,9 @@
   #
   # ARM General Interrupt Controller
   #
-!ifdef ARM_FVP_LEGACY_GICV2_LOCATION
-  gArmTokenSpaceGuid.PcdGicDistributorBase|0x2C001000
-  gArmTokenSpaceGuid.PcdGicInterruptInterfaceBase|0x2C002000
-!else
   gArmTokenSpaceGuid.PcdGicDistributorBase|0x2f000000
   gArmTokenSpaceGuid.PcdGicRedistributorsBase|0x2f100000
   gArmTokenSpaceGuid.PcdGicInterruptInterfaceBase|0x2C000000
-!endif
 
   #
   # ARM OS Loader
