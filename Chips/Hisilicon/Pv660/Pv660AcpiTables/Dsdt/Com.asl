@@ -18,13 +18,12 @@
 
 Scope(_SB)
 {
-  // UART 8250
   Device(COM0) {
-    Name(_HID, "APMC0D08") //Or AMD0020, trick to use dw8250 serial driver
+    Name(_HID, "HISI0031") //it is not 16550 compatible
     Name(_CID, "8250dw")
     Name(_UID, Zero)
     Name(_CRS, ResourceTemplate() {
-      Memory32Fixed(ReadWrite, 0x80300000, 0x1000) //0x7FF80000, 0x1000
+      Memory32Fixed(ReadWrite, 0x80300000, 0x1000)
       Interrupt(ResourceConsumer, Level, ActiveHigh, Exclusive) { 349 }
     })
     Name (_DSD, Package () {
