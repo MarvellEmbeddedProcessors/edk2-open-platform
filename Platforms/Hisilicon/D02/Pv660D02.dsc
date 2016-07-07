@@ -155,7 +155,7 @@
   gHisiTokenSpaceGuid.PcdPcieSmmuBaseAddress|0xb0040000
   gHisiTokenSpaceGuid.PcdDsaSmmuBaseAddress|0xc0040000
   gHisiTokenSpaceGuid.PcdAlgSmmuBaseAddress|0xd0040000
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"Estuary v2.2 D02 UEFI"
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"Hisilicon D02 UEFI 16.08 RC1"
 
   gHisiTokenSpaceGuid.PcdSystemProductName|L"D02"
   gHisiTokenSpaceGuid.PcdSystemVersion|L"Estuary"

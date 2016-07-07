@@ -182,7 +182,7 @@
   gHisiTokenSpaceGuid.PcdAlgSmmuBaseAddress|0xd0040000
 
 
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"Estuary v2.2 D03 UEFI"
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"Hisilicon D03 UEFI 16.08 RC1"
 
   gHisiTokenSpaceGuid.PcdBiosVersionString|L"10.01.01T18"
 
