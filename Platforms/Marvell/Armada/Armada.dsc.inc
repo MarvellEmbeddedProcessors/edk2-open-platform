@@ -197,6 +197,10 @@
   # Add support for GCC stack protector
   NULL|MdePkg/Library/BaseStackCheckLib/BaseStackCheckLib.inf
 
+  # Enable compilation with aarch64-linux-gnueabi toolchain
+[BuildOptions]
+  *_*_*_PLATFORM_FLAGS = -fno-unwind-tables
+
 ################################################################################
 #
 # Pcd Section - list of all EDK II PCD Entries defined by this Platform
