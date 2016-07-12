@@ -70,6 +70,7 @@ FV = STYX_EFI
 ################################################################################
 
 [FV.FvMain]
+FvNameGuid         = 94f067ae-2aa6-4b30-aa07-4e47fe518bb8
 BlockSize          = 0x40
 NumBlocks          = 0         # This FV gets compressed so make it just big enough
 FvAlignment        = 16        # FV alignment and FV attributes setting.
