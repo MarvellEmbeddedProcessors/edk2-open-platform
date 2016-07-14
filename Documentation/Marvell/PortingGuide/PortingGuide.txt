@@ -1,0 +1,59 @@
+Porting Guide
+-------------
+
+This document provides instructions for adding support for new Marvell Armada
+board. For the sake of simplicity new Marvell board will be called "new_board".
+
+1 Create configuration files for new target
+
+1.1 Create FDF file for new board
+
+ - Copy and rename PathToYourOpp/Platforms/Marvell/Armada/Armada70x0.fdf to
+   PathToYourOpp/Platforms/Marvell/Armada/new_board.fdf
+ - Change the first no-comment line:
+   [FD.Armada70x0_EFI] to [FD.{new_board}_EFI]
+
+1.2 Create DSC file for new board
+
+ - Add new_board.dsc file to PathToYourOpp/Platforms/Marvell/Armada directory
+ - Insert following [Defines] section to new_board.dsc:
+
+[Defines]
+  PLATFORM_NAME                  = {new_board}
+  PLATFORM_GUID                  = {newly_generated_GUID}
+  PLATFORM_VERSION               = 0.1
+  DSC_SPECIFICATION              = 0x00010005
+  OUTPUT_DIRECTORY               = {output_directory}
+  SUPPORTED_ARCHITECTURES        = AARCH64
+  BUILD_TARGETS                  = DEBUG|RELEASE
+  SKUID_IDENTIFIER               = DEFAULT
+  FLASH_DEFINITION               = {path_to_fdf_file}
+
+ - Add "!include Armada.dsc.inc" entry to new_board.dsc
+
+2. Driver support
+ According to content of files from PathToYourOpp/Documentation/Marvell/PortingGuide
+ insert PCD entries into new_board.dsc for every needed interface. Below is
+ list of supported drivers and corresponding docs:
+  - COMPHY - ComPhy.txt
+  - I2C -I2c.txt
+  - MDIO - Mdio.txt
+  - MPPs - Mpp.txt
+  - PCI EMULATION - PciEmulation.txt
+  - PHY - Phy.txt
+  - PP2 - Pp2.txt
+  - RESET - Reset.txt
+  - SATA - Sata.txt
+  - SPI - Spi.txt
+  - SPI FLASH - SpiFlash.txt
+  - UTMI PHY - Utmi.txt
+
+3. Compilation
+  Refer to PathToYourOpp/Documentation/Marvell/Build.txt. Remember to change
+  {platform} to new_board in order to point build system to newly created DSC
+  file.
+
+4. Output file
+
+ - Output files (and among others FD file, which may be used by ATF) are
+   generated under directory pointed by "OUTPUT_DIRECTORY" entry (see point 1.2).
