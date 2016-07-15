@@ -277,6 +277,11 @@
   EmbeddedPkg/Drivers/SataSiI3132Dxe/SataSiI3132Dxe.inf
 
   #
+  # NVMe boot devices
+  #
+  MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf
+
+  #
   # Networking stack
   #
   EmbeddedPkg/Drivers/Lan9118Dxe/Lan9118Dxe.inf

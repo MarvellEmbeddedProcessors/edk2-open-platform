@@ -169,6 +169,11 @@ FvNameGuid         = B73FE497-B92E-416e-8326-45AD0D270092
   INF EmbeddedPkg/Drivers/SataSiI3132Dxe/SataSiI3132Dxe.inf
 
   #
+  # NVMe boot devices
+  #
+  INF  MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf
+
+  #
   # Networking stack
   #
   INF MdeModulePkg/Universal/Network/DpcDxe/DpcDxe.inf
