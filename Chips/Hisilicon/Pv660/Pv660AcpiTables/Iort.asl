@@ -10,11 +10,11 @@
 [0004]                       Table Length : 0000010C
 [0001]                           Revision : 00
 [0001]                           Checksum : BC
-[0006]                             Oem ID : "INTEL "
-[0008]                       Oem Table ID : "TEMPLATE"
+[0006]                             Oem ID : "HISI  "
+[0008]                       Oem Table ID : "HISI0660"
 [0004]                       Oem Revision : 00000000
 [0004]                    Asl Compiler ID : "INTL"
-[0004]              Asl Compiler Revision : 20150410
+[0004]              Asl Compiler Revision : 20151124
 
 [0004]                         Node Count : 0000000A
 [0004]                        Node Offset : 00000034

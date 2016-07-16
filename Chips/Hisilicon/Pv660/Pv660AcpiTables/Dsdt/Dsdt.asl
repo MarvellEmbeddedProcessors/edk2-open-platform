@@ -18,7 +18,7 @@
 
 #include "Pv660Platform.h"
 
-DefinitionBlock("DsdtTable.aml", "DSDT", 1, "HISI", "HISI-D02", EFI_ACPI_ARM_OEM_REVISION) {
+DefinitionBlock("DsdtTable.aml", "DSDT", 1, "HISI", "HISI0660", EFI_ACPI_ARM_OEM_REVISION) {
   include ("Mbig.asl")
   include ("CPU.asl")
   include ("Com.asl")

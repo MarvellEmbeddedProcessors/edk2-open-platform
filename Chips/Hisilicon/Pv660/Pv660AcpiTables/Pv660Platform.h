@@ -24,10 +24,10 @@
 // ACPI table information used to initialize tables.
 //
 #define EFI_ACPI_ARM_OEM_ID           'H','I','S','I'   // OEMID 6 bytes long
-#define EFI_ACPI_ARM_OEM_TABLE_ID     SIGNATURE_64('H','I','S','I','-','D','0','2') // OEM table id 8 bytes long
-#define EFI_ACPI_ARM_OEM_REVISION     0x20140727
-#define EFI_ACPI_ARM_CREATOR_ID       SIGNATURE_32('H','I','S','I')
-#define EFI_ACPI_ARM_CREATOR_REVISION 0x00000099
+#define EFI_ACPI_ARM_OEM_TABLE_ID     SIGNATURE_64('H','I','S','I','0','6','6','0') // OEM table id 8 bytes long
+#define EFI_ACPI_ARM_OEM_REVISION     0x00000000
+#define EFI_ACPI_ARM_CREATOR_ID       SIGNATURE_32('I','N','T','L')
+#define EFI_ACPI_ARM_CREATOR_REVISION 0x20151124
 
 // A macro to initialise the common header part of EFI ACPI tables as defined by
 // EFI_ACPI_DESCRIPTION_HEADER structure.
