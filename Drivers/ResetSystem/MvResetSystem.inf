@@ -32,25 +32,34 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = MarvellResetSystemLib
-  FILE_GUID                      = 13370566-097f-4ff6-ad24-c818f1b47a88
-  MODULE_TYPE                    = BASE
+  BASE_NAME                      = Reset
+  FILE_GUID                      = 9d1373c0-6fac-432c-88e7-818744dc45d9
+  MODULE_TYPE                    = DXE_RUNTIME_DRIVER
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = EfiResetSystemLib
-
+  ENTRY_POINT                    = InitializeReset
 
 [Sources.common]
-  MarvellResetSystemLib.c
+  MvResetSystem.c
 
 [Packages]
   MdePkg/MdePkg.dec
-  EmbeddedPkg/EmbeddedPkg.dec
   OpenPlatformPkg/Platforms/Marvell/Marvell.dec
 
 [LibraryClasses]
-  IoLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
   DebugLib
+  IoLib
+  UefiLib
+  DxeServicesTableLib
+  UefiRuntimeLib
 
 [Pcd]
   gMarvellTokenSpaceGuid.PcdResetRegAddress
   gMarvellTokenSpaceGuid.PcdResetRegMask
+
+[Protocols]
+  gEfiResetArchProtocolGuid                     # PROTOCOL ALWAYS_PRODUCED
+
+[Depex]
+  TRUE
