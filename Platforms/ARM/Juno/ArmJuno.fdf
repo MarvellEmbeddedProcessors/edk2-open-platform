@@ -202,6 +202,12 @@ FvNameGuid         = B73FE497-B92E-416e-8326-45AD0D270092
   INF SecurityPkg/RandomNumberGenerator/RngDxe/RngDxe.inf
 
   #
+  # SMBIOS/DMI
+  #
+  INF MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
+  INF OpenPlatformPkg/Platforms/ARM/Juno/SmbiosPlatformDxe/SmbiosPlatformDxe.inf
+
+  #
   # Bds
   #
   INF MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
