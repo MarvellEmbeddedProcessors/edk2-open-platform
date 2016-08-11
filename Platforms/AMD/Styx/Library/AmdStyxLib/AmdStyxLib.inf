@@ -63,14 +63,15 @@
   gArmTokenSpaceGuid.PcdFvBaseAddress
   gArmTokenSpaceGuid.PcdFdBaseAddress
 
+  gAmdStyxTokenSpaceGuid.PcdTrustedFWMemoryBase
+  gAmdStyxTokenSpaceGuid.PcdTrustedFWMemorySize
+
+[FixedPcd]
   gArmTokenSpaceGuid.PcdArmPrimaryCoreMask
   gArmTokenSpaceGuid.PcdArmPrimaryCore
 
   gArmPlatformTokenSpaceGuid.PcdCoreCount
   gArmPlatformTokenSpaceGuid.PcdCPUCoresStackBase
-
-  gAmdStyxTokenSpaceGuid.PcdTrustedFWMemoryBase
-  gAmdStyxTokenSpaceGuid.PcdTrustedFWMemorySize
 
 [Depex]
   gAmdStyxPlatInitPpiGuid
