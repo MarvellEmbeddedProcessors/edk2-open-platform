@@ -11,11 +11,6 @@
 //
 //
 
-#include <AsmMacroIoLib.h>
-#include <Base.h>
-
-#include <AutoGen.h>
-
   INCLUDE AsmMacroIoLib.inc
 
   EXPORT    ArmPlatformPeiBootAction
