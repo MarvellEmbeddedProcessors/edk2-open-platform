@@ -161,7 +161,6 @@ DEFINE DO_KCS       = 1
 
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64LibSec.inf
-  ArmPlatformSecLib|OpenPlatformPkg/Platforms/AMD/Styx/Library/AmdStyxSecLib/AmdStyxSecLib.inf
   ArmPlatformLib|OpenPlatformPkg/Platforms/AMD/Styx/Library/AmdStyxLib/AmdStyxLibSec.inf
 
   ArmPlatformSecExtraActionLib|ArmPlatformPkg/Library/DebugSecExtraActionLib/DebugSecExtraActionLib.inf
