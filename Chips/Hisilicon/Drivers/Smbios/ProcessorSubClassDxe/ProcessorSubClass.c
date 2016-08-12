@@ -490,6 +490,7 @@ AddSmbiosProcessorTypeTable (
     CHAR16                      *CpuVersion;
     STRING_REF                  TokenToUpdate;
 
+    UINT64                      *ProcessorId;
     Type4Record         = NULL;
     ProcessorManuStr    = NULL;
     ProcessorVersionStr = NULL;
@@ -614,6 +615,8 @@ AddSmbiosProcessorTypeTable (
     Type4Record->ProcessorCharacteristics   = ProcessorCharacteristics.Data;
 
     Type4Record->ExternalClock              = (UINT16)(ArmReadCntFrq() / 1000 / 1000);
+    ProcessorId = (UINT64 *)&(Type4Record->ProcessorId);
+    *ProcessorId = ArmReadMidr();
 
     OptionalStrStart = (CHAR8 *) (Type4Record + 1);
     UnicodeStrToAsciiStr (ProcessorSocketStr, OptionalStrStart);
