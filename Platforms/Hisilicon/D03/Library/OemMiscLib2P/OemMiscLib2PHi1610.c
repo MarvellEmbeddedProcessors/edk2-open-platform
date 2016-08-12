@@ -134,3 +134,8 @@ VOID OemBiosSwitch(UINT32 Master)
     (VOID)Master;
     return;
 }
+
+BOOLEAN OemIsNeedDisableExpanderBuffer(VOID)
+{
+    return TRUE;
+}

@@ -44,6 +44,7 @@ BOOLEAN OemIsMpBoot();
 UINT32 OemIsWarmBoot();
 
 VOID OemBiosSwitch(UINT32 Master);
+BOOLEAN OemIsNeedDisableExpanderBuffer(VOID);
 
 extern EFI_STRING_ID gDimmToDevLocator[MAX_SOCKET][MAX_CHANNEL][MAX_DIMM];
 EFI_HII_HANDLE EFIAPI OemGetPackages ();
