@@ -926,7 +926,6 @@ PciePortInit (
      (VOID)PciePcsInit(soctype, HostBridgeNum, PortIndex);
 
      (VOID)PcieModeSet(soctype, HostBridgeNum, PortIndex,PcieCfg->PortInfo.PortType);
-     (VOID)PcieLaneReversalSet(soctype, HostBridgeNum, PortIndex);
      (VOID)PcieSpdSet(soctype, HostBridgeNum, PortIndex, 3);
      (VOID)PciePortNumSet(soctype, HostBridgeNum, PortIndex, 0);
      /* setup root complex */
