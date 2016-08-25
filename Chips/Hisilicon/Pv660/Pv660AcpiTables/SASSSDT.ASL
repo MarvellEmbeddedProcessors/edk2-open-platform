@@ -20,7 +20,7 @@ DefinitionBlock (
     "SASSSDT.aml", // Output Filename
     "SSDT",         // Signature
     0x01,           // SSDT Compliance Revision
-    "HISI",       // OEM ID
+    "HISI  ",       // OEM ID
     "SAS0",     // Table ID
     EFI_ACPI_ARM_OEM_REVISION          // OEM Revision
     )
