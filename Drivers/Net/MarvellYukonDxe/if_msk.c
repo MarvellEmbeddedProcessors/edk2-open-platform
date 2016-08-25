@@ -1467,7 +1467,7 @@ msk_status_dma_alloc (
   UINTN       Length;
 
   Status = mPciIo->AllocateBuffer (mPciIo, AllocateAnyPages, EfiBootServicesData,
-                                   BYTES_TO_PAGES (MSK_STAT_RING_SZ), (VOID**)&mSoftc->msk_stat_ring, 0);
+                                   EFI_SIZE_TO_PAGES (MSK_STAT_RING_SZ), (VOID**)&mSoftc->msk_stat_ring, 0);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((EFI_D_ERROR, "Marvell Yukon: failed to allocate DMA'able memory for status ring\n"));
@@ -1496,7 +1496,7 @@ msk_status_dma_free (
   if (mSoftc->msk_stat_map) {
     mPciIo->Unmap (mPciIo, mSoftc->msk_stat_map);
     if (mSoftc->msk_stat_ring) {
-      mPciIo->FreeBuffer (mPciIo, BYTES_TO_PAGES (MSK_STAT_RING_SZ), mSoftc->msk_stat_ring);
+      mPciIo->FreeBuffer (mPciIo, EFI_SIZE_TO_PAGES (MSK_STAT_RING_SZ), mSoftc->msk_stat_ring);
       mSoftc->msk_stat_ring = NULL;
     }
     mSoftc->msk_stat_map = NULL;
@@ -1516,7 +1516,7 @@ msk_txrx_dma_alloc (
   EFI_STATUS          Status;
 
   Status = mPciIo->AllocateBuffer (mPciIo, AllocateAnyPages, EfiBootServicesData,
-                                   BYTES_TO_PAGES (MSK_TX_RING_SZ), (VOID**)&sc_if->msk_rdata.msk_tx_ring, 0);
+                                   EFI_SIZE_TO_PAGES (MSK_TX_RING_SZ), (VOID**)&sc_if->msk_rdata.msk_tx_ring, 0);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((EFI_D_ERROR, "Marvell Yukon: failed to allocate DMA'able memory for Tx ring\n"));
@@ -1535,7 +1535,7 @@ msk_txrx_dma_alloc (
   ASSERT (Length == MSK_TX_RING_SZ);
 
   Status = mPciIo->AllocateBuffer (mPciIo, AllocateAnyPages, EfiBootServicesData,
-                                   BYTES_TO_PAGES (MSK_RX_RING_SZ), (VOID**)&sc_if->msk_rdata.msk_rx_ring, 0);
+                                   EFI_SIZE_TO_PAGES (MSK_RX_RING_SZ), (VOID**)&sc_if->msk_rdata.msk_rx_ring, 0);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((EFI_D_ERROR, "Marvell Yukon: failed to allocate DMA'able memory for Rx ring\n"));
@@ -1582,7 +1582,7 @@ msk_txrx_dma_free (
   if (sc_if->msk_cdata.msk_tx_ring_map) {
     mPciIo->Unmap (mPciIo, sc_if->msk_cdata.msk_tx_ring_map);
     if (sc_if->msk_rdata.msk_tx_ring) {
-      mPciIo->FreeBuffer (mPciIo, BYTES_TO_PAGES (MSK_TX_RING_SZ), sc_if->msk_rdata.msk_tx_ring);
+      mPciIo->FreeBuffer (mPciIo, EFI_SIZE_TO_PAGES (MSK_TX_RING_SZ), sc_if->msk_rdata.msk_tx_ring);
       sc_if->msk_rdata.msk_tx_ring = NULL;
     }
     sc_if->msk_cdata.msk_tx_ring_map = NULL;
@@ -1592,7 +1592,7 @@ msk_txrx_dma_free (
   if (sc_if->msk_cdata.msk_rx_ring_map) {
     mPciIo->Unmap (mPciIo, sc_if->msk_cdata.msk_rx_ring_map);
     if (sc_if->msk_rdata.msk_rx_ring) {
-      mPciIo->FreeBuffer (mPciIo, BYTES_TO_PAGES (MSK_RX_RING_SZ), sc_if->msk_rdata.msk_rx_ring);
+      mPciIo->FreeBuffer (mPciIo, EFI_SIZE_TO_PAGES (MSK_RX_RING_SZ), sc_if->msk_rdata.msk_rx_ring);
       sc_if->msk_rdata.msk_rx_ring = NULL;
     }
     sc_if->msk_cdata.msk_rx_ring_map = NULL;

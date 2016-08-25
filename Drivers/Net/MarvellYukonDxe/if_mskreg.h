@@ -2275,8 +2275,6 @@ struct msk_stat_desc {
 #define MSK_MIN_FRAMELEN  (ETHER_MIN_LEN - ETHER_CRC_LEN)
 */
 
-#define PAGE_SIZE                           0x1000
-#define BYTES_TO_PAGES(BYTES)               ((((BYTES) - 1) / PAGE_SIZE) + 1)
 #define htole32(x)                          (x) // All UEFI platforms are little endian
 #define le32toh(x)                          (x)
 #define ACPI_SPECFLAG_PREFETCHABLE          0x06
