@@ -150,12 +150,12 @@ Scope(_SB)
                 Name (_CRS, ResourceTemplate (){
                         Memory32Fixed (ReadWrite, 0xc5000000 , 0x890000)
                         Memory32Fixed (ReadWrite, 0xc7000000 , 0x60000)
-      Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive,,,)
+      Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive, 0, "\\_SB.MBI3")
         {
           576, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588,
           589, 590, 591, 592, 593, 594, 595, 596, 597, 598, 599, 600,
         }
-      Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive,,,)
+      Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive, 0, "\\_SB.MBI3")
         {
           960, 961, 962, 963, 964, 965, 966, 967, 968, 969, 970, 971, 972, 973, 974, 975,
           976, 977, 978, 979, 980, 981, 982, 983, 984, 985, 986, 987, 988, 989, 990, 991,
@@ -170,7 +170,7 @@ Scope(_SB)
           1120, 1121, 1122, 1123, 1124, 1125, 1126, 1127, 1128, 1129, 1130, 1131, 1132, 1133, 1134, 1135,
           1136, 1137, 1138, 1139, 1140, 1141, 1142, 1143, 1144, 1145, 1146, 1147, 1148, 1149, 1150, 1151,
         }
-      Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive,,,)
+      Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive, 0, "\\_SB.MBI3")
         {
           1152, 1153, 1154, 1155, 1156, 1157, 1158, 1159, 1160, 1161, 1162, 1163, 1164, 1165, 1166, 1167,
           1168, 1169, 1170, 1171, 1172, 1173, 1174, 1175, 1176, 1177, 1178, 1179, 1180, 1181, 1182, 1183,

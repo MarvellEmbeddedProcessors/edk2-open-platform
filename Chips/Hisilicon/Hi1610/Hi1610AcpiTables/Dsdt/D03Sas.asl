@@ -21,8 +21,8 @@ Scope(_SB)
     Name(_CCA, 1)
           Name(_CRS, ResourceTemplate() {
                   Memory32Fixed(ReadWrite, 0xC3000000, 0x10000)
-                  Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
-                  {
+     Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, 0, "\\_SB.MBI6")
+     {
       64,65,66,67,68,
       69,70,71,72,73,
       75,76,77,78,79,
@@ -45,7 +45,7 @@ Scope(_SB)
       160,
       }
 
-                  Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive, ,, )
+      Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive, 0, "\\_SB.MBI6" )
                   {
       601,602,603,604,
       605,606,607,608,609,
@@ -93,12 +93,12 @@ Scope(_SB)
 
     Device(SAS1) {
           Name(_HID, "HISI0162")
-    Name(_CCA, 1)
+        Name(_CCA, 1)
           Name(_CRS, ResourceTemplate() {
                   Memory32Fixed(ReadWrite, 0xA2000000, 0x10000)
 
-      Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
-                  {
+      Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, 0, "\\_SB.MBI1")
+      {
       64,65,66,67,68,
       69,70,71,72,73,
       75,76,77,78,79,
@@ -121,7 +121,7 @@ Scope(_SB)
       160,
       }
 
-                  Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive, ,, )
+      Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive, 0, "\\_SB.MBI1")
                   {
          576,577,578,579,580,
       581,582,583,584,585,
@@ -174,7 +174,7 @@ Scope(_SB)
           Name(_CRS, ResourceTemplate() {
                   Memory32Fixed(ReadWrite, 0xA3000000, 0x10000)
 
-      Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
+      Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, 0, "\\_SB.MBI2")
                   {
       192,193,194,195,196,
       197,198,199,200,201,
@@ -198,7 +198,7 @@ Scope(_SB)
       287,
       }
 
-                  Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive, ,, )
+                  Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive, 0, "\\_SB.MBI2")
                   {
       608,609,610,611,
       612,613,614,615,616,

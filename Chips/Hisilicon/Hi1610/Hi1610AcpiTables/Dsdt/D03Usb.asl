@@ -32,7 +32,7 @@ Scope(_SB)
                         0xa7020000,         // Address Base
                         0x00010000,         // Address Length
                         )
-                    Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
+                    Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, 0, "\\_SB.MBI0")
                     {
                         0x00000041,
                     }
