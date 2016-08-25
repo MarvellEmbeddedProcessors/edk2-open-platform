@@ -73,9 +73,10 @@ UpdateSlotUsage(
   )
 {
     EFI_STATUS        Status;
-    serdes_param_t    sSerdesParam;
+    serdes_param_t    SerdesParamA;
+    serdes_param_t    SerdesParamB;
 
-    Status = OemGetSerdesParam (&sSerdesParam);
+    Status = OemGetSerdesParam (&SerdesParamA, &SerdesParamB, 0);
     if(EFI_ERROR(Status))
     {
         DEBUG((EFI_D_ERROR, "[%a]:[%dL] OemGetSerdesParam failed %r\n", __FUNCTION__, __LINE__, Status));
@@ -85,8 +86,8 @@ UpdateSlotUsage(
     //
     // PCIE0
     //
-    if (((UINTN)InputData == (UINTN)&MiscSystemSlotDesignationPcie0Data) && sSerdesParam.hilink1_mode == EM_HILINK1_PCIE0_8LANE)
-    {
+    if (((UINTN)InputData == (UINTN)&MiscSystemSlotDesignationPcie0Data)
+        && SerdesParamA.hilink1_mode == EM_HILINK1_PCIE0_8LANE) {
         InputData->CurrentUsage = SlotUsageAvailable;
     }
 
@@ -95,8 +96,7 @@ UpdateSlotUsage(
     //
     if ((UINTN)InputData == (UINTN)&MiscSystemSlotDesignationPcie1Data)
     {
-        if (sSerdesParam.hilink0_mode == EM_HILINK0_PCIE1_4LANE_PCIE2_4LANE)
-        {
+        if (SerdesParamA.hilink0_mode == EM_HILINK0_PCIE1_4LANE_PCIE2_4LANE) {
             InputData->SlotDataBusWidth = SlotDataBusWidth4X;
         }
     }
@@ -106,13 +106,10 @@ UpdateSlotUsage(
     //
     if ((UINTN)InputData == (UINTN)&MiscSystemSlotDesignationPcie2Data)
     {
-        if (sSerdesParam.hilink0_mode == EM_HILINK0_PCIE1_4LANE_PCIE2_4LANE)
-        {
+        if (SerdesParamA.hilink0_mode == EM_HILINK0_PCIE1_4LANE_PCIE2_4LANE) {
             InputData->SlotDataBusWidth = SlotDataBusWidth4X;
             InputData->CurrentUsage = SlotUsageAvailable;
-        }
-        else if (sSerdesParam.hilink2_mode == EM_HILINK2_PCIE2_8LANE)
-        {
+        } else if (SerdesParamA.hilink2_mode == EM_HILINK2_PCIE2_8LANE) {
             InputData->CurrentUsage = SlotUsageAvailable;
         }
     }
@@ -120,8 +117,8 @@ UpdateSlotUsage(
     //
     // PCIE3
     //
-    if (((UINTN)InputData == (UINTN)&MiscSystemSlotDesignationPcie3Data) && sSerdesParam.hilink5_mode == EM_HILINK5_PCIE3_4LANE)
-    {
+    if (((UINTN)InputData == (UINTN)&MiscSystemSlotDesignationPcie3Data)
+        && SerdesParamA.hilink5_mode == EM_HILINK5_PCIE3_4LANE) {
         InputData->CurrentUsage = SlotUsageAvailable;
     }
 }

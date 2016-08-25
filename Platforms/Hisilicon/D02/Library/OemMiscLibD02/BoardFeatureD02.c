@@ -59,15 +59,14 @@ serdes_param_t gSerdesParam = {
     .hilink5_mode = EM_HILINK5_SAS1_4LANE,
     };
 
-EFI_STATUS OemGetSerdesParam (serdes_param_t *Param)
+EFI_STATUS OemGetSerdesParam (serdes_param_t *ParamA, serdes_param_t *ParamB, UINT32 SocketId)
 {
-  if (NULL == Param)
-  {
-    DEBUG((EFI_D_ERROR, "[%a]:[%dL] Param == NULL!\n", __FUNCTION__, __LINE__));
+  if (ParamA == NULL) {
+    DEBUG((DEBUG_ERROR, "[%a]:[%dL] ParamA == NULL!\n", __FUNCTION__, __LINE__));
     return EFI_INVALID_PARAMETER;
   }
 
-  (VOID) CopyMem(Param, &gSerdesParam, sizeof(*Param));
+  (VOID) CopyMem(ParamA, &gSerdesParam, sizeof(*ParamA));
   return EFI_SUCCESS;
 }
 

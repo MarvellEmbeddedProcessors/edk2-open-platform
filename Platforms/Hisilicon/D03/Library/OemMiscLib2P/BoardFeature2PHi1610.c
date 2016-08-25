@@ -75,15 +75,14 @@ serdes_param_t gSerdesParam1 = {
     .use_ssc      = 0,
     };
 
-EFI_STATUS OemGetSerdesParam (serdes_param_t *Param)
+EFI_STATUS OemGetSerdesParam (serdes_param_t *ParamA, serdes_param_t *ParamB, UINT32 SocketId)
 {
-  if (NULL == Param)
-  {
+  if (ParamA == NULL) {
     DEBUG((EFI_D_ERROR, "[%a]:[%dL] Param == NULL!\n", __FUNCTION__, __LINE__));
     return EFI_INVALID_PARAMETER;
   }
 
-  (VOID) CopyMem(Param, &gSerdesParam, sizeof(*Param));
+  (VOID) CopyMem(ParamA, &gSerdesParam, sizeof(*ParamA));
   return EFI_SUCCESS;
 }
 

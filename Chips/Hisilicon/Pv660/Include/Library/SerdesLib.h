@@ -76,7 +76,7 @@ typedef struct {
 } SERDES_POLARITY_INVERT;
 
 
-EFI_STATUS OemGetSerdesParam (serdes_param_t *Param);
+EFI_STATUS OemGetSerdesParam (serdes_param_t *ParamA, serdes_param_t *ParamB, UINT32 SocketId);
 extern SERDES_POLARITY_INVERT gSerdesPolarityTxDesc[];
 extern SERDES_POLARITY_INVERT gSerdesPolarityRxDesc[];
 UINT32 GetEthType(UINT8 EthChannel);
