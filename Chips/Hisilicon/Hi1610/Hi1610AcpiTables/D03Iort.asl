@@ -10,8 +10,8 @@
 [0004]                       Table Length : 000002e4
 [0001]                           Revision : 00
 [0001]                           Checksum : BC
-[0006]                             Oem ID : "HISI "
-[0008]                       Oem Table ID : "HISI1610"
+[0006]                             Oem ID : "HISI  "
+[0008]                       Oem Table ID : "HIP06   "
 [0004]                       Oem Revision : 00000000
 [0004]                    Asl Compiler ID : "INTL"
 [0004]              Asl Compiler Revision : 20151124

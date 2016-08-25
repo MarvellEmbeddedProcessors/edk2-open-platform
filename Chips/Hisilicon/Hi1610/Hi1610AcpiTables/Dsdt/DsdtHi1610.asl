@@ -18,7 +18,7 @@
 
 #include "Hi1610Platform.h"
 
-DefinitionBlock("DsdtTable.aml", "DSDT", 1, "HISI", "HISI1610", EFI_ACPI_ARM_OEM_REVISION) {
+DefinitionBlock("DsdtTable.aml", "DSDT", 1, "HISI  ", "HIP06   ", EFI_ACPI_ARM_OEM_REVISION) {
      include ("Lpc.asl")
      include ("D03Mbig.asl")
      include ("CPU.asl")
