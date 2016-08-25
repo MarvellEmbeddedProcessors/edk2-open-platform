@@ -183,6 +183,10 @@
   #
   gEfiMdeModulePkgTokenSpaceGuid.PcdSmbiosVersion|0x0300
   gEfiMdeModulePkgTokenSpaceGuid.PcdSmbiosDocRev|0x0
+  #
+  # ACPI Table Version
+  #
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiExposedTableVersions|0x20
 
 [PcdsPatchableInModule]
   # Console Resolution (Full HD)
