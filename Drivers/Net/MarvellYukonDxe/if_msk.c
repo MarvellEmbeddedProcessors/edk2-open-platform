@@ -171,6 +171,7 @@ static struct msk_product {
 { VENDORID_DLINK,   DEVICEID_DLINK_DGE560T,   "D-Link 560T Gigabit Ethernet" }
 };
 
+#ifndef MDEPKG_NDEBUG
 static const CHAR8 *model_name[] = {
   "Yukon XL",
   "Yukon EC Ultra",
@@ -183,6 +184,7 @@ static const CHAR8 *model_name[] = {
   "Yukon Unknown",
   "Yukon Optima",
 };
+#endif
 
 //
 // Forward declarations
