@@ -684,31 +684,32 @@ MvI2cEnumerate (
 {
   UINT8 *DevicesPcd;
   UINT8 *DeviceBusPcd;
-  UINTN Index, NextIndex;
+  UINTN Index, NextIndex, DevCount;
   UINT8 NextDeviceAddress;
   I2C_MASTER_CONTEXT *I2cMasterContext = I2C_SC_FROM_ENUMERATE(This);
 
+  DevCount = PcdGetSize (PcdI2cSlaveAddresses);
   DevicesPcd = PcdGetPtr (PcdI2cSlaveAddresses);
   DeviceBusPcd = PcdGetPtr (PcdI2cSlaveBuses);
   if (*Device == NULL) {
-    for (Index = 0; DevicesPcd[Index] != '\0'; Index++) {
+    for (Index = 0; Index < DevCount ; Index++) {
       if (DeviceBusPcd[Index] != I2cMasterContext->Bus)
         continue;
-      if (DevicesPcd[Index] != '\0')
+      if (Index < DevCount)
         MvI2cAllocDevice (DevicesPcd[Index], I2cMasterContext->Bus, Device);
       return EFI_SUCCESS;
     }
   } else {
     /* Device is not NULL, so something was already allocated */
-    for (Index = 0; DevicesPcd[Index] != '\0'; Index++) {
+    for (Index = 0; Index < DevCount; Index++) {
       if (DeviceBusPcd[Index] != I2cMasterContext->Bus)
         continue;
       if (DevicesPcd[Index] == I2C_DEVICE_ADDRESS((*Device)->DeviceIndex)) {
-        for (NextIndex = Index + 1; DevicesPcd[NextIndex] != '\0'; NextIndex++) {
+        for (NextIndex = Index + 1; NextIndex < DevCount; NextIndex++) {
           if (DeviceBusPcd[NextIndex] != I2cMasterContext->Bus)
             continue;
           NextDeviceAddress = DevicesPcd[NextIndex];
-          if (NextDeviceAddress != '\0')
+          if (NextIndex < DevCount)
             MvI2cAllocDevice(NextDeviceAddress, I2cMasterContext->Bus, Device);
           return EFI_SUCCESS;
         }
