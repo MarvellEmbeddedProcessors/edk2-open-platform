@@ -62,7 +62,6 @@
   gArmTokenSpaceGuid.PcdFvBaseAddress
 
 [FixedPcd]
-  gArmTokenSpaceGuid.PcdArmPrimaryCoreMask
   gArmTokenSpaceGuid.PcdArmPrimaryCore
 
   gArmPlatformTokenSpaceGuid.PcdCoreCount

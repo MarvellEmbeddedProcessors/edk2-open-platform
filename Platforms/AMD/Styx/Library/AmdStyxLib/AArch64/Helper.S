@@ -58,9 +58,6 @@ ASM_FUNC(ArmGetCpuCountPerCluster)
 //  IN UINTN MpId
 //  );
 ASM_FUNC(ArmPlatformIsPrimaryCore)
-  MOV32 (w1, FixedPcdGet32 (PcdArmPrimaryCoreMask))
-  and   x0, x0, x1
-
   ldr   w1, PrimaryCoreMpid
 
   cmp   w0, w1
