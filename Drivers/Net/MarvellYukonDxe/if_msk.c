@@ -1804,7 +1804,7 @@ mskc_receive (
     OUT    VOID   *Buffer
     )
 {
-  MSK_LINKED_DMA_BUF   *mBuf;
+  MSK_LINKED_SYSTEM_BUF   *mBuf;
 
   msk_intr (); // check the interrupt lines
 
@@ -1813,17 +1813,17 @@ mskc_receive (
     return EFI_NOT_READY;
   }
 
-  mBuf = CR (GetFirstNode (&mSoftc->ReceiveQueueHead), MSK_LINKED_DMA_BUF, Link, RX_MBUF_SIGNATURE);
-  if (mBuf->DmaBuf.Length > *BufferSize) {
-    *BufferSize = mBuf->DmaBuf.Length;
+  mBuf = CR (GetFirstNode (&mSoftc->ReceiveQueueHead), MSK_LINKED_SYSTEM_BUF, Link, RX_MBUF_SIGNATURE);
+  if (mBuf->SystemBuf.Length > *BufferSize) {
+    *BufferSize = mBuf->SystemBuf.Length;
     DEBUG ((EFI_D_NET, "Marvell Yukon: Receive buffer is too small: Provided = %d, Received = %d\n",
-            *BufferSize, mBuf->DmaBuf.Length));
+            *BufferSize, mBuf->SystemBuf.Length));
     return EFI_BUFFER_TOO_SMALL;
   }
-  *BufferSize = mBuf->DmaBuf.Length;
+  *BufferSize = mBuf->SystemBuf.Length;
   RemoveEntryList (&mBuf->Link);
-  gBS->CopyMem (Buffer, mBuf->DmaBuf.Buf, *BufferSize);
-  gBS->FreePool(mBuf->DmaBuf.Buf);
+  gBS->CopyMem (Buffer, mBuf->SystemBuf.Buf, *BufferSize);
+  gBS->FreePool(mBuf->SystemBuf.Buf);
   gBS->FreePool (mBuf);
   return EFI_SUCCESS;
 }
@@ -1836,12 +1836,12 @@ msk_rxeof (
     INTN                  len
     )
 {
-  EFI_STATUS          Status;
-  MSK_LINKED_DMA_BUF  *m_link;
-  struct msk_rxdesc   *rxd;
-  INTN                cons;
-  INTN                rxlen;
-  MSK_DMA_BUF         m;
+  EFI_STATUS            Status;
+  MSK_LINKED_SYSTEM_BUF *m_link;
+  struct msk_rxdesc     *rxd;
+  INTN                  cons;
+  INTN                  rxlen;
+  MSK_DMA_BUF           m;
 
   DEBUG ((EFI_D_NET, "Marvell Yukon: rxeof\n"));
 
@@ -1888,18 +1888,17 @@ msk_rxeof (
     }
 
     Status = gBS->AllocatePool (EfiBootServicesData,
-                                sizeof (MSK_LINKED_DMA_BUF),
+                                sizeof (MSK_LINKED_SYSTEM_BUF),
                                 (VOID**) &m_link);
     if (!EFI_ERROR (Status)) {
-      gBS->SetMem (m_link, sizeof (MSK_LINKED_DMA_BUF), 0);
+      gBS->SetMem (m_link, sizeof (MSK_LINKED_SYSTEM_BUF), 0);
       m_link->Signature = RX_MBUF_SIGNATURE;
       Status = gBS->AllocatePool (EfiBootServicesData,
                                   len,
-                                  (VOID**) &m_link->DmaBuf.Buf);
+                                  (VOID**) &m_link->SystemBuf.Buf);
       if(!EFI_ERROR (Status)) {
-        gBS->CopyMem (m_link->DmaBuf.Buf, m.Buf, len);
-        m_link->DmaBuf.Length = len;
-        m_link->DmaBuf.DmaMapping = NULL;
+        gBS->CopyMem (m_link->SystemBuf.Buf, m.Buf, len);
+        m_link->SystemBuf.Length = len;
 
         InsertTailList (&mSoftc->ReceiveQueueHead, &m_link->Link);
       } else {
