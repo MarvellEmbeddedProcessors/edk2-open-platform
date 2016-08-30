@@ -585,6 +585,7 @@ msk_newbuf (
   if (EFI_ERROR (Status)) {
     return Status;
   }
+  gBS->SetMem (Buffer, Length, 0);
 
   Status = mPciIo->Map (mPciIo, EfiPciIoOperationBusMasterWrite, Buffer, &Length, &PhysAddr, &Mapping);
   if (EFI_ERROR (Status)) {
