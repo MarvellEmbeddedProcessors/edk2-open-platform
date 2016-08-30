@@ -2239,6 +2239,12 @@ struct msk_stat_desc {
 #define BMU_UDP_CHECK                       (0x57<<16)  // Descr with UDP ext (YUKON only)
 #define BMU_BBC                             0xffff  // Bit 15.. 0:  Buffer Byte Counter
 
+/* Use 64-bit DMA in all cases in UEFI. After much discussion on the mailing
+ * list, it was determined that there is not currently a good way to detect
+ * whether 32-bit DMA should be used (if ever) or whether there are any
+ * supported platforms on which 64-bit DMA would not work */
+#define MSK_64BIT_DMA
+
 #define MSK_TX_RING_CNT                     512
 #define MSK_RX_RING_CNT                     512
 #define MSK_RX_BUF_ALIGN                    8
@@ -2323,6 +2329,7 @@ struct msk_chain_data {
   void              *msk_tx_ring_map;
   void              *msk_rx_ring_map;
   //  struct msk_rxdesc  msk_jumbo_rxdesc[MSK_JUMBO_RX_RING_CNT];
+  INTN     msk_tx_high_addr;
   INTN     msk_tx_prod;
   INTN     msk_tx_cons;
   INTN     msk_tx_cnt;
@@ -2352,6 +2359,15 @@ struct msk_ring_data {
 #define MSK_STAT_RING_SZ                    (sizeof (struct msk_stat_desc) * MSK_STAT_RING_CNT)
 
 #define MSK_INC(x, y)                       ((x) = (x + 1) % y)
+#ifdef MSK_64BIT_DMA
+#define MSK_RX_INC(x, y)        (x) = (x + 2) % y
+#define MSK_RX_BUF_CNT          (MSK_RX_RING_CNT / 2)
+#define MSK_JUMBO_RX_BUF_CNT    (MSK_JUMBO_RX_RING_CNT / 2)
+#else
+#define MSK_RX_INC(x, y)        (x) = (x + 1) % y
+#define MSK_RX_BUF_CNT          MSK_RX_RING_CNT
+#define MSK_JUMBO_RX_BUF_CNT    MSK_JUMBO_RX_RING_CNT
+#endif
 
 #define  MSK_PCI_BUS                         0
 #define  MSK_PCIX_BUS                        1

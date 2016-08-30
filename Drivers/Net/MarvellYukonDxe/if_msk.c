@@ -492,6 +492,7 @@ msk_init_rx_ring (
   struct msk_rxdesc     *rxd;
   INTN                  i;
   INTN                  prod;
+  INTN                  nbuf;
   EFI_STATUS            Status;
 
   sc_if->msk_cdata.msk_rx_cons = 0;
@@ -500,17 +501,22 @@ msk_init_rx_ring (
 
   rd = &sc_if->msk_rdata;
   gBS->SetMem (rd->msk_rx_ring, MSK_RX_RING_SZ, 0);
-  prod = sc_if->msk_cdata.msk_rx_prod;
-  for (i = 0; i < MSK_RX_RING_CNT; i++) {
+  for (i = prod = 0; i < MSK_RX_RING_CNT; i++) {
     rxd = &sc_if->msk_cdata.msk_rxdesc[prod];
     gBS->SetMem (&rxd->rx_m, sizeof (MSK_DMA_BUF), 0);
     rxd->rx_le = &rd->msk_rx_ring[prod];
-    Status = msk_newbuf (sc_if, prod);
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
     MSK_INC (prod, MSK_RX_RING_CNT);
   }
+  nbuf = MSK_RX_BUF_CNT;
+  prod = 0;
+
+  for (i = 0; i < nbuf; i++) {
+     Status = msk_newbuf (sc_if, prod);
+     if (EFI_ERROR (Status)) {
+       return Status;
+     }
+     MSK_RX_INC(prod, MSK_RX_RING_CNT);
+   }
 
   // Update prefetch unit.
   sc_if->msk_cdata.msk_rx_prod = MSK_RX_RING_CNT - 1;
@@ -532,6 +538,7 @@ msk_init_tx_ring (
   sc_if->msk_cdata.msk_tx_prod = 0;
   sc_if->msk_cdata.msk_tx_cons = 0;
   sc_if->msk_cdata.msk_tx_cnt = 0;
+  sc_if->msk_cdata.msk_tx_high_addr = 0;
 
   rd = &sc_if->msk_rdata;
   gBS->SetMem (rd->msk_tx_ring, sizeof (struct msk_tx_desc) * MSK_TX_RING_CNT, 0);
@@ -555,6 +562,13 @@ msk_discard_rxbuf (
   MSK_DMA_BUF         *DmaBuffer;
 
   DEBUG ((EFI_D_NET, "Marvell Yukon: discard rxbuf\n"));
+
+#ifdef MSK_64BIT_DMA
+  rxd = &sc_if->msk_cdata.msk_rxdesc[idx];
+  rx_le = rxd->rx_le;
+  rx_le->msk_control = htole32(OP_ADDR64 | HW_OWNER);
+  MSK_INC(idx, MSK_RX_RING_CNT);
+#endif
 
   rxd = &sc_if->msk_cdata.msk_rxdesc[idx];
   DmaBuffer = &rxd->rx_m;
@@ -593,6 +607,14 @@ msk_newbuf (
     mPciIo->FreeBuffer (mPciIo, EFI_SIZE_TO_PAGES (Length), Buffer);
     return Status;
   }
+
+#ifdef MSK_64BIT_DMA
+  rx_le = rxd->rx_le;
+  rx_le->msk_addr = htole32(MSK_ADDR_HI(PhysAddr));
+  rx_le->msk_control = htole32(OP_ADDR64 | HW_OWNER);
+  MSK_INC(idx, MSK_RX_RING_CNT);
+  rxd = &sc_if->msk_cdata.msk_rxdesc[idx];
+#endif
 
   gBS->SetMem (&(rxd->rx_m), sizeof (MSK_DMA_BUF), 0);
   rxd->rx_m.DmaMapping = Mapping;
@@ -1649,6 +1671,19 @@ msk_encap (
 
   control = 0;
 
+#ifdef MSK_64BIT_DMA
+  if (MSK_ADDR_HI(BusPhysAddr) !=
+    sc_if->msk_cdata.msk_tx_high_addr) {
+      sc_if->msk_cdata.msk_tx_high_addr =
+          MSK_ADDR_HI(BusPhysAddr);
+      tx_le = &sc_if->msk_rdata.msk_tx_ring[prod];
+      tx_le->msk_addr = htole32(MSK_ADDR_HI(BusPhysAddr));
+      tx_le->msk_control = htole32(OP_ADDR64 | HW_OWNER);
+      sc_if->msk_cdata.msk_tx_cnt++;
+      MSK_INC(prod, MSK_TX_RING_CNT);
+  }
+#endif
+
   si = prod;
   tx_le = &sc_if->msk_rdata.msk_tx_ring[prod];
   tx_le->msk_addr = htole32 (MSK_ADDR_LO (BusPhysAddr));
@@ -1866,7 +1901,11 @@ msk_rxeof (
       break;
     }
 
+#ifdef MSK_64BIT_DMA
+    rxd = &sc_if->msk_cdata.msk_rxdesc[(cons + 1) % MSK_RX_RING_CNT];
+#else
     rxd = &sc_if->msk_cdata.msk_rxdesc[cons];
+#endif
 
     gBS->CopyMem (&m, &rxd->rx_m, sizeof(m));
 
@@ -1912,8 +1951,8 @@ msk_rxeof (
     mPciIo->FreeBuffer (mPciIo, EFI_SIZE_TO_PAGES (m.Length), m.Buf);
   } while (0);
 
-  MSK_INC (sc_if->msk_cdata.msk_rx_cons, MSK_RX_RING_CNT);
-  MSK_INC (sc_if->msk_cdata.msk_rx_prod, MSK_RX_RING_CNT);
+  MSK_RX_INC (sc_if->msk_cdata.msk_rx_cons, MSK_RX_RING_CNT);
+  MSK_RX_INC (sc_if->msk_cdata.msk_rx_prod, MSK_RX_RING_CNT);
 }
 
 static
