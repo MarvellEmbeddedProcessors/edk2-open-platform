@@ -15,7 +15,7 @@
 
 #include <Uefi.h>
 
-#define MAX_SUPPORTED_PACKET_SIZE   EFI_PAGE_SIZE
+#define MAX_SUPPORTED_PACKET_SIZE   (1500)
 
 EFI_STATUS mskc_probe (EFI_PCI_IO_PROTOCOL *PciIo);
 

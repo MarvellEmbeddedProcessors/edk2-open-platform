@@ -595,7 +595,7 @@ msk_newbuf (
 
   rxd = &sc_if->msk_cdata.msk_rxdesc[idx];
 
-  Status = mPciIo->AllocateBuffer (mPciIo, AllocateAnyPages, EfiBootServicesData, EFI_SIZE_TO_PAGES (Length), &Buffer, 0);
+  Status = gBS->AllocatePool (EfiBootServicesData, Length, &Buffer);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -603,8 +603,7 @@ msk_newbuf (
 
   Status = mPciIo->Map (mPciIo, EfiPciIoOperationBusMasterWrite, Buffer, &Length, &PhysAddr, &Mapping);
   if (EFI_ERROR (Status)) {
-    Length = MAX_SUPPORTED_PACKET_SIZE;
-    mPciIo->FreeBuffer (mPciIo, EFI_SIZE_TO_PAGES (Length), Buffer);
+    gBS->FreePool (Buffer);
     return Status;
   }
 
@@ -1630,7 +1629,7 @@ msk_txrx_dma_free (
       mPciIo->Unmap (mPciIo, rxd->rx_m.DmaMapping);
       // Free Rx buffers as we own these
       if(rxd->rx_m.Buf != NULL) {
-        mPciIo->FreeBuffer (mPciIo, EFI_SIZE_TO_PAGES (rxd->rx_m.Length), rxd->rx_m.Buf);
+        gBS->FreePool (rxd->rx_m.Buf);
         rxd->rx_m.Buf = NULL;
       }
       gBS->SetMem (&(rxd->rx_m), sizeof (MSK_DMA_BUF), 0);
@@ -1933,23 +1932,14 @@ msk_rxeof (
     if (!EFI_ERROR (Status)) {
       gBS->SetMem (m_link, sizeof (MSK_LINKED_SYSTEM_BUF), 0);
       m_link->Signature = RX_MBUF_SIGNATURE;
-      Status = gBS->AllocatePool (EfiBootServicesData,
-                                  len,
-                                  (VOID**) &m_link->SystemBuf.Buf);
-      if(!EFI_ERROR (Status)) {
-        gBS->CopyMem (m_link->SystemBuf.Buf, m.Buf, len);
-        m_link->SystemBuf.Length = len;
+      m_link->SystemBuf.Buf = m.Buf;
+      m_link->SystemBuf.Length = len;
 
-        InsertTailList (&mSoftc->ReceiveQueueHead, &m_link->Link);
-      } else {
-        DEBUG ((EFI_D_NET, "Marvell Yukon: failed to allocate DMA buffer. Dropping Frame\n"));
-        gBS->FreePool (m_link);
-      }
+      InsertTailList (&mSoftc->ReceiveQueueHead, &m_link->Link);
     } else {
       DEBUG ((EFI_D_NET, "Marvell Yukon: failed to allocate receive buffer link. Dropping Frame\n"));
+      gBS->FreePool (m.Buf);
     }
-
-    mPciIo->FreeBuffer (mPciIo, EFI_SIZE_TO_PAGES (m.Length), m.Buf);
   } while (0);
 
   MSK_RX_INC (sc_if->msk_cdata.msk_rx_cons, MSK_RX_RING_CNT);
@@ -2764,7 +2754,7 @@ msk_stop (
     if (rxd->rx_m.Buf != NULL) {
       mPciIo->Unmap (mPciIo, rxd->rx_m.DmaMapping);
       if(rxd->rx_m.Buf != NULL) {
-        mPciIo->FreeBuffer (mPciIo, EFI_SIZE_TO_PAGES (rxd->rx_m.Length), rxd->rx_m.Buf);
+        gBS->FreePool (rxd->rx_m.Buf);
         rxd->rx_m.Buf = NULL;
       }
       gBS->SetMem (&(rxd->rx_m), sizeof (MSK_DMA_BUF), 0);
