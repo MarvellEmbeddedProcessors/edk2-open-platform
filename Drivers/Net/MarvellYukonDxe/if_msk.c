@@ -1160,7 +1160,7 @@ mskc_attach (
     Status = mPciIo->Attributes (
           mPciIo,
           EfiPciIoAttributeOperationEnable,
-          Supports,
+          Supports | EFI_PCI_IO_ATTRIBUTE_DUAL_ADDRESS_CYCLE,
           NULL
           );
   }
