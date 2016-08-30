@@ -1943,6 +1943,7 @@ msk_rxeof (
         InsertTailList (&mSoftc->ReceiveQueueHead, &m_link->Link);
       } else {
         DEBUG ((EFI_D_NET, "Marvell Yukon: failed to allocate DMA buffer. Dropping Frame\n"));
+        gBS->FreePool (m_link);
       }
     } else {
       DEBUG ((EFI_D_NET, "Marvell Yukon: failed to allocate receive buffer link. Dropping Frame\n"));
