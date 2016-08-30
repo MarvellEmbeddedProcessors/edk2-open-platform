@@ -581,13 +581,6 @@ msk_newbuf (
 
   rxd = &sc_if->msk_cdata.msk_rxdesc[idx];
 
-  if ((rxd->rx_m.Buf != NULL) && (rxd->rx_m.Length >= Length)) {
-    return EFI_ALREADY_STARTED;
-  } else if (rxd->rx_m.Buf != NULL) {
-    mPciIo->Unmap (mPciIo, rxd->rx_m.DmaMapping);
-    mPciIo->FreeBuffer (mPciIo, EFI_SIZE_TO_PAGES (rxd->rx_m.Length), rxd->rx_m.Buf);
-  }
-
   Status = mPciIo->AllocateBuffer (mPciIo, AllocateAnyPages, EfiBootServicesData, EFI_SIZE_TO_PAGES (Length), &Buffer, 0);
   if (EFI_ERROR (Status)) {
     return Status;
@@ -1848,6 +1841,7 @@ msk_rxeof (
   struct msk_rxdesc   *rxd;
   INTN                cons;
   INTN                rxlen;
+  MSK_DMA_BUF         m;
 
   DEBUG ((EFI_D_NET, "Marvell Yukon: rxeof\n"));
 
@@ -1871,26 +1865,41 @@ msk_rxeof (
       break;
     }
 
+    rxd = &sc_if->msk_cdata.msk_rxdesc[cons];
+
+    gBS->CopyMem (&m, &rxd->rx_m, sizeof(m));
+
     Status = msk_newbuf (sc_if, cons);
     if (EFI_ERROR (Status)) {
+      // This is a dropped packet, but we aren't counting drops
       // Reuse old buffer
       msk_discard_rxbuf (sc_if, cons);
+      break;
     }
+
+    Status = mPciIo->Flush (mPciIo);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((EFI_D_NET, "Marvell Yukon: failed to Flush DMA\n"));
+    }
+
+    Status = mPciIo->Unmap (mPciIo, rxd->rx_m.DmaMapping);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((EFI_D_NET, "Marvell Yukon: failed to Unmap DMA\n"));
+    }
+
     Status = gBS->AllocatePool (EfiBootServicesData,
                                 sizeof (MSK_LINKED_DMA_BUF),
                                 (VOID**) &m_link);
     if (!EFI_ERROR (Status)) {
       gBS->SetMem (m_link, sizeof (MSK_LINKED_DMA_BUF), 0);
-      rxd = &sc_if->msk_cdata.msk_rxdesc[cons];
-
       m_link->Signature = RX_MBUF_SIGNATURE;
       Status = gBS->AllocatePool (EfiBootServicesData,
                                   len,
                                   (VOID**) &m_link->DmaBuf.Buf);
       if(!EFI_ERROR (Status)) {
-        gBS->CopyMem (m_link->DmaBuf.Buf, rxd->rx_m.Buf, len);
+        gBS->CopyMem (m_link->DmaBuf.Buf, m.Buf, len);
         m_link->DmaBuf.Length = len;
-        m_link->DmaBuf.DmaMapping = rxd->rx_m.DmaMapping;
+        m_link->DmaBuf.DmaMapping = NULL;
 
         InsertTailList (&mSoftc->ReceiveQueueHead, &m_link->Link);
       } else {
@@ -1899,6 +1908,8 @@ msk_rxeof (
     } else {
       DEBUG ((EFI_D_NET, "Marvell Yukon: failed to allocate receive buffer link. Dropping Frame\n"));
     }
+
+    mPciIo->FreeBuffer (mPciIo, EFI_SIZE_TO_PAGES (m.Length), m.Buf);
   } while (0);
 
   MSK_INC (sc_if->msk_cdata.msk_rx_cons, MSK_RX_RING_CNT);
