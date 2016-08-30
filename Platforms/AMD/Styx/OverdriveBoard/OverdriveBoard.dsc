@@ -546,6 +546,7 @@ DEFINE DO_KCS       = 1
   EmbeddedPkg/ResetRuntimeDxe/ResetRuntimeDxe.inf
   EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
   EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
+  MdeModulePkg/Universal/EbcDxe/EbcDxe.inf
 
   #
   # Console IO support
