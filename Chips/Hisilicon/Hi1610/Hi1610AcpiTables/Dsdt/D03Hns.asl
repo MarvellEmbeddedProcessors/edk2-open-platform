@@ -115,6 +115,33 @@ Scope(_SB)
           , 31,  //RESERVED
         }
 
+    // DSAF Channel RESET
+    OperationRegion(DCRR, SystemMemory, 0xC0000AA8, 8)
+    Field(DCRR, DWordAcc, NoLock, Preserve) {
+          DCRE, 1,
+          , 31,  //RESERVED
+          DCRD, 1,
+          , 31,  //RESERVED
+        }
+
+    // RoCE RESET
+    OperationRegion(RKRR, SystemMemory, 0xC0000A50, 8)
+    Field(RKRR, DWordAcc, NoLock, Preserve) {
+          RKRE, 1,
+          , 31,  //RESERVED
+          RKRD, 1,
+          , 31,  //RESERVED
+        }
+
+    // RoCE Clock enable/disable
+    OperationRegion(RKCR, SystemMemory, 0xC0000328, 8)
+    Field(RKCR, DWordAcc, NoLock, Preserve) {
+          RCLE, 1,
+          , 31,  //RESERVED
+          RCLD, 1,
+          , 31,  //RESERVED
+        }
+
     // Hilink access sel cfg reg
     OperationRegion(HSER, SystemMemory, 0xC2240008, 0x4)
     Field(HSER, DWordAcc, NoLock, Preserve) {
@@ -254,6 +281,30 @@ Scope(_SB)
       }
     }
 
+    //reset DSAF channels
+    //Arg0 : mask
+    //Arg1 : 0 reset, 1 de-reset
+    Method(DCRT, 2, Serialized) {
+      If (LEqual (Arg1, 0)) {
+        Store(Arg0, DCRE)
+      } Else  {
+        Store(Arg0, DCRD)
+      }
+    }
+
+    //reset RoCE
+    //Arg0 : 0 reset, 1 de-reset
+    Method(RRST, 1, Serialized) {
+      If (LEqual (Arg0, 0)) {
+        Store(0x1, RKRE)
+      } Else  {
+        Store(0x1, RCLD)
+        Store(0x1, RKRD)
+        sleep(20)
+        Store(0x1, RCLE)
+      }
+    }
+
     // Set Serdes Loopback
     //Arg0 : port
     //Arg1 : 0 disable, 1 enable
@@ -307,7 +358,7 @@ Scope(_SB)
     }
 
     //Reset
-    //Arg0 : reset type (1: dsaf; 2: ppe; 3:XGE core; 4:XGE; 5:G3)
+    //Arg0 : reset type (1: dsaf; 2: ppe; 3:xge core; 4:xge; 5:ge; 6:dchan; 7:roce)
     //Arg1 : port
     //Arg2 : 0 disable, 1 enable
     Method(DRST, 3, Serialized)
@@ -363,6 +414,22 @@ Scope(_SB)
           Store (Arg2, Local1)
           GRST (Local0, Local1)
         }
+
+        //Reset DSAF Channels
+        case (0x6)
+        {
+          Store (Arg1, Local0)
+          Store (Arg2, Local1)
+          DCRT (Local0, Local1)
+        }
+
+        //Reset RoCE
+        case (0x7)
+        {
+          // Discarding Arg1 as it is always 0
+          Store (Arg2, Local0)
+          RRST (Local0)
+        }
       }
     }
 
@@ -373,7 +440,7 @@ Scope(_SB)
     // Arg2: Integer Function Index
     //   0 : Return Supported Functions bit mask
     //   1 : Reset Sequence
-    //    Arg3[0] : reset type (1:dsaf; 2:ppe; 3:xge core; 4:xge; 5: ge)
+    //    Arg3[0] : reset type (1:dsaf; 2:ppe; 3:xge core; 4:xge; 5:ge; 6:dchan; 7:roce)
     //    Arg3[1] : port index in dsaf
     //    Arg3[2] : 0 reset, 1 cancle reset
     //   2 : Set Serdes Loopback
@@ -605,6 +672,14 @@ Scope(_SB)
     Name (_CRS, ResourceTemplate (){
       Memory32Fixed (ReadWrite, 0xc4000000 , 0x100000)
       Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive, 0, "\\_SB.MBI7")
+        {
+          722, 723, 724, 725, 726, 727, 728, 729, 730, 731, 732, 733,
+          734, 735, 736, 737, 738, 739, 740, 741, 742, 743, 744, 745,
+          746, 747, 748, 749, 750, 751, 752, 753, 785, 754,
+        }
+   })
+    Name (_PRS, ResourceTemplate (){
+      Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive,,,)
         {
           722, 723, 724, 725, 726, 727, 728, 729, 730, 731, 732, 733,
           734, 735, 736, 737, 738, 739, 740, 741, 742, 743, 744, 745,
