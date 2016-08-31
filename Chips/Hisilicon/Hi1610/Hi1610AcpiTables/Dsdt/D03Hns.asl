@@ -633,6 +633,7 @@ Scope(_SB)
       Package () {
         Package () {"eth-handle", Package () {\_SB.ETH0, \_SB.ETH1, 0, 0, \_SB.ETH4, \_SB.ETH5}},
         Package () {"dsaf-handle", Package (){\_SB.DSF0}},
+        Package () {"node-guid", Package () { 0x00, 0x9A, 0xCD, 0x00, 0x00, 0x01, 0x02, 0x03 }}, // 8-bytes
         Package () {"interrupt-names", Package() {"hns-roce-comp-0",
                                                   "hns-roce-comp-1",
                                                   "hns-roce-comp-2",
