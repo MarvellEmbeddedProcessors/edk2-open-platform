@@ -558,5 +558,58 @@ Scope(_SB)
       }
     })
   }
-
+  Device (ROCE) {
+    Name(_HID, "HISI00D1")
+    Name (_CCA, 1) // Cache-coherent controller
+    Name (_DSD, Package () {
+      ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
+      Package () {
+        Package () {"eth-handle", Package () {\_SB.ETH0, \_SB.ETH1, 0, 0, \_SB.ETH4, \_SB.ETH5}},
+        Package () {"dsaf-handle", Package (){\_SB.DSF0}},
+        Package () {"interrupt-names", Package() {"hns-roce-comp-0",
+                                                  "hns-roce-comp-1",
+                                                  "hns-roce-comp-2",
+                                                  "hns-roce-comp-3",
+                                                  "hns-roce-comp-4",
+                                                  "hns-roce-comp-5",
+                                                  "hns-roce-comp-6",
+                                                  "hns-roce-comp-7",
+                                                  "hns-roce-comp-8",
+                                                  "hns-roce-comp-9",
+                                                  "hns-roce-comp-10",
+                                                  "hns-roce-comp-11",
+                                                  "hns-roce-comp-12",
+                                                  "hns-roce-comp-13",
+                                                  "hns-roce-comp-14",
+                                                  "hns-roce-comp-15",
+                                                  "hns-roce-comp-16",
+                                                  "hns-roce-comp-17",
+                                                  "hns-roce-comp-18",
+                                                  "hns-roce-comp-19",
+                                                  "hns-roce-comp-20",
+                                                  "hns-roce-comp-21",
+                                                  "hns-roce-comp-22",
+                                                  "hns-roce-comp-23",
+                                                  "hns-roce-comp-24",
+                                                  "hns-roce-comp-25",
+                                                  "hns-roce-comp-26",
+                                                  "hns-roce-comp-27",
+                                                  "hns-roce-comp-28",
+                                                  "hns-roce-comp-29",
+                                                  "hns-roce-comp-30",
+                                                  "hns-roce-comp-31",
+                                                  "hns-roce-async",
+                                                  "hns-roce-common"}},
+      }
+    })
+    Name (_CRS, ResourceTemplate (){
+      Memory32Fixed (ReadWrite, 0xc4000000 , 0x100000)
+      Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive, 0, "\\_SB.MBI7")
+        {
+          722, 723, 724, 725, 726, 727, 728, 729, 730, 731, 732, 733,
+          734, 735, 736, 737, 738, 739, 740, 741, 742, 743, 744, 745,
+          746, 747, 748, 749, 750, 751, 752, 753, 785, 754,
+        }
+   })
+ }
 }

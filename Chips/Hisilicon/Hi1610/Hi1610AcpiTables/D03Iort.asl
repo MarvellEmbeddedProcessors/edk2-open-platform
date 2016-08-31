@@ -7,7 +7,7 @@
  * Format: [ByteLength]  FieldName : HexFieldValue
  */
 [0004]                          Signature : "IORT"    [IO Remapping Table]
-[0004]                       Table Length : 0000029e
+[0004]                       Table Length : 000002e4
 [0001]                           Revision : 00
 [0001]                           Checksum : BC
 [0006]                             Oem ID : "HISI "
@@ -245,6 +245,37 @@
 [0004]                         Input base : 00000000
 [0004]                           ID Count : 00000001
 [0004]                        Output Base : 00040900
+[0004]                   Output Reference : 00000034
+[0004]              Flags (decoded below) : 00000000
+                           Single Mapping : 1
+
+/* mbi-gen mbi7 - RoCE named component */
+[0001]                               Type : 01
+[0002]                             Length : 0046
+[0001]                           Revision : 00
+[0004]                           Reserved : 00000000
+[0004]                      Mapping Count : 00000001
+[0004]                     Mapping Offset : 00000032
+
+[0004]                         Node Flags : 00000000
+[0008]                  Memory Properties : [IORT Memory Access Properties]
+[0004]                    Cache Coherency : 00000000
+[0001]              Hints (decoded below) : 00
+                                Transient : 0
+                           Write Allocate : 0
+                            Read Allocate : 0
+                                 Override : 0
+[0002]                           Reserved : 0000
+[0001]       Memory Flags (decoded below) : 00
+                                Coherency : 0
+                         Device Attribute : 0
+[0001]                  Memory Size Limit : 00
+[0016]                        Device Name : "\_SB_.MBI7"
+[0004]                            Padding : 00 00 00 00
+
+[0004]                         Input base : 00000000
+[0004]                           ID Count : 00000001
+[0004]                        Output Base : 00040b1e
 [0004]                   Output Reference : 00000034
 [0004]              Flags (decoded below) : 00000000
                            Single Mapping : 1

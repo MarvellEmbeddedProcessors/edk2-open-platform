@@ -280,5 +280,26 @@ Name(_PRS, ResourceTemplate() {
         }
    })
   }
-
+  Device(MBI7) {          // Mbi-gen roce intc
+    Name(_HID, "HISI0152")
+    Name(_CID, "MBIGen")
+    Name(_CRS, ResourceTemplate() {
+      Memory32Fixed(ReadWrite, 0xc0080000, 0x10000)
+    })
+    Name (_PRS, ResourceTemplate (){
+       Interrupt (ResourceConsumer, Edge, ActiveHigh, Exclusive,,,)
+         {
+           722, 723, 724, 725, 726, 727, 728, 729, 730, 731, 732, 733,
+           734, 735, 736, 737, 738, 739, 740, 741, 742, 743, 744, 745,
+           746, 747, 748, 749, 750, 751, 752, 753, 785, 754,
+         }
+    })
+    Name(_DSD, Package () {
+         ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
+         Package ()
+         {
+           Package () {"num-pins", 34}
+         }
+    })
+  }
 }
