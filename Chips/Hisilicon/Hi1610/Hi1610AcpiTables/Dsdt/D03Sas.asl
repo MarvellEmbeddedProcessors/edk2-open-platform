@@ -80,6 +80,32 @@ Scope(_SB)
       STS, 32,
     }
 
+    OperationRegion (PHYS, SystemMemory, 0xC3002000, 0x2000)
+    Field (PHYS, DWordAcc, NoLock, Preserve) {
+      Offset (0x0014),
+      PHY0, 32,
+      Offset (0x0414),
+      PHY1, 32,
+      Offset (0x0814),
+      PHY2, 32,
+      Offset (0x0c14),
+      PHY3, 32,
+      Offset (0x1014),
+      PHY4, 32,
+      Offset (0x1414),
+      PHY5, 32,
+      Offset (0x1814),
+      PHY6, 32,
+      Offset (0x1c14),
+      PHY7, 32,
+    }
+
+    OperationRegion (SYSR, SystemMemory, 0xD0000000, 0x10000)
+    Field (SYSR, DWordAcc, NoLock, Preserve) {
+      Offset (0xe014),
+      DIE4, 32,
+    }
+
     Method (_RST, 0x0, Serialized)
     {
       Store(0x7ffff, RST)
@@ -88,6 +114,19 @@ Scope(_SB)
       Store(0x7ffff, DRST)
       Store(0x7ffff, CLK)
       Sleep(1)
+      Store(DIE4, local0)
+      If (LEqual (local0, 0)) {
+        /* 66MHZ */
+        Store(0x0199B694, Local1)
+        Store(Local1, PHY0)
+        Store(Local1, PHY1)
+        Store(Local1, PHY2)
+        Store(Local1, PHY3)
+        Store(Local1, PHY4)
+        Store(Local1, PHY5)
+        Store(Local1, PHY6)
+        Store(Local1, PHY7)
+      }
     }
   }
 
@@ -157,6 +196,32 @@ Scope(_SB)
       STS, 32,
     }
 
+    OperationRegion (PHYS, SystemMemory, 0xA2002000, 0x2000)
+    Field (PHYS, DWordAcc, NoLock, Preserve) {
+      Offset (0x0014),
+      PHY0, 32,
+      Offset (0x0414),
+      PHY1, 32,
+      Offset (0x0814),
+      PHY2, 32,
+      Offset (0x0c14),
+      PHY3, 32,
+      Offset (0x1014),
+      PHY4, 32,
+      Offset (0x1414),
+      PHY5, 32,
+      Offset (0x1814),
+      PHY6, 32,
+      Offset (0x1c14),
+      PHY7, 32,
+    }
+
+    OperationRegion (SYSR, SystemMemory, 0xD0000000, 0x10000)
+    Field (SYSR, DWordAcc, NoLock, Preserve) {
+      Offset (0xe014),
+      DIE4, 32,
+    }
+
     Method (_RST, 0x0, Serialized)
     {
       Store(0x7ffff, RST)
@@ -165,6 +230,19 @@ Scope(_SB)
       Store(0x7ffff, DRST)
       Store(0x7ffff, CLK)
       Sleep(1)
+      Store(DIE4, local0)
+      If (LEqual (local0, 0)) {
+        /* 66MHZ */
+        Store(0x0199B694, Local1)
+        Store(Local1, PHY0)
+        Store(Local1, PHY1)
+        Store(Local1, PHY2)
+        Store(Local1, PHY3)
+        Store(Local1, PHY4)
+        Store(Local1, PHY5)
+        Store(Local1, PHY6)
+        Store(Local1, PHY7)
+      }
     }
   }
 
@@ -216,7 +294,7 @@ Scope(_SB)
         Package () {"interrupt-parent",Package() {\_SB.MBI2}},
         Package (2) {"sas-addr", Package() {50, 01, 88, 20, 16, 00, 00, 00}},
         Package () {"queue-count", 16},
-        Package () {"phy-count", 8},
+        Package () {"phy-count", 9},
       }
     })
 
@@ -233,6 +311,34 @@ Scope(_SB)
       STS, 32,
     }
 
+    OperationRegion (PHYS, SystemMemory, 0xA3002000, 0x2400)
+    Field (PHYS, DWordAcc, NoLock, Preserve) {
+      Offset (0x0014),
+      PHY0, 32,
+      Offset (0x0414),
+      PHY1, 32,
+      Offset (0x0814),
+      PHY2, 32,
+      Offset (0x0c14),
+      PHY3, 32,
+      Offset (0x1014),
+      PHY4, 32,
+      Offset (0x1414),
+      PHY5, 32,
+      Offset (0x1814),
+      PHY6, 32,
+      Offset (0x1c14),
+      PHY7, 32,
+      offset (0x2014),
+      PHY8, 32,
+    }
+
+    OperationRegion (SYSR, SystemMemory, 0xD0000000, 0x10000)
+    Field (SYSR, DWordAcc, NoLock, Preserve) {
+      Offset (0xe014),
+      DIE4, 32,
+    }
+
     Method (_RST, 0x0, Serialized)
     {
       Store(0x7ffff, RST)
@@ -241,6 +347,20 @@ Scope(_SB)
       Store(0x7ffff, DRST)
       Store(0x7ffff, CLK)
       Sleep(1)
+      Store(DIE4, local0)
+      If (LEqual (local0, 0)) {
+        /* 66MHZ */
+        Store(0x0199B694, Local1)
+        Store(Local1, PHY0)
+        Store(Local1, PHY1)
+        Store(Local1, PHY2)
+        Store(Local1, PHY3)
+        Store(Local1, PHY4)
+        Store(Local1, PHY5)
+        Store(Local1, PHY6)
+        Store(Local1, PHY7)
+        Store(Local1, PHY8)
+      }
     }
   }
 

@@ -218,7 +218,9 @@
   #
   # ARM Architectual Timer Frequency
   #
-  gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|66000000
+  # Set it to 0 so that the code will read frequence from register and be
+  # adapted to 66M and 50M boards
+  gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|0
 
 
   gEfiMdeModulePkgTokenSpaceGuid.PcdResetOnMemoryTypeInformationChange|FALSE
