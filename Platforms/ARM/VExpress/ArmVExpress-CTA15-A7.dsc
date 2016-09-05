@@ -38,7 +38,7 @@
 !include OpenPlatformPkg/Platforms/ARM/VExpress/ArmVExpress.dsc.inc
 
 [LibraryClasses.common]
-  ArmLib|ArmPkg/Library/ArmLib/ArmV7/ArmV7Lib.inf
+  ArmLib|ArmPkg/Library/ArmLib/ArmBaseLib.inf
   ArmMmuLib|ArmPkg/Library/ArmMmuLib/ArmMmuBaseLib.inf
   ArmPlatformLib|ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressLibCTA15-A7/ArmVExpressLib.inf
 
@@ -210,7 +210,6 @@
   #
   ArmPlatformPkg/PrePi/PeiMPCore.inf {
     <LibraryClasses>
-      ArmLib|ArmPkg/Library/ArmLib/ArmV7/ArmV7Lib.inf
       ArmPlatformLib|ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressLibCTA15-A7/ArmVExpressLib.inf
   }
 

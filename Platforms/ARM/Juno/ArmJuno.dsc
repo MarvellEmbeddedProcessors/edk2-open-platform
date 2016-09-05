@@ -34,6 +34,7 @@
 !include OpenPlatformPkg/Platforms/ARM/VExpress/ArmVExpress.dsc.inc
 
 [LibraryClasses.common]
+  ArmLib|ArmPkg/Library/ArmLib/ArmBaseLib.inf
   ArmMmuLib|ArmPkg/Library/ArmMmuLib/ArmMmuBaseLib.inf
   ArmPlatformLib|ArmPlatformPkg/ArmJunoPkg/Library/ArmJunoLib/ArmJunoLib.inf
   ArmSmcLib|ArmPkg/Library/ArmSmcLib/ArmSmcLib.inf
@@ -50,12 +51,6 @@
 
   # USB Requirements
   UefiUsbLib|MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
-
-[LibraryClasses.ARM]
-  ArmLib|ArmPkg/Library/ArmLib/ArmV7/ArmV7Lib.inf
-
-[LibraryClasses.AARCH64]
-  ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64Lib.inf
 
 [LibraryClasses.common.SEC]
   PrePiLib|EmbeddedPkg/Library/PrePiLib/PrePiLib.inf

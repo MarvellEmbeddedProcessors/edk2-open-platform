@@ -39,7 +39,7 @@
 !include OpenPlatformPkg/Platforms/ARM/VExpress/ArmVExpress.dsc.inc
 
 [LibraryClasses.common]
-  ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64Lib.inf
+  ArmLib|ArmPkg/Library/ArmLib/ArmBaseLib.inf
   ArmCpuLib|ArmPkg/Drivers/ArmCpuLib/ArmCortexAEMv8Lib/ArmCortexAEMv8Lib.inf
   ArmPlatformLib|ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressLibRTSM/ArmVExpressLib.inf
   ArmMmuLib|ArmPkg/Library/ArmMmuLib/ArmMmuBaseLib.inf
@@ -60,7 +60,6 @@
 !endif
 
 [LibraryClasses.common.SEC]
-  ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64LibSec.inf
   ArmPlatformSecLib|ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressSecLibRTSM/ArmVExpressSecLib.inf
   ArmPlatformLib|ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressLibRTSM/ArmVExpressLibSec.inf
 
@@ -199,7 +198,6 @@
   # UEFI is placed in RAM by bootloader
   ArmPlatformPkg/PrePi/PeiUniCore.inf {
     <LibraryClasses>
-      ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64Lib.inf
       ArmPlatformLib|ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressLibRTSM/ArmVExpressLib.inf
   }
 !else
