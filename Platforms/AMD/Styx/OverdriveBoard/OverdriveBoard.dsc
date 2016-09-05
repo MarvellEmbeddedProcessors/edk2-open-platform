@@ -102,7 +102,7 @@ DEFINE DO_KCS       = 1
   ArmGenericTimerCounterLib|ArmPkg/Library/ArmGenericTimerPhyCounterLib/ArmGenericTimerPhyCounterLib.inf
   PlatformPeiLib|ArmPlatformPkg/PlatformPei/PlatformPeiLib.inf
 
-  ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64Lib.inf
+  ArmLib|ArmPkg/Library/ArmLib/ArmBaseLib.inf
   ArmCpuLib|ArmPkg/Drivers/ArmCpuLib/ArmCortexA5xLib/ArmCortexA5xLib.inf
   ArmMmuLib|ArmPkg/Library/ArmMmuLib/ArmMmuBaseLib.inf
   ArmPlatformLib|OpenPlatformPkg/Platforms/AMD/Styx/Library/AmdStyxLib/AmdStyxLib.inf
@@ -160,7 +160,6 @@ DEFINE DO_KCS       = 1
   MemoryAllocationLib|MdePkg/Library/PeiMemoryAllocationLib/PeiMemoryAllocationLib.inf
 
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
-  ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64LibSec.inf
   ArmPlatformLib|OpenPlatformPkg/Platforms/AMD/Styx/Library/AmdStyxLib/AmdStyxLibSec.inf
 
   ArmPlatformSecExtraActionLib|ArmPlatformPkg/Library/DebugSecExtraActionLib/DebugSecExtraActionLib.inf
