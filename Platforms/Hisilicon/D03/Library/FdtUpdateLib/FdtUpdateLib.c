@@ -14,6 +14,7 @@
 **/
 
 #include <Uefi.h>
+#include <Library/ArmArchTimer.h>
 #include <Library/BaseLib.h>
 #include <libfdt.h>
 #include <Library/IoLib.h>
@@ -181,6 +182,61 @@ DelPhyhandleUpdateMacAddress(IN VOID* Fdt)
         }
     }
     return Status;
+}
+
+STATIC
+EFI_STATUS
+UpdateRefClk (IN VOID* Fdt)
+{
+  INTN                node;
+  INTN                Error;
+  struct              fdt_property *m_prop;
+  int                 m_oldlen;
+  UINTN               ArchTimerFreq = 0;
+  UINT32              Data;
+  CONST CHAR8         *Property = "clock-frequency";
+
+  ArmArchTimerReadReg (CntFrq, &ArchTimerFreq);
+  if (!ArchTimerFreq) {
+    DEBUG ((DEBUG_ERROR, "[%a]:[%dL] Get timer frequency failed!\n", __FUNCTION__, __LINE__));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  node = fdt_subnode_offset(Fdt, 0, "soc");
+  if (node < 0) {
+    DEBUG ((DEBUG_ERROR, "can not find soc node\n"));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  node = fdt_subnode_offset(Fdt, node, "refclk");
+  if (node < 0) {
+    DEBUG ((DEBUG_ERROR, "can not find refclk node\n"));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  m_prop = fdt_get_property_w(Fdt, node, Property, &m_oldlen);
+  if(!m_prop) {
+    DEBUG ((DEBUG_ERROR, "[%a]:[%dL] Can't find property %a\n", __FUNCTION__, __LINE__, Property));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Error = fdt_delprop(Fdt, node, Property);
+  if (Error) {
+    DEBUG ((DEBUG_ERROR, "ERROR: fdt_delprop() %a: %a\n", Property, fdt_strerror (Error)));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  // UINT32 is enough for refclk data length
+  Data = (UINT32) ArchTimerFreq;
+  Data = cpu_to_fdt32 (Data);
+  Error = fdt_setprop(Fdt, node, Property, &Data, sizeof(Data));
+  if (Error) {
+    DEBUG ((DEBUG_ERROR, "ERROR:fdt_setprop() %a: %a\n", Property, fdt_strerror (Error)));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  DEBUG ((DEBUG_INFO, "Update refclk successfully.\n"));
+  return EFI_SUCCESS;
 }
 
 INTN
@@ -401,6 +457,10 @@ EFI_STATUS EFIFdtUpdate(UINTN FdtFileAddr)
         Status = EFI_SUCCESS;
     }
 
+    Status =  UpdateRefClk (Fdt);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "UpdateiRefClk fail.\n"));
+    }
 
     Status = UpdateMemoryNode(Fdt);
     if (EFI_ERROR (Status))

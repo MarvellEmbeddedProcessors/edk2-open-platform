@@ -27,12 +27,14 @@
 
 
 [Packages]
+  ArmPkg/ArmPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   EmbeddedPkg/EmbeddedPkg.dec
   OpenPlatformPkg/Chips/Hisilicon/HisiPkg.dec
 
 [LibraryClasses]
+  ArmLib
  FdtLib
  PlatformSysCtrlLib
  OemMiscLib
