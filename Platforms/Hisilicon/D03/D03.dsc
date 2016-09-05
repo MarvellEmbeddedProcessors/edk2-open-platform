@@ -34,7 +34,7 @@
 !include OpenPlatformPkg/Chips/Hisilicon/Pv660/Pv660.dsc.inc
 
 [LibraryClasses.common]
-  ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64Lib.inf
+  ArmLib|ArmPkg/Library/ArmLib/ArmBaseLib.inf
   ArmPlatformLib|OpenPlatformPkg/Chips/Hisilicon/Library/ArmPlatformLibPv660/ArmPlatformLib.inf
 
   ArmPlatformSysConfigLib|ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressSysConfigLib/ArmVExpressSysConfigLib.inf
@@ -83,7 +83,6 @@
   LpcLib|OpenPlatformPkg/Chips/Hisilicon/Binary/Hi1610/Library/LpcLib/LpcLib.inf
   SerialPortLib|OpenPlatformPkg/Chips/Hisilicon/Binary/Hi1610/Library/Uart/LpcSerialPortLib/LpcSerialPortLib.inf
 [LibraryClasses.common.SEC]
-  ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64LibSec.inf
   ArmPlatformLib|OpenPlatformPkg/Chips/Hisilicon/Library/ArmPlatformLibPv660/ArmPlatformLibSec.inf
 
 

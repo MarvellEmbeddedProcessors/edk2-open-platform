@@ -34,7 +34,7 @@
 !include OpenPlatformPkg/Chips/Hisilicon/Pv660/Pv660.dsc.inc
 
 [LibraryClasses.common]
-  ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64Lib.inf
+  ArmLib|ArmPkg/Library/ArmLib/ArmBaseLib.inf
   ArmPlatformLib|OpenPlatformPkg/Chips/Hisilicon/Library/ArmPlatformLibPv660/ArmPlatformLib.inf
 
   ArmPlatformSysConfigLib|ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressSysConfigLib/ArmVExpressSysConfigLib.inf
@@ -74,7 +74,6 @@
   CustomizedDisplayLib|MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf
 
 [LibraryClasses.common.SEC]
-  ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64LibSec.inf
   ArmPlatformLib|OpenPlatformPkg/Chips/Hisilicon/Library/ArmPlatformLibPv660/ArmPlatformLibSec.inf
 
 [LibraryClasses.common.DXE_RUNTIME_DRIVER]
