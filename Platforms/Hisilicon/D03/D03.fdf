@@ -317,9 +317,6 @@ READ_STATUS        = TRUE
 READ_LOCK_CAP      = TRUE
 READ_LOCK_STATUS   = TRUE
 
-!if $(EDK2_SKIP_PEICORE) == 1
-  INF ArmPlatformPkg/PrePi/PeiMPCore.inf
-!else
   APRIORI PEI {
     INF  MdeModulePkg/Universal/PCD/Pei/Pcd.inf
   }
@@ -340,7 +337,6 @@ READ_LOCK_STATUS   = TRUE
   INF OpenPlatformPkg/Platforms/Hisilicon/D03/EarlyConfigPeim/EarlyConfigPeimD03.inf
 
   INF MdeModulePkg/Core/DxeIplPeim/DxeIpl.inf
-!endif
 
   FILE FV_IMAGE = 9E21FD93-9C72-4c15-8C4B-E77F1DB2D792 {
     SECTION GUIDED EE4E5898-3914-4259-9D6E-DC7BD79403CF PROCESSING_REQUIRED = TRUE {

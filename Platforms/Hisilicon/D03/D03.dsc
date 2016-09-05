@@ -28,7 +28,6 @@
   BUILD_TARGETS                  = DEBUG|RELEASE
   SKUID_IDENTIFIER               = DEFAULT
   FLASH_DEFINITION               = OpenPlatformPkg/Platforms/Hisilicon/$(PLATFORM_NAME)/$(PLATFORM_NAME).fdf
-  DEFINE EDK2_SKIP_PEICORE=0
   DEFINE INCLUDE_TFTP_COMMAND=1
 
 !include OpenPlatformPkg/Chips/Hisilicon/Pv660/Pv660.dsc.inc
@@ -100,11 +99,6 @@
 ################################################################################
 
 [PcdsFeatureFlag.common]
-
-!if $(EDK2_SKIP_PEICORE) == 1
-  gArmPlatformTokenSpaceGuid.PcdSystemMemoryInitializeInSec|TRUE
-  gArmPlatformTokenSpaceGuid.PcdSendSgiToBringUpSecondaryCores|TRUE
-!endif
 
   ## If TRUE, Graphics Output Protocol will be installed on virtual handle created by ConsplitterDxe.
   #  It could be set FALSE to save size.
@@ -322,20 +316,6 @@
   #
   # PEI Phase modules
   #
-!if $(EDK2_SKIP_PEICORE) == 1
-  ArmPlatformPkg/PrePi/PeiMPCore.inf {
-    <LibraryClasses>
-      ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64Lib.inf
-      ArmPlatformLib|OpenPlatformPkg/Chips/Hisilicon/Library/ArmPlatformLibPv660/ArmPlatformLib.inf
-      ArmPlatformGlobalVariableLib|ArmPlatformPkg/Library/ArmPlatformGlobalVariableLib/PrePi/PrePiArmPlatformGlobalVariableLib.inf
-  }
-  ArmPlatformPkg/PrePi/PeiUniCore.inf {
-    <LibraryClasses>
-      ArmLib|ArmPkg/Library/ArmLib/AArch64/AArch64Lib.inf
-      ArmPlatformLib|OpenPlatformPkg/Chips/Hisilicon/Library/ArmPlatformLibPv660/ArmPlatformLib.inf
-      ArmPlatformGlobalVariableLib|ArmPlatformPkg/Library/ArmPlatformGlobalVariableLib/PrePi/PrePiArmPlatformGlobalVariableLib.inf
-  }
-!else
   ArmPlatformPkg/PrePeiCore/PrePeiCoreMPCore.inf
   MdeModulePkg/Core/Pei/PeiMain.inf
   MdeModulePkg/Universal/PCD/Pei/Pcd.inf
@@ -356,7 +336,6 @@
     <LibraryClasses>
       NULL|IntelFrameworkModulePkg/Library/LzmaCustomDecompressLib/LzmaCustomDecompressLib.inf
   }
-!endif
 
   #
   # DXE

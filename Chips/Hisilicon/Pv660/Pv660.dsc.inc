@@ -135,18 +135,6 @@
 
   DefaultExceptionHandlerLib|ArmPkg/Library/DefaultExceptionHandlerLib/DefaultExceptionHandlerLibBase.inf
 
-!if $(EDK2_SKIP_PEICORE) == 1
-  PrePiLib|EmbeddedPkg/Library/PrePiLib/PrePiLib.inf
-  ExtractGuidedSectionLib|EmbeddedPkg/Library/PrePiExtractGuidedSectionLib/PrePiExtractGuidedSectionLib.inf
-  LzmaDecompressLib|IntelFrameworkModulePkg/Library/LzmaCustomDecompressLib/LzmaCustomDecompressLib.inf
-  MemoryAllocationLib|EmbeddedPkg/Library/PrePiMemoryAllocationLib/PrePiMemoryAllocationLib.inf
-  HobLib|EmbeddedPkg/Library/PrePiHobLib/PrePiHobLib.inf
-  PrePiHobListPointerLib|ArmPlatformPkg/Library/PrePiHobListPointerLib/PrePiHobListPointerLib.inf
-  PerformanceLib|MdeModulePkg/Library/PeiPerformanceLib/PeiPerformanceLib.inf
-  PlatformPeiLib|ArmPlatformPkg/PlatformPei/PlatformPeiLib.inf
-  MemoryInitPeiLib|OpenPlatformPkg/Chips/Hisilicon/Override/ArmPlatformPkg/MemoryInitPei/MemoryInitPeiLib.inf
-!endif
-
   # Trustzone Support
   ArmTrustedMonitorLib|ArmPlatformPkg/Library/ArmTrustedMonitorLibNull/ArmTrustedMonitorLibNull.inf
 
