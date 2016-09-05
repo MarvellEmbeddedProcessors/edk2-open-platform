@@ -94,11 +94,6 @@
 [BuildOptions]
   GCC:*_*_AARCH64_PLATFORM_FLAGS == -I$(WORKSPACE)/ArmPlatformPkg/ArmVExpressPkg/Include -I$(WORKSPACE)/ArmPlatformPkg/ArmVExpressPkg/Include/Platform/RTSM -I$(WORKSPACE)/OpenPlatformPkg/Chips/Hisilicon/Hi1610/Include
 
-[BuildOptions.AARCH64.EDKII.UEFI_APPLICATION]
-  GCC:*_*_*_CC_FLAGS = -mcmodel=small -falign-functions=16
-  GCC:*_*_*_DLINK_FLAGS = -z common-page-size=0x1000 --sort-section=alignment
-
-
 ################################################################################
 #
 # Pcd Section - list of all EDK II PCD Entries defined by this Platform
