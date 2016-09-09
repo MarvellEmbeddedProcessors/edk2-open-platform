@@ -175,6 +175,9 @@
   # Set tick frequency value to 100Mhz
   gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|100000000
 
+  # the entire FVP address space can be covered by 36 bit VAs
+  gEmbeddedTokenSpaceGuid.PcdPrePiCpuMemorySize|36
+
 [PcdsDynamicDefault.common]
   #
   # The size of a dynamic PCD of the (VOID*) type can not be increased at run
