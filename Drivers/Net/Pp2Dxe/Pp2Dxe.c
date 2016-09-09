@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/CacheMaintenanceLib.h>
 
+#include "mvpp2_lib_hw.h"
 #include "Pp2Dxe.h"
 #include "mvpp2_lib.h"
 
@@ -732,7 +733,7 @@ Pp2SnpTransmit (
   PP2DXE_CONTEXT *Pp2Context = INSTANCE_FROM_SNP(This);
   PP2DXE_PORT *Port = &Pp2Context->Port;
   struct mvpp2_tx_queue *aggr_txq = Mvpp2Shared->aggr_txqs;
-  struct mvpp2_tx_desc *tx_desc;
+  MVPP2_TX_DESC *tx_desc;
   INTN timeout = 0;
   INTN tx_done;
   UINT8 *DataPtr = Buffer;
@@ -1064,20 +1065,20 @@ Pp2DxeInitialise (
   }
   SetMem (BufferSpace, BD_SPACE, 0x0);
 
-  BufferLocation.tx_descs = (struct mvpp2_tx_desc *)BufferSpace;
+  BufferLocation.tx_descs = (MVPP2_TX_DESC *)BufferSpace;
 
-  BufferLocation.aggr_tx_descs = (struct mvpp2_tx_desc *)
+  BufferLocation.aggr_tx_descs = (MVPP2_TX_DESC *)
     ((UINT64)BufferSpace + MVPP2_MAX_TXD
-    * sizeof(struct mvpp2_tx_desc));
+    * sizeof(MVPP2_TX_DESC));
 
   BufferLocation.rx_descs = (struct mvpp2_rx_desc *)
     ((UINT64)BufferSpace +
     (MVPP2_MAX_TXD + MVPP2_AGGR_TXQ_SIZE)
-    * sizeof(struct mvpp2_tx_desc));
+    * sizeof(MVPP2_TX_DESC));
 
   BufferLocation.rx_buffers = (UINT64)
     (BufferSpace + (MVPP2_MAX_TXD + MVPP2_AGGR_TXQ_SIZE)
-    * sizeof(struct mvpp2_tx_desc) +
+    * sizeof(MVPP2_TX_DESC) +
     MVPP2_MAX_RXD * sizeof(struct mvpp2_rx_desc));
 
   mvpp2_axi_config(Mvpp2Shared);

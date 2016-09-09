@@ -54,6 +54,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
+#include "mvpp2_lib_hw.h"
+
 #define PP2DXE_MAX_PHY  2
 
 #define PP2DXE_DEFAULT_MAC_ADDR { 0x0, 0xaf, 0x1c, 0xdd, 0xe, 0x2 }
@@ -216,29 +218,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* buffer has to be aligned to 1M */
 #define MVPP2_BUFFER_ALIGN_SIZE  (1 << 20)
-/* Types */
-typedef INT8 MV_8;
-typedef UINT8 MV_U8;
-
-typedef INT16 MV_16;
-typedef UINT16 MV_U16;
-
-typedef INT32 MV_32;
-typedef UINT32 MV_U32;
-
-typedef INT64 MV_64;
-typedef UINT64 MV_U64;
-
-typedef INTN MV_LONG;    /* 32/64 */
-typedef UINTN MV_ULONG;  /* 32/64 */
-
-typedef BOOLEAN MV_BOOL;
-typedef VOID MV_VOID;
-
-typedef EFI_STATUS MV_STATUS;
-
-#define MV_TRUE      TRUE
-#define MV_FALSE    FALSE
 
 #define __iomem
 
@@ -352,7 +331,7 @@ struct mvpp2_tx_queue {
   MV_U32 done_pkts_coal;
 
   /* Virtual address of thex Tx DMA descriptors array */
-  struct mvpp2_tx_desc *descs;
+  MVPP2_TX_DESC *descs;
 
   /* DMA address of the Tx DMA descriptors array */
   dma_addr_t descs_phys;
@@ -425,8 +404,8 @@ struct mvpp2_bm_pool {
 
 /* Structure for preallocation for buffer */
 struct buffer_location {
-  struct mvpp2_tx_desc *tx_descs;
-  struct mvpp2_tx_desc *aggr_tx_descs;
+  MVPP2_TX_DESC *tx_descs;
+  MVPP2_TX_DESC *aggr_tx_descs;
   struct mvpp2_rx_desc *rx_descs;
   dma_addr_t rx_buffers;
 };

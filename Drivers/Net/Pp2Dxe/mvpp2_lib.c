@@ -95,6 +95,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
 
+#include "mvpp2_lib_hw.h"
 #include "Pp2Dxe.h"
 #include "mvpp2_lib.h"
 
@@ -2915,7 +2916,7 @@ MV_U32 mvpp2_aggr_txq_pend_desc_num_get(struct mvpp2 *pp2, int cpu)
 }
 
 /* Get pointer to next Tx descriptor to be processed (send) by HW */
-struct mvpp2_tx_desc *
+MVPP2_TX_DESC *
 mvpp2_txq_next_desc_get(struct mvpp2_tx_queue *txq)
 {
 	MV_32 tx_desc = txq->next_desc_to_proc;
