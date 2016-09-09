@@ -382,6 +382,11 @@ DEFINE DO_KCS       = 1
   # Size of the region used by UEFI in permanent memory (Reserved 64MB)
   gArmPlatformTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x04000000
 
+  # 40 bits of VA space is sufficient to support up to 512 GB of RAM in the
+  # range 0x80_0000_0000 - 0xFF_FFFF_FFFF (all platform and PCI MMIO is below
+  # that)
+  gEmbeddedTokenSpaceGuid.PcdPrePiCpuMemorySize|40
+
   #
   # ARM PrimeCell
   #
