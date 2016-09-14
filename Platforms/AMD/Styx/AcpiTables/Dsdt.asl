@@ -554,9 +554,9 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "AMDINC", "SEATTLE ", 3)
                     WordBusNumber (ResourceProducer, MinFixed, MaxFixed, PosDecode,
                         0x0000,             // Granularity
                         0x0000,             // Range Minimum
-                        0x000F,             // Range Maximum
+                        0x007F,             // Range Maximum
                         0x0000,             // Translation Offset
-                        0x0010,             // Length
+                        0x0080,             // Length
                         )
                     DWordMemory (ResourceProducer, PosDecode, MinFixed, MaxFixed, NonCacheable, ReadWrite,
                         0x00000000,         // Granularity
@@ -637,10 +637,14 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "AMDINC", "SEATTLE ", 3)
                         )
                     DWordIo (ResourceProducer, MinFixed, MaxFixed, PosDecode, EntireRange,
                         0x00000000,         // Granularity
-                        0xEFFF0000,         // Range Minimum
-                        0xEFFFFFFF,         // Range Maximum
+                        0x00000000,         // Range Minimum
+                        0x0000FFFF,         // Range Maximum
                         0xEFFF0000,         // Translation Address
-                        0x00010000          // Length
+                        0x00010000,         // Length
+                        ,
+                        ,
+                        ,
+                        TypeTranslation
                         )
                 })
                 Return (RBUF) /* \_SB_.PCI0._CRS.RBUF */
