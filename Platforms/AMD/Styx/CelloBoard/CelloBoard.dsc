@@ -659,3 +659,7 @@ DEFINE DO_KCS    = 0
       gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
       gEfiMdePkgTokenSpaceGuid.PcdUefiLibMaxPrintBufferSize|8000
   }
+
+!ifdef $(RENESAS_XHCI_FW_DIR)
+  OpenPlatformPkg/Drivers/Xhci/RenesasFirmwarePD720202/RenesasFirmwarePD720202.inf
+!endif

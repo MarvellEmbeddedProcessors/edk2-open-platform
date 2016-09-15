@@ -218,6 +218,16 @@ READ_LOCK_STATUS   = TRUE
   #
   INF OpenPlatformPkg/Platforms/AMD/Styx/Drivers/StyxRngDxe/StyxRngDxe.inf
 
+  #
+  # Renesas PD720202 XHCI firmware uploader, requires firmware image
+  # in directory $(RENESAS_XHCI_FW_DIR)
+  #
+!ifdef $(RENESAS_XHCI_FW_DIR)
+  INF OpenPlatformPkg/Drivers/Xhci/RenesasFirmwarePD720202/RenesasFirmwarePD720202.inf
+  FILE FREEFORM = A059EBC4-D73D-4279-81BF-E4A89308B923 {
+    SECTION RAW = $(RENESAS_XHCI_FW_DIR)/K2013080.mem
+  }
+!endif
 
 [FV.STYX_EFI]
 FvAlignment        = 16
