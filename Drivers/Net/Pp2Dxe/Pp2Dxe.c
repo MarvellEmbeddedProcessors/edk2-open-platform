@@ -148,7 +148,7 @@ Pp2DxeBmPoolInit (
             MVPP2_BM_POOL_PTR_ALIGN);
 
   Mvpp2Shared->bm_pools->id = MVPP2_BM_POOL;
-  Mvpp2Shared->bm_pools->virt_addr = (MV_U32*)pool_addr;
+  Mvpp2Shared->bm_pools->virt_addr = (UINT32*)pool_addr;
   Mvpp2Shared->bm_pools->phys_addr = (UINT64)pool_addr;
 
   mvpp2_bm_pool_hw_create(Mvpp2Shared, Mvpp2Shared->bm_pools, MVPP2_BM_SIZE);

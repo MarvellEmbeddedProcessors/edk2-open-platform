@@ -98,29 +98,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __MVPP2_LIB_HW__
 #define __MVPP2_LIB_HW__
 
-/* Types */
-typedef INT8 MV_8;
-typedef UINT8 MV_U8;
-
-typedef INT16 MV_16;
-typedef UINT16 MV_U16;
-
-typedef INT32 MV_32;
-typedef UINT32 MV_U32;
-
-typedef INT64 MV_64;
-typedef UINT64 MV_U64;
-
-typedef INTN MV_LONG;    /* 32/64 */
-typedef UINTN MV_ULONG;  /* 32/64 */
-
-typedef BOOLEAN MV_BOOL;
-typedef VOID MV_VOID;
-
-typedef EFI_STATUS MV_STATUS;
-
-#define MV_TRUE      TRUE
-#define MV_FALSE    FALSE
 #ifndef BIT
 #define BIT(nr)					(1 << (nr))
 #endif
@@ -1266,10 +1243,10 @@ enum mvpp2_tag_type {
 #define MVPP2_PRS_DBL_VLAN_AI_BIT		BIT(7)
 
 /* DSA/EDSA type */
-#define MVPP2_PRS_TAGGED		MV_TRUE
-#define MVPP2_PRS_UNTAGGED		MV_FALSE
-#define MVPP2_PRS_EDSA			MV_TRUE
-#define MVPP2_PRS_DSA			MV_FALSE
+#define MVPP2_PRS_TAGGED		TRUE
+#define MVPP2_PRS_UNTAGGED		FALSE
+#define MVPP2_PRS_EDSA			TRUE
+#define MVPP2_PRS_DSA			FALSE
 
 /* MAC entries, shadow udf */
 enum mvpp2_prs_udf {
@@ -1357,93 +1334,93 @@ enum mvpp2_prs_l3_cast {
 #define MVPP2_RXD_BUF_HDR		BIT(31)
 
 typedef struct {
-	MV_U32 command;		/* Options used by HW for packet transmitting.*/
-	MV_U8  packet_offset;	/* the offset from the buffer beginning	*/
-	MV_U8  phys_txq;		/* destination queue ID			*/
-	MV_U16 data_size;		/* data size of transmitted packet in bytes */
+	UINT32 command;		/* Options used by HW for packet transmitting.*/
+	UINT8  packet_offset;	/* the offset from the buffer beginning	*/
+	UINT8  phys_txq;		/* destination queue ID			*/
+	UINT16 data_size;		/* data size of transmitted packet in bytes */
 #ifdef MVPP2_V1
-	MV_U32 buf_phys_addr;	/* physical addr of transmitted buffer	*/
-	MV_U32 buf_cookie;		/* cookie for access to TX buffer in tx path */
-	MV_U32 reserved1[3];	/* hw_cmd (for future use, BM, PON, PNC) */
-	MV_U32 reserved2;		/* reserved (for future use)		*/
+	UINT32 buf_phys_addr;	/* physical addr of transmitted buffer	*/
+	UINT32 buf_cookie;		/* cookie for access to TX buffer in tx path */
+	UINT32 reserved1[3];	/* hw_cmd (for future use, BM, PON, PNC) */
+	UINT32 reserved2;		/* reserved (for future use)		*/
 #else
-	MV_U64 rsrvd_hw_cmd1;	/* hw_cmd (BM, PON, PNC) */
-	MV_U64 buf_phys_addr_hw_cmd2;
-	MV_U64 buf_cookie_bm_qset_hw_cmd3;
+	UINT64 rsrvd_hw_cmd1;	/* hw_cmd (BM, PON, PNC) */
+	UINT64 buf_phys_addr_hw_cmd2;
+	UINT64 buf_cookie_bm_qset_hw_cmd3;
 #endif
 } MVPP2_TX_DESC;
 
 struct mvpp2_rx_desc {
-	MV_U32 status;		/* info about received packet		*/
-	MV_U16 reserved1;		/* parser_info (for future use, PnC)	*/
-	MV_U16 data_size;		/* size of received packet in bytes	*/
+	UINT32 status;		/* info about received packet		*/
+	UINT16 reserved1;		/* parser_info (for future use, PnC)	*/
+	UINT16 data_size;		/* size of received packet in bytes	*/
 #ifdef MVPP2_V1
-	MV_U32 buf_phys_addr;	/* physical address of the buffer	*/
-	MV_U32 buf_cookie;		/* cookie for access to RX buffer in rx path */
-	MV_U16 reserved2;		/* gem_port_id (for future use, PON)	*/
-	MV_U16 reserved3;		/* csum_l4 (for future use, PnC)	*/
-	MV_U8  reserved4;		/* bm_qset (for future use, BM)		*/
-	MV_U8  reserved5;
-	MV_U16 reserved6;		/* classify_info (for future use, PnC)	*/
-	MV_U32 reserved7;		/* flow_id (for future use, PnC) */
-	MV_U32 reserved8;
+	UINT32 buf_phys_addr;	/* physical address of the buffer	*/
+	UINT32 buf_cookie;		/* cookie for access to RX buffer in rx path */
+	UINT16 reserved2;		/* gem_port_id (for future use, PON)	*/
+	UINT16 reserved3;		/* csum_l4 (for future use, PnC)	*/
+	UINT8  reserved4;		/* bm_qset (for future use, BM)		*/
+	UINT8  reserved5;
+	UINT16 reserved6;		/* classify_info (for future use, PnC)	*/
+	UINT32 reserved7;		/* flow_id (for future use, PnC) */
+	UINT32 reserved8;
 #else
-	MV_U16 rsrvd_gem;		/* gem_port_id (for future use, PON)	*/
-	MV_U16 rsrvd_l4csum;	/* csum_l4 (for future use, PnC)	*/
-	MV_U32 rsrvd_timestamp;
-	MV_U64 buf_phys_addr_key_hash;
-	MV_U64 buf_cookie_bm_qset_cls_info;
+	UINT16 rsrvd_gem;		/* gem_port_id (for future use, PON)	*/
+	UINT16 rsrvd_l4csum;	/* csum_l4 (for future use, PnC)	*/
+	UINT32 rsrvd_timestamp;
+	UINT64 buf_phys_addr_key_hash;
+	UINT64 buf_cookie_bm_qset_cls_info;
 #endif
 };
 
 union mvpp2_prs_tcam_entry {
-	MV_U32 word[MVPP2_PRS_TCAM_WORDS];
-	MV_U8  byte[MVPP2_PRS_TCAM_WORDS * 4];
+	UINT32 word[MVPP2_PRS_TCAM_WORDS];
+	UINT8  byte[MVPP2_PRS_TCAM_WORDS * 4];
 };
 
 union mvpp2_prs_sram_entry {
-	MV_U32 word[MVPP2_PRS_SRAM_WORDS];
-	MV_U8  byte[MVPP2_PRS_SRAM_WORDS * 4];
+	UINT32 word[MVPP2_PRS_SRAM_WORDS];
+	UINT8  byte[MVPP2_PRS_SRAM_WORDS * 4];
 };
 
 struct mvpp2_prs_entry {
-	MV_U32 index;
+	UINT32 index;
 	union mvpp2_prs_tcam_entry tcam;
 	union mvpp2_prs_sram_entry sram;
 };
 
 struct mvpp2_prs_shadow {
-	MV_BOOL valid;
-	MV_BOOL finish;
+	BOOLEAN valid;
+	BOOLEAN finish;
 
 	/* Lookup ID */
-	MV_32 lu;
+	INT32 lu;
 
 	/* User defined offset */
-	MV_32 udf;
+	INT32 udf;
 
 	/* Result info */
-	MV_U32 ri;
-	MV_U32 ri_mask;
+	UINT32 ri;
+	UINT32 ri_mask;
 };
 
 struct mvpp2_cls_flow_entry {
-	MV_U32 index;
-	MV_U32 data[MVPP2_CLS_FLOWS_TBL_DATA_WORDS];
+	UINT32 index;
+	UINT32 data[MVPP2_CLS_FLOWS_TBL_DATA_WORDS];
 };
 
 struct mvpp2_cls_lookup_entry {
-	MV_U32 lkpid;
-	MV_U32 way;
-	MV_U32 data;
+	UINT32 lkpid;
+	UINT32 way;
+	UINT32 data;
 };
 
 struct mvpp2_buff_hdr {
-	MV_U32 next_buff_phys_addr;
-	MV_U32 next_buff_virt_addr;
-	MV_U16 byte_count;
-	MV_U16 info;
-	MV_U8  reserved1;		/* bm_qset (for future use, BM)		*/
+	UINT32 next_buff_phys_addr;
+	UINT32 next_buff_virt_addr;
+	UINT16 byte_count;
+	UINT16 info;
+	UINT8  reserved1;		/* bm_qset (for future use, BM)		*/
 };
 
 /* Buffer header info bits */
