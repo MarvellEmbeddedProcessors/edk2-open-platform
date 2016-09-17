@@ -106,122 +106,122 @@ static INT32 rxq_number = 1;
 /* Number of TXQs used by single port */
 static INT32 txq_number = 1;
 
-VOID mvpp2_prs_mac_promisc_set(struct mvpp2 *priv, INT32 port, BOOLEAN add);
-VOID mvpp2_prs_mac_multi_set(struct mvpp2 *priv, INT32 port, INT32 index,
+VOID mvpp2_prs_mac_promisc_set(MVPP2_SHARED *priv, INT32 port, BOOLEAN add);
+VOID mvpp2_prs_mac_multi_set(MVPP2_SHARED *priv, INT32 port, INT32 index,
         BOOLEAN add);
-INT32 mvpp2_prs_default_init(struct mvpp2 *priv);
-INT32 mvpp2_prs_mac_da_accept(struct mvpp2 *priv, INT32 port,
+INT32 mvpp2_prs_default_init(MVPP2_SHARED *priv);
+INT32 mvpp2_prs_mac_da_accept(MVPP2_SHARED *priv, INT32 port,
             const UINT8 *da, BOOLEAN add);
-VOID mvpp2_prs_mcast_del_all(struct mvpp2 *priv, INT32 port);
-INT32 mvpp2_prs_tag_mode_set(struct mvpp2 *priv, INT32 port, INT32 type);
-INT32 mvpp2_prs_def_flow(struct mvpp2_port *port);
-VOID mvpp2_cls_init(struct mvpp2 *priv);
-VOID mvpp2_cls_port_config(struct mvpp2_port *port);
-VOID mvpp2_cls_oversize_rxq_set(struct mvpp2_port *port);
-VOID mvpp2_bm_pool_hw_create(struct mvpp2 *priv,
-        struct mvpp2_bm_pool *bm_pool, INT32 size);
-VOID mvpp2_bm_pool_bufsize_set(struct mvpp2 *priv,
-             struct mvpp2_bm_pool *bm_pool,
+VOID mvpp2_prs_mcast_del_all(MVPP2_SHARED *priv, INT32 port);
+INT32 mvpp2_prs_tag_mode_set(MVPP2_SHARED *priv, INT32 port, INT32 type);
+INT32 mvpp2_prs_def_flow(PP2DXE_PORT *port);
+VOID mvpp2_cls_init(MVPP2_SHARED *priv);
+VOID mvpp2_cls_port_config(PP2DXE_PORT *port);
+VOID mvpp2_cls_oversize_rxq_set(PP2DXE_PORT *port);
+VOID mvpp2_bm_pool_hw_create(MVPP2_SHARED *priv,
+        MVPP2_BMS_POOL *bm_pool, INT32 size);
+VOID mvpp2_bm_pool_bufsize_set(MVPP2_SHARED *priv,
+             MVPP2_BMS_POOL *bm_pool,
              INT32 buf_size);
-VOID mvpp2_bm_stop(struct mvpp2 *priv, INT32 pool);
-VOID mvpp2_bm_irq_clear(struct mvpp2 *priv, INT32 pool);
-VOID mvpp2_rxq_long_pool_set(struct mvpp2_port *port,
+VOID mvpp2_bm_stop(MVPP2_SHARED *priv, INT32 pool);
+VOID mvpp2_bm_irq_clear(MVPP2_SHARED *priv, INT32 pool);
+VOID mvpp2_rxq_long_pool_set(PP2DXE_PORT *port,
         INT32 lrxq, INT32 long_pool);
-VOID mvpp2_rxq_short_pool_set(struct mvpp2_port *port,
+VOID mvpp2_rxq_short_pool_set(PP2DXE_PORT *port,
          INT32 lrxq, INT32 short_pool);
-VOID mvpp2_bm_pool_mc_put(struct mvpp2_port *port, INT32 pool,
+VOID mvpp2_bm_pool_mc_put(PP2DXE_PORT *port, INT32 pool,
            UINT32 buf_phys_addr, UINT32 buf_virt_addr,
            INT32 mc_id);
-VOID mvpp2_pool_refill(struct mvpp2_port *port, UINT32 bm,
+VOID mvpp2_pool_refill(PP2DXE_PORT *port, UINT32 bm,
         UINT32 phys_addr, UINT32 cookie);
 VOID mvpp2_interrupts_mask(VOID *arg);
 VOID mvpp2_interrupts_unmask(VOID *arg);
-VOID mvpp2_port_enable(struct mvpp2_port *port);
-VOID mvpp2_port_disable(struct mvpp2_port *port);
-VOID mvpp2_defaults_set(struct mvpp2_port *port);
-VOID mvpp2_ingress_enable(struct mvpp2_port *port);
-VOID mvpp2_ingress_disable(struct mvpp2_port *port);
-VOID mvpp2_egress_enable(struct mvpp2_port *port);
-VOID mvpp2_egress_disable(struct mvpp2_port *port);
-UINT32 mvpp2_bm_cookie_build(struct mvpp2_rx_desc *rx_desc, INT32 cpu);
-INT32 mvpp2_txq_drain_set(struct mvpp2_port *port, INT32 txq, BOOLEAN en);
-INT32 mvpp2_txq_pend_desc_num_get(struct mvpp2_port *port,
-          struct mvpp2_tx_queue *txq);
-UINT32 mvpp2_aggr_txq_pend_desc_num_get(struct mvpp2 *pp2, int cpu);
+VOID mvpp2_port_enable(PP2DXE_PORT *port);
+VOID mvpp2_port_disable(PP2DXE_PORT *port);
+VOID mvpp2_defaults_set(PP2DXE_PORT *port);
+VOID mvpp2_ingress_enable(PP2DXE_PORT *port);
+VOID mvpp2_ingress_disable(PP2DXE_PORT *port);
+VOID mvpp2_egress_enable(PP2DXE_PORT *port);
+VOID mvpp2_egress_disable(PP2DXE_PORT *port);
+UINT32 mvpp2_bm_cookie_build(MVPP2_RX_DESC *rx_desc, INT32 cpu);
+INT32 mvpp2_txq_drain_set(PP2DXE_PORT *port, INT32 txq, BOOLEAN en);
+INT32 mvpp2_txq_pend_desc_num_get(PP2DXE_PORT *port,
+          MVPP2_TX_QUEUE *txq);
+UINT32 mvpp2_aggr_txq_pend_desc_num_get(MVPP2_SHARED *pp2, int cpu);
 MVPP2_TX_DESC *
-mvpp2_txq_next_desc_get(struct mvpp2_tx_queue *txq);
-VOID mvpp2_aggr_txq_pend_desc_add(struct mvpp2_port *port, INT32 pending);
-INT32 mvpp2_aggr_desc_num_check(struct mvpp2 *priv,
-        struct mvpp2_tx_queue *aggr_txq,
+mvpp2_txq_next_desc_get(MVPP2_TX_QUEUE *txq);
+VOID mvpp2_aggr_txq_pend_desc_add(PP2DXE_PORT *port, INT32 pending);
+INT32 mvpp2_aggr_desc_num_check(MVPP2_SHARED *priv,
+        MVPP2_TX_QUEUE *aggr_txq,
         INT32 num, INT32 cpu);
-INT32 mvpp2_txq_alloc_reserved_desc(struct mvpp2 *priv,
-            struct mvpp2_tx_queue *txq, INT32 num);
-VOID mvpp2_txq_desc_put(struct mvpp2_tx_queue *txq);
+INT32 mvpp2_txq_alloc_reserved_desc(MVPP2_SHARED *priv,
+            MVPP2_TX_QUEUE *txq, INT32 num);
+VOID mvpp2_txq_desc_put(MVPP2_TX_QUEUE *txq);
 UINT32 mvpp2_txq_desc_csum(INT32 l3_offs, INT32 l3_proto,
          INT32 ip_hdr_len, INT32 l4_proto);
 VOID mvpp2_txq_sent_counter_clear(VOID *arg);
-VOID mvpp2_gmac_max_rx_size_set(struct mvpp2_port *port);
-VOID mvpp2_txp_max_tx_size_set(struct mvpp2_port *port);
-VOID mvpp2_rx_pkts_coal_set(struct mvpp2_port *port,
-             struct mvpp2_rx_queue *rxq, UINT32 pkts);
-VOID mvpp2_rx_time_coal_set(struct mvpp2_port *port,
-             struct mvpp2_rx_queue *rxq, UINT32 usec);
-VOID mvpp2_aggr_txq_hw_init(struct mvpp2_tx_queue *aggr_txq,
+VOID mvpp2_gmac_max_rx_size_set(PP2DXE_PORT *port);
+VOID mvpp2_txp_max_tx_size_set(PP2DXE_PORT *port);
+VOID mvpp2_rx_pkts_coal_set(PP2DXE_PORT *port,
+             MVPP2_RX_QUEUE *rxq, UINT32 pkts);
+VOID mvpp2_rx_time_coal_set(PP2DXE_PORT *port,
+             MVPP2_RX_QUEUE *rxq, UINT32 usec);
+VOID mvpp2_aggr_txq_hw_init(MVPP2_TX_QUEUE *aggr_txq,
              INT32 desc_num, INT32 cpu,
-             struct mvpp2 *priv);
-VOID mvpp2_rxq_hw_init(struct mvpp2_port *port,
-        struct mvpp2_rx_queue *rxq);
-VOID mvpp2_rxq_drop_pkts(struct mvpp2_port *port,
-          struct mvpp2_rx_queue *rxq,
+             MVPP2_SHARED *priv);
+VOID mvpp2_rxq_hw_init(PP2DXE_PORT *port,
+        MVPP2_RX_QUEUE *rxq);
+VOID mvpp2_rxq_drop_pkts(PP2DXE_PORT *port,
+          MVPP2_RX_QUEUE *rxq,
           INT32 cpu);
-VOID mvpp2_txq_hw_init(struct mvpp2_port *port,
-        struct mvpp2_tx_queue *txq);
-VOID mvpp2_txq_hw_deinit(struct mvpp2_port *port,
-          struct mvpp2_tx_queue *txq);
-VOID mvpp2_port_power_up(struct mvpp2_port *port);
-VOID mvpp2_rx_fifo_init(struct mvpp2 *priv);
-VOID mvpp2_rxq_hw_deinit(struct mvpp2_port *port,
-          struct mvpp2_rx_queue *rxq);
-UINT32 mvp_pp2x_gop110_netc_cfg_create(struct mvpp2_port *pp2_port);
-INT32 mv_gop110_netc_init(struct mvpp2_port *mvport,
+VOID mvpp2_txq_hw_init(PP2DXE_PORT *port,
+        MVPP2_TX_QUEUE *txq);
+VOID mvpp2_txq_hw_deinit(PP2DXE_PORT *port,
+          MVPP2_TX_QUEUE *txq);
+VOID mvpp2_port_power_up(PP2DXE_PORT *port);
+VOID mvpp2_rx_fifo_init(MVPP2_SHARED *priv);
+VOID mvpp2_rxq_hw_deinit(PP2DXE_PORT *port,
+          MVPP2_RX_QUEUE *rxq);
+UINT32 mvp_pp2x_gop110_netc_cfg_create(PP2DXE_PORT *pp2_port);
+INT32 mv_gop110_netc_init(PP2DXE_PORT *mvport,
       UINT32 net_comp_config, enum mv_netc_phase phase);
 
-UINT32 mvp_pp2x_gop110_netc_cfg_create(struct mvpp2_port *pp2_port);
-INT32 mv_gop110_port_init(struct mvpp2_port *pp2_port);
-INT32 mv_gop110_gmac_reset(struct mvpp2_port *pp2_port, enum mv_reset reset);
-INT32 mv_gop110_gpcs_mode_cfg(struct mvpp2_port *pp2_port, BOOLEAN en);
-INT32 mv_gop110_bypass_clk_cfg(struct mvpp2_port *pp2_port, BOOLEAN en);
-INT32 mv_gop110_gpcs_reset(struct mvpp2_port *pp2_port, enum mv_reset act);
-VOID mv_gop110_xlg_2_gig_mac_cfg(struct mvpp2_port *pp2_port);
-INT32 mv_gop110_gmac_mode_cfg(struct mvpp2_port *pp2_port);
-VOID mv_gop110_gmac_rgmii_cfg(struct mvpp2_port *pp2_port);
-VOID mv_gop110_gmac_sgmii2_5_cfg(struct mvpp2_port *pp2_port);
-VOID mv_gop110_gmac_sgmii_cfg(struct mvpp2_port *pp2_port);
-VOID mv_gop110_gmac_qsgmii_cfg(struct mvpp2_port *pp2_port);
-INT32 mvpp2_smi_phy_addr_cfg(struct mvpp2_port *pp2_port, INT32 port, INT32 addr);
-BOOLEAN mv_gop110_port_is_link_up(struct mvpp2_port *pp2_port);
-BOOLEAN mv_gop110_gmac_link_status_get(struct mvpp2_port *pp2_port);
-INTN mvpp2_bm_pool_ctrl(struct mvpp2 *pp2, INTN pool,
+UINT32 mvp_pp2x_gop110_netc_cfg_create(PP2DXE_PORT *pp2_port);
+INT32 mv_gop110_port_init(PP2DXE_PORT *pp2_port);
+INT32 mv_gop110_gmac_reset(PP2DXE_PORT *pp2_port, enum mv_reset reset);
+INT32 mv_gop110_gpcs_mode_cfg(PP2DXE_PORT *pp2_port, BOOLEAN en);
+INT32 mv_gop110_bypass_clk_cfg(PP2DXE_PORT *pp2_port, BOOLEAN en);
+INT32 mv_gop110_gpcs_reset(PP2DXE_PORT *pp2_port, enum mv_reset act);
+VOID mv_gop110_xlg_2_gig_mac_cfg(PP2DXE_PORT *pp2_port);
+INT32 mv_gop110_gmac_mode_cfg(PP2DXE_PORT *pp2_port);
+VOID mv_gop110_gmac_rgmii_cfg(PP2DXE_PORT *pp2_port);
+VOID mv_gop110_gmac_sgmii2_5_cfg(PP2DXE_PORT *pp2_port);
+VOID mv_gop110_gmac_sgmii_cfg(PP2DXE_PORT *pp2_port);
+VOID mv_gop110_gmac_qsgmii_cfg(PP2DXE_PORT *pp2_port);
+INT32 mvpp2_smi_phy_addr_cfg(PP2DXE_PORT *pp2_port, INT32 port, INT32 addr);
+BOOLEAN mv_gop110_port_is_link_up(PP2DXE_PORT *pp2_port);
+BOOLEAN mv_gop110_gmac_link_status_get(PP2DXE_PORT *pp2_port);
+INTN mvpp2_bm_pool_ctrl(MVPP2_SHARED *pp2, INTN pool,
     enum mvpp2_command cmd);
-VOID mv_gop110_port_disable(struct mvpp2_port *pp2_port);
-VOID mv_gop110_port_enable(struct mvpp2_port *pp2_port);
-VOID mv_gop110_gmac_port_enable(struct mvpp2_port *pp2_port);
-VOID mv_gop110_gmac_port_disable(struct mvpp2_port *pp2_port);
-VOID mv_gop110_gmac_port_link_event_mask(struct mvpp2_port *pp2_port);
-INT32 mv_gop110_port_events_mask(struct mvpp2_port *pp2_port);
-INT32 mv_gop110_fl_cfg(struct mvpp2_port *pp2_port);
-INT32 mv_gop110_speed_duplex_set(struct mvpp2_port *pp2_port,
+VOID mv_gop110_port_disable(PP2DXE_PORT *pp2_port);
+VOID mv_gop110_port_enable(PP2DXE_PORT *pp2_port);
+VOID mv_gop110_gmac_port_enable(PP2DXE_PORT *pp2_port);
+VOID mv_gop110_gmac_port_disable(PP2DXE_PORT *pp2_port);
+VOID mv_gop110_gmac_port_link_event_mask(PP2DXE_PORT *pp2_port);
+INT32 mv_gop110_port_events_mask(PP2DXE_PORT *pp2_port);
+INT32 mv_gop110_fl_cfg(PP2DXE_PORT *pp2_port);
+INT32 mv_gop110_speed_duplex_set(PP2DXE_PORT *pp2_port,
       INT32 speed, enum mv_port_duplex duplex);
-INT32 mv_gop110_gmac_speed_duplex_set(struct mvpp2_port *pp2_port,
+INT32 mv_gop110_gmac_speed_duplex_set(PP2DXE_PORT *pp2_port,
   INT32 speed, enum mv_port_duplex duplex);
-VOID mvpp2_axi_config(struct mvpp2 *pp2);
-VOID mvpp2_txp_clean(struct mvpp2_port *pp, INT32 txp,
-          struct mvpp2_tx_queue *txq);
-VOID mvpp2_cleanup_txqs(struct mvpp2_port *pp);
-VOID mvpp2_cleanup_rxqs(struct mvpp2_port *pp);
+VOID mvpp2_axi_config(MVPP2_SHARED *pp2);
+VOID mvpp2_txp_clean(PP2DXE_PORT *pp, INT32 txp,
+          MVPP2_TX_QUEUE *txq);
+VOID mvpp2_cleanup_txqs(PP2DXE_PORT *pp);
+VOID mvpp2_cleanup_rxqs(PP2DXE_PORT *pp);
 
 /* Get number of physical egress port */
-static inline INT32 mvpp2_egress_port(struct mvpp2_port *port)
+static inline INT32 mvpp2_egress_port(PP2DXE_PORT *port)
 {
   return MVPP2_MAX_TCONT + port->id;
 }
@@ -251,14 +251,14 @@ static inline INT32 mvpp2_bm_cookie_pool_get(UINT32 cookie)
 
 #ifdef MVPP2_V1
 /* Release buffer to BM */
-static inline VOID mvpp2_bm_pool_put(struct mvpp2 *pp2, INT32 pool,
+static inline VOID mvpp2_bm_pool_put(MVPP2_SHARED *pp2, INT32 pool,
             UINT32 buf_phys_addr, UINT32 buf_virt_addr)
 {
   mvpp2_write(port->priv, MVPP2_BM_VIRT_RLS_REG, buf_virt_addr);
   mvpp2_write(port->priv, MVPP2_BM_PHY_RLS_REG(pool), buf_phys_addr);
 }
 #else
-static inline VOID mvpp2_bm_pool_put(struct mvpp2 *pp2, INT32 pool,
+static inline VOID mvpp2_bm_pool_put(MVPP2_SHARED *pp2, INT32 pool,
             UINT64 buf_phys_addr, UINT64 buf_virt_addr)
 {
   UINT32 val = 0;
@@ -273,14 +273,14 @@ static inline VOID mvpp2_bm_pool_put(struct mvpp2 *pp2, INT32 pool,
 }
 #endif
 
-static inline VOID mvpp2_interrupts_enable(struct mvpp2_port *port,
+static inline VOID mvpp2_interrupts_enable(PP2DXE_PORT *port,
              INT32 cpu_mask)
 {
   mvpp2_write(port->priv, MVPP2_ISR_ENABLE_REG(port->id),
         MVPP2_ISR_ENABLE_INTERRUPT(cpu_mask));
 }
 
-static inline VOID mvpp2_interrupts_disable(struct mvpp2_port *port,
+static inline VOID mvpp2_interrupts_disable(PP2DXE_PORT *port,
               INT32 cpu_mask)
 {
   mvpp2_write(port->priv, MVPP2_ISR_ENABLE_REG(port->id),
@@ -289,7 +289,7 @@ static inline VOID mvpp2_interrupts_disable(struct mvpp2_port *port,
 
 /* Get number of Rx descriptors occupied by received packets */
 static inline INT32
-mvpp2_rxq_received(struct mvpp2_port *port, INT32 rxq_id)
+mvpp2_rxq_received(PP2DXE_PORT *port, INT32 rxq_id)
 {
   UINT32 val = mvpp2_read(port->priv, MVPP2_RXQ_STATUS_REG(rxq_id));
 
@@ -300,7 +300,7 @@ mvpp2_rxq_received(struct mvpp2_port *port, INT32 rxq_id)
  * Rx descriptor slots.
  */
 static inline VOID
-mvpp2_rxq_status_update(struct mvpp2_port *port, INT32 rxq_id,
+mvpp2_rxq_status_update(PP2DXE_PORT *port, INT32 rxq_id,
       INT32 used_count, INT32 free_count)
 {
   /* Decrement the number of used descriptors and increment count
@@ -312,8 +312,8 @@ mvpp2_rxq_status_update(struct mvpp2_port *port, INT32 rxq_id,
 }
 
 /* Get pointer to next RX descriptor to be processed by SW */
-static inline struct mvpp2_rx_desc *
-mvpp2_rxq_next_desc_get(struct mvpp2_rx_queue *rxq)
+static inline MVPP2_RX_DESC *
+mvpp2_rxq_next_desc_get(MVPP2_RX_QUEUE *rxq)
 {
   INT32 rx_desc = rxq->next_desc_to_proc;
 
@@ -326,8 +326,8 @@ mvpp2_rxq_next_desc_get(struct mvpp2_rx_queue *rxq)
  * The number of sent descriptors is returned.
  * Per-CPU access
  */
-static inline INT32 mvpp2_txq_sent_desc_proc(struct mvpp2_port *port,
-            struct mvpp2_tx_queue *txq)
+static inline INT32 mvpp2_txq_sent_desc_proc(PP2DXE_PORT *port,
+            MVPP2_TX_QUEUE *txq)
 {
   UINT32 val;
 
@@ -342,7 +342,7 @@ static inline INT32 mvpp2_txq_sent_desc_proc(struct mvpp2_port *port,
     MVPP2_TRANSMITTED_COUNT_OFFSET;
 }
 
-static inline struct mvpp2_rx_queue *mvpp2_get_rx_queue(struct mvpp2_port *port,
+static inline MVPP2_RX_QUEUE *mvpp2_get_rx_queue(PP2DXE_PORT *port,
              UINT32 cause)
 {
   INT32 queue = mvpp2_fls(cause) - 1;
@@ -350,7 +350,7 @@ static inline struct mvpp2_rx_queue *mvpp2_get_rx_queue(struct mvpp2_port *port,
   return &port->rxqs[queue];
 }
 
-static inline struct mvpp2_tx_queue *mvpp2_get_tx_queue(struct mvpp2_port *port,
+static inline MVPP2_TX_QUEUE *mvpp2_get_tx_queue(PP2DXE_PORT *port,
              UINT32 cause)
 {
   INT32 queue = mvpp2_fls(cause) - 1;

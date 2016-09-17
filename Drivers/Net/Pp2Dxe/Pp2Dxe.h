@@ -242,80 +242,9 @@ enum mvpp2_command {
 
 /* Structures */
 
-/* Individual port structure */
-struct mvpp2_port {
-  UINT8 id;
-  UINT8 gop_index;
-
-  INT32 irq;
-
-  struct mvpp2 *priv;
-
-  /* Per-port registers' base address */
-  UINT64 gmac_base;
-  UINT64 xlg_base;
-
-  struct mvpp2_rx_queue *rxqs;
-  struct mvpp2_tx_queue *txqs;
-
-  INT32 pkt_size;
-
-  UINT32 pending_cause_rx;
-
-  /* Per-CPU port control */
-
-  /* Flags */
-  UINTN flags;
-
-  UINT16 tx_ring_size;
-  UINT16 rx_ring_size;
-
-  INT32 phy_interface;
-  BOOLEAN link;
-  BOOLEAN duplex;
-  BOOLEAN always_up;
-  PHY_SPEED speed;
-
-  struct mvpp2_bm_pool *pool_long;
-  struct mvpp2_bm_pool *pool_short;
-
-  UINT8 txp_num;
-
-  /* Index of first port's physical RXQ */
-  UINT8 first_rxq;
-};
-
-typedef struct mvpp2_port PP2DXE_PORT;
-
-/* Shared Packet Processor resources */
-struct mvpp2 {
-  /* Shared registers' base addresses */
-  UINT64 __iomem base;
-  UINT64 __iomem rfu1_base;
-  UINT64 __iomem smi_base;
-  VOID __iomem *lms_base;
-
-  /* List of pointers to port structures */
-  struct mvpp2_port **port_list;
-
-  /* Aggregated TXQs */
-  struct mvpp2_tx_queue *aggr_txqs;
-
-  /* BM pools */
-  struct mvpp2_bm_pool *bm_pools;
-
-  /* PRS shadow table */
-  struct mvpp2_prs_shadow *prs_shadow;
-  /* PRS auxiliary table for double vlan entries control */
-  BOOLEAN *prs_double_vlans;
-
-  /* Tclk value */
-  UINT32 tclk;
-};
-
 typedef struct mvpp2 MVPP2_SHARED;
 
-struct mvpp2_tx_queue {
+typedef struct {
   /* Physical number of this Tx queue */
   UINT8 id;
 
@@ -341,9 +270,9 @@ struct mvpp2_tx_queue {
 
   /* Index of the next Tx DMA descriptor to process */
   INT32 next_desc_to_proc;
-};
+} MVPP2_TX_QUEUE;
 
-struct mvpp2_rx_queue {
+typedef struct {
   /* RX queue number, in the range 0-31 for physical RXQs */
   UINT8 id;
 
@@ -354,7 +283,7 @@ struct mvpp2_rx_queue {
   UINT32 time_coal;
 
   /* Virtual address of the RX DMA descriptors array */
-  struct mvpp2_rx_desc *descs;
+  MVPP2_RX_DESC *descs;
 
   /* DMA address of the RX DMA descriptors array */
   dma_addr_t descs_phys;
@@ -370,7 +299,7 @@ struct mvpp2_rx_queue {
 
   /* Port's logic RXQ number to which physical RXQ is mapped */
   INT32 logic_rxq;
-};
+} MVPP2_RX_QUEUE;
 
 enum mvpp2_bm_type {
   MVPP2_BM_FREE,
@@ -378,7 +307,7 @@ enum mvpp2_bm_type {
   MVPP2_BM_SWF_SHORT
 };
 
-struct mvpp2_bm_pool {
+typedef struct {
   /* Pool number in the range 0-7 */
   INT32 id;
   enum mvpp2_bm_type type;
@@ -399,17 +328,84 @@ struct mvpp2_bm_pool {
 
   /* Ports using BM pool */
   UINT32 port_map;
+} MVPP2_BMS_POOL;
 
+/* Individual port structure */
+typedef struct {
+  UINT8 id;
+  UINT8 gop_index;
+
+  INT32 irq;
+
+  MVPP2_SHARED *priv;
+
+  /* Per-port registers' base address */
+  UINT64 gmac_base;
+  UINT64 xlg_base;
+
+  MVPP2_RX_QUEUE *rxqs;
+  MVPP2_TX_QUEUE *txqs;
+
+  INT32 pkt_size;
+
+  UINT32 pending_cause_rx;
+
+  /* Per-CPU port control */
+
+  /* Flags */
+  UINTN flags;
+
+  UINT16 tx_ring_size;
+  UINT16 rx_ring_size;
+
+  INT32 phy_interface;
+  BOOLEAN link;
+  BOOLEAN duplex;
+  BOOLEAN always_up;
+  PHY_SPEED speed;
+
+  MVPP2_BMS_POOL *pool_long;
+  MVPP2_BMS_POOL *pool_short;
+
+  UINT8 txp_num;
+
+  /* Index of first port's physical RXQ */
+  UINT8 first_rxq;
+} PP2DXE_PORT;
+
+/* Shared Packet Processor resources */
+struct mvpp2 {
+  /* Shared registers' base addresses */
+  UINT64 __iomem base;
+  UINT64 __iomem rfu1_base;
+  UINT64 __iomem smi_base;
+  VOID __iomem *lms_base;
+
+  /* List of pointers to port structures */
+  PP2DXE_PORT **port_list;
+
+  /* Aggregated TXQs */
+  MVPP2_TX_QUEUE *aggr_txqs;
+
+  /* BM pools */
+  MVPP2_BMS_POOL *bm_pools;
+
+  /* PRS shadow table */
+  MVPP2_PRS_SHADOW *prs_shadow;
+  /* PRS auxiliary table for double vlan entries control */
+  BOOLEAN *prs_double_vlans;
+
+  /* Tclk value */
+  UINT32 tclk;
 };
 
 /* Structure for preallocation for buffer */
-struct buffer_location {
+typedef struct {
   MVPP2_TX_DESC *tx_descs;
   MVPP2_TX_DESC *aggr_tx_descs;
-  struct mvpp2_rx_desc *rx_descs;
+  MVPP2_RX_DESC *rx_descs;
   dma_addr_t rx_buffers;
-};
-typedef struct buffer_location BUFFER_LOCATION;
+} BUFFER_LOCATION;
 
 #define QUEUE_DEPTH 64
 typedef struct {
@@ -429,79 +425,79 @@ typedef struct {
   EFI_EVENT                   EfiExitBootServicesEvent;
 } PP2DXE_CONTEXT;
 
-static inline VOID mvpp2_write(struct mvpp2 *priv, UINT32 offset,
+static inline VOID mvpp2_write(MVPP2_SHARED *priv, UINT32 offset,
           UINT32 data)
 {
   ASSERT (priv->base != 0);
   MmioWrite32 (priv->base + offset, data);
 }
 
-static inline UINT32 mvpp2_read(struct mvpp2 *priv, UINT32 offset)
+static inline UINT32 mvpp2_read(MVPP2_SHARED *priv, UINT32 offset)
 {
   ASSERT (priv->base != 0);
   return MmioRead32 (priv->base + offset);
 }
 
-static inline UINT32 mvpp2_rfu1_read(struct mvpp2 *priv, UINT32 offset)
+static inline UINT32 mvpp2_rfu1_read(MVPP2_SHARED *priv, UINT32 offset)
 {
   ASSERT (priv->rfu1_base != 0);
   return MmioRead32 (priv->rfu1_base + offset);
 }
 
-static inline UINT32 mvpp2_rfu1_write(struct mvpp2 *priv, UINT32 offset,
+static inline UINT32 mvpp2_rfu1_write(MVPP2_SHARED *priv, UINT32 offset,
               UINT32 data)
 {
   ASSERT (priv->rfu1_base != 0);
   return MmioWrite32 (priv->rfu1_base + offset, data);
 }
 
-static inline UINT32 mvpp2_smi_read(struct mvpp2 *priv, UINT32 offset)
+static inline UINT32 mvpp2_smi_read(MVPP2_SHARED *priv, UINT32 offset)
 {
   ASSERT (priv->smi_base != 0);
   return MmioRead32 (priv->smi_base + offset);
 }
 
-static inline UINT32 mvpp2_smi_write(struct mvpp2 *priv, UINT32 offset,
+static inline UINT32 mvpp2_smi_write(MVPP2_SHARED *priv, UINT32 offset,
               UINT32 data)
 {
   ASSERT (priv->smi_base != 0);
   return MmioWrite32 (priv->smi_base + offset, data);
 }
 
-static inline VOID mvpp2_gmac_write(struct mvpp2_port *port, UINT32 offset,
+static inline VOID mvpp2_gmac_write(PP2DXE_PORT *port, UINT32 offset,
                UINT32 data)
 {
   ASSERT (port->priv->base != 0);
   MmioWrite32 (port->priv->base + offset, data);
 }
 
-static inline UINT32 mvpp2_gmac_read(struct mvpp2_port *port, UINT32 offset)
+static inline UINT32 mvpp2_gmac_read(PP2DXE_PORT *port, UINT32 offset)
 {
   ASSERT (port->priv->base != 0);
   return MmioRead32 (port->priv->base + offset);
 }
 
-static inline VOID mv_gop110_gmac_write(struct mvpp2_port *port, UINT32 offset,
+static inline VOID mv_gop110_gmac_write(PP2DXE_PORT *port, UINT32 offset,
                UINT32 data)
 {
   ASSERT (port->gmac_base != 0);
   MmioWrite32 (port->gmac_base + offset, data);
 }
 
-static inline UINT32 mv_gop110_gmac_read(struct mvpp2_port *port, UINT32 offset)
+static inline UINT32 mv_gop110_gmac_read(PP2DXE_PORT *port, UINT32 offset)
 {
   ASSERT (port->gmac_base != 0);
   return MmioRead32 (port->gmac_base + offset);
 }
 
-static inline VOID mvpp2_xlg_write(struct mvpp2_port *port, UINT32 offset,
+static inline VOID mvpp2_xlg_write(PP2DXE_PORT *port, UINT32 offset,
                UINT32 data)
 {
   ASSERT (port->xlg_base != 0);
   MmioWrite32 (port->xlg_base + offset, data);
 }
 
-static inline UINT32 mvpp2_xlg_read(struct mvpp2_port *port, UINT32 offset)
+static inline UINT32 mvpp2_xlg_read(PP2DXE_PORT *port, UINT32 offset)
 {
   ASSERT (port->xlg_base != 0);
   return MmioRead32 (port->xlg_base + offset);

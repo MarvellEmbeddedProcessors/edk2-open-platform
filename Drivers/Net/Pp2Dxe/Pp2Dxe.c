@@ -130,7 +130,7 @@ Pp2DxeBmPoolInit (
     mvpp2_bm_irq_clear(Mvpp2Shared, i);
   }
 
-  Mvpp2Shared->bm_pools = AllocateZeroPool (sizeof(struct mvpp2_bm_pool));
+  Mvpp2Shared->bm_pools = AllocateZeroPool (sizeof(MVPP2_BMS_POOL));
 
   if (!Mvpp2Shared->bm_pools)
     return EFI_OUT_OF_RESOURCES;
@@ -217,7 +217,7 @@ Pp2DxeSetupRxqs (
 {
   INTN Queue;
   EFI_STATUS Status;
-  struct mvpp2_rx_queue *rxq;
+  MVPP2_RX_QUEUE *rxq;
 
   for (Queue = 0; Queue < rxq_number; Queue++) {
     rxq = &Pp2Context->Port.rxqs[Queue];
@@ -244,7 +244,7 @@ Pp2DxeSetupTxqs (
   )
 {
   INTN Queue;
-  struct mvpp2_tx_queue *txq;
+  MVPP2_TX_QUEUE *txq;
   EFI_STATUS Status;
 
   for (Queue = 0; Queue < txq_number; Queue++) {
@@ -270,7 +270,7 @@ Pp2DxeSetupAggrTxqs (
   IN PP2DXE_CONTEXT *Pp2Context
   )
 {
-  struct mvpp2_tx_queue *aggr_txq;
+  MVPP2_TX_QUEUE *aggr_txq;
 
   aggr_txq = Mvpp2Shared->aggr_txqs;
   aggr_txq->descs_phys = (dma_addr_t)aggr_txq->descs;
@@ -349,7 +349,7 @@ Pp2DxeLatePortInitialize (
   mv_gop110_port_events_mask(Port);
   mv_gop110_port_disable(Port);
 
-  Port->txqs = AllocateZeroPool (sizeof(struct mvpp2_tx_queue) * txq_number);
+  Port->txqs = AllocateZeroPool (sizeof(MVPP2_TX_QUEUE) * txq_number);
   if (Port->txqs == NULL) {
     DEBUG((DEBUG_ERROR, "Failed to allocate txqs\n"));
     return EFI_OUT_OF_RESOURCES;
@@ -359,14 +359,14 @@ Pp2DxeLatePortInitialize (
   Port->txqs[0].descs = BufferLocation.tx_descs;
 
   for (Queue = 0; Queue < txq_number; Queue++) {
-    struct mvpp2_tx_queue *txq = &Port->txqs[Queue];
+    MVPP2_TX_QUEUE *txq = &Port->txqs[Queue];
 
     txq->id = mvpp2_txq_phys(Port->id, Queue);
     txq->log_id = Queue;
     txq->size = Port->tx_ring_size;
   }
 
-  Port->rxqs = AllocateZeroPool (sizeof(struct mvpp2_rx_queue) * rxq_number);
+  Port->rxqs = AllocateZeroPool (sizeof(MVPP2_RX_QUEUE) * rxq_number);
   if (Port->rxqs == NULL) {
     DEBUG((DEBUG_ERROR, "Failed to allocate rxqs\n"));
     return EFI_OUT_OF_RESOURCES;
@@ -375,7 +375,7 @@ Pp2DxeLatePortInitialize (
   Port->rxqs[0].descs = BufferLocation.rx_descs;
 
   for (Queue = 0; Queue < txq_number; Queue++) {
-    struct mvpp2_rx_queue *rxq = &Port->rxqs[Queue];
+    MVPP2_RX_QUEUE *rxq = &Port->rxqs[Queue];
 
     rxq->id = Queue + Port->first_rxq;
     rxq->size = Port->rx_ring_size;
@@ -732,7 +732,7 @@ Pp2SnpTransmit (
 {
   PP2DXE_CONTEXT *Pp2Context = INSTANCE_FROM_SNP(This);
   PP2DXE_PORT *Port = &Pp2Context->Port;
-  struct mvpp2_tx_queue *aggr_txq = Mvpp2Shared->aggr_txqs;
+  MVPP2_TX_QUEUE *aggr_txq = Mvpp2Shared->aggr_txqs;
   MVPP2_TX_DESC *tx_desc;
   INTN timeout = 0;
   INTN tx_done;
@@ -859,8 +859,8 @@ Pp2SnpReceive (
   INTN PoolId;
   UINTN PktLength;
   UINT8 *DataPtr;
-  struct mvpp2_rx_desc *RxDesc;
-  struct mvpp2_rx_queue *Rxq = &Port->rxqs[0];
+  MVPP2_RX_DESC *RxDesc;
+  MVPP2_RX_QUEUE *Rxq = &Port->rxqs[0];
 
   SavedTpl = gBS->RaiseTPL (TPL_CALLBACK);
   ReceivedPackets = mvpp2_rxq_received(Port, Rxq->id);
@@ -1071,7 +1071,7 @@ Pp2DxeInitialise (
     ((UINT64)BufferSpace + MVPP2_MAX_TXD
     * sizeof(MVPP2_TX_DESC));
 
-  BufferLocation.rx_descs = (struct mvpp2_rx_desc *)
+  BufferLocation.rx_descs = (MVPP2_RX_DESC *)
     ((UINT64)BufferSpace +
     (MVPP2_MAX_TXD + MVPP2_AGGR_TXQ_SIZE)
     * sizeof(MVPP2_TX_DESC));
@@ -1079,13 +1079,13 @@ Pp2DxeInitialise (
   BufferLocation.rx_buffers = (UINT64)
     (BufferSpace + (MVPP2_MAX_TXD + MVPP2_AGGR_TXQ_SIZE)
     * sizeof(MVPP2_TX_DESC) +
-    MVPP2_MAX_RXD * sizeof(struct mvpp2_rx_desc));
+    MVPP2_MAX_RXD * sizeof(MVPP2_RX_DESC));
 
   mvpp2_axi_config(Mvpp2Shared);
   Pp2DxeBmPoolInit();
   mvpp2_rx_fifo_init(Mvpp2Shared);
 
-  Mvpp2Shared->prs_shadow = AllocateZeroPool (sizeof(struct mvpp2_prs_shadow)
+  Mvpp2Shared->prs_shadow = AllocateZeroPool (sizeof(MVPP2_PRS_SHADOW)
                 * MVPP2_PRS_TCAM_SRAM_SIZE);
   if (Mvpp2Shared->prs_shadow == NULL) {
     DEBUG((DEBUG_ERROR, "Failed to allocate prs_shadow\n"));
@@ -1122,7 +1122,7 @@ Pp2DxeInitialise (
   mvpp2_write(Mvpp2Shared, MVPP22_AXI_TX_DATA_RD_ATTR_REG,
         MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
 
-  Mvpp2Shared->aggr_txqs = AllocateZeroPool (sizeof(struct mvpp2_tx_queue));
+  Mvpp2Shared->aggr_txqs = AllocateZeroPool (sizeof(MVPP2_TX_QUEUE));
   if (Mvpp2Shared->aggr_txqs == NULL) {
     DEBUG((DEBUG_ERROR, "Failed to allocate aggregated txqs\n"));
     return EFI_OUT_OF_RESOURCES;

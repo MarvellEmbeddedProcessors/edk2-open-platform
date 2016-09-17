@@ -1301,7 +1301,7 @@ enum mvpp2_prs_l3_cast {
  */
 #define MVPP2_BM_SHORT_PKT_SIZE   MVPP2_RX_MAX_PKT_SIZE(512)
 
-/* The mvpp2_tx_desc and mvpp2_rx_desc structures describe the
+/* The MVPP2_TX_DESC and MVPP2_RX_DESC structures describe the
  * layout of the transmit and reception DMA descriptors, and their
  * layout is therefore defined by the hardware design
  */
@@ -1350,7 +1350,7 @@ typedef struct {
 #endif
 } MVPP2_TX_DESC;
 
-struct mvpp2_rx_desc {
+typedef struct {
   UINT32 status;    /* info about received packet   */
   UINT16 reserved1;   /* parser_info (for future use, PnC)  */
   UINT16 data_size;   /* size of received packet in bytes */
@@ -1371,7 +1371,7 @@ struct mvpp2_rx_desc {
   UINT64 buf_phys_addr_key_hash;
   UINT64 buf_cookie_bm_qset_cls_info;
 #endif
-};
+} MVPP2_RX_DESC;
 
 union mvpp2_prs_tcam_entry {
   UINT32 word[MVPP2_PRS_TCAM_WORDS];
@@ -1383,13 +1383,13 @@ union mvpp2_prs_sram_entry {
   UINT8  byte[MVPP2_PRS_SRAM_WORDS * 4];
 };
 
-struct mvpp2_prs_entry {
+typedef struct {
   UINT32 index;
   union mvpp2_prs_tcam_entry tcam;
   union mvpp2_prs_sram_entry sram;
-};
+} MVPP2_PRS_ENTRY;
 
-struct mvpp2_prs_shadow {
+typedef struct {
   BOOLEAN valid;
   BOOLEAN finish;
 
@@ -1402,26 +1402,26 @@ struct mvpp2_prs_shadow {
   /* Result info */
   UINT32 ri;
   UINT32 ri_mask;
-};
+} MVPP2_PRS_SHADOW;
 
-struct mvpp2_cls_flow_entry {
+typedef struct {
   UINT32 index;
   UINT32 data[MVPP2_CLS_FLOWS_TBL_DATA_WORDS];
-};
+} MVPP2_CLS_FLOW_ENTRY;
 
-struct mvpp2_cls_lookup_entry {
+typedef struct {
   UINT32 lkpid;
   UINT32 way;
   UINT32 data;
-};
+} MVPP2_CLS_LOOKUP_ENTRY;
 
-struct mvpp2_buff_hdr {
+typedef struct {
   UINT32 next_buff_phys_addr;
   UINT32 next_buff_virt_addr;
   UINT16 byte_count;
   UINT16 info;
   UINT8  reserved1;   /* bm_qset (for future use, BM)   */
-};
+} MVPP2_BUFF_HDR;
 
 /* Buffer header info bits */
 #define MVPP2_B_HDR_INFO_MC_ID_MASK 0xfff
