@@ -40,7 +40,7 @@ General Public License Version 2.1 plus the following FreeRTOS exception.
 An independent module is a module which is not derived from or based on
 FreeRTOS.
 Clause 1:
-Linking FreeRTOS statically or dynamically with other modules is making a
+Linking FreeRTOS STATICally or dynamically with other modules is making a
 combined work based on FreeRTOS. Thus, the terms and conditions of the GNU
 General Public License cover the whole combination.
 As a special exception, the copyright holder of FreeRTOS gives you permission
@@ -102,9 +102,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Pp2Dxe.h"
 
 /* Number of RXQs used by single port */
-static INT32 rxq_number = 1;
+STATIC INT32 rxq_number = 1;
 /* Number of TXQs used by single port */
-static INT32 txq_number = 1;
+STATIC INT32 txq_number = 1;
 
 VOID mvpp2_prs_mac_promisc_set(MVPP2_SHARED *priv, INT32 port, BOOLEAN add);
 VOID mvpp2_prs_mac_multi_set(MVPP2_SHARED *priv, INT32 port, INT32 index,
@@ -221,19 +221,19 @@ VOID mvpp2_cleanup_txqs(PP2DXE_PORT *pp);
 VOID mvpp2_cleanup_rxqs(PP2DXE_PORT *pp);
 
 /* Get number of physical egress port */
-static inline INT32 mvpp2_egress_port(PP2DXE_PORT *port)
+STATIC inline INT32 mvpp2_egress_port(PP2DXE_PORT *port)
 {
   return MVPP2_MAX_TCONT + port->id;
 }
 
 /* Get number of physical TXQ */
-static inline INT32 mvpp2_txq_phys(INT32 port, INT32 txq)
+STATIC inline INT32 mvpp2_txq_phys(INT32 port, INT32 txq)
 {
   return (MVPP2_MAX_TCONT + port) * MVPP2_MAX_TXQ + txq;
 }
 
 /* Set pool number in a BM cookie */
-static inline UINT32 mvpp2_bm_cookie_pool_set(UINT32 cookie, INT32 pool)
+STATIC inline UINT32 mvpp2_bm_cookie_pool_set(UINT32 cookie, INT32 pool)
 {
   UINT32 bm;
 
@@ -244,21 +244,21 @@ static inline UINT32 mvpp2_bm_cookie_pool_set(UINT32 cookie, INT32 pool)
 }
 
 /* Get pool number from a BM cookie */
-static inline INT32 mvpp2_bm_cookie_pool_get(UINT32 cookie)
+STATIC inline INT32 mvpp2_bm_cookie_pool_get(UINT32 cookie)
 {
   return (cookie >> MVPP2_BM_COOKIE_POOL_OFFS) & 0xFF;
 }
 
 #ifdef MVPP2_V1
 /* Release buffer to BM */
-static inline VOID mvpp2_bm_pool_put(MVPP2_SHARED *pp2, INT32 pool,
+STATIC inline VOID mvpp2_bm_pool_put(MVPP2_SHARED *pp2, INT32 pool,
             UINT32 buf_phys_addr, UINT32 buf_virt_addr)
 {
   mvpp2_write(port->priv, MVPP2_BM_VIRT_RLS_REG, buf_virt_addr);
   mvpp2_write(port->priv, MVPP2_BM_PHY_RLS_REG(pool), buf_phys_addr);
 }
 #else
-static inline VOID mvpp2_bm_pool_put(MVPP2_SHARED *pp2, INT32 pool,
+STATIC inline VOID mvpp2_bm_pool_put(MVPP2_SHARED *pp2, INT32 pool,
             UINT64 buf_phys_addr, UINT64 buf_virt_addr)
 {
   UINT32 val = 0;
@@ -273,14 +273,14 @@ static inline VOID mvpp2_bm_pool_put(MVPP2_SHARED *pp2, INT32 pool,
 }
 #endif
 
-static inline VOID mvpp2_interrupts_enable(PP2DXE_PORT *port,
+STATIC inline VOID mvpp2_interrupts_enable(PP2DXE_PORT *port,
              INT32 cpu_mask)
 {
   mvpp2_write(port->priv, MVPP2_ISR_ENABLE_REG(port->id),
         MVPP2_ISR_ENABLE_INTERRUPT(cpu_mask));
 }
 
-static inline VOID mvpp2_interrupts_disable(PP2DXE_PORT *port,
+STATIC inline VOID mvpp2_interrupts_disable(PP2DXE_PORT *port,
               INT32 cpu_mask)
 {
   mvpp2_write(port->priv, MVPP2_ISR_ENABLE_REG(port->id),
@@ -288,7 +288,7 @@ static inline VOID mvpp2_interrupts_disable(PP2DXE_PORT *port,
 }
 
 /* Get number of Rx descriptors occupied by received packets */
-static inline INT32
+STATIC inline INT32
 mvpp2_rxq_received(PP2DXE_PORT *port, INT32 rxq_id)
 {
   UINT32 val = mvpp2_read(port->priv, MVPP2_RXQ_STATUS_REG(rxq_id));
@@ -299,7 +299,7 @@ mvpp2_rxq_received(PP2DXE_PORT *port, INT32 rxq_id)
 /* Update Rx queue status with the number of occupied and available
  * Rx descriptor slots.
  */
-static inline VOID
+STATIC inline VOID
 mvpp2_rxq_status_update(PP2DXE_PORT *port, INT32 rxq_id,
       INT32 used_count, INT32 free_count)
 {
@@ -312,7 +312,7 @@ mvpp2_rxq_status_update(PP2DXE_PORT *port, INT32 rxq_id,
 }
 
 /* Get pointer to next RX descriptor to be processed by SW */
-static inline MVPP2_RX_DESC *
+STATIC inline MVPP2_RX_DESC *
 mvpp2_rxq_next_desc_get(MVPP2_RX_QUEUE *rxq)
 {
   INT32 rx_desc = rxq->next_desc_to_proc;
@@ -326,7 +326,7 @@ mvpp2_rxq_next_desc_get(MVPP2_RX_QUEUE *rxq)
  * The number of sent descriptors is returned.
  * Per-CPU access
  */
-static inline INT32 mvpp2_txq_sent_desc_proc(PP2DXE_PORT *port,
+STATIC inline INT32 mvpp2_txq_sent_desc_proc(PP2DXE_PORT *port,
             MVPP2_TX_QUEUE *txq)
 {
   UINT32 val;
@@ -342,7 +342,7 @@ static inline INT32 mvpp2_txq_sent_desc_proc(PP2DXE_PORT *port,
     MVPP2_TRANSMITTED_COUNT_OFFSET;
 }
 
-static inline MVPP2_RX_QUEUE *mvpp2_get_rx_queue(PP2DXE_PORT *port,
+STATIC inline MVPP2_RX_QUEUE *mvpp2_get_rx_queue(PP2DXE_PORT *port,
              UINT32 cause)
 {
   INT32 queue = mvpp2_fls(cause) - 1;
@@ -350,7 +350,7 @@ static inline MVPP2_RX_QUEUE *mvpp2_get_rx_queue(PP2DXE_PORT *port,
   return &port->rxqs[queue];
 }
 
-static inline MVPP2_TX_QUEUE *mvpp2_get_tx_queue(PP2DXE_PORT *port,
+STATIC inline MVPP2_TX_QUEUE *mvpp2_get_tx_queue(PP2DXE_PORT *port,
              UINT32 cause)
 {
   INT32 queue = mvpp2_fls(cause) - 1;
@@ -359,7 +359,7 @@ static inline MVPP2_TX_QUEUE *mvpp2_get_tx_queue(PP2DXE_PORT *port,
   return &port->txqs[queue];
 }
  
-static inline void mvpp2x2_txdesc_phys_addr_set(dma_addr_t phys_addr,
+STATIC inline void mvpp2x2_txdesc_phys_addr_set(dma_addr_t phys_addr,
   MVPP2_TX_DESC *tx_desc) {
   UINT64 *buf_phys_addr_p = &tx_desc->buf_phys_addr_hw_cmd2;
 

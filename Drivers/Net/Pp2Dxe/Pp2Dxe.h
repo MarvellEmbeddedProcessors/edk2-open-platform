@@ -425,79 +425,79 @@ typedef struct {
   EFI_EVENT                   EfiExitBootServicesEvent;
 } PP2DXE_CONTEXT;
 
-static inline VOID mvpp2_write(MVPP2_SHARED *priv, UINT32 offset,
+STATIC inline VOID mvpp2_write(MVPP2_SHARED *priv, UINT32 offset,
           UINT32 data)
 {
   ASSERT (priv->base != 0);
   MmioWrite32 (priv->base + offset, data);
 }
 
-static inline UINT32 mvpp2_read(MVPP2_SHARED *priv, UINT32 offset)
+STATIC inline UINT32 mvpp2_read(MVPP2_SHARED *priv, UINT32 offset)
 {
   ASSERT (priv->base != 0);
   return MmioRead32 (priv->base + offset);
 }
 
-static inline UINT32 mvpp2_rfu1_read(MVPP2_SHARED *priv, UINT32 offset)
+STATIC inline UINT32 mvpp2_rfu1_read(MVPP2_SHARED *priv, UINT32 offset)
 {
   ASSERT (priv->rfu1_base != 0);
   return MmioRead32 (priv->rfu1_base + offset);
 }
 
-static inline UINT32 mvpp2_rfu1_write(MVPP2_SHARED *priv, UINT32 offset,
+STATIC inline UINT32 mvpp2_rfu1_write(MVPP2_SHARED *priv, UINT32 offset,
               UINT32 data)
 {
   ASSERT (priv->rfu1_base != 0);
   return MmioWrite32 (priv->rfu1_base + offset, data);
 }
 
-static inline UINT32 mvpp2_smi_read(MVPP2_SHARED *priv, UINT32 offset)
+STATIC inline UINT32 mvpp2_smi_read(MVPP2_SHARED *priv, UINT32 offset)
 {
   ASSERT (priv->smi_base != 0);
   return MmioRead32 (priv->smi_base + offset);
 }
 
-static inline UINT32 mvpp2_smi_write(MVPP2_SHARED *priv, UINT32 offset,
+STATIC inline UINT32 mvpp2_smi_write(MVPP2_SHARED *priv, UINT32 offset,
               UINT32 data)
 {
   ASSERT (priv->smi_base != 0);
   return MmioWrite32 (priv->smi_base + offset, data);
 }
 
-static inline VOID mvpp2_gmac_write(PP2DXE_PORT *port, UINT32 offset,
+STATIC inline VOID mvpp2_gmac_write(PP2DXE_PORT *port, UINT32 offset,
                UINT32 data)
 {
   ASSERT (port->priv->base != 0);
   MmioWrite32 (port->priv->base + offset, data);
 }
 
-static inline UINT32 mvpp2_gmac_read(PP2DXE_PORT *port, UINT32 offset)
+STATIC inline UINT32 mvpp2_gmac_read(PP2DXE_PORT *port, UINT32 offset)
 {
   ASSERT (port->priv->base != 0);
   return MmioRead32 (port->priv->base + offset);
 }
 
-static inline VOID mv_gop110_gmac_write(PP2DXE_PORT *port, UINT32 offset,
+STATIC inline VOID mv_gop110_gmac_write(PP2DXE_PORT *port, UINT32 offset,
                UINT32 data)
 {
   ASSERT (port->gmac_base != 0);
   MmioWrite32 (port->gmac_base + offset, data);
 }
 
-static inline UINT32 mv_gop110_gmac_read(PP2DXE_PORT *port, UINT32 offset)
+STATIC inline UINT32 mv_gop110_gmac_read(PP2DXE_PORT *port, UINT32 offset)
 {
   ASSERT (port->gmac_base != 0);
   return MmioRead32 (port->gmac_base + offset);
 }
 
-static inline VOID mvpp2_xlg_write(PP2DXE_PORT *port, UINT32 offset,
+STATIC inline VOID mvpp2_xlg_write(PP2DXE_PORT *port, UINT32 offset,
                UINT32 data)
 {
   ASSERT (port->xlg_base != 0);
   MmioWrite32 (port->xlg_base + offset, data);
 }
 
-static inline UINT32 mvpp2_xlg_read(PP2DXE_PORT *port, UINT32 offset)
+STATIC inline UINT32 mvpp2_xlg_read(PP2DXE_PORT *port, UINT32 offset)
 {
   ASSERT (port->xlg_base != 0);
   return MmioRead32 (port->xlg_base + offset);

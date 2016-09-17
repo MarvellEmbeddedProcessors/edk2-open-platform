@@ -40,7 +40,7 @@ General Public License Version 2.1 plus the following FreeRTOS exception.
 An independent module is a module which is not derived from or based on
 FreeRTOS.
 Clause 1:
-Linking FreeRTOS statically or dynamically with other modules is making a
+Linking FreeRTOS STATICally or dynamically with other modules is making a
 combined work based on FreeRTOS. Thus, the terms and conditions of the GNU
 General Public License cover the whole combination.
 As a special exception, the copyright holder of FreeRTOS gives you permission
@@ -102,7 +102,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* Parser configuration routines */
 
 /* Update parser tcam and sram hw entries */
-static INT32 mvpp2_prs_hw_write(MVPP2_SHARED *priv, MVPP2_PRS_ENTRY *pe)
+STATIC INT32 mvpp2_prs_hw_write(MVPP2_SHARED *priv, MVPP2_PRS_ENTRY *pe)
 {
   INT32 i;
 
@@ -126,7 +126,7 @@ static INT32 mvpp2_prs_hw_write(MVPP2_SHARED *priv, MVPP2_PRS_ENTRY *pe)
 }
 
 /* Read tcam entry from hw */
-static INT32 mvpp2_prs_hw_read(MVPP2_SHARED *priv, MVPP2_PRS_ENTRY *pe)
+STATIC INT32 mvpp2_prs_hw_read(MVPP2_SHARED *priv, MVPP2_PRS_ENTRY *pe)
 {
   INT32 i;
 
@@ -153,7 +153,7 @@ static INT32 mvpp2_prs_hw_read(MVPP2_SHARED *priv, MVPP2_PRS_ENTRY *pe)
 }
 
 /* Invalidate tcam hw entry */
-static VOID mvpp2_prs_hw_inv(MVPP2_SHARED *priv, INT32 index)
+STATIC VOID mvpp2_prs_hw_inv(MVPP2_SHARED *priv, INT32 index)
 {
   /* Write index - indirect access */
   mvpp2_write(priv, MVPP2_PRS_TCAM_IDX_REG, index);
@@ -162,14 +162,14 @@ static VOID mvpp2_prs_hw_inv(MVPP2_SHARED *priv, INT32 index)
 }
 
 /* Enable shadow table entry and set its lookup ID */
-static VOID mvpp2_prs_shadow_set(MVPP2_SHARED *priv, INT32 index, INT32 lu)
+STATIC VOID mvpp2_prs_shadow_set(MVPP2_SHARED *priv, INT32 index, INT32 lu)
 {
   priv->prs_shadow[index].valid = TRUE;
   priv->prs_shadow[index].lu = lu;
 }
 
 /* Update ri fields in shadow table entry */
-static VOID mvpp2_prs_shadow_ri_set(MVPP2_SHARED *priv, INT32 index,
+STATIC VOID mvpp2_prs_shadow_ri_set(MVPP2_SHARED *priv, INT32 index,
             UINT32 ri, UINT32 ri_mask)
 {
   priv->prs_shadow[index].ri_mask = ri_mask;
@@ -177,7 +177,7 @@ static VOID mvpp2_prs_shadow_ri_set(MVPP2_SHARED *priv, INT32 index,
 }
 
 /* Update lookup field in tcam sw entry */
-static VOID mvpp2_prs_tcam_lu_set(MVPP2_PRS_ENTRY *pe, UINT32 lu)
+STATIC VOID mvpp2_prs_tcam_lu_set(MVPP2_PRS_ENTRY *pe, UINT32 lu)
 {
   INT32 enable_off = MVPP2_PRS_TCAM_EN_OFFS(MVPP2_PRS_TCAM_LU_BYTE);
 
@@ -186,7 +186,7 @@ static VOID mvpp2_prs_tcam_lu_set(MVPP2_PRS_ENTRY *pe, UINT32 lu)
 }
 
 /* Update mask for single port in tcam sw entry */
-static VOID mvpp2_prs_tcam_port_set(MVPP2_PRS_ENTRY *pe,
+STATIC VOID mvpp2_prs_tcam_port_set(MVPP2_PRS_ENTRY *pe,
             UINT32 port, BOOLEAN add)
 {
   INT32 enable_off = MVPP2_PRS_TCAM_EN_OFFS(MVPP2_PRS_TCAM_PORT_BYTE);
@@ -198,7 +198,7 @@ static VOID mvpp2_prs_tcam_port_set(MVPP2_PRS_ENTRY *pe,
 }
 
 /* Update port map in tcam sw entry */
-static VOID mvpp2_prs_tcam_port_map_set(MVPP2_PRS_ENTRY *pe,
+STATIC VOID mvpp2_prs_tcam_port_map_set(MVPP2_PRS_ENTRY *pe,
           UINT32 ports)
 {
   UINT8 port_mask = MVPP2_PRS_PORT_MASK;
@@ -210,7 +210,7 @@ static VOID mvpp2_prs_tcam_port_map_set(MVPP2_PRS_ENTRY *pe,
 }
 
 /* Obtain port map from tcam sw entry */
-static UINT32 mvpp2_prs_tcam_port_map_get(MVPP2_PRS_ENTRY *pe)
+STATIC UINT32 mvpp2_prs_tcam_port_map_get(MVPP2_PRS_ENTRY *pe)
 {
   INT32 enable_off = MVPP2_PRS_TCAM_EN_OFFS(MVPP2_PRS_TCAM_PORT_BYTE);
 
@@ -218,7 +218,7 @@ static UINT32 mvpp2_prs_tcam_port_map_get(MVPP2_PRS_ENTRY *pe)
 }
 
 /* Set byte of data and its enable bits in tcam sw entry */
-static VOID mvpp2_prs_tcam_data_byte_set(MVPP2_PRS_ENTRY *pe,
+STATIC VOID mvpp2_prs_tcam_data_byte_set(MVPP2_PRS_ENTRY *pe,
            UINT32 offs, UINT8 byte,
            UINT8 enable)
 {
@@ -227,7 +227,7 @@ static VOID mvpp2_prs_tcam_data_byte_set(MVPP2_PRS_ENTRY *pe,
 }
 
 /* Get byte of data and its enable bits from tcam sw entry */
-static VOID mvpp2_prs_tcam_data_byte_get(MVPP2_PRS_ENTRY *pe,
+STATIC VOID mvpp2_prs_tcam_data_byte_get(MVPP2_PRS_ENTRY *pe,
            UINT32 offs, UINT8 *byte,
            UINT8 *enable)
 {
@@ -236,7 +236,7 @@ static VOID mvpp2_prs_tcam_data_byte_get(MVPP2_PRS_ENTRY *pe,
 }
 
 /* Compare tcam data bytes with a pattern */
-static BOOLEAN mvpp2_prs_tcam_data_cmp(MVPP2_PRS_ENTRY *pe, INT32 offs,
+STATIC BOOLEAN mvpp2_prs_tcam_data_cmp(MVPP2_PRS_ENTRY *pe, INT32 offs,
             UINT16 data)
 {
   INT32 off = MVPP2_PRS_TCAM_DATA_BYTE(offs);
@@ -249,7 +249,7 @@ static BOOLEAN mvpp2_prs_tcam_data_cmp(MVPP2_PRS_ENTRY *pe, INT32 offs,
 }
 
 /* Update ai bits in tcam sw entry */
-static VOID mvpp2_prs_tcam_ai_update(MVPP2_PRS_ENTRY *pe,
+STATIC VOID mvpp2_prs_tcam_ai_update(MVPP2_PRS_ENTRY *pe,
              UINT32 bits, UINT32 enable)
 {
   INT32 i, ai_idx = MVPP2_PRS_TCAM_AI_BYTE;
@@ -269,13 +269,13 @@ static VOID mvpp2_prs_tcam_ai_update(MVPP2_PRS_ENTRY *pe,
 }
 
 /* Get ai bits from tcam sw entry */
-static INT32 mvpp2_prs_tcam_ai_get(MVPP2_PRS_ENTRY *pe)
+STATIC INT32 mvpp2_prs_tcam_ai_get(MVPP2_PRS_ENTRY *pe)
 {
   return pe->tcam.byte[MVPP2_PRS_TCAM_AI_BYTE];
 }
 
 /* Get dword of data and its enable bits from tcam sw entry */
-static VOID mvpp2_prs_tcam_data_dword_get(MVPP2_PRS_ENTRY *pe,
+STATIC VOID mvpp2_prs_tcam_data_dword_get(MVPP2_PRS_ENTRY *pe,
            UINT32 offs, UINT32 *word,
            UINT32 *enable)
 {
@@ -291,7 +291,7 @@ static VOID mvpp2_prs_tcam_data_dword_get(MVPP2_PRS_ENTRY *pe,
 }
 
 /* Set ethertype in tcam sw entry */
-static VOID mvpp2_prs_match_etype(MVPP2_PRS_ENTRY *pe, INT32 offset,
+STATIC VOID mvpp2_prs_match_etype(MVPP2_PRS_ENTRY *pe, INT32 offset,
           UINT16 ethertype)
 {
   mvpp2_prs_tcam_data_byte_set(pe, offset + 0, ethertype >> 8, 0xff);
@@ -299,21 +299,21 @@ static VOID mvpp2_prs_match_etype(MVPP2_PRS_ENTRY *pe, INT32 offset,
 }
 
 /* Set bits in sram sw entry */
-static VOID mvpp2_prs_sram_bits_set(MVPP2_PRS_ENTRY *pe,
+STATIC VOID mvpp2_prs_sram_bits_set(MVPP2_PRS_ENTRY *pe,
                INT32 bit_num, INT32 val)
 {
   pe->sram.byte[MVPP2_BIT_TO_BYTE(bit_num)] |= (val << (bit_num % 8));
 }
 
 /* Clear bits in sram sw entry */
-static VOID mvpp2_prs_sram_bits_clear(MVPP2_PRS_ENTRY *pe,
+STATIC VOID mvpp2_prs_sram_bits_clear(MVPP2_PRS_ENTRY *pe,
            INT32 bit_num, INT32 val)
 {
   pe->sram.byte[MVPP2_BIT_TO_BYTE(bit_num)] &= ~(val << (bit_num % 8));
 }
 
 /* Update ri bits in sram sw entry */
-static VOID mvpp2_prs_sram_ri_update(MVPP2_PRS_ENTRY *pe,
+STATIC VOID mvpp2_prs_sram_ri_update(MVPP2_PRS_ENTRY *pe,
              UINT32 bits, UINT32 mask)
 {
   UINT32 i;
@@ -334,13 +334,13 @@ static VOID mvpp2_prs_sram_ri_update(MVPP2_PRS_ENTRY *pe,
 }
 
 /* Obtain ri bits from sram sw entry */
-static INT32 mvpp2_prs_sram_ri_get(MVPP2_PRS_ENTRY *pe)
+STATIC INT32 mvpp2_prs_sram_ri_get(MVPP2_PRS_ENTRY *pe)
 {
   return pe->sram.word[MVPP2_PRS_SRAM_RI_WORD];
 }
 
 /* Update ai bits in sram sw entry */
-static VOID mvpp2_prs_sram_ai_update(MVPP2_PRS_ENTRY *pe,
+STATIC VOID mvpp2_prs_sram_ai_update(MVPP2_PRS_ENTRY *pe,
              UINT32 bits, UINT32 mask)
 {
   UINT32 i;
@@ -361,7 +361,7 @@ static VOID mvpp2_prs_sram_ai_update(MVPP2_PRS_ENTRY *pe,
 }
 
 /* Read ai bits from sram sw entry */
-static INT32 mvpp2_prs_sram_ai_get(MVPP2_PRS_ENTRY *pe)
+STATIC INT32 mvpp2_prs_sram_ai_get(MVPP2_PRS_ENTRY *pe)
 {
   UINT8 bits;
   INT32 ai_off = MVPP2_BIT_TO_BYTE(MVPP2_PRS_SRAM_AI_OFFS);
@@ -377,7 +377,7 @@ static INT32 mvpp2_prs_sram_ai_get(MVPP2_PRS_ENTRY *pe)
 /* In sram sw entry set lookup ID field of the tcam key to be used in the next
  * lookup INT32eration
  */
-static VOID mvpp2_prs_sram_next_lu_set(MVPP2_PRS_ENTRY *pe,
+STATIC VOID mvpp2_prs_sram_next_lu_set(MVPP2_PRS_ENTRY *pe,
                UINT32 lu)
 {
   INT32 sram_next_off = MVPP2_PRS_SRAM_NEXT_LU_OFFS;
@@ -390,7 +390,7 @@ static VOID mvpp2_prs_sram_next_lu_set(MVPP2_PRS_ENTRY *pe,
 /* In the sram sw entry set sign and value of the next lookup offset
  * and the offset value generated to the classifier
  */
-static VOID mvpp2_prs_sram_shift_set(MVPP2_PRS_ENTRY *pe, INT32 shift,
+STATIC VOID mvpp2_prs_sram_shift_set(MVPP2_PRS_ENTRY *pe, INT32 shift,
              UINT32 op)
 {
   /* Set sign */
@@ -417,7 +417,7 @@ static VOID mvpp2_prs_sram_shift_set(MVPP2_PRS_ENTRY *pe, INT32 shift,
 /* In the sram sw entry set sign and value of the user defined offset
  * generated to the classifier
  */
-static VOID mvpp2_prs_sram_offset_set(MVPP2_PRS_ENTRY *pe,
+STATIC VOID mvpp2_prs_sram_offset_set(MVPP2_PRS_ENTRY *pe,
               UINT32 type, INT32 offset,
               UINT32 op)
 {
@@ -464,7 +464,7 @@ static VOID mvpp2_prs_sram_offset_set(MVPP2_PRS_ENTRY *pe,
 }
 
 /* Find parser flow entry */
-static MVPP2_PRS_ENTRY *mvpp2_prs_flow_find(MVPP2_SHARED *priv,
+STATIC MVPP2_PRS_ENTRY *mvpp2_prs_flow_find(MVPP2_SHARED *priv,
                INT32 flow)
 {
   MVPP2_PRS_ENTRY *pe;
@@ -505,7 +505,7 @@ static MVPP2_PRS_ENTRY *mvpp2_prs_flow_find(MVPP2_SHARED *priv,
 }
 
 /* Return first free tcam index, seeking from start to end */
-static INT32 mvpp2_prs_tcam_first_free(MVPP2_SHARED *priv, UINT8 start,
+STATIC INT32 mvpp2_prs_tcam_first_free(MVPP2_SHARED *priv, UINT8 start,
              UINT8 end)
 {
   INT32 tid;
@@ -525,7 +525,7 @@ static INT32 mvpp2_prs_tcam_first_free(MVPP2_SHARED *priv, UINT8 start,
 }
 
 /* Enable/disable dropping all mac da's */
-static VOID mvpp2_prs_mac_drop_all_set(MVPP2_SHARED *priv, INT32 port,
+STATIC VOID mvpp2_prs_mac_drop_all_set(MVPP2_SHARED *priv, INT32 port,
                BOOLEAN add)
 {
   MVPP2_PRS_ENTRY pe;
@@ -651,7 +651,7 @@ VOID mvpp2_prs_mac_multi_set(MVPP2_SHARED *priv, INT32 port, INT32 index,
 }
 
 /* Set entry for dsa packets */
-static VOID mvpp2_prs_dsa_tag_set(MVPP2_SHARED *priv, INT32 port,
+STATIC VOID mvpp2_prs_dsa_tag_set(MVPP2_SHARED *priv, INT32 port,
              BOOLEAN add, BOOLEAN tagged,
              BOOLEAN extend)
 {
@@ -711,7 +711,7 @@ static VOID mvpp2_prs_dsa_tag_set(MVPP2_SHARED *priv, INT32 port,
 }
 
 /* Set entry for dsa ethertype */
-static VOID mvpp2_prs_dsa_tag_ethertype_set(MVPP2_SHARED *priv, INT32 port,
+STATIC VOID mvpp2_prs_dsa_tag_ethertype_set(MVPP2_SHARED *priv, INT32 port,
               BOOLEAN add, BOOLEAN tagged,
               BOOLEAN extend)
 {
@@ -781,7 +781,7 @@ static VOID mvpp2_prs_dsa_tag_ethertype_set(MVPP2_SHARED *priv, INT32 port,
 }
 
 /* Search for existing single/triple vlan entry */
-static MVPP2_PRS_ENTRY *mvpp2_prs_vlan_find(MVPP2_SHARED *priv,
+STATIC MVPP2_PRS_ENTRY *mvpp2_prs_vlan_find(MVPP2_SHARED *priv,
                UINT16 tpid, INT32 ai)
 {
   MVPP2_PRS_ENTRY *pe;
@@ -1045,7 +1045,7 @@ error:
 }
 
 /* IPv4 header parsing for fragmentation and L4 offset */
-static INT32 mvpp2_prs_ip4_proto(MVPP2_SHARED *priv, UINT16 proto,
+STATIC INT32 mvpp2_prs_ip4_proto(MVPP2_SHARED *priv, UINT16 proto,
              UINT32 ri, UINT32 ri_mask)
 {
   MVPP2_PRS_ENTRY pe;
@@ -1109,7 +1109,7 @@ static INT32 mvpp2_prs_ip4_proto(MVPP2_SHARED *priv, UINT16 proto,
 }
 
 /* IPv4 L3 multicast or broadcast */
-static INT32 mvpp2_prs_ip4_cast(MVPP2_SHARED *priv, UINT16 l3_cast)
+STATIC INT32 mvpp2_prs_ip4_cast(MVPP2_SHARED *priv, UINT16 l3_cast)
 {
   MVPP2_PRS_ENTRY pe;
   INT32 mask, tid;
@@ -1160,7 +1160,7 @@ static INT32 mvpp2_prs_ip4_cast(MVPP2_SHARED *priv, UINT16 l3_cast)
 }
 
 /* Set entries for protocols over IPv6  */
-static INT32 mvpp2_prs_ip6_proto(MVPP2_SHARED *priv, UINT16 proto,
+STATIC INT32 mvpp2_prs_ip6_proto(MVPP2_SHARED *priv, UINT16 proto,
              UINT32 ri, UINT32 ri_mask)
 {
   MVPP2_PRS_ENTRY pe;
@@ -1201,7 +1201,7 @@ static INT32 mvpp2_prs_ip6_proto(MVPP2_SHARED *priv, UINT16 proto,
 }
 
 /* IPv6 L3 multicast entry */
-static INT32 mvpp2_prs_ip6_cast(MVPP2_SHARED *priv, UINT16 l3_cast)
+STATIC INT32 mvpp2_prs_ip6_cast(MVPP2_SHARED *priv, UINT16 l3_cast)
 {
   MVPP2_PRS_ENTRY pe;
   INT32 tid;
@@ -1241,7 +1241,7 @@ static INT32 mvpp2_prs_ip6_cast(MVPP2_SHARED *priv, UINT16 l3_cast)
 }
 
 /* Parser per-port initialization */
-static VOID mvpp2_prs_hw_port_init(MVPP2_SHARED *priv, INT32 port,
+STATIC VOID mvpp2_prs_hw_port_init(MVPP2_SHARED *priv, INT32 port,
               INT32 lu_first, INT32 lu_max,
               INT32 offset)
 {
@@ -1269,7 +1269,7 @@ static VOID mvpp2_prs_hw_port_init(MVPP2_SHARED *priv, INT32 port,
 }
 
 /* Default flow entries initialization for all ports */
-static VOID mvpp2_prs_def_flow_init(MVPP2_SHARED *priv)
+STATIC VOID mvpp2_prs_def_flow_init(MVPP2_SHARED *priv)
 {
   MVPP2_PRS_ENTRY pe;
   INT32 port;
@@ -1293,7 +1293,7 @@ static VOID mvpp2_prs_def_flow_init(MVPP2_SHARED *priv)
 }
 
 /* Set default entry for Marvell Header field */
-static VOID mvpp2_prs_mh_init(MVPP2_SHARED *priv)
+STATIC VOID mvpp2_prs_mh_init(MVPP2_SHARED *priv)
 {
   MVPP2_PRS_ENTRY pe;
 
@@ -1316,7 +1316,7 @@ static VOID mvpp2_prs_mh_init(MVPP2_SHARED *priv)
 /* Set default entires (place holder) for promiscuous, non-promiscuous and
  * multicast MAC addresses
  */
-static VOID mvpp2_prs_mac_init(MVPP2_SHARED *priv)
+STATIC VOID mvpp2_prs_mac_init(MVPP2_SHARED *priv)
 {
   MVPP2_PRS_ENTRY pe;
 
@@ -1346,7 +1346,7 @@ static VOID mvpp2_prs_mac_init(MVPP2_SHARED *priv)
 }
 
 /* Set default entries for various types of dsa packets */
-static VOID mvpp2_prs_dsa_init(MVPP2_SHARED *priv)
+STATIC VOID mvpp2_prs_dsa_init(MVPP2_SHARED *priv)
 {
   MVPP2_PRS_ENTRY pe;
 
@@ -1400,7 +1400,7 @@ static VOID mvpp2_prs_dsa_init(MVPP2_SHARED *priv)
 }
 
 /* Match basic ethertypes */
-static INT32 mvpp2_prs_etype_init(MVPP2_SHARED *priv)
+STATIC INT32 mvpp2_prs_etype_init(MVPP2_SHARED *priv)
 {
   MVPP2_PRS_ENTRY pe;
   INT32 tid;
@@ -1627,7 +1627,7 @@ static INT32 mvpp2_prs_etype_init(MVPP2_SHARED *priv)
  * 0x8100
  * 0x88A8
  */
-static INT32 mvpp2_prs_vlan_init(MVPP2_SHARED *priv)
+STATIC INT32 mvpp2_prs_vlan_init(MVPP2_SHARED *priv)
 {
   MVPP2_PRS_ENTRY pe;
   INT32 err;
@@ -1697,7 +1697,7 @@ static INT32 mvpp2_prs_vlan_init(MVPP2_SHARED *priv)
 }
 
 /* Set entries for PPPoE ethertype */
-static INT32 mvpp2_prs_pppoe_init(MVPP2_SHARED *priv)
+STATIC INT32 mvpp2_prs_pppoe_init(MVPP2_SHARED *priv)
 {
   MVPP2_PRS_ENTRY pe;
   INT32 tid;
@@ -1808,7 +1808,7 @@ static INT32 mvpp2_prs_pppoe_init(MVPP2_SHARED *priv)
 }
 
 /* Initialize entries for IPv4 */
-static INT32 mvpp2_prs_ip4_init(MVPP2_SHARED *priv)
+STATIC INT32 mvpp2_prs_ip4_init(MVPP2_SHARED *priv)
 {
   MVPP2_PRS_ENTRY pe;
   INT32 err;
@@ -1891,7 +1891,7 @@ static INT32 mvpp2_prs_ip4_init(MVPP2_SHARED *priv)
 }
 
 /* Initialize entries for IPv6 */
-static INT32 mvpp2_prs_ip6_init(MVPP2_SHARED *priv)
+STATIC INT32 mvpp2_prs_ip6_init(MVPP2_SHARED *priv)
 {
   MVPP2_PRS_ENTRY pe;
   INT32 tid, err;
@@ -2085,7 +2085,7 @@ INT32 mvpp2_prs_default_init(MVPP2_SHARED *priv)
 }
 
 /* Compare MAC DA with tcam entry data */
-static BOOLEAN mvpp2_prs_mac_range_equals(MVPP2_PRS_ENTRY *pe,
+STATIC BOOLEAN mvpp2_prs_mac_range_equals(MVPP2_PRS_ENTRY *pe,
                const UINT8 *da, UINT8 *mask)
 {
   UINT8 tcam_byte, tcam_mask;
@@ -2104,7 +2104,7 @@ static BOOLEAN mvpp2_prs_mac_range_equals(MVPP2_PRS_ENTRY *pe,
 }
 
 /* Find tcam entry with matched pair <MAC DA, port> */
-static MVPP2_PRS_ENTRY *
+STATIC MVPP2_PRS_ENTRY *
 mvpp2_prs_mac_da_range_find(MVPP2_SHARED *priv, INT32 pmap, const UINT8 *da,
           UINT8 *mask, INT32 udf_type)
 {
@@ -2357,7 +2357,7 @@ INT32 mvpp2_prs_def_flow(PP2DXE_PORT *port)
 /* Classifier configuration routines */
 
 /* Update classification flow table registers */
-static VOID mvpp2_cls_flow_write(MVPP2_SHARED *priv,
+STATIC VOID mvpp2_cls_flow_write(MVPP2_SHARED *priv,
          MVPP2_CLS_FLOW_ENTRY *fe)
 {
   mvpp2_write(priv, MVPP2_CLS_FLOW_INDEX_REG, fe->index);
@@ -2600,7 +2600,7 @@ VOID mvpp2_interrupts_unmask(VOID *arg)
 
 /* Port configuration routines */
 
-static VOID mvpp2_port_mii_set(PP2DXE_PORT *port)
+STATIC VOID mvpp2_port_mii_set(PP2DXE_PORT *port)
 {
   UINT32 val;
 
@@ -2619,7 +2619,7 @@ static VOID mvpp2_port_mii_set(PP2DXE_PORT *port)
   mvpp2_gmac_write(port, MVPP2_GMAC_CTRL_2_REG, val);
 }
 
-static VOID mvpp2_port_fc_adv_enable(PP2DXE_PORT *port)
+STATIC VOID mvpp2_port_fc_adv_enable(PP2DXE_PORT *port)
 {
   UINT32 val;
 
@@ -2648,7 +2648,7 @@ VOID mvpp2_port_disable(PP2DXE_PORT *port)
 }
 
 /* Set IEEE 802.3x Flow Control Xon Packet Transmission Mode */
-static VOID mvpp2_port_periodic_xon_disable(PP2DXE_PORT *port)
+STATIC VOID mvpp2_port_periodic_xon_disable(PP2DXE_PORT *port)
 {
   UINT32 val;
 
@@ -2659,7 +2659,7 @@ static VOID mvpp2_port_periodic_xon_disable(PP2DXE_PORT *port)
 
 /* Configure loopback port */
 #ifdef MVPP2_V1
-static VOID mvpp2_port_loopback_set(PP2DXE_PORT *port)
+STATIC VOID mvpp2_port_loopback_set(PP2DXE_PORT *port)
 {
   UINT32 val;
 
@@ -2679,7 +2679,7 @@ static VOID mvpp2_port_loopback_set(PP2DXE_PORT *port)
 }
 #endif
 
-static VOID mvpp2_port_reset(PP2DXE_PORT *port)
+STATIC VOID mvpp2_port_reset(PP2DXE_PORT *port)
 {
   UINT32 val;
 
@@ -2845,7 +2845,7 @@ VOID mvpp2_egress_disable(PP2DXE_PORT *port)
 /* Rx descriptors helper methods */
 
 /* Set rx queue offset */
-static VOID mvpp2_rxq_offset_set(PP2DXE_PORT *port,
+STATIC VOID mvpp2_rxq_offset_set(PP2DXE_PORT *port,
          INT32 prxq, INT32 offset)
 {
   UINT32 val;
@@ -3315,7 +3315,7 @@ VOID mv_gop110_netc_active_port(PP2DXE_PORT *pp2_port, UINT32 port, UINT32 val)
   mvpp2_rfu1_write(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_1, reg);
 }
 
-static VOID mv_gop110_netc_xaui_enable(PP2DXE_PORT *pp2_port, UINT32 port, UINT32 val)
+STATIC VOID mv_gop110_netc_xaui_enable(PP2DXE_PORT *pp2_port, UINT32 port, UINT32 val)
 {
   UINT32 reg;
 
@@ -3330,7 +3330,7 @@ static VOID mv_gop110_netc_xaui_enable(PP2DXE_PORT *pp2_port, UINT32 port, UINT3
   mvpp2_rfu1_write(pp2_port->priv, SD1_CONTROL_1_REG, reg);
 }
 
-static VOID mv_gop110_netc_rxaui0_enable(PP2DXE_PORT *pp2_port, UINT32 port, UINT32 val)
+STATIC VOID mv_gop110_netc_rxaui0_enable(PP2DXE_PORT *pp2_port, UINT32 port, UINT32 val)
 {
   UINT32 reg;
 
@@ -3345,7 +3345,7 @@ static VOID mv_gop110_netc_rxaui0_enable(PP2DXE_PORT *pp2_port, UINT32 port, UIN
   mvpp2_rfu1_write(pp2_port->priv, SD1_CONTROL_1_REG, reg);
 }
 
-static VOID mv_gop110_netc_rxaui1_enable(PP2DXE_PORT *pp2_port, UINT32 port, UINT32 val)
+STATIC VOID mv_gop110_netc_rxaui1_enable(PP2DXE_PORT *pp2_port, UINT32 port, UINT32 val)
 {
   UINT32 reg;
 
@@ -3360,7 +3360,7 @@ static VOID mv_gop110_netc_rxaui1_enable(PP2DXE_PORT *pp2_port, UINT32 port, UIN
   mvpp2_rfu1_write(pp2_port->priv, SD1_CONTROL_1_REG, reg);
 }
 
-static VOID mv_gop110_netc_mii_mode(PP2DXE_PORT *pp2_port, UINT32 port, UINT32 val)
+STATIC VOID mv_gop110_netc_mii_mode(PP2DXE_PORT *pp2_port, UINT32 port, UINT32 val)
 {
   UINT32 reg;
 
@@ -3375,7 +3375,7 @@ static VOID mv_gop110_netc_mii_mode(PP2DXE_PORT *pp2_port, UINT32 port, UINT32 v
   mvpp2_rfu1_write(pp2_port->priv, MV_NETCOMP_CONTROL_0, reg);
 }
 
-static VOID mv_gop110_netc_gop_reset(PP2DXE_PORT *pp2_port, UINT32 val)
+STATIC VOID mv_gop110_netc_gop_reset(PP2DXE_PORT *pp2_port, UINT32 val)
 {
   UINT32 reg;
 
@@ -3390,7 +3390,7 @@ static VOID mv_gop110_netc_gop_reset(PP2DXE_PORT *pp2_port, UINT32 val)
   mvpp2_rfu1_write(pp2_port->priv, MV_GOP_SOFT_RESET_1_REG, reg);
 }
 
-static VOID mv_gop110_netc_gop_clock_logic_set(PP2DXE_PORT *pp2_port, UINT32 val)
+STATIC VOID mv_gop110_netc_gop_clock_logic_set(PP2DXE_PORT *pp2_port, UINT32 val)
 {
   UINT32 reg;
 
@@ -3405,7 +3405,7 @@ static VOID mv_gop110_netc_gop_clock_logic_set(PP2DXE_PORT *pp2_port, UINT32 val
   mvpp2_rfu1_write(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_0, reg);
 }
 
-static VOID mv_gop110_netc_port_rf_reset(PP2DXE_PORT *pp2_port, UINT32 port, UINT32 val)
+STATIC VOID mv_gop110_netc_port_rf_reset(PP2DXE_PORT *pp2_port, UINT32 port, UINT32 val)
 {
   UINT32 reg;
 
@@ -3420,7 +3420,7 @@ static VOID mv_gop110_netc_port_rf_reset(PP2DXE_PORT *pp2_port, UINT32 port, UIN
   mvpp2_rfu1_write(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_1, reg);
 }
 
-static VOID mv_gop110_netc_gbe_sgmii_mode_select(PP2DXE_PORT *pp2_port, UINT32 port,
+STATIC VOID mv_gop110_netc_gbe_sgmii_mode_select(PP2DXE_PORT *pp2_port, UINT32 port,
             UINT32 val)
 {
   UINT32 reg, mask, offset;
@@ -3443,7 +3443,7 @@ static VOID mv_gop110_netc_gbe_sgmii_mode_select(PP2DXE_PORT *pp2_port, UINT32 p
   mvpp2_rfu1_write(pp2_port->priv, MV_NETCOMP_CONTROL_0, reg);
 }
 
-static VOID mv_gop110_netc_bus_width_select(PP2DXE_PORT *pp2_port, UINT32 val)
+STATIC VOID mv_gop110_netc_bus_width_select(PP2DXE_PORT *pp2_port, UINT32 val)
 {
   UINT32 reg;
 
@@ -3458,7 +3458,7 @@ static VOID mv_gop110_netc_bus_width_select(PP2DXE_PORT *pp2_port, UINT32 val)
   mvpp2_rfu1_write(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_0, reg);
 }
 
-static VOID mv_gop110_netc_sample_stages_timing(PP2DXE_PORT *pp2_port, UINT32 val)
+STATIC VOID mv_gop110_netc_sample_stages_timing(PP2DXE_PORT *pp2_port, UINT32 val)
 {
   UINT32 reg;
 
@@ -3473,7 +3473,7 @@ static VOID mv_gop110_netc_sample_stages_timing(PP2DXE_PORT *pp2_port, UINT32 va
   mvpp2_rfu1_write(pp2_port->priv, MV_NETCOMP_PORTS_CONTROL_0, reg);
 }
 
-static VOID mv_gop110_netc_mac_to_xgmii(PP2DXE_PORT *pp2_port, UINT32 port,
+STATIC VOID mv_gop110_netc_mac_to_xgmii(PP2DXE_PORT *pp2_port, UINT32 port,
           enum mv_netc_phase phase)
 {
   switch (phase) {
@@ -3491,7 +3491,7 @@ static VOID mv_gop110_netc_mac_to_xgmii(PP2DXE_PORT *pp2_port, UINT32 port,
   }
 }
 
-static VOID mv_gop110_netc_mac_to_sgmii(PP2DXE_PORT *pp2_port, UINT32 port,
+STATIC VOID mv_gop110_netc_mac_to_sgmii(PP2DXE_PORT *pp2_port, UINT32 port,
           enum mv_netc_phase phase)
 {
   switch (phase) {
@@ -3515,7 +3515,7 @@ static VOID mv_gop110_netc_mac_to_sgmii(PP2DXE_PORT *pp2_port, UINT32 port,
   }
 }
 
-static VOID mv_gop110_netc_mac_to_rxaui(PP2DXE_PORT *pp2_port, UINT32 port,
+STATIC VOID mv_gop110_netc_mac_to_rxaui(PP2DXE_PORT *pp2_port, UINT32 port,
           enum mv_netc_phase phase,
           enum mv_netc_lanes lanes)
 {
@@ -3538,7 +3538,7 @@ static VOID mv_gop110_netc_mac_to_rxaui(PP2DXE_PORT *pp2_port, UINT32 port,
   }
 }
 
-static VOID mv_gop110_netc_mac_to_xaui(PP2DXE_PORT *pp2_port, UINT32 port,
+STATIC VOID mv_gop110_netc_mac_to_xaui(PP2DXE_PORT *pp2_port, UINT32 port,
           enum mv_netc_phase phase)
 {
   switch (phase) {
