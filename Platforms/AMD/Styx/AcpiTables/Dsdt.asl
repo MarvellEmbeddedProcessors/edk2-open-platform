@@ -397,24 +397,22 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "AMDINC", "SEATTLE ", 3)
 
             Method (SSCN, 0, NotSerialized)
             {
-                Name (PKG, Package (0x03)
+                Return (Package (0x03)
                 {
                     0x0430,
                     0x04E1,
                     0x00
                 })
-                Return (PKG)
             }
 
             Method (FMCN, 0, NotSerialized)
             {
-                Name (PKG, Package (0x03)
+                Return (Package (0x03)
                 {
                     0x00DE,
                     0x018F,
                     0x00
                 })
-                Return (PKG)
             }
         }
 
@@ -433,24 +431,22 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "AMDINC", "SEATTLE ", 3)
 
             Method (SSCN, 0, NotSerialized)
             {
-                Name (PKG, Package (0x03)
+                Return (Package (0x03)
                 {
                     0x0430,
                     0x04E1,
                     0x00
                 })
-                Return (PKG)
             }
 
             Method (FMCN, 0, NotSerialized)
             {
-                Name (PKG, Package (0x03)
+                Return (Package (0x03)
                 {
                     0x00DE,
                     0x018F,
                     0x00
                 })
-                Return (PKG)
             }
         }
 
