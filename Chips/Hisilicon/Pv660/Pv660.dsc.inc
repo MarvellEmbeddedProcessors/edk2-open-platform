@@ -51,9 +51,7 @@
   #
   PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
 
-  # 1/123 faster than Stm or Vstm version
-  #BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
-  BaseMemoryLib|ArmPkg/Library/BaseMemoryLibStm/BaseMemoryLibStm.inf
+  BaseMemoryLib|MdePkg/Library/BaseMemoryLibOptDxe/BaseMemoryLibOptDxe.inf
 
   # ARM Architectural Libraries
   CacheMaintenanceLib|ArmPkg/Library/ArmCacheMaintenanceLib/ArmCacheMaintenanceLib.inf
@@ -140,6 +138,7 @@
 
   ArmGicArchLib|ArmPkg/Library/ArmGicArchSecLib/ArmGicArchSecLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+  BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
 
 [LibraryClasses.common.PEI_CORE]
   HobLib|MdePkg/Library/PeiHobLib/PeiHobLib.inf
@@ -155,6 +154,7 @@
 
   PeiServicesTablePointerLib|ArmPkg/Library/PeiServicesTablePointerLib/PeiServicesTablePointerLib.inf
   PcdLib|MdePkg/Library/PeiPcdLib/PeiPcdLib.inf
+  BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
 
 [LibraryClasses.common.PEIM]
   HobLib|MdePkg/Library/PeiHobLib/PeiHobLib.inf
@@ -175,6 +175,7 @@
   PlatformPeiLib|ArmPlatformPkg/PlatformPei/PlatformPeiLib.inf
   PcdLib|MdePkg/Library/PeiPcdLib/PeiPcdLib.inf
   ArmMmuLib|ArmPkg/Library/ArmMmuLib/ArmMmuPeiLib.inf
+  BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
 
 [LibraryClasses.common.DXE_CORE]
   HobLib|MdePkg/Library/DxeCoreHobLib/DxeCoreHobLib.inf
