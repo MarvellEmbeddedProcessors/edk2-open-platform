@@ -54,7 +54,7 @@
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
 
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
-  BaseMemoryLib|ArmPkg/Library/BaseMemoryLibStm/BaseMemoryLibStm.inf
+  BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
 
   EfiResetSystemLib|OpenPlatformPkg/Platforms/TexasInstruments/BeagleBoard/Library/ResetSystemLib/ResetSystemLib.inf
 
