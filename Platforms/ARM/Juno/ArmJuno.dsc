@@ -297,6 +297,7 @@
   # Networking stack
   #
   EmbeddedPkg/Drivers/Lan9118Dxe/Lan9118Dxe.inf
+  OpenPlatformPkg/Drivers/Net/MarvellYukonDxe/MarvellYukonDxe.inf
 
   #
   # Usb Support

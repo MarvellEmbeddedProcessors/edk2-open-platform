@@ -188,6 +188,7 @@ FvNameGuid         = B73FE497-B92E-416e-8326-45AD0D270092
   INF MdeModulePkg/Universal/Network/UefiPxeBcDxe/UefiPxeBcDxe.inf
   INF MdeModulePkg/Universal/Network/IScsiDxe/IScsiDxe.inf
   INF EmbeddedPkg/Drivers/Lan9118Dxe/Lan9118Dxe.inf
+  INF OpenPlatformPkg/Drivers/Net/MarvellYukonDxe/MarvellYukonDxe.inf
 
   #
   # UEFI applications
