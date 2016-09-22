@@ -332,3 +332,8 @@
   MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe.inf
   MdeModulePkg/Universal/SetupBrowserDxe/SetupBrowserDxe.inf
   IntelFrameworkModulePkg/Universal/BdsDxe/BdsDxe.inf
+
+  #
+  # EBC
+  #
+  MdeModulePkg/Universal/EbcDxe/EbcDxe.inf

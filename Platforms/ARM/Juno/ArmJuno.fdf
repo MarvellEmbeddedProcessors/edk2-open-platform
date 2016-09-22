@@ -222,6 +222,11 @@ FvNameGuid         = B73FE497-B92E-416e-8326-45AD0D270092
   # after the device drivers (eg: Ethernet) to ensure we have support for them.
   INF EmbeddedPkg/Drivers/FdtPlatformDxe/FdtPlatformDxe.inf
 
+  #
+  # EBC
+  #
+  INF MdeModulePkg/Universal/EbcDxe/EbcDxe.inf
+
 [FV.FVMAIN_COMPACT]
 FvAlignment        = 8
 ERASE_POLARITY     = 1
