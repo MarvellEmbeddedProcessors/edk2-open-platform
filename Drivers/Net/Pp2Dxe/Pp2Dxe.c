@@ -1132,23 +1132,6 @@ Pp2DxeInitialise (
     return Status;
   }
 
-  mvpp2_write(Mvpp2Shared, MVPP22_AXI_BM_WR_ATTR_REG,
-        MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
-  mvpp2_write(Mvpp2Shared, MVPP22_AXI_BM_RD_ATTR_REG,
-        MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
-  mvpp2_write(Mvpp2Shared, MVPP22_AXI_AGGRQ_DESCR_RD_ATTR_REG,
-        MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
-  mvpp2_write(Mvpp2Shared, MVPP22_AXI_TXQ_DESCR_WR_ATTR_REG,
-        MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
-  mvpp2_write(Mvpp2Shared, MVPP22_AXI_TXQ_DESCR_RD_ATTR_REG,
-        MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
-  mvpp2_write(Mvpp2Shared, MVPP22_AXI_RXQ_DESCR_WR_ATTR_REG,
-        MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
-  mvpp2_write(Mvpp2Shared, MVPP22_AXI_RX_DATA_WR_ATTR_REG,
-        MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
-  mvpp2_write(Mvpp2Shared, MVPP22_AXI_TX_DATA_RD_ATTR_REG,
-        MVPP22_AXI_ATTR_SNOOP_CNTRL_BIT);
-
   Mvpp2Shared->aggr_txqs = AllocateZeroPool (sizeof(struct mvpp2_tx_queue));
   if (Mvpp2Shared->aggr_txqs == NULL) {
     DEBUG((DEBUG_ERROR, "Failed to allocate aggregated txqs\n"));
