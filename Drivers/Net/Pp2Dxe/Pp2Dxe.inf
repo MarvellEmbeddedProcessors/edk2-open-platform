@@ -86,6 +86,9 @@
   gMarvellTokenSpaceGuid.PcdPp2Rfu1BaseAddress
   gMarvellTokenSpaceGuid.PcdPp2SmiBaseAddress
   gMarvellTokenSpaceGuid.PcdPp2ClockFrequency
+  gMarvellTokenSpaceGuid.PcdPp2MacAddressPort0
+  gMarvellTokenSpaceGuid.PcdPp2MacAddressPort1
+  gMarvellTokenSpaceGuid.PcdPp2MacAddressPort2
 
 [Depex]
   TRUE

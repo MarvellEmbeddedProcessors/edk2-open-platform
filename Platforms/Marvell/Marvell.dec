@@ -206,6 +206,9 @@
   gMarvellTokenSpaceGuid.PcdPp2Rfu1BaseAddress|0|UINT64|0x40000029
   gMarvellTokenSpaceGuid.PcdPp2SmiBaseAddress|0|UINT64|0x40000030
   gMarvellTokenSpaceGuid.PcdPp2ClockFrequency|0|UINT32|0x3000042
+  gMarvellTokenSpaceGuid.PcdPp2MacAddressPort0|{ 0x0, 0x0, 0x0, 0x0, 0x0, 0x1 }|VOID*|0x40000033
+  gMarvellTokenSpaceGuid.PcdPp2MacAddressPort1|{ 0x0, 0x0, 0x0, 0x0, 0x0, 0x2 }|VOID*|0x40000034
+  gMarvellTokenSpaceGuid.PcdPp2MacAddressPort2|{ 0x0, 0x0, 0x0, 0x0, 0x0, 0x3 }|VOID*|0x40000035
 
 #ResetLib
   gMarvellTokenSpaceGuid.PcdResetRegAddress|0|UINT64|0x40000050

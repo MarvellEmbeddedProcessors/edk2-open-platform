@@ -57,3 +57,14 @@ TCLK frequency:
 
 GMAC and XLG addresses are computed as follows:
   address = base_address + obj_size * gop_index
+
+MAC adresses for up to 3 ports per controller
+are defined in following tables:
+  gMarvellTokenSpaceGuid.PcdPp2MacAddressPort<N>,
+
+where N is port number (0-2). Example: Set Port1
+address to value 0a:70:40:00:00:02:
+  gMarvellTokenSpaceGuid.PcdPp2MacAddressPort1|{ 0x0a, 0x70, 0x40, 0x00, 0x00, 0x2 }
+
+Default value, for MAC address not defined in board's
+.dsc file is 00:00:00:00:00:0<N>, where N is port index + 1
