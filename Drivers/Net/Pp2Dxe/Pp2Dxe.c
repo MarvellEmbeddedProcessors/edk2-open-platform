@@ -66,7 +66,7 @@ PP2_DEVICE_PATH Pp2DevicePathTemplate = {
       MESSAGING_DEVICE_PATH, MSG_MAC_ADDR_DP,
       { (UINT8) (sizeof(MAC_ADDR_DEVICE_PATH)), (UINT8) ((sizeof(MAC_ADDR_DEVICE_PATH)) >> 8) }
     },
-    { PP2DXE_DEFAULT_MAC_ADDR },
+    { { 0 } },
     0
   },
   {
@@ -936,6 +936,35 @@ drop:
   ReturnUnlock(SavedTpl, Status);
 }
 
+STATIC
+VOID
+Pp2DxeConfigureMacAddress (
+  IN PP2DXE_CONTEXT *Pp2Context,
+  IN PP2_DEVICE_PATH *Pp2DevicePath
+  )
+{
+  UINT8 *MacAddressPtr;
+  INTN i;
+
+  switch (Pp2Context->Instance) {
+  case 0:
+    MacAddressPtr = PcdGetPtr (PcdPp2MacAddressPort0);
+    break;
+  case 1:
+    MacAddressPtr = PcdGetPtr (PcdPp2MacAddressPort1);
+    break;
+  case 2:
+    MacAddressPtr = PcdGetPtr (PcdPp2MacAddressPort2);
+    break;
+  default:
+    Pp2DevicePath->Pp2Mac.MacAddress.Addr[5] = Pp2Context->Instance + 1;
+    return;
+  }
+
+  for (i = 0; i < NET_ETHER_ADDR_LEN; i++)
+    Pp2DevicePath->Pp2Mac.MacAddress.Addr[i] = MacAddressPtr[i];
+}
+
 EFI_STATUS
 Pp2DxeSnpInstall (
   IN PP2DXE_CONTEXT *Pp2Context
@@ -948,8 +977,7 @@ Pp2DxeSnpInstall (
   DEBUG((DEBUG_INFO, "Pp2Dxe%d: Installing protocols\n", Pp2Context->Instance));
   Pp2Context->Snp.Mode = AllocateZeroPool (sizeof (EFI_SIMPLE_NETWORK_MODE));
   Pp2DevicePath = AllocateCopyPool (sizeof (PP2_DEVICE_PATH), &Pp2DevicePathTemplate);
-  /* change MAC address depending on interface */
-  Pp2DevicePath->Pp2Mac.MacAddress.Addr[5] += Pp2Context->Instance;
+  Pp2DxeConfigureMacAddress(Pp2Context, Pp2DevicePath);
   Pp2Context->Signature = PP2DXE_SIGNATURE;
   Pp2Context->Snp.Initialize = Pp2DxeSnpInitialize;
   Pp2Context->Snp.Start = Pp2SnpStart;
