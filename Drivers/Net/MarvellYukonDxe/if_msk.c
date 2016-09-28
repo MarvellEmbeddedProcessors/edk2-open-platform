@@ -615,7 +615,6 @@ msk_newbuf (
   rxd = &sc_if->msk_cdata.msk_rxdesc[idx];
 #endif
 
-  gBS->SetMem (&(rxd->rx_m), sizeof (MSK_DMA_BUF), 0);
   rxd->rx_m.DmaMapping = Mapping;
   rxd->rx_m.Buf = Buffer;
   rxd->rx_m.Length = Length;
@@ -1906,7 +1905,9 @@ msk_rxeof (
     rxd = &sc_if->msk_cdata.msk_rxdesc[cons];
 #endif
 
-    gBS->CopyMem (&m, &rxd->rx_m, sizeof(m));
+    m.Buf = rxd->rx_m.Buf;
+    m.DmaMapping = rxd->rx_m.DmaMapping;
+    m.Length = rxd->rx_m.Length;
 
     Status = msk_newbuf (sc_if, cons);
     if (EFI_ERROR (Status)) {
