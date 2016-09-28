@@ -15,7 +15,7 @@
 
 #include <Uefi.h>
 
-#define MAX_SUPPORTED_PACKET_SIZE   (1500)
+#define MAX_SUPPORTED_PACKET_SIZE   (1566) /* No jumbo frame size support */
 
 EFI_STATUS mskc_probe (EFI_PCI_IO_PROTOCOL *PciIo);
 
