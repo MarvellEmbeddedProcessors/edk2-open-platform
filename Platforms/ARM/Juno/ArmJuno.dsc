@@ -277,7 +277,10 @@
   # PCI Support
   #
   MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
-  ArmPlatformPkg/ArmJunoPkg/Drivers/PciHostBridgeDxe/PciHostBridgeDxe.inf
+  ArmPlatformPkg/ArmJunoPkg/Drivers/PciHostBridgeDxe/PciHostBridgeDxe.inf {
+    <LibraryClasses>
+      DmaLib|EmbeddedPkg/Library/NullDmaLib/NullDmaLib.inf
+  }
 
   #
   # SATA Controller
