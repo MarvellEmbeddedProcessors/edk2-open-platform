@@ -123,8 +123,8 @@ typedef struct _DDR_DIMM{
     UINT8       MtbDividend;
     UINT8       MtbDivsor;
     UINT8       nCL;
-    UINT8       nRCD;
-    UINT8       nRP;
+    UINT32      nRCD;
+    UINT32      nRP;
     UINT8       SPDftb;
     UINT8       SpdMinTCK;
     UINT8       SpdMinTCKFtb;
@@ -173,7 +173,13 @@ typedef struct {
     UINT32      ddrcTiming5;
     UINT32      ddrcTiming6;
     UINT32      ddrcTiming7;
+    UINT32      ddrcTiming8;
 }DDRC_TIMING;
+
+typedef struct _MARGIN_RESULT{
+    UINT32 OptimalDramVref[12];
+    UINT32 optimalPhyVref[18];
+}MARGIN_RESULT;
 
 typedef struct _DDR_Channel{
     BOOLEAN     Status;
@@ -184,22 +190,42 @@ typedef struct _DDR_Channel{
     UINT8       DramWidth;
     UINT8       ModuleType;
     UINT32      MemSize;
+    UINT32      tck;
+    UINT32      ratio;
     UINT32      CLSupport;
     UINT32      minTck;
+    UINT32      taref;
     UINT32      nAA;
+    UINT32      nAOND;
+    UINT32      nCKE;
     UINT32      nCL;
     UINT32      nCCDL;
+    UINT32      nCKSRX;
+    UINT32      nCKSRE;
+    UINT32      nCCDNSW;
+    UINT32      nCCDNSR;
     UINT32      nFAW;
+    UINT32      nMRD;
+    UINT32      nMOD;
     UINT32      nRCD;
     UINT32      nRRD;
     UINT32      nRRDL;
     UINT32      nRAS;
     UINT32      nRC;
     UINT32      nRFC;
+    UINT32      nRFCAB;
     UINT32      nRTP;
+    UINT32      nRTW;
     UINT32      nRP;
+    UINT32      nSRE;
+    UINT32      nWL;
     UINT32      nWR;
     UINT32      nWTR;
+    UINT32      nWTRL;
+    UINT32      nXARD;
+    UINT32      nZQPRD;
+    UINT32      nZQINIT;
+    UINT32      nZQCS;
     UINT8       cwl;  //tWL?
     UINT8       pl;     //parity latency
     UINT8       wr_pre_2t_en;
@@ -232,11 +258,19 @@ typedef struct _DDR_Channel{
     UINT32      ddrcCfgDfiLat0;
     UINT32      ddrcCfgDfiLat1;
     UINT32      parityLatency;
+    UINT32      dimm_parity_en;
     DDRC_TIMING ddrcTiming;
     DDR_DIMM    Dimm[MAX_DIMM];
+    MARGIN_RESULT sMargin;
 }DDR_CHANNEL;
 
 typedef struct _NVRAM_RANK{
+    UINT16      MR0;
+    UINT16      MR1;
+    UINT16      MR2;
+    UINT16      MR3;
+    UINT16      MR4;
+    UINT16      MR5;
     UINT16      MR6[9];
 }NVRAM_RANK;
 
@@ -306,6 +340,14 @@ typedef struct _MEMORY{
     UINT32          Config2;
 }MEMORY;
 
+typedef struct _NUMAINFO{
+    UINT8           NodeId;
+    UINT64          Base;
+    UINT64          Length;
+    UINT32          ScclInterleaveEn;
+}NUMAINFO;
+
+
 typedef struct _GBL_DATA
 {
     DDR_CHANNEL Channel[MAX_SOCKET][MAX_CHANNEL];
@@ -319,6 +361,7 @@ typedef struct _GBL_DATA
     UINT32      SpdTck;
     UINT32      Tck;
     UINT32      DdrFreqIdx;
+    UINT32      DevParaFreqIdx; //Maximum frequency of DDR device
     UINT32      MemSize;
     UINT32      EccEn;
 
@@ -365,6 +408,7 @@ typedef struct _GBL_DATA
     BOOLEAN     chipIsEc;
     NVRAM       nvram;
     MEMORY      mem;
+    NUMAINFO    NumaInfo[MAX_SOCKET][MAX_NUM_PER_TYPE];
 
 }GBL_DATA, *pGBL_DATA;
 
