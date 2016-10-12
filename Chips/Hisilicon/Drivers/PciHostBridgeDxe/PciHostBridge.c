@@ -30,8 +30,16 @@ UINT64 RootBridgeAttribute[PCIE_MAX_HOSTBRIDGE][PCIE_MAX_ROOTBRIDGE] = {
             EFI_PCI_HOST_BRIDGE_MEM64_DECODE,
             EFI_PCI_HOST_BRIDGE_MEM64_DECODE,
             EFI_PCI_HOST_BRIDGE_MEM64_DECODE,
+            EFI_PCI_HOST_BRIDGE_MEM64_DECODE,
+            EFI_PCI_HOST_BRIDGE_MEM64_DECODE,
+            EFI_PCI_HOST_BRIDGE_MEM64_DECODE,
+            EFI_PCI_HOST_BRIDGE_MEM64_DECODE,
     },
     { //Host Bridge1
+            EFI_PCI_HOST_BRIDGE_MEM64_DECODE,
+            EFI_PCI_HOST_BRIDGE_MEM64_DECODE,
+            EFI_PCI_HOST_BRIDGE_MEM64_DECODE,
+            EFI_PCI_HOST_BRIDGE_MEM64_DECODE,
             EFI_PCI_HOST_BRIDGE_MEM64_DECODE,
             EFI_PCI_HOST_BRIDGE_MEM64_DECODE,
             EFI_PCI_HOST_BRIDGE_MEM64_DECODE,
@@ -136,10 +144,8 @@ EFI_PCI_ROOT_BRIDGE_DEVICE_PATH mEfiPciRootBridgeDevicePath[PCIE_MAX_HOSTBRIDGE]
           0
         }
       }
-    }
-},
-{ // Host Bridge1
-  /* Port 0 */
+    },
+    /* Port 4 */
     {
       {
         {
@@ -163,7 +169,7 @@ EFI_PCI_ROOT_BRIDGE_DEVICE_PATH mEfiPciRootBridgeDevicePath[PCIE_MAX_HOSTBRIDGE]
         }
       }
     },
-  /* Port 1 */
+    /* Port 5 */
     {
       {
         {
@@ -187,7 +193,7 @@ EFI_PCI_ROOT_BRIDGE_DEVICE_PATH mEfiPciRootBridgeDevicePath[PCIE_MAX_HOSTBRIDGE]
         }
       }
     },
-  /* Port 2 */
+    /* Port 6 */
     {
       {
         {
@@ -211,7 +217,7 @@ EFI_PCI_ROOT_BRIDGE_DEVICE_PATH mEfiPciRootBridgeDevicePath[PCIE_MAX_HOSTBRIDGE]
         }
       }
     },
-  /* Port 3 */
+    /* Port 7 */
     {
       {
         {
@@ -223,6 +229,200 @@ EFI_PCI_ROOT_BRIDGE_DEVICE_PATH mEfiPciRootBridgeDevicePath[PCIE_MAX_HOSTBRIDGE]
           }
         },
         EISA_PNP_ID(0x0A0A),
+        0
+      },
+
+      {
+        END_DEVICE_PATH_TYPE,
+        END_ENTIRE_DEVICE_PATH_SUBTYPE,
+        {
+          END_DEVICE_PATH_LENGTH,
+          0
+        }
+      }
+    }
+},
+{ // Host Bridge1
+  /* Port 0 */
+    {
+      {
+        {
+          ACPI_DEVICE_PATH,
+          ACPI_DP,
+          {
+            (UINT8) (sizeof(ACPI_HID_DEVICE_PATH)),
+            (UINT8) ((sizeof(ACPI_HID_DEVICE_PATH)) >> 8)
+          }
+        },
+        EISA_PNP_ID(0x0A0B),
+        0
+      },
+
+      {
+        END_DEVICE_PATH_TYPE,
+        END_ENTIRE_DEVICE_PATH_SUBTYPE,
+        {
+          END_DEVICE_PATH_LENGTH,
+          0
+        }
+      }
+    },
+  /* Port 1 */
+    {
+      {
+        {
+          ACPI_DEVICE_PATH,
+          ACPI_DP,
+          {
+            (UINT8) (sizeof(ACPI_HID_DEVICE_PATH)),
+            (UINT8) ((sizeof(ACPI_HID_DEVICE_PATH)) >> 8)
+          }
+        },
+        EISA_PNP_ID(0x0A0C),
+        0
+      },
+
+      {
+        END_DEVICE_PATH_TYPE,
+        END_ENTIRE_DEVICE_PATH_SUBTYPE,
+        {
+          END_DEVICE_PATH_LENGTH,
+          0
+        }
+      }
+    },
+  /* Port 2 */
+    {
+      {
+        {
+          ACPI_DEVICE_PATH,
+          ACPI_DP,
+          {
+            (UINT8) (sizeof(ACPI_HID_DEVICE_PATH)),
+            (UINT8) ((sizeof(ACPI_HID_DEVICE_PATH)) >> 8)
+          }
+        },
+        EISA_PNP_ID(0x0A0D),
+        0
+      },
+
+      {
+        END_DEVICE_PATH_TYPE,
+        END_ENTIRE_DEVICE_PATH_SUBTYPE,
+        {
+          END_DEVICE_PATH_LENGTH,
+          0
+        }
+      }
+    },
+  /* Port 3 */
+    {
+      {
+        {
+          ACPI_DEVICE_PATH,
+          ACPI_DP,
+          {
+            (UINT8) (sizeof(ACPI_HID_DEVICE_PATH)),
+            (UINT8) ((sizeof(ACPI_HID_DEVICE_PATH)) >> 8)
+          }
+        },
+        EISA_PNP_ID(0x0A0E),
+        0
+      },
+
+      {
+        END_DEVICE_PATH_TYPE,
+        END_ENTIRE_DEVICE_PATH_SUBTYPE,
+        {
+          END_DEVICE_PATH_LENGTH,
+          0
+        }
+      }
+    },
+   /* Port 4 */
+    {
+      {
+        {
+          ACPI_DEVICE_PATH,
+          ACPI_DP,
+          {
+            (UINT8) (sizeof(ACPI_HID_DEVICE_PATH)),
+            (UINT8) ((sizeof(ACPI_HID_DEVICE_PATH)) >> 8)
+          }
+        },
+        EISA_PNP_ID(0x0A0F),
+        0
+      },
+
+      {
+        END_DEVICE_PATH_TYPE,
+        END_ENTIRE_DEVICE_PATH_SUBTYPE,
+        {
+          END_DEVICE_PATH_LENGTH,
+          0
+        }
+      }
+    },
+    /* Port 5 */
+    {
+      {
+        {
+          ACPI_DEVICE_PATH,
+          ACPI_DP,
+          {
+            (UINT8) (sizeof(ACPI_HID_DEVICE_PATH)),
+            (UINT8) ((sizeof(ACPI_HID_DEVICE_PATH)) >> 8)
+          }
+        },
+        EISA_PNP_ID(0x0A10),
+        0
+      },
+
+      {
+        END_DEVICE_PATH_TYPE,
+        END_ENTIRE_DEVICE_PATH_SUBTYPE,
+        {
+          END_DEVICE_PATH_LENGTH,
+          0
+        }
+      }
+    },
+    /* Port 6 */
+    {
+      {
+        {
+          ACPI_DEVICE_PATH,
+          ACPI_DP,
+          {
+            (UINT8) (sizeof(ACPI_HID_DEVICE_PATH)),
+            (UINT8) ((sizeof(ACPI_HID_DEVICE_PATH)) >> 8)
+          }
+        },
+        EISA_PNP_ID(0x0A11),
+        0
+      },
+
+      {
+        END_DEVICE_PATH_TYPE,
+        END_ENTIRE_DEVICE_PATH_SUBTYPE,
+        {
+          END_DEVICE_PATH_LENGTH,
+          0
+        }
+      }
+    },
+    /* Port 7 */
+    {
+      {
+        {
+          ACPI_DEVICE_PATH,
+          ACPI_DP,
+          {
+            (UINT8) (sizeof(ACPI_HID_DEVICE_PATH)),
+            (UINT8) ((sizeof(ACPI_HID_DEVICE_PATH)) >> 8)
+          }
+        },
+        EISA_PNP_ID(0x0A12),
         0
       },
 
@@ -286,7 +486,6 @@ InitializePciHostBridge (
   if (!OemIsMpBoot())
   {
     PcieRootBridgeMask = PcdGet32(PcdPcieRootBridgeMask);
-    PcieRootBridgeMask &= 0xf;
   }
   else
   {
@@ -297,9 +496,10 @@ InitializePciHostBridge (
   //
   // Create Host Bridge Device Handle
   //
-
+  //Each Host Bridge have 8 Root Bridges max, every bits of 0xFF(8 bit) stands for the according PCIe Port
+  //is enable or not
   for (Loop1 = 0; Loop1 < PCIE_MAX_HOSTBRIDGE; Loop1++) {
-    if (((PcieRootBridgeMask >> (4 * Loop1)) & 0xF ) == 0) {
+    if (((PcieRootBridgeMask >> (PCIE_MAX_ROOTBRIDGE * Loop1)) & 0xFF ) == 0) {
       continue;
     }
 
@@ -326,7 +526,7 @@ InitializePciHostBridge (
     // Create Root Bridge Device Handle in this Host Bridge
     //
     for (Loop2 = 0; Loop2 < HostBridge->RootBridgeNumber; Loop2++) {
-      if (!(((PcieRootBridgeMask >> (4 * Loop1)) >> Loop2 ) & 0x01)) {
+      if (!(((PcieRootBridgeMask >> (PCIE_MAX_ROOTBRIDGE * Loop1)) >> Loop2 ) & 0x01)) {
         continue;
       }
 

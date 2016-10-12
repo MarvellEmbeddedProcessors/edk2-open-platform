@@ -481,7 +481,10 @@
 !endif #$(FDT_ENABLE)
 
   #PCIe Support
-  OpenPlatformPkg/Chips/Hisilicon/Hi1610/Drivers/PcieInit1610/PcieInitDxe.inf
+  OpenPlatformPkg/Chips/Hisilicon/Hi1610/Drivers/PcieInit1610/PcieInitDxe.inf {
+    <LibraryClasses>
+      NULL|OpenPlatformPkg/Platforms/Hisilicon/D03/Library/PlatformPciLib/PlatformPciLib.inf
+  }
   OpenPlatformPkg/Platforms/Hisilicon/D03/Drivers/PciPlatform/PciPlatform.inf
   OpenPlatformPkg/Chips/Hisilicon/Drivers/PciHostBridgeDxe/PciHostBridgeDxe.inf {
     <LibraryClasses>

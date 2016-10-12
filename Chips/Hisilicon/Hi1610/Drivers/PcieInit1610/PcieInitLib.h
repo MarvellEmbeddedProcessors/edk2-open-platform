@@ -19,6 +19,7 @@
 
 #include <Uefi.h>
 #include <Library/IoLib.h>
+#include <Library/PlatformPciLib.h>
 #include <Regs/HisiPcieV1RegOffset.h>
 #include "PcieKernelApi.h"
 
@@ -147,12 +148,12 @@ typedef struct {
 } PCIE_MAPPED_IATU_ADDR;
 
 typedef struct {
-    BOOLEAN             PortIsInitilized[PCIE_MAX_PORT_NUM];
-    DRIVER_CFG_U        Dev[PCIE_MAX_PORT_NUM];
-    VOID                *DmaResource[PCIE_MAX_PORT_NUM];
-    UINT32              DmaChannel[PCIE_MAX_PORT_NUM][2];
-    VOID                *RegResource[PCIE_MAX_PORT_NUM];
-    VOID                *CfgResource[PCIE_MAX_PORT_NUM];
+    BOOLEAN             PortIsInitilized[PCIE_MAX_ROOTBRIDGE];
+    DRIVER_CFG_U        Dev[PCIE_MAX_ROOTBRIDGE];
+    VOID                *DmaResource[PCIE_MAX_ROOTBRIDGE];
+    UINT32              DmaChannel[PCIE_MAX_ROOTBRIDGE][PCIE_DMA_CHANNEL_NUM];
+    VOID                *RegResource[PCIE_MAX_ROOTBRIDGE];
+    VOID                *CfgResource[PCIE_MAX_ROOTBRIDGE];
 } PCIE_INIT_CFG;
 
 typedef enum {

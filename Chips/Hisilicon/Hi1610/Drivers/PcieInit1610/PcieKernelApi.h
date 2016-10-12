@@ -16,8 +16,6 @@
 #ifndef __PCIE_KERNEL_API_H__
 #define __PCIE_KERNEL_API_H__
 
-#define PCIE_HOST_BRIDGE_NUM            (1)
-#define PCIE_MAX_PORT_NUM               (4)
 #define PCIE_MAX_OUTBOUND               (6)
 #define PCIE_MAX_INBOUND               (4)
 #define PCIE3_MAX_OUTBOUND               (16)

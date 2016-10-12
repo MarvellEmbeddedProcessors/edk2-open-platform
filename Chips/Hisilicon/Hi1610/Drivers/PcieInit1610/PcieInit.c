@@ -17,13 +17,14 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/PcdLib.h>
 #include <Library/OemMiscLib.h>
+#include <Library/PlatformPciLib.h>
 
 
 extern VOID PcieRegWrite(UINT32 Port, UINTN Offset, UINT32 Value);
 extern EFI_STATUS PciePortReset(UINT32 HostBridgeNum, UINT32 Port);
 extern EFI_STATUS PciePortInit (UINT32 soctype, UINT32 HostBridgeNum, PCIE_DRIVER_CFG *PcieCfg);
 
-PCIE_DRIVER_CFG gastr_pcie_driver_cfg[PCIE_MAX_PORT_NUM] =
+PCIE_DRIVER_CFG gastr_pcie_driver_cfg[PCIE_MAX_ROOTBRIDGE] =
 {
     //Port 0
     {
@@ -69,6 +70,46 @@ PCIE_DRIVER_CFG gastr_pcie_driver_cfg[PCIE_MAX_PORT_NUM] =
         },
 
     },
+    //Port 4
+    {
+        0x4,                        //Portindex
+        {
+            PCIE_ROOT_COMPLEX,      //PortType
+            PCIE_WITDH_X8,          //PortWidth
+            PCIE_GEN3_0,            //PortGen
+        },
+
+    },
+    //Port 5
+    {
+        0x5,                        //Portindex
+        {
+            PCIE_ROOT_COMPLEX,      //PortType
+            PCIE_WITDH_X8,          //PortWidth
+            PCIE_GEN3_0,            //PortGen
+        },
+
+    },
+    //Port 6
+    {
+        0x6,                        //Portindex
+        {
+            PCIE_ROOT_COMPLEX,      //PortType
+            PCIE_WITDH_X8,          //PortWidth
+            PCIE_GEN3_0,            //PortGen
+        },
+
+    },
+    //Port 7
+    {
+        0x7,                        //Portindex
+        {
+            PCIE_ROOT_COMPLEX,      //PortType
+            PCIE_WITDH_X8,          //PortWidth
+            PCIE_GEN3_0,            //PortGen
+        },
+
+    },
 };
 
 EFI_STATUS
@@ -88,7 +129,6 @@ PcieInitEntry (
     if (!OemIsMpBoot())
     {
         PcieRootBridgeMask = PcdGet32(PcdPcieRootBridgeMask);
-        PcieRootBridgeMask &= 0xf;
     }
     else
     {
@@ -96,12 +136,15 @@ PcieInitEntry (
     }
 
     soctype = PcdGet32(Pcdsoctype);
-    for (HostBridgeNum = 0; HostBridgeNum < PCIE_HOST_BRIDGE_NUM; HostBridgeNum++)
-    {
-        for (Port = 0; Port < PCIE_MAX_PORT_NUM; Port++)
-        {
-            if (!(((( PcieRootBridgeMask >> (4 * HostBridgeNum))) >> Port) & 0x1))
-            {
+    for (HostBridgeNum = 0; HostBridgeNum < PCIE_MAX_HOSTBRIDGE; HostBridgeNum++) {
+        for (Port = 0; Port < PCIE_MAX_ROOTBRIDGE; Port++) {
+            /*
+               Host Bridge may contain lots of root bridges.
+               Each Host bridge have PCIE_MAX_ROOTBRIDGE root bridges
+               PcieRootBridgeMask have PCIE_MAX_ROOTBRIDGE*HostBridgeNum bits,
+               and each bit stands for this PCIe Port is enable or not
+            */
+            if (!(((( PcieRootBridgeMask >> (PCIE_MAX_ROOTBRIDGE * HostBridgeNum))) >> Port) & 0x1)) {
                 continue;
             }
 

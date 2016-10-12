@@ -19,23 +19,20 @@
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/IoLib.h>
+#include <Library/PlatformPciLib.h>
 #include <Library/TimerLib.h>
 
 #define PCIE_SYS_REG_OFFSET 0x1000
 
 static PCIE_INIT_CFG mPcieIntCfg;
 UINT64 pcie_subctrl_base[2] = {0xb0000000, BASE_4TB + 0xb0000000};
-UINT64 pcie_subctrl_base_1610[2] = {0xa0000000, 0xb0000000};
 UINT64 io_sub0_base = 0xa0000000;
 UINT64 PCIE_APB_SLVAE_BASE[2] = {0xb0070000, BASE_4TB + 0xb0070000};
 #define PCIE_REG_BASE(HostBridgeNum,port)              (PCIE_APB_SLVAE_BASE[HostBridgeNum] + (UINT32)(port * 0x10000))
-UINT64 PCIE_APB_SLAVE_BASE_1610[2][4] = {{0xa0090000, 0xa0200000, 0xa00a0000, 0xa00b0000},
-                                         {0xb0090000, 0xb0200000, 0xb00a0000, 0xb00b0000}};
-UINT64 PCIE_PHY_BASE_1610[2][4] = {{0xa00c0000, 0xa00d0000, 0xa00e0000, 0xa00f0000},
-                                    {0xb00c0000,0xb00d0000, 0xb00e0000, 0xb00f0000}};
 UINT32 loop_test_flag[4] = {0,0,0,0};
 UINT64 pcie_dma_des_base = PCIE_ADDR_BASE_HOST_ADDR;
 #define PcieMaxLanNum       8
+#define PCIE_PORT_NUM_IN_SICL    4  //SICL: Super IO Cluster
 
 
 extern PCIE_DRIVER_CFG gastr_pcie_driver_cfg;
@@ -158,8 +155,7 @@ EFI_STATUS PcieEnableItssm(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
     PCIE_CTRL_7_U pcie_ctrl7;
     UINT32 Value = 0;
 
-    if(Port >= PCIE_MAX_PORT_NUM)
-    {
+    if (Port >= PCIE_MAX_ROOTBRIDGE) {
         return EFI_INVALID_PARAMETER;
     }
 
@@ -236,8 +232,7 @@ EFI_STATUS PcieDisableItssm(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
     PCIE_CTRL_7_U pcie_ctrl7;
     UINT32 Value = 0;
 
-    if(Port >= PCIE_MAX_PORT_NUM)
-    {
+    if(Port >= PCIE_MAX_ROOTBRIDGE) {
         return PCIE_ERR_PARAM_INVALID;
     }
 
@@ -269,8 +264,7 @@ EFI_STATUS PcieLinkSpeedSet(UINT32 Port,PCIE_PORT_GEN Speed)
 {
     PCIE_EP_PCIE_CAP12_U pcie_cap12;
 
-    if(Port >= PCIE_MAX_PORT_NUM)
-    {
+    if(Port >= PCIE_MAX_ROOTBRIDGE) {
         return EFI_INVALID_PARAMETER;
     }
 
@@ -293,8 +287,7 @@ EFI_STATUS PcieLinkWidthSet(UINT32 Port, PCIE_PORT_WIDTH Width)
     PCIE_EP_PORT_LOGIC4_U pcie_logic4;
     PCIE_EP_PORT_LOGIC22_U logic22;
 
-    if(Port >= PCIE_MAX_PORT_NUM)
-    {
+    if(Port >= PCIE_MAX_ROOTBRIDGE) {
         return PCIE_ERR_PARAM_INVALID;
     }
 
@@ -353,8 +346,7 @@ EFI_STATUS PcieSetupRC(UINT32 Port, PCIE_PORT_WIDTH Width)
     PCIE_EP_PORT_LOGIC22_U logic22;
     PCIE_EEP_PCI_CFG_HDR15_U hdr15;
     UINT32 Value = 0;
-    if(Port >= PCIE_MAX_PORT_NUM)
-    {
+    if(Port >= PCIE_MAX_ROOTBRIDGE) {
         return EFI_INVALID_PARAMETER;
     }
 
@@ -440,8 +432,7 @@ EFI_STATUS PcieModeSet(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port, PCIE_P
 {
     PCIE_CTRL_0_U str_pcie_ctrl_0;
 
-    if(Port >= PCIE_MAX_PORT_NUM)
-    {
+    if(Port >= PCIE_MAX_ROOTBRIDGE) {
         return EFI_INVALID_PARAMETER;
     }
 
@@ -622,8 +613,8 @@ EFI_STATUS PciePortReset(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
 
 EFI_STATUS AssertPcieCoreReset(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
 {
-    if(Port >= PCIE_MAX_PORT_NUM)
-    {
+    UINT32 PortIndexInSicl;
+    if(Port >= PCIE_MAX_ROOTBRIDGE) {
         return EFI_INVALID_PARAMETER;
     }
 
@@ -634,14 +625,14 @@ EFI_STATUS AssertPcieCoreReset(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port
 
     if (0x1610 == soctype)
     {
-        if(Port <= 2)
-        {
-            RegWrite(pcie_subctrl_base_1610[HostBridgeNum] + PCIE_SUBCTRL_SC_PCIE0_RESET_REQ_REG + (UINT32)(8 * Port), 0x3);
+        PortIndexInSicl = Port % PCIE_PORT_NUM_IN_SICL;
+        if (PortIndexInSicl <= 2) {
+            RegWrite(pcie_subctrl_base_1610[HostBridgeNum][Port] + PCIE_SUBCTRL_SC_PCIE0_RESET_REQ_REG + (UINT32)(8 * PortIndexInSicl), 0x3);
             MicroSecondDelay(0x1000);
         }
         else
         {
-            RegWrite(pcie_subctrl_base_1610[HostBridgeNum] + PCIE_SUBCTRL_SC_PCIE3_RESET_REQ_REG, 0x3);
+            RegWrite(pcie_subctrl_base_1610[HostBridgeNum][Port] + PCIE_SUBCTRL_SC_PCIE3_RESET_REQ_REG, 0x3);
             MicroSecondDelay(0x1000);
         }
     }
@@ -664,8 +655,8 @@ EFI_STATUS AssertPcieCoreReset(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port
 
 EFI_STATUS DeassertPcieCoreReset(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
 {
-    if(Port >= PCIE_MAX_PORT_NUM)
-    {
+    UINT32 PortIndexInSicl;
+    if(Port >= PCIE_MAX_ROOTBRIDGE) {
         return EFI_INVALID_PARAMETER;
     }
 
@@ -676,14 +667,14 @@ EFI_STATUS DeassertPcieCoreReset(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Po
 
     if (0x1610 == soctype)
     {
-        if(Port <= 2)
-        {
-            RegWrite(pcie_subctrl_base_1610[HostBridgeNum] + PCIE_SUBCTRL_SC_PCIE0_RESET_DREQ_REG + (UINT32)(8 * Port), 0x3);
+        PortIndexInSicl = Port % PCIE_PORT_NUM_IN_SICL;
+        if (PortIndexInSicl <= 2) {
+            RegWrite(pcie_subctrl_base_1610[HostBridgeNum][Port] + PCIE_SUBCTRL_SC_PCIE0_RESET_DREQ_REG + (UINT32)(8 * PortIndexInSicl), 0x3);
             MicroSecondDelay(0x1000);
         }
         else
         {
-            RegWrite(pcie_subctrl_base_1610[HostBridgeNum] + PCIE_SUBCTRL_SC_PCIE3_RESET_DREQ_REG,0x3);
+            RegWrite(pcie_subctrl_base_1610[HostBridgeNum][Port] + PCIE_SUBCTRL_SC_PCIE3_RESET_DREQ_REG, 0x3);
             MicroSecondDelay(0x1000);
         }
     }
@@ -707,20 +698,21 @@ EFI_STATUS DeassertPcieCoreReset(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Po
 EFI_STATUS AssertPciePcsReset(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
 {
     u_sc_pcie_hilink_pcs_reset_req reset_req;
+    UINT32 PortIndexInSicl;
     if (0x1610 == soctype)
     {
-        if(Port <= 3)
-        {
-            reset_req.UInt32 = 0;
-            reset_req.UInt32 = reset_req.UInt32 | (0x1 << Port);
-            RegWrite(pcie_subctrl_base_1610[HostBridgeNum] + PCIE_SUBCTRL_SC_PCS_LOCAL_RESET_REQ_REG, reset_req.UInt32);
-            RegWrite(pcie_subctrl_base_1610[HostBridgeNum] + PCIE_SUBCTRL_SC_PCS_APB_RESET_REQ_REG, reset_req.UInt32);
+        PortIndexInSicl = Port % PCIE_PORT_NUM_IN_SICL;
+        reset_req.UInt32 = 0;
+        reset_req.UInt32 = reset_req.UInt32 | (0x1 << PortIndexInSicl);
+        RegWrite(pcie_subctrl_base_1610[HostBridgeNum][Port] + PCIE_SUBCTRL_SC_PCS_LOCAL_RESET_REQ_REG, reset_req.UInt32);
+        RegWrite(pcie_subctrl_base_1610[HostBridgeNum][Port] + PCIE_SUBCTRL_SC_PCS_APB_RESET_REQ_REG, reset_req.UInt32);
 
-            reset_req.UInt32 = 0;
-            reset_req.UInt32 = reset_req.UInt32 | (0xFF << (8 * Port));
-            RegWrite(pcie_subctrl_base_1610[HostBridgeNum] + PCIE_SUBCTRL_SC_PCIE_HILINK_PCS_RESET_REQ_REG, reset_req.UInt32);
-            MicroSecondDelay(0x1000);
-        }
+        reset_req.UInt32 = 0;
+        reset_req.UInt32 = reset_req.UInt32 | (0xFF << (8 * PortIndexInSicl));
+        RegWrite(pcie_subctrl_base_1610[HostBridgeNum][Port] + PCIE_SUBCTRL_SC_PCIE_HILINK_PCS_RESET_REQ_REG, reset_req.UInt32);
+        //0x1000 microseconds delay comes from experiment and
+        //should be fairly enough for this operation.
+        MicroSecondDelay(0x1000);
     }
     else
     {
@@ -742,20 +734,21 @@ EFI_STATUS AssertPciePcsReset(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
 EFI_STATUS DeassertPciePcsReset(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
 {
     u_sc_pcie_hilink_pcs_reset_req reset_req;
+    UINT32 PortIndexInSicl;
     if (0x1610 == soctype)
     {
-        if(Port <= 3)
-        {
-            reset_req.UInt32 = 0;
-            reset_req.UInt32 = reset_req.UInt32 | (0x1 << Port);
-            RegWrite(pcie_subctrl_base_1610[HostBridgeNum] + 0xacc, reset_req.UInt32);
-            RegWrite(pcie_subctrl_base_1610[HostBridgeNum] + PCIE_SUBCTRL_SC_PCS_LOCAL_RESET_DREQ_REG, reset_req.UInt32);
+        PortIndexInSicl = Port % PCIE_PORT_NUM_IN_SICL;
+        reset_req.UInt32 = 0;
+        reset_req.UInt32 = reset_req.UInt32 | (0x1 << PortIndexInSicl);
+        RegWrite(pcie_subctrl_base_1610[HostBridgeNum][Port] + 0xacc, reset_req.UInt32);
+        RegWrite(pcie_subctrl_base_1610[HostBridgeNum][Port] + PCIE_SUBCTRL_SC_PCS_LOCAL_RESET_DREQ_REG, reset_req.UInt32);
 
-            reset_req.UInt32 = 0;
-            reset_req.UInt32 = reset_req.UInt32 | (0xFF << (8 * Port));
-            RegWrite(pcie_subctrl_base_1610[HostBridgeNum] + PCIE_SUBCTRL_SC_PCIE_HILINK_PCS_RESET_DREQ_REG, reset_req.UInt32);
-            MicroSecondDelay(0x1000);
-        }
+        reset_req.UInt32 = 0;
+        reset_req.UInt32 = reset_req.UInt32 | (0xFF << (8 * PortIndexInSicl));
+        RegWrite(pcie_subctrl_base_1610[HostBridgeNum][Port] + PCIE_SUBCTRL_SC_PCIE_HILINK_PCS_RESET_DREQ_REG, reset_req.UInt32);
+        //0x1000 microseconds delay comes from experimenti
+        // and should be fairly enough for this operation.
+        MicroSecondDelay(0x1000);
     }
     else
     {
@@ -779,21 +772,22 @@ EFI_STATUS HisiPcieClockCtrl(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port, 
 {
     UINT32 reg_clock_disable;
     UINT32 reg_clock_enable;
-
-    if (Port == 3) {
+    UINT32 PortIndexInSicl;
+    PortIndexInSicl = Port % PCIE_PORT_NUM_IN_SICL;
+    if (PortIndexInSicl == 3) {
         reg_clock_disable = PCIE_SUBCTRL_SC_PCIE3_CLK_DIS_REG;
         reg_clock_enable = PCIE_SUBCTRL_SC_PCIE3_CLK_EN_REG;
     } else {
-        reg_clock_disable = PCIE_SUBCTRL_SC_PCIE0_2_CLK_DIS_REG(Port);
-        reg_clock_enable = PCIE_SUBCTRL_SC_PCIE0_2_CLK_EN_REG(Port);
+        reg_clock_disable = PCIE_SUBCTRL_SC_PCIE0_2_CLK_DIS_REG(PortIndexInSicl);
+        reg_clock_enable = PCIE_SUBCTRL_SC_PCIE0_2_CLK_EN_REG(PortIndexInSicl);
     }
 
     if (0x1610 == soctype)
     {
         if (Clock)
-            RegWrite(pcie_subctrl_base_1610[HostBridgeNum] + reg_clock_enable, 0x7);
+            RegWrite(pcie_subctrl_base_1610[HostBridgeNum][Port] + reg_clock_enable, 0x7);
         else
-            RegWrite(pcie_subctrl_base_1610[HostBridgeNum] + reg_clock_disable, 0x7);
+            RegWrite(pcie_subctrl_base_1610[HostBridgeNum][Port] + reg_clock_disable, 0x7);
     }
     else
     {
@@ -933,15 +927,14 @@ PciePortInit (
      UINT16              Count = 0;
      UINT32             PortIndex = PcieCfg->PortIndex;
 
-     if(PortIndex >= PCIE_MAX_PORT_NUM)
-     {
+     if (PortIndex >= PCIE_MAX_ROOTBRIDGE) {
         return EFI_INVALID_PARAMETER;
      }
 
      if (0x1610 == soctype)
      {
          mPcieIntCfg.RegResource[PortIndex] = (VOID *)PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][PortIndex];
-         DEBUG((EFI_D_INFO, "Soc type is 1610\n"));
+         DEBUG((DEBUG_INFO, "Soc type is 161x\n"));
      }
      else
      {
@@ -1024,8 +1017,7 @@ EFI_STATUS PcieSetDBICS2Enable(UINT32 HostBridgeNum, UINT32 Port, UINT32 Enable)
 {
     PCIE_SYS_CTRL20_U dbi_ro_enable;
 
-    if(Port >= PCIE_MAX_PORT_NUM)
-    {
+    if (Port >= PCIE_MAX_ROOTBRIDGE) {
         return EFI_INVALID_PARAMETER;
     }
 
