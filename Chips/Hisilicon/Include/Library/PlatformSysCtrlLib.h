@@ -90,8 +90,17 @@ VOID DResetUsb ();
 UINT32 PlatformGetEhciBase ();
 UINT32 PlatformGetOhciBase ();
 VOID PlatformPllInit();
+// PLL initialization for super IO clusters.
+VOID SiclPllInit(UINT32 SclId);
 VOID PlatformDeviceDReset();
 VOID PlatformGicdInit();
 VOID PlatformLpcInit();
+// Synchronize architecture timer counter between different super computing
+// clusters.
+VOID PlatformArchTimerSynchronize(VOID);
+VOID PlatformEventBroadcastConfig(VOID);
+UINTN GetDjtagRegBase(UINT32 NodeId);
+VOID LlcCleanInvalidateAsm(VOID);
+VOID PlatformMdioInit(VOID);
 
 #endif
