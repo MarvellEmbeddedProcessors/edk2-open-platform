@@ -360,7 +360,12 @@ I2CWrite(I2C_DEVICE *I2cInfo, UINT16 InfoOffset, UINT32 ulLength, UINT8 *pBuf)
             ulFifo = I2C_GetTxStatus(I2cInfo->Socket,I2cInfo->Port);
         }
 
-        I2C_REG_WRITE(Base + I2C_DATA_CMD_OFFSET, *pBuf++);
+        if (Idx < ulLength - 1) {
+            I2C_REG_WRITE(Base + I2C_DATA_CMD_OFFSET, (*pBuf++));
+        } else {
+            //Send command stop bit for the last transfer
+            I2C_REG_WRITE(Base + I2C_DATA_CMD_OFFSET, (*pBuf++) | I2C_CMD_STOP_BIT);
+        }
     }
 
     ulFifo = I2C_GetTxStatus(I2cInfo->Socket,I2cInfo->Port);
@@ -386,13 +391,10 @@ EFI_STATUS
 EFIAPI
 I2CRead(I2C_DEVICE *I2cInfo, UINT16 InfoOffset,UINT32 ulRxLen,UINT8 *pBuf)
 {
-    UINT32 ulCnt;
-    UINT16 usTotalLen = 0;
     UINT32 ulFifo;
     UINT32 ulTimes = 0;
     UINT8  I2CWAddr[2];
     EFI_STATUS  Status;
-    UINT32  BytesLeft;
     UINT32  Idx = 0;
     UINTN Base;
 
@@ -441,42 +443,14 @@ I2CRead(I2C_DEVICE *I2cInfo, UINT16 InfoOffset,UINT32 ulRxLen,UINT8 *pBuf)
         ulFifo = I2C_GetTxStatus(I2cInfo->Socket,I2cInfo->Port);
     }
 
-    usTotalLen = ulRxLen;
-    BytesLeft = usTotalLen;
-
-    while(BytesLeft >= I2C_DRV_ONCE_READ_BYTES_NUM){
-
-
-        for(ulCnt = 0; ulCnt < I2C_DRV_ONCE_READ_BYTES_NUM; ulCnt++) {
+    while (ulRxLen > 0) {
+        if (ulRxLen > 1) {
             I2C_REG_WRITE(Base + I2C_DATA_CMD_OFFSET, I2C_READ_SIGNAL);
+        } else {
+            //Send command stop bit for the last transfer
+            I2C_REG_WRITE(Base + I2C_DATA_CMD_OFFSET, I2C_READ_SIGNAL | I2C_CMD_STOP_BIT);
         }
 
-
-        for(ulCnt = 0; ulCnt < I2C_DRV_ONCE_READ_BYTES_NUM; ulCnt++) {
-            ulTimes = 0;
-            do {
-                I2C_Delay(2);
-
-                while(++ulTimes > I2C_READ_TIMEOUT) {
-                    (VOID)I2C_Disable(I2cInfo->Socket, I2cInfo->Port);
-                    return EFI_TIMEOUT;
-                }
-                ulFifo = I2C_GetRxStatus(I2cInfo->Socket,I2cInfo->Port);
-
-            }while(0 == ulFifo);
-
-            I2C_REG_READ(Base + I2C_DATA_CMD_OFFSET, pBuf[Idx++]);
-        }
-        BytesLeft -= I2C_DRV_ONCE_READ_BYTES_NUM;
-    }
-
-
-    for(ulCnt = 0; ulCnt < BytesLeft; ulCnt++) {
-        I2C_REG_WRITE(Base + I2C_DATA_CMD_OFFSET, I2C_READ_SIGNAL);
-    }
-
-
-    for(ulCnt = 0; ulCnt < BytesLeft; ulCnt++) {
         ulTimes = 0;
         do {
             I2C_Delay(2);
@@ -489,6 +463,8 @@ I2CRead(I2C_DEVICE *I2cInfo, UINT16 InfoOffset,UINT32 ulRxLen,UINT8 *pBuf)
         }while(0 == ulFifo);
 
         I2C_REG_READ(Base + I2C_DATA_CMD_OFFSET, pBuf[Idx++]);
+
+        ulRxLen --;
     }
     (VOID)I2C_Disable(I2cInfo->Socket, I2cInfo->Port);
 

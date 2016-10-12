@@ -26,6 +26,7 @@
 #define I2C_TXRX_THRESHOLD           0x7
 #define I2C_SS_SCLHCNT               0x493
 #define I2C_SS_SCLLCNT               0x4fe
+#define I2C_CMD_STOP_BIT             BIT9
 
 #define I2C_REG_WRITE(reg,data) \
      MmioWrite32 ((reg), (data))

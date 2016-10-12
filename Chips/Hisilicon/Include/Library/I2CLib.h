@@ -33,7 +33,7 @@ typedef enum {
 }SPEED_MODE;
 
 
-#define    I2C_PORT_MAX            9
+#define    I2C_PORT_MAX            10
 
 
 
