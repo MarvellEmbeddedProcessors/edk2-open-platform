@@ -200,6 +200,8 @@ typedef struct {
   UINT64          CpuMemRegionBase;
   UINT64          CpuIoRegionBase;
   UINT64          RbPciBar;
+  UINT64          PciRegionBase;
+  UINT64          PciRegionLimit;
 } PCI_ROOT_BRIDGE_RESOURCE_APPETURE;
 
 extern PCI_ROOT_BRIDGE_RESOURCE_APPETURE  mResAppeture[PCIE_MAX_HOSTBRIDGE][PCIE_MAX_ROOTBRIDGE];

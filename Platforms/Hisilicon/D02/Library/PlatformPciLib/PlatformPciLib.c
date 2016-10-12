@@ -29,7 +29,9 @@ PCI_ROOT_BRIDGE_RESOURCE_APPETURE  mResAppeture[PCIE_MAX_HOSTBRIDGE][PCIE_MAX_RO
       (0),  //IoLimit
       0,
       0,
-      (PCI_HB0RB0_PCI_BASE)  //RbPciBar
+      (PCI_HB0RB0_PCI_BASE),  //RbPciBar
+      0,
+      0
   },
   /* Port 1 */
   {
@@ -42,7 +44,9 @@ PCI_ROOT_BRIDGE_RESOURCE_APPETURE  mResAppeture[PCIE_MAX_HOSTBRIDGE][PCIE_MAX_RO
       PCI_HB0RB1_IO_BASE + PCI_HB0RB1_IO_SIZE - 1,  //IoLimit
       PCI_HB0RB1_CPUMEMREGIONBASE,
       PCI_HB0RB2_CPUIOREGIONBASE,
-      (PCI_HB0RB1_PCI_BASE)  //RbPciBar
+      (PCI_HB0RB1_PCI_BASE),  //RbPciBar
+      PCI_HB0RB1_PCIREGION_BASE,
+      PCI_HB0RB1_PCIREGION_BASE + PCI_HB0RB1_PCIREGION_SIZE - 1
   },
   /* Port 2 */
   {
@@ -55,7 +59,9 @@ PCI_ROOT_BRIDGE_RESOURCE_APPETURE  mResAppeture[PCIE_MAX_HOSTBRIDGE][PCIE_MAX_RO
       PCI_HB0RB2_IO_BASE + PCI_HB0RB2_IO_SIZE - 1,  //IoLimit
       PCI_HB0RB2_CPUMEMREGIONBASE,
       PCI_HB0RB2_CPUIOREGIONBASE,
-      (PCI_HB0RB2_PCI_BASE)  //RbPciBar
+      (PCI_HB0RB2_PCI_BASE),  //RbPciBar
+      PCI_HB0RB2_PCIREGION_BASE ,
+      PCI_HB0RB2_PCIREGION_BASE + PCI_HB0RB2_PCIREGION_SIZE - 1
   },
 
   /* Port 3 */
@@ -69,7 +75,9 @@ PCI_ROOT_BRIDGE_RESOURCE_APPETURE  mResAppeture[PCIE_MAX_HOSTBRIDGE][PCIE_MAX_RO
       (0),  //IoLimit
       0,
       0,
-      (PCI_HB0RB3_PCI_BASE)  //RbPciBar
+      (PCI_HB0RB3_PCI_BASE),  //RbPciBar
+      0,
+      0
   }
  },
 {// HostBridge 1
@@ -84,7 +92,9 @@ PCI_ROOT_BRIDGE_RESOURCE_APPETURE  mResAppeture[PCIE_MAX_HOSTBRIDGE][PCIE_MAX_RO
       (0),  //IoLimit
       0,
       0,
-      (PCI_HB1RB0_PCI_BASE)  //RbPciBar
+      (PCI_HB1RB0_PCI_BASE),  //RbPciBar
+      0,
+      0
   },
   /* Port 1 */
   {
@@ -97,7 +107,9 @@ PCI_ROOT_BRIDGE_RESOURCE_APPETURE  mResAppeture[PCIE_MAX_HOSTBRIDGE][PCIE_MAX_RO
       (0),  //IoLimit
       0,
       0,
-      (PCI_HB1RB1_PCI_BASE)  //RbPciBar
+      (PCI_HB1RB1_PCI_BASE),  //RbPciBar
+      0,
+      0
   },
   /* Port 2 */
   {
@@ -110,7 +122,9 @@ PCI_ROOT_BRIDGE_RESOURCE_APPETURE  mResAppeture[PCIE_MAX_HOSTBRIDGE][PCIE_MAX_RO
       (0),  //IoLimit
       0,
       0,
-      (PCI_HB1RB2_PCI_BASE)  //RbPciBar
+      (PCI_HB1RB2_PCI_BASE),  //RbPciBar
+      0,
+      0
   },
 
   /* Port 3 */
@@ -124,7 +138,9 @@ PCI_ROOT_BRIDGE_RESOURCE_APPETURE  mResAppeture[PCIE_MAX_HOSTBRIDGE][PCIE_MAX_RO
       (0),  //IoLimit
       0,
       0,
-      (PCI_HB1RB3_PCI_BASE)  //RbPciBar
+      (PCI_HB1RB3_PCI_BASE),  //RbPciBar
+      0,
+      0
   }
  }
 };

@@ -478,6 +478,8 @@ typedef struct {
   UINT32                 SocType;
   UINT64                 CpuMemRegionBase;
   UINT64                 CpuIoRegionBase;
+  UINT64                 PciRegionBase;
+  UINT64                 PciRegionLimit;
 
   EFI_DEVICE_PATH_PROTOCOL                *DevicePath;
   EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL         Io;

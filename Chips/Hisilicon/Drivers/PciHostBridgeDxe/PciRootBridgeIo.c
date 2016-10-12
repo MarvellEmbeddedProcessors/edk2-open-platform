@@ -730,7 +730,7 @@ void SetAtuMemRW(UINT64 RbPciBase,UINT64 MemBase,UINT64 CpuMemRegionLimit, UINT6
 
 VOID InitAtu (PCI_ROOT_BRIDGE_INSTANCE *Private)
 {
-  SetAtuMemRW (Private->RbPciBar, Private->MemBase, Private->MemLimit, Private->CpuMemRegionBase, 0);
+  SetAtuMemRW (Private->RbPciBar, Private->PciRegionBase, Private->PciRegionLimit, Private->CpuMemRegionBase, 0);
   SetAtuConfig0RW (Private, 1);
   SetAtuConfig1RW (Private, 2);
   SetAtuIoRW (Private->RbPciBar, Private->IoBase, Private->IoLimit, Private->CpuIoRegionBase, 3);
@@ -800,6 +800,8 @@ RootBridgeConstructor (
   PrivateData->Ecam = ResAppeture->Ecam;
   PrivateData->CpuMemRegionBase = ResAppeture->CpuMemRegionBase;
   PrivateData->CpuIoRegionBase = ResAppeture->CpuIoRegionBase;
+  PrivateData->PciRegionBase = ResAppeture->PciRegionBase;
+  PrivateData->PciRegionLimit = ResAppeture->PciRegionLimit;
 
   //
   // Bus Appeture for this Root Bridge (Possible Range)
@@ -1058,7 +1060,7 @@ RootBridgeIoMemRW (
 
   PrivateData = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS (This);
   /* Address is bus resource */
-  Address -= PrivateData->MemBase;
+  Address -= PrivateData->PciRegionBase;
   Address += PrivateData->CpuMemRegionBase;
 
   PCIE_DEBUG("RootBridgeIoMemRW Address:0x%llx\n", Address);
