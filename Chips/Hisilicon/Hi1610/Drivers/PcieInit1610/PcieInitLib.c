@@ -903,12 +903,31 @@ VOID PcieWriteOwnConfig(UINT32 HostBridgeNum, UINT32 Port, UINT32 Offset, UINT32
      }
 }
 
+VOID SysRegWrite(UINT32 SocType, UINT32 HostBridgeNum, UINT32 Port, UINTN Reg, UINTN Value)
+{
+  if (SocType == 0x1610) {
+    RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + Reg, Value);
+  } else {
+    //PCIE_APB_SLVAE_BASE is for 660,and each PCIe Ccontroller has the same APB_SLVAE_BASE
+    //in the same hostbridge.
+    RegWrite(PCIE_APB_SLVAE_BASE[HostBridgeNum] + Reg, Value);
+  }
+}
+
 void PcieConfigContextHi1610(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
 {
     UINT32 Value = 0;
+    UINT64 GicdSetSpiReg = PcdGet64 (PcdGicDistributorBase) + 0x40;
 
-    RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x11b4, PcdGet64 (PcdPcieMsiTargetAddress));
-    RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x11c4, 0);
+    if (FeaturePcdGet (PcdIsItsSupported)) {
+        //PCIE_SYS_CTRL24_REG is MSI Low address register
+        //PCIE_SYS_CTRL28_REG is MSI High addres register
+        SysRegWrite(soctype, HostBridgeNum, Port, PCIE_SYS_REG_OFFSET + PCIE_SYS_CTRL24_REG, PCIE_ITS_1610[HostBridgeNum][Port]);
+        SysRegWrite(soctype, HostBridgeNum, Port, PCIE_SYS_REG_OFFSET + PCIE_SYS_CTRL28_REG, PCIE_ITS_1610[HostBridgeNum][Port] >> 32);
+    } else {
+        SysRegWrite(soctype, HostBridgeNum, Port, PCIE_SYS_REG_OFFSET + PCIE_SYS_CTRL24_REG, GicdSetSpiReg);
+        SysRegWrite(soctype, HostBridgeNum, Port, PCIE_SYS_REG_OFFSET + PCIE_SYS_CTRL28_REG, GicdSetSpiReg >> 32);
+    }
     RegRead(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x11c8, Value);
     Value |= (1 << 12);
     RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x11c8, Value);

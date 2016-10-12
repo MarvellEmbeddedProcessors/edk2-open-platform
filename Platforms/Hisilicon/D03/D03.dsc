@@ -111,6 +111,7 @@
   ## If TRUE, Graphics Output Protocol will be installed on virtual handle created by ConsplitterDxe.
   #  It could be set FALSE to save size.
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutGopSupport|TRUE
+  gHisiTokenSpaceGuid.PcdIsItsSupported|TRUE
   gHisiTokenSpaceGuid.PcdIsPciPerfTuningEnable|TRUE
 
 [PcdsFixedAtBuild.common]
@@ -309,7 +310,6 @@
   gArmPlatformTokenSpaceGuid.PcdSP804TimerPerformanceBase|0x40060000
   gArmPlatformTokenSpaceGuid.PcdSP804TimerMetronomeBase|0x40060000
 
-  gHisiTokenSpaceGuid.PcdPcieMsiTargetAddress|0xc6010040
 
 ################################################################################
 #

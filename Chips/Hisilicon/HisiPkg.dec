@@ -267,10 +267,10 @@
   gHisiTokenSpaceGuid.PcdHb1Rb7IoSize|0|UINT64|0x2110005d
 
   gHisiTokenSpaceGuid.Pcdsoctype|0|UINT32|0x00000061
-  gHisiTokenSpaceGuid.PcdPcieMsiTargetAddress|0x0|UINT64|0x00000064
   gHisiTokenSpaceGuid.PcdSerDesFlowCtrlFlag|0|UINT32|0x40000056
 
 [PcdsFeatureFlag]
+  gHisiTokenSpaceGuid.PcdIsItsSupported|FALSE|BOOLEAN|0x00000065
   gHisiTokenSpaceGuid.PcdIsPciPerfTuningEnable|FALSE|BOOLEAN|0x00000066
 
 

@@ -51,9 +51,10 @@
   gHisiTokenSpaceGuid.PcdPcieRootBridgeMask
   gHisiTokenSpaceGuid.PcdPcieRootBridgeMask2P
   gHisiTokenSpaceGuid.Pcdsoctype
-  gHisiTokenSpaceGuid.PcdPcieMsiTargetAddress
+  gArmTokenSpaceGuid.PcdGicDistributorBase
 
 [FeaturePcd]
+  gHisiTokenSpaceGuid.PcdIsItsSupported
   gHisiTokenSpaceGuid.PcdIsPciPerfTuningEnable
 
 [depex]
