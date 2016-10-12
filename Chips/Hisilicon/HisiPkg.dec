@@ -104,7 +104,10 @@
   gHisiTokenSpaceGuid.PcdTrustedFirmwareEnable|0x0|UINT64|0x40000008
   gHisiTokenSpaceGuid.PcdTrustedFirmwareBL1Base|0x0|UINT64|0x40000009
   gHisiTokenSpaceGuid.PcdTrustedFirmwareMagicNum|0x5A5A5A5A|UINT32|0x4000000a
+  gHisiTokenSpaceGuid.PcdIsMPBoot|0|UINT32|0x4000000b
+  gHisiTokenSpaceGuid.PcdSocketMask|1|UINT32|0x4000001b
 
+  gHisiTokenSpaceGuid.PcdMacAddress|0x0|UINT64|0x4000000c
   gHisiTokenSpaceGuid.PcdNumaEnable|0|UINT32|0x4000000d
 
   gHisiTokenSpaceGuid.PcdArmPrimaryCoreTemp|0x0|UINT64|0x10000038
