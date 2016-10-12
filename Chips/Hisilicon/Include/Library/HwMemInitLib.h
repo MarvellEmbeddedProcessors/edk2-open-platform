@@ -186,20 +186,20 @@ typedef struct _DDR_Channel{
     UINT32      MemSize;
     UINT32      CLSupport;
     UINT32      minTck;
+    UINT32      nAA;
     UINT32      nCL;
-    UINT32      nWR;
+    UINT32      nCCDL;
+    UINT32      nFAW;
     UINT32      nRCD;
     UINT32      nRRD;
     UINT32      nRRDL;
     UINT32      nRAS;
     UINT32      nRC;
     UINT32      nRFC;
-    UINT32      nWTR;
     UINT32      nRTP;
-    UINT32      nAA;
-    UINT32      nFAW;
     UINT32      nRP;
-    UINT32      nCCDL;
+    UINT32      nWR;
+    UINT32      nWTR;
     UINT8       cwl;  //tWL?
     UINT8       pl;     //parity latency
     UINT8       wr_pre_2t_en;
