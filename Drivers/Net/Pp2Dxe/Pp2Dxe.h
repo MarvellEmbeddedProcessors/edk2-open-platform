@@ -430,6 +430,11 @@ struct buffer_location {
 };
 typedef struct buffer_location BUFFER_LOCATION;
 
+typedef struct {
+  MAC_ADDR_DEVICE_PATH      Pp2Mac;
+  EFI_DEVICE_PATH_PROTOCOL  End;
+} PP2_DEVICE_PATH;
+
 #define QUEUE_DEPTH 64
 typedef struct {
   UINT32                      Signature;
@@ -446,6 +451,7 @@ typedef struct {
   UINTN                       CompletionQueueHead;
   UINTN                       CompletionQueueTail;
   EFI_EVENT                   EfiExitBootServicesEvent;
+  PP2_DEVICE_PATH             *DevicePath;
 } PP2DXE_CONTEXT;
 
 static inline MV_VOID mvpp2_write(struct mvpp2 *priv, MV_U32 offset,

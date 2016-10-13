@@ -51,11 +51,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mvpp2_lib.h"
 
 #define ReturnUnlock(tpl, status) do { gBS->RestoreTPL (tpl); return (status); } while(0)
-typedef struct {
-  MAC_ADDR_DEVICE_PATH      Pp2Mac;
-  EFI_DEVICE_PATH_PROTOCOL  End;
-} PP2_DEVICE_PATH;
-
 MVPP2_SHARED *Mvpp2Shared;
 BUFFER_LOCATION BufferLocation;
 
@@ -646,6 +641,108 @@ Pp2SnpReceiveFilters (
 
 EFI_STATUS
 EFIAPI
+Pp2SnpStationAddress (
+  IN EFI_SIMPLE_NETWORK_PROTOCOL *Snp,
+  IN BOOLEAN Reset,
+  IN EFI_MAC_ADDRESS *NewMac
+)
+{
+  PP2DXE_CONTEXT *Pp2Context = INSTANCE_FROM_SNP(Snp);
+  PP2_DEVICE_PATH *Pp2DevicePath = Pp2Context->DevicePath;
+  PP2DXE_PORT *Port = &Pp2Context->Port;
+  EFI_TPL SavedTpl;
+  INTN Ret;
+  UINTN Index;
+
+  /* Check Snp instance */
+  if (Snp == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  DEBUG((DEBUG_ERROR, "Pp2SnpStationAddress\n"));
+
+  /* Serialize access to data and registers */
+  SavedTpl = gBS->RaiseTPL (TPL_CALLBACK);
+
+  /* Check that driver was started and initialised */
+  switch (Snp->Mode->State) {
+  case EfiSimpleNetworkInitialized:
+    break;
+  case EfiSimpleNetworkStarted:
+    DEBUG((DEBUG_WARN, "Pp2Dxe%d: Driver not yet initialized\n",
+          Pp2Context->Instance));
+    ReturnUnlock (SavedTpl, EFI_DEVICE_ERROR);
+  case EfiSimpleNetworkStopped:
+    DEBUG((DEBUG_WARN, "Pp2Dxe%d: Driver not started\n",
+          Pp2Context->Instance));
+    ReturnUnlock (SavedTpl, EFI_NOT_STARTED);
+  default:
+    DEBUG((DEBUG_ERROR, "Pp2Dxe%d: Driver in an invalid state\n",
+          Pp2Context->Instance));
+    ReturnUnlock (SavedTpl, EFI_DEVICE_ERROR);
+  }
+
+      DEBUG((DEBUG_ERROR, "CURR\n"));
+      for (Index = 0; Index < 6; Index++) {
+        DEBUG((DEBUG_ERROR, "%x:", Snp->Mode->CurrentAddress.Addr[Index]));
+      }
+      DEBUG((DEBUG_ERROR, "\n"));
+
+      DEBUG((DEBUG_ERROR, "NewMac\n"));
+      for (Index = 0; Index < 6; Index++) {
+        DEBUG((DEBUG_ERROR, "%x:", NewMac->Addr[Index]));
+      }
+      DEBUG((DEBUG_ERROR, "\n"));
+
+  /* Invalidate old unicast address in parser */
+  Ret = mvpp2_prs_mac_da_accept(Mvpp2Shared, Port->id,
+                                Snp->Mode->CurrentAddress.Addr, FALSE);
+  if (Ret) {
+    DEBUG((DEBUG_ERROR, "Pp2SnpStationAddress - Fail\n"));
+    return EFI_DEVICE_ERROR;
+  }
+
+  if (Reset) {
+    CopyMem (Snp->Mode->CurrentAddress.Addr, Snp->Mode->PermanentAddress.Addr,
+             NET_ETHER_ADDR_LEN);
+    CopyMem (NewMac->Addr, Snp->Mode->PermanentAddress.Addr,
+             NET_ETHER_ADDR_LEN);
+    CopyMem (Pp2DevicePath->Pp2Mac.MacAddress.Addr, Snp->Mode->PermanentAddress.Addr,
+             NET_ETHER_ADDR_LEN);
+    DEBUG((DEBUG_ERROR, "Pp2SnpStationAddress - Reset TRUE\n"));
+  } else {
+    if (NewMac == NULL) {
+      ReturnUnlock (SavedTpl, EFI_INVALID_PARAMETER);
+    }
+    CopyMem (Snp->Mode->CurrentAddress.Addr, NewMac->Addr,
+             NET_ETHER_ADDR_LEN);
+    CopyMem (Pp2DevicePath->Pp2Mac.MacAddress.Addr, NewMac->Addr,
+             NET_ETHER_ADDR_LEN);
+  }
+
+  /* Update parser with new unicast address */
+  DEBUG((DEBUG_ERROR, "Pp2SnpStationAddress - Copy\n"));
+  Ret = mvpp2_prs_mac_da_accept(Mvpp2Shared, Port->id,
+                                Snp->Mode->CurrentAddress.Addr, TRUE);
+  if (Ret) {
+    DEBUG((DEBUG_ERROR, "Pp2SnpStationAddress - Fail\n"));
+    return EFI_DEVICE_ERROR;
+  }
+
+      DEBUG((DEBUG_ERROR, "CURR\n"));
+      for (Index = 0; Index < 6; Index++) {
+        DEBUG((DEBUG_ERROR, "%x:", Snp->Mode->CurrentAddress.Addr[Index]));
+      }
+      DEBUG((DEBUG_ERROR, "\n"));
+
+  DEBUG((DEBUG_ERROR, "Pp2SnpStationAddress - Success\n"));
+  /* Restore TPL and return */
+  gBS->RestoreTPL (SavedTpl);
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
 Pp2SnpNetStat (
   IN EFI_SIMPLE_NETWORK_PROTOCOL          *This,
   IN BOOLEAN                              Reset,
@@ -783,13 +880,15 @@ Pp2SnpTransmit (
   if (HeaderSize != 0) {
     CopyMem(DataPtr, DestAddr, NET_ETHER_ADDR_LEN);
 
-    if (SrcAddr != NULL)
-      CopyMem(DataPtr + NET_ETHER_ADDR_LEN, SrcAddr, NET_ETHER_ADDR_LEN);
-    else
+   // if (SrcAddr != NULL)
+    //  CopyMem(DataPtr + NET_ETHER_ADDR_LEN, SrcAddr, NET_ETHER_ADDR_LEN);
+   // else
       CopyMem(DataPtr + NET_ETHER_ADDR_LEN, &This->Mode->CurrentAddress, NET_ETHER_ADDR_LEN);
 
     CopyMem(DataPtr + NET_ETHER_ADDR_LEN * 2, &Protocol, 2);
   }
+
+  CopyMem(DataPtr + NET_ETHER_ADDR_LEN, &This->Mode->CurrentAddress, NET_ETHER_ADDR_LEN);
 
   /* set descriptor fields */
   tx_desc->command =  MVPP2_TXD_IP_CSUM_DISABLE |
@@ -903,6 +1002,8 @@ Pp2SnpReceive (
 
     DataPtr = (UINT8 *)Buffer;
 
+//  DEBUG((DEBUG_ERROR, "RECEIVE\n"));
+
   /* extract the destination address */
   if (DstAddr != NULL) {
     ZeroMem (DstAddr, sizeof(EFI_MAC_ADDRESS));
@@ -984,6 +1085,7 @@ Pp2DxeSnpInstall (
   Pp2Context->Snp.Reset = Pp2SnpReset;
   Pp2Context->Snp.Shutdown = Pp2SnpShutdown;
   Pp2Context->Snp.ReceiveFilters = Pp2SnpReceiveFilters;
+  Pp2Context->Snp.StationAddress = Pp2SnpStationAddress;
   Pp2Context->Snp.Statistics = Pp2SnpNetStat;
   Pp2Context->Snp.MCastIpToMac = Pp2SnpIpToMac;
   Pp2Context->Snp.NvData = Pp2SnpNvData;
@@ -992,6 +1094,7 @@ Pp2DxeSnpInstall (
   Pp2Context->Snp.Receive = Pp2SnpReceive;
   Pp2Context->Snp.Revision = EFI_SIMPLE_NETWORK_PROTOCOL_REVISION;
 
+  Pp2Context->Snp.Mode->MacAddressChangeable = TRUE;
   Pp2Context->Snp.Mode->CurrentAddress = Pp2DevicePath->Pp2Mac.MacAddress;
   Pp2Context->Snp.Mode->PermanentAddress = Pp2DevicePath->Pp2Mac.MacAddress;
   Pp2Context->Snp.Mode->State = EfiSimpleNetworkStopped;
@@ -1015,6 +1118,7 @@ Pp2DxeSnpInstall (
   SetMem (&Pp2Context->Snp.Mode->BroadcastAddress, sizeof (EFI_MAC_ADDRESS), 0xFF);
 
   Pp2DevicePath->Pp2Mac.IfType = Pp2Context->Snp.Mode->IfType;
+  Pp2Context->DevicePath = Pp2DevicePath;
   Status = gBS->InstallMultipleProtocolInterfaces (
       &Handle,
       &gEfiSimpleNetworkProtocolGuid, &Pp2Context->Snp,
