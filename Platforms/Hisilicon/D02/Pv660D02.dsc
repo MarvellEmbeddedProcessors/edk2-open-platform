@@ -72,6 +72,13 @@
   PlatformBdsLib|OpenPlatformPkg/Chips/Hisilicon/Library/PlatformIntelBdsLib/PlatformIntelBdsLib.inf
   CustomizedDisplayLib|MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf
 
+## GIC on D02/D03 is not fully ARM GIC compatible: IRQ cannot be cancelled when
+## input signal is de-asserted, except for virtual timer interrupt IRQ #27.
+## So we choose to use virtual timer instead of physical one as a workaround.
+## This library instance is to override the original define in LibraryClasses.AARCH64 in Pv660.dsc.inc.
+[LibraryClasses.AARCH64]
+  ArmGenericTimerCounterLib|ArmPkg/Library/ArmGenericTimerVirtCounterLib/ArmGenericTimerVirtCounterLib.inf
+
 [LibraryClasses.common.SEC]
   ArmPlatformLib|OpenPlatformPkg/Chips/Hisilicon/Library/ArmPlatformLibPv660/ArmPlatformLibSec.inf
 
@@ -341,8 +348,7 @@
 
   ArmPkg/Drivers/ArmGic/ArmGicDxe.inf
 
-  #ArmPkg/Drivers/TimerDxe/TimerDxe
-  ArmPlatformPkg/Drivers/SP804TimerDxe/SP804TimerDxe.inf
+  ArmPkg/Drivers/TimerDxe/TimerDxe.inf
   ArmPlatformPkg/Drivers/SP805WatchdogDxe/SP805WatchdogDxe.inf
 
   IntelFrameworkModulePkg/Universal/StatusCode/RuntimeDxe/StatusCodeRuntimeDxe.inf
