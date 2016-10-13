@@ -67,6 +67,7 @@
 #string STR_IFCONFIG_INVALID_INTERFACE        #language en-US    "Invalid interface name.\n"
 #string STR_IFCONFIG_INVALID_IPADDRESS        #language en-US    "Invalid ipv4 address: '%H%s%N'\n"
 #string STR_IFCONFIG_INVALID_GATEWAY          #language en-US    "Invalid gateway address: '%H%s%N'\n"
+#string STR_IFCONFIG_INVALID_MACADDRESS       #language en-US    "Invalid MAC address: '%H%s%N'\n"
 #string STR_IFCONFIG_DUPLICATE_COMMAND        #language en-US    "Duplicate commands. Bad command %H%s%N is skipped.\n"
 #string STR_IFCONFIG_CONFLICT_COMMAND         #language en-US    "Conflict commands. Bad command %H%s%N is skipped.\n"
 #string STR_IFCONFIG_UNKNOWN_COMMAND          #language en-US    "Unknown commands. Bad command %H%s%N is skipped.\n"
@@ -134,7 +135,7 @@
 ".SH SYNOPSIS\r\n"
 " \r\n"
 "IFCONFIG [-r [Name]] [-l [Name]]\r\n"
-"IFCONFIG [-s <Name> dhcp | <static <IP> <Mask>  <Gateway>> | <dns <IP>>]\r\n"
+"IFCONFIG [-s <Name> dhcp | <static <IP> <Mask>  <Gateway>> | <dns <IP>> | <mac reset> | <mac <MAC>>]\r\n"
 ".SH OPTIONS\r\n"
 " \r\n"
 "  -r          - Renew configuration of interface and set dhcp policy.\r\n"
@@ -147,6 +148,8 @@
 "                  - Example: 255.255.255.0\r\n"
 "  GatewayMask - Specifies a default gateway in four integer values:\r\n"
 "                  - Example: 192.168.0.1\r\n"
+"  MAC         - Specifies the MAC address:\r\n"
+"                  - Example: 00:11:22:33:44:55\r\n"
 ".SH DESCRIPTION\r\n"
 " \r\n"
 "NOTES:\r\n"
@@ -175,6 +178,11 @@
 " \r\n"
 "  * To configure DNS server address for the eth0 interface:\r\n"
 "    fs0:\> ifconfig -s eth0 dns 192.168.0.8 192.168.0.9\r\n"
-                                                                  
+" \r\n"
+"  * To configure MAC address for the eth0 interface:\r\n"
+"    fs0:\> ifconfig -s eth0 mac 00:11:22:33:44:55\r\n"
+" \r\n"
+"  * To reset MAC address of the eth0 interface to initial value:\r\n"
+"    fs0:\> ifconfig -s eth0 mac reset\r\n"
 
 

@@ -120,6 +120,12 @@ VAR_CHECK_ITEM  mSetCheckList[] = {
     FlagTypeSingle
   },
   {
+    L"mac",
+    0x00000010,
+    0x00000005,
+    FlagTypeSingle
+  },
+  {
     NULL,
     0x0,
     0x0,
@@ -832,6 +838,7 @@ IfConfigSetInterfaceInfo (
   EFI_EVENT                        TimeOutEvt;
   EFI_EVENT                        MappedEvt;
   BOOLEAN                          IsAddressOk;
+  BOOLEAN                          MacAddressReset;
 
   EFI_IP4_CONFIG2_POLICY           Policy;
   EFI_IP4_CONFIG2_MANUAL_ADDRESS   ManualAddress;
@@ -842,6 +849,7 @@ IfConfigSetInterfaceInfo (
   EFI_IPv4_ADDRESS                 *Dns;
   ARG_LIST                         *Tmp;
   UINTN                            Index;
+  EFI_MAC_ADDRESS                  NewMac;
 
   CONST CHAR16* TempString;
 
@@ -1167,6 +1175,52 @@ IfConfigSetInterfaceInfo (
         ShellStatus = SHELL_ACCESS_DENIED;
         goto ON_EXIT;
       }
+    } else if (StrCmp (VarArg->Arg, L"mac") == 0) {
+      //
+      // Set MAC address.
+      //
+      MacAddressReset = FALSE;
+      VarArg = VarArg->Next;
+      if (VarArg == NULL) {
+        ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_IFCONFIG_LACK_COMMAND), gShellNetwork1HiiHandle);
+        ShellStatus = SHELL_INVALID_PARAMETER;
+        goto ON_EXIT;
+      }
+
+      if (StrCmp (VarArg->Arg, L"reset") == 0) {
+        MacAddressReset = TRUE;
+      } else {
+        Status = NetLibStrToMac (VarArg->Arg, &NewMac);
+        if (EFI_ERROR(Status)) {
+          ShellPrintHiiEx(-1, -1, NULL,STRING_TOKEN (STR_IFCONFIG_INVALID_MACADDRESS), gShellNetwork1HiiHandle, VarArg->Arg);
+          ShellStatus = SHELL_INVALID_PARAMETER;
+          goto ON_EXIT;
+        }
+      }
+
+      Status = NetLibSetMacAddress (
+                      IfCb->NicHandle,
+                      &NewMac,
+                      IfCb->IfInfo->HwAddressSize,
+                      MacAddressReset
+                      );
+      if (EFI_ERROR(Status)) {
+        ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_IFCONFIG_SET_ADDR_FAILED), gShellNetwork1HiiHandle, Status);
+        ShellStatus = SHELL_ACCESS_DENIED;
+        goto ON_EXIT;
+      }
+
+      //
+      // Reconnect controller, so that all children get updated with
+      // new MAC address information.
+      //
+      Status = NetLibReconnectInterface (IfCb->NicHandle);
+      if (EFI_ERROR(Status)) {
+        ShellStatus = SHELL_DEVICE_ERROR;
+        goto ON_EXIT;
+      }
+
+      VarArg = VarArg->Next;
     }
   }
 
