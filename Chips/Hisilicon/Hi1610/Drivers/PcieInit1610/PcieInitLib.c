@@ -27,7 +27,7 @@ UINT64 pcie_subctrl_base_1610[2] = {0xa0000000, 0xb0000000};
 UINT64 io_sub0_base = 0xa0000000;
 UINT64 PCIE_APB_SLVAE_BASE[2] = {0xb0070000, BASE_4TB + 0xb0070000};
 #define PCIE_REG_BASE(HostBridgeNum,port)              (PCIE_APB_SLVAE_BASE[HostBridgeNum] + (UINT32)(port * 0x10000))
-UINT64 PCIE_APB_SLVAE_BASE_1610[2][4] = {{0xa0090000, 0xa0200000, 0xa00a0000, 0xa00b0000},
+UINT64 PCIE_APB_SLAVE_BASE_1610[2][4] = {{0xa0090000, 0xa0200000, 0xa00a0000, 0xa00b0000},
                                          {0xb0090000, 0xb0200000, 0xb00a0000, 0xb00b0000}};
 UINT64 PCIE_PHY_BASE_1610[2][4] = {{0xa00c0000, 0xa00d0000, 0xa00e0000, 0xa00f0000},
                                     {0xb00c0000,0xb00d0000, 0xb00e0000, 0xb00f0000}};
@@ -163,9 +163,9 @@ EFI_STATUS PcieEnableItssm(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
 
     if (0x1610 == soctype)
     {
-        RegRead(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0x1114, Value);
+        RegRead(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x1114, Value);
         Value |= BIT11|BIT30|BIT31;
-        RegWrite(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0x1114, Value);
+        RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x1114, Value);
         (VOID)PcieRxValidCtrl(soctype, HostBridgeNum, Port, 1);
         return EFI_SUCCESS;
     }
@@ -197,9 +197,9 @@ EFI_STATUS PcieDisableItssm(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
 
     if (0x1610 == soctype)
     {
-        RegRead(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0x1114, Value);
+        RegRead(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x1114, Value);
         Value &= ~(BIT11);
-        RegWrite(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0x1114, Value);
+        RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x1114, Value);
         PcieRxValidCtrl(soctype, HostBridgeNum, Port, 1);
         return EFI_SUCCESS;
     }
@@ -401,7 +401,7 @@ EFI_STATUS PcieModeSet(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port, PCIE_P
 
     if (0x1610 == soctype)
     {
-        RegWrite(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0x1000 + 0xf8, 0x4 << 28);
+        RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x1000 + 0xf8, 0x4 << 28);
     }
     else
     {
@@ -516,10 +516,10 @@ VOID PcieEqualization(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
         PcieRegWrite(Port, 0x168, 0x44444444);
         PcieRegWrite(Port, 0x16c, 0x44444444);
         PcieRegWrite(Port, 0x170, 0x44444444);
-        RegRead(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0x1000 + 0x2d0, Value);
+        RegRead(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x1000 + 0x2d0, Value);
         Value &= (~0x3f);
         Value |= 0x5;
-        RegWrite(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0x1000 + 0x2d0, Value);
+        RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x1000 + 0x2d0, Value);
 
     }
     else
@@ -764,10 +764,10 @@ VOID PciePortNumSet(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port, UINT8 Num
     if (0x1610 == soctype)
     {
         UINT32 Value = 0;
-        RegRead(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0x1000 + 0x1c, Value);
+        RegRead(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x1000 + 0x1c, Value);
         Value &= ~(0xff);
         Value |= Num;
-        RegWrite(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0x1000 + 0x1c, Value);
+        RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x1000 + 0x1c, Value);
     }
     return;
 }
@@ -777,9 +777,9 @@ VOID PcieLaneReversalSet(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
     UINT32 Value = 0;
     if (0x1610 == soctype)
     {
-        RegRead(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + PCIE_EP_PORT_LOGIC22_REG, Value);
+        RegRead(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + PCIE_EP_PORT_LOGIC22_REG, Value);
         Value |= BIT16;
-        RegWrite(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + PCIE_EP_PORT_LOGIC22_REG, Value);
+        RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + PCIE_EP_PORT_LOGIC22_REG, Value);
     }
     return;
 }
@@ -809,7 +809,7 @@ BOOLEAN PcieIsLinkUp(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
     U_SC_PCIE0_SYS_STATE4      PcieStat;
     if (0x1610 == soctype)
     {
-        RegRead(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0x131c, PcieStat.UInt32);
+        RegRead(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x131c, PcieStat.UInt32);
         Value = PcieStat.UInt32;
         if ((Value & PCIE_LTSSM_STATE_MASK) == PCIE_LTSSM_LINKUP_STATE)
             return TRUE;
@@ -842,10 +842,10 @@ VOID PcieSpdSet(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port, UINT8 Spd)
     UINT32 Value = 0;
     if (0x1610 == soctype)
     {
-        RegRead(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0xa0, Value);
+        RegRead(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0xa0, Value);
         Value &= ~(0xf);
         Value |= Spd;
-        RegWrite(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0xa0, Value);
+        RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0xa0, Value);
         return;
     }
     return;
@@ -855,10 +855,10 @@ VOID PcieWriteOwnConfig(UINT32 HostBridgeNum, UINT32 Port, UINT32 Offset, UINT32
 {
      UINT32 Value = 0;
      {
-         RegRead(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + (Offset & (~0x3)), Value);
+         RegRead(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + (Offset & (~0x3)), Value);
          Value &= 0x0000ffff;
          Value |= 0x06040000;
-         RegWrite(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + (Offset & (~0x3)), Value);
+         RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + (Offset & (~0x3)), Value);
          return;
      }
 }
@@ -867,11 +867,11 @@ void PcieConfigContextHi1610(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
 {
     UINT32 Value = 0;
 
-    RegWrite(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0x11b4, PcdGet64 (PcdPcieMsiTargetAddress));
-    RegWrite(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0x11c4, 0);
-    RegRead(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0x11c8, Value);
+    RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x11b4, PcdGet64 (PcdPcieMsiTargetAddress));
+    RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x11c4, 0);
+    RegRead(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x11c8, Value);
     Value |= (1 << 12);
-    RegWrite(PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][Port] + 0x11c8, Value);
+    RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x11c8, Value);
 
     return;
 }
@@ -894,7 +894,7 @@ PciePortInit (
 
      if (0x1610 == soctype)
      {
-         mPcieIntCfg.RegResource[PortIndex] = (VOID *)PCIE_APB_SLVAE_BASE_1610[HostBridgeNum][PortIndex];
+         mPcieIntCfg.RegResource[PortIndex] = (VOID *)PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][PortIndex];
          DEBUG((EFI_D_INFO, "Soc type is 1610\n"));
      }
      else
