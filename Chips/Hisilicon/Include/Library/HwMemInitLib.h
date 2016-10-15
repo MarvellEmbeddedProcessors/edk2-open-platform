@@ -254,7 +254,7 @@ typedef struct _DDR_Channel{
     UINT8       per_cs_training_en;
     UINT32      phyRdDataEnIeDly;
     UINT32      phyPadCalConfig;
-    UINT32      phyDqsFailRiseDelay;
+    UINT32      phyDqsFallRiseDelay;
     UINT32      ddrcCfgDfiLat0;
     UINT32      ddrcCfgDfiLat1;
     UINT32      parityLatency;
