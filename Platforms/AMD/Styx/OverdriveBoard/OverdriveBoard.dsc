@@ -584,7 +584,7 @@ DEFINE DO_KCS       = 1
   #
   # FDT support
   #
-  OpenPlatformPkg/Platforms/AMD/Styx/OverdriveBoard/FdtDxe/FdtDxe.inf {
+  OpenPlatformPkg/Platforms/AMD/Styx/Drivers/FdtDxe/FdtDxe.inf {
     <LibraryClasses>
       # deprecated BdsLib from the ARM BDS
       BdsLib|ArmPkg/Library/BdsLib/BdsLib.inf

@@ -141,7 +141,7 @@ READ_LOCK_STATUS   = TRUE
   #
   # FDT support
   #
-  INF OpenPlatformPkg/Platforms/AMD/Styx/OverdriveBoard/FdtDxe/FdtDxe.inf
+  INF OpenPlatformPkg/Platforms/AMD/Styx/Drivers/FdtDxe/FdtDxe.inf
 
   FILE FREEFORM = PCD(gAmdStyxTokenSpaceGuid.PcdStyxFdt) {
     SECTION RAW = OpenPlatformPkg/Platforms/AMD/Styx/OverdriveBoard/FdtBlob/styx-overdrive.dtb
