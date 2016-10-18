@@ -573,44 +573,6 @@ VOID PcieEqualization(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
 }
 
 
-EFI_STATUS PciePortReset(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
-{
-    if(Port >= PCIE_MAX_PORT_NUM)
-    {
-        return EFI_INVALID_PARAMETER;
-    }
-
-
-    if(PcieIsLinkUp(soctype, HostBridgeNum, Port) && mPcieIntCfg.PortIsInitilized[Port])
-    {
-        (VOID)PcieDisableItssm(soctype, HostBridgeNum, Port);
-    }
-
-    mPcieIntCfg.PortIsInitilized[Port] = FALSE;
-    mPcieIntCfg.DmaResource[Port] = (VOID *)NULL;
-    mPcieIntCfg.DmaChannel[Port][PCIE_DMA_CHANLE_READ] = 0;
-    mPcieIntCfg.DmaChannel[Port][PCIE_DMA_CHANLE_WRITE] = 0;
-    ZeroMem(&mPcieIntCfg.Dev[Port], sizeof(DRIVER_CFG_U));
-
-    if(Port <= 2)
-    {
-        RegWrite(pcie_subctrl_base[HostBridgeNum]+ PCIE_SUBCTRL_SC_PCIE0_RESET_REQ_REG + (UINT32)(8 * Port), 0x1);
-        MicroSecondDelay(0x1000);
-
-        RegWrite(pcie_subctrl_base[HostBridgeNum] + PCIE_SUBCTRL_SC_PCIE0_RESET_DREQ_REG + (UINT32)(8 * Port), 0x1);
-        MicroSecondDelay(0x1000);
-    }
-    else
-    {
-        RegWrite(pcie_subctrl_base[HostBridgeNum] + PCIE_SUBCTRL_SC_PCIE3_RESET_REQ_REG,0x1);
-        MicroSecondDelay(0x1000);
-
-        RegWrite(pcie_subctrl_base[HostBridgeNum] + PCIE_SUBCTRL_SC_PCIE3_RESET_DREQ_REG,0x1);
-        MicroSecondDelay(0x1000);
-    }
-    return EFI_SUCCESS;
-}
-
 EFI_STATUS AssertPcieCoreReset(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
 {
     UINT32 PortIndexInSicl;
