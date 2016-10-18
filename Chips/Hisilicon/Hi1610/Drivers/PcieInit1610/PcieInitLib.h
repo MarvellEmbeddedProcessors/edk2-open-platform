@@ -68,6 +68,8 @@
 #define PCIE_BAR_TYPE_64            (2)
 #define PCIE_BAR_PREFETCH_MODE      (1)
 
+#define PCS_SDS_CFG_REG            0x204
+#define SDS_CFG_STRIDE             0x4
 #define RegWrite(addr,data)            MmioWrite32((addr), (data))
 #define RegRead(addr,data)             ((data) = MmioRead32 (addr))
 

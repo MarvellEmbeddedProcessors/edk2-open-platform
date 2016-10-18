@@ -466,9 +466,11 @@ VOID PciePcsInit(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
     UINT32 Value = 0;
     if (0x1610 == soctype)
     {
-        RegRead(PCIE_PHY_BASE_1610[HostBridgeNum][Port] + 0x204 + i*0x4, Value);
-        Value |= (1 << 20);
-        RegWrite(PCIE_PHY_BASE_1610[HostBridgeNum][Port] + 0x204 + i*0x4, Value);
+        for (i = 0; i < PcieMaxLanNum; i++) {
+            RegRead(PCIE_PHY_BASE_1610[HostBridgeNum][Port] + PCS_SDS_CFG_REG + i * SDS_CFG_STRIDE, Value);
+            Value |= (1 << 20); //bit 20: rxvalid enable
+            RegWrite(PCIE_PHY_BASE_1610[HostBridgeNum][Port] + PCS_SDS_CFG_REG + i * SDS_CFG_STRIDE, Value);
+        }
         PcieRxValidCtrl(soctype, HostBridgeNum, Port, 0);
         RegWrite(PCIE_PHY_BASE_1610[HostBridgeNum][Port] + 0x264, 0x3D090);
     }
