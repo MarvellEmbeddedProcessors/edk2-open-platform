@@ -34,7 +34,7 @@ Scope(_SB)
                         )
                     Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, 0, "\\_SB.MBI0")
                     {
-                        0x00000041,
+                        641, //EHCI
                     }
                 })
                 Return (RBUF) /* \_SB_.USB0._CRS.RBUF */

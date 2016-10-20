@@ -23,7 +23,7 @@ Scope(_SB)
     })
 
    Name(_PRS, ResourceTemplate() {
-       Interrupt(ResourceProducer, Edge, ActiveHigh, Exclusive, 0,,) {0x41, 0x42}
+       Interrupt(ResourceProducer, Edge, ActiveHigh, Exclusive, 0,,) {640, 641} //OHCI: 640, EHCI 641
        })
 
    Name(_DSD, Package () {
