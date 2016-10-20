@@ -47,8 +47,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/CacheMaintenanceLib.h>
 
+#include "Mvpp2LibHw.h"
 #include "Pp2Dxe.h"
-#include "mvpp2_lib.h"
+#include "Mvpp2Lib.h"
 
 #define ReturnUnlock(tpl, status) do { gBS->RestoreTPL (tpl); return (status); } while(0)
 MVPP2_SHARED *Mvpp2Shared;
@@ -117,41 +118,41 @@ Pp2DxeBmPoolInit (
   )
 {
   INTN i;
-  UINT8 *pool_addr;
+  UINT8 *PoolAddr;
 
   for (i = 0; i < MVPP2_BM_POOLS_NUM; i++) {
-    /* bm_irq_clear */
-    mvpp2_bm_irq_clear(Mvpp2Shared, i);
+    /* BmIrqClear */
+    Mvpp2BmIrqClear(Mvpp2Shared, i);
   }
 
-  Mvpp2Shared->bm_pools = AllocateZeroPool (sizeof(struct mvpp2_bm_pool));
+  Mvpp2Shared->BmPools = AllocateZeroPool (sizeof(MVPP2_BMS_POOL));
 
-  if (!Mvpp2Shared->bm_pools)
+  if (!Mvpp2Shared->BmPools)
     return EFI_OUT_OF_RESOURCES;
 
-  pool_addr = AllocateZeroPool ((sizeof(VOID*) * MVPP2_BM_SIZE)*2 +
+  PoolAddr = AllocateZeroPool ((sizeof(VOID*) * MVPP2_BM_SIZE)*2 +
       MVPP2_BM_POOL_PTR_ALIGN);
 
-  if (!pool_addr) {
+  if (!PoolAddr) {
     return EFI_OUT_OF_RESOURCES;
   }
-  if (IS_NOT_ALIGN((UINT64)pool_addr,
+  if (IS_NOT_ALIGN((UINT64)PoolAddr,
     MVPP2_BM_POOL_PTR_ALIGN))
-    pool_addr =
-    (UINT8 *)ALIGN_UP((UINT64)pool_addr,
+    PoolAddr =
+    (UINT8 *)ALIGN_UP((UINT64)PoolAddr,
             MVPP2_BM_POOL_PTR_ALIGN);
 
-  Mvpp2Shared->bm_pools->id = MVPP2_BM_POOL;
-  Mvpp2Shared->bm_pools->virt_addr = (MV_U32*)pool_addr;
-  Mvpp2Shared->bm_pools->phys_addr = (UINT64)pool_addr;
+  Mvpp2Shared->BmPools->id = MVPP2_BM_POOL;
+  Mvpp2Shared->BmPools->VirtAddr = (UINT32*)PoolAddr;
+  Mvpp2Shared->BmPools->PhysAddr = (UINT64)PoolAddr;
 
-  mvpp2_bm_pool_hw_create(Mvpp2Shared, Mvpp2Shared->bm_pools, MVPP2_BM_SIZE);
+  Mvpp2BmPoolHwCreate(Mvpp2Shared, Mvpp2Shared->BmPools, MVPP2_BM_SIZE);
 
   return EFI_SUCCESS;
 }
 
 /*
- * mvpp2_bm_start
+ * Mvpp2BmStart
  *   enable and fill BM pool
  */
 STATIC
@@ -160,24 +161,24 @@ Pp2DxeBmStart (
   VOID
   )
 {
-  UINT8 *buff, *buff_phys;
+  UINT8 *buff, *BuffPhys;
   INTN i;
 
-  mvpp2_bm_pool_ctrl(Mvpp2Shared, MVPP2_BM_POOL, MVPP2_START);
+  Mvpp2BmPoolCtrl(Mvpp2Shared, MVPP2_BM_POOL, MVPP2_START);
 
-  mvpp2_bm_pool_bufsize_set(Mvpp2Shared, Mvpp2Shared->bm_pools, RX_BUFFER_SIZE);
+  Mvpp2BmPoolBufsizeSet(Mvpp2Shared, Mvpp2Shared->BmPools, RX_BUFFER_SIZE);
 
   /* fill BM pool with buffers */
   for (i = 0; i < MVPP2_BM_SIZE; i++) {
-    buff = (UINT8 *)(BufferLocation.rx_buffers
+    buff = (UINT8 *)(BufferLocation.RxBuffers
       + (i * RX_BUFFER_SIZE));
     if (!buff)
       return EFI_OUT_OF_RESOURCES;
 
-    buff_phys = (UINT8 *)ALIGN_UP((UINT64)buff,
+    BuffPhys = (UINT8 *)ALIGN_UP((UINT64)buff,
       BM_ALIGN);
-    mvpp2_bm_pool_put(Mvpp2Shared, MVPP2_BM_POOL,
-      (UINT64)buff_phys, (UINT64)buff_phys);
+    Mvpp2BmPoolPut(Mvpp2Shared, MVPP2_BM_POOL,
+      (UINT64)BuffPhys, (UINT64)BuffPhys);
   }
 
   return EFI_SUCCESS;
@@ -191,16 +192,16 @@ Pp2DxeStartDev (
 {
   PP2DXE_PORT *Port = &Pp2Context->Port;
 
-  mvpp2_ingress_enable(Port);
+  Mvpp2IngressEnable(Port);
 
   /* Config classifier decoding table */
-  mvpp2_cls_port_config(Port);
-  mvpp2_cls_oversize_rxq_set(Port);
-  mv_gop110_port_events_mask(Port);
-  mv_gop110_port_enable(Port);
+  Mvpp2ClsPortConfig(Port);
+  Mvpp2ClsOversizeRxqSet(Port);
+  MvGop110PortEventsMask(Port);
+  MvGop110PortEnable(Port);
 
   gBS->Stall(2000);
-  mvpp2_egress_enable(Port);
+  Mvpp2EgressEnable(Port);
 }
 
 STATIC
@@ -211,23 +212,23 @@ Pp2DxeSetupRxqs (
 {
   INTN Queue;
   EFI_STATUS Status;
-  struct mvpp2_rx_queue *rxq;
+  MVPP2_RX_QUEUE *rxq;
 
-  for (Queue = 0; Queue < rxq_number; Queue++) {
+  for (Queue = 0; Queue < RxqNumber; Queue++) {
     rxq = &Pp2Context->Port.rxqs[Queue];
-    rxq->descs_phys = (dma_addr_t)rxq->descs;
+    rxq->DescsPhys = (DmaAddrT)rxq->descs;
     if (!rxq->descs) {
       Status = EFI_OUT_OF_RESOURCES;
-      goto err_cleanup;
+      goto ErrCleanup;
     }
 
-    mvpp2_rxq_hw_init(&Pp2Context->Port, rxq);
+    Mvpp2RxqHwInit(&Pp2Context->Port, rxq);
   }
 
   return EFI_SUCCESS;
 
-err_cleanup:
-  mvpp2_cleanup_rxqs(&Pp2Context->Port);
+ErrCleanup:
+  Mvpp2CleanupRxqs(&Pp2Context->Port);
   return Status;
 }
 
@@ -238,23 +239,23 @@ Pp2DxeSetupTxqs (
   )
 {
   INTN Queue;
-  struct mvpp2_tx_queue *txq;
+  MVPP2_TX_QUEUE *txq;
   EFI_STATUS Status;
 
-  for (Queue = 0; Queue < txq_number; Queue++) {
+  for (Queue = 0; Queue < TxqNumber; Queue++) {
     txq = &Pp2Context->Port.txqs[Queue];
-    txq->descs_phys = (dma_addr_t) txq->descs;
-    if (!txq->descs_phys) {
+    txq->DescsPhys = (DmaAddrT) txq->descs;
+    if (!txq->DescsPhys) {
       Status = EFI_OUT_OF_RESOURCES;
-      goto err_cleanup;
+      goto ErrCleanup;
     }
-    mvpp2_txq_hw_init(&Pp2Context->Port, txq);
+    Mvpp2TxqHwInit(&Pp2Context->Port, txq);
   }
 
   return EFI_SUCCESS;
 
-err_cleanup:
-  mvpp2_cleanup_txqs(&Pp2Context->Port);
+ErrCleanup:
+  Mvpp2CleanupTxqs(&Pp2Context->Port);
   return Status;
 }
 
@@ -264,13 +265,13 @@ Pp2DxeSetupAggrTxqs (
   IN PP2DXE_CONTEXT *Pp2Context
   )
 {
-  struct mvpp2_tx_queue *aggr_txq;
+  MVPP2_TX_QUEUE *AggrTxq;
 
-  aggr_txq = Mvpp2Shared->aggr_txqs;
-  aggr_txq->descs_phys = (dma_addr_t)aggr_txq->descs;
-  if (!aggr_txq->descs)
+  AggrTxq = Mvpp2Shared->AggrTxqs;
+  AggrTxq->DescsPhys = (DmaAddrT)AggrTxq->descs;
+  if (!AggrTxq->descs)
     return EFI_OUT_OF_RESOURCES;
-  mvpp2_aggr_txq_hw_init(aggr_txq, aggr_txq->size, 0, Mvpp2Shared);
+  Mvpp2AggrTxqHwInit(AggrTxq, AggrTxq->size, 0, Mvpp2Shared);
   return EFI_SUCCESS;
 
 }
@@ -282,29 +283,29 @@ Pp2DxeOpen (
   )
 {
   PP2DXE_PORT *Port = &Pp2Context->Port;
-  UINT8 mac_bcast[NET_ETHER_ADDR_LEN] = { 0xff, 0xff, 0xff,
+  UINT8 MacBcast[NET_ETHER_ADDR_LEN] = { 0xff, 0xff, 0xff,
         0xff, 0xff, 0xff };
-  UINT8 dev_addr[NET_ETHER_ADDR_LEN];
+  UINT8 DevAddr[NET_ETHER_ADDR_LEN];
   INTN ret;
   EFI_STATUS Status;
 
   DEBUG((DEBUG_INFO, "Pp2Dxe: Open\n"));
 
-  CopyMem (dev_addr, Pp2Context->Snp.Mode->CurrentAddress.Addr, NET_ETHER_ADDR_LEN);
+  CopyMem (DevAddr, Pp2Context->Snp.Mode->CurrentAddress.Addr, NET_ETHER_ADDR_LEN);
 
-  ret = mvpp2_prs_mac_da_accept(Mvpp2Shared, Port->id, mac_bcast, TRUE);
+  ret = Mvpp2PrsMacDaAccept(Mvpp2Shared, Port->id, MacBcast, TRUE);
   if (ret) {
     return EFI_DEVICE_ERROR;
   }
-  ret = mvpp2_prs_mac_da_accept(Mvpp2Shared, Port->id, dev_addr, TRUE);
+  ret = Mvpp2PrsMacDaAccept(Mvpp2Shared, Port->id, DevAddr, TRUE);
   if (ret) {
     return EFI_DEVICE_ERROR;
   }
-  ret = mvpp2_prs_tag_mode_set(Mvpp2Shared, Port->id, MVPP2_TAG_TYPE_MH);
+  ret = Mvpp2PrsTagModeSet(Mvpp2Shared, Port->id, MVPP2_TAG_TYPE_MH);
   if (ret) {
     return EFI_DEVICE_ERROR;
   }
-  ret = mvpp2_prs_def_flow(Port);
+  ret = Mvpp2PrsDefFlow(Port);
   if (ret) {
     return EFI_DEVICE_ERROR;
   }
@@ -336,48 +337,48 @@ Pp2DxeLatePortInitialize (
   INTN Queue;
 
   DEBUG((DEBUG_INFO, "Pp2Dxe: LatePortInitialize\n"));
-  Port->tx_ring_size = MVPP2_MAX_TXD;
-  Port->rx_ring_size = MVPP2_MAX_RXD;
+  Port->TxRingSize = MVPP2_MAX_TXD;
+  Port->RxRingSize = MVPP2_MAX_RXD;
 
-  mvpp2_egress_disable(Port);
-  mv_gop110_port_events_mask(Port);
-  mv_gop110_port_disable(Port);
+  Mvpp2EgressDisable(Port);
+  MvGop110PortEventsMask(Port);
+  MvGop110PortDisable(Port);
 
-  Port->txqs = AllocateZeroPool (sizeof(struct mvpp2_tx_queue) * txq_number);
+  Port->txqs = AllocateZeroPool (sizeof(MVPP2_TX_QUEUE) * TxqNumber);
   if (Port->txqs == NULL) {
     DEBUG((DEBUG_ERROR, "Failed to allocate txqs\n"));
     return EFI_OUT_OF_RESOURCES;
   }
 
   /* Use preallocated area */
-  Port->txqs[0].descs = BufferLocation.tx_descs;
+  Port->txqs[0].descs = BufferLocation.TxDescs;
 
-  for (Queue = 0; Queue < txq_number; Queue++) {
-    struct mvpp2_tx_queue *txq = &Port->txqs[Queue];
+  for (Queue = 0; Queue < TxqNumber; Queue++) {
+    MVPP2_TX_QUEUE *txq = &Port->txqs[Queue];
 
-    txq->id = mvpp2_txq_phys(Port->id, Queue);
-    txq->log_id = Queue;
-    txq->size = Port->tx_ring_size;
+    txq->id = Mvpp2TxqPhys(Port->id, Queue);
+    txq->LogId = Queue;
+    txq->size = Port->TxRingSize;
   }
 
-  Port->rxqs = AllocateZeroPool (sizeof(struct mvpp2_rx_queue) * rxq_number);
+  Port->rxqs = AllocateZeroPool (sizeof(MVPP2_RX_QUEUE) * RxqNumber);
   if (Port->rxqs == NULL) {
     DEBUG((DEBUG_ERROR, "Failed to allocate rxqs\n"));
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Port->rxqs[0].descs = BufferLocation.rx_descs;
+  Port->rxqs[0].descs = BufferLocation.RxDescs;
 
-  for (Queue = 0; Queue < txq_number; Queue++) {
-    struct mvpp2_rx_queue *rxq = &Port->rxqs[Queue];
+  for (Queue = 0; Queue < TxqNumber; Queue++) {
+    MVPP2_RX_QUEUE *rxq = &Port->rxqs[Queue];
 
-    rxq->id = Queue + Port->first_rxq;
-    rxq->size = Port->rx_ring_size;
+    rxq->id = Queue + Port->FirstRxq;
+    rxq->size = Port->RxRingSize;
   }
 
-  mvpp2_ingress_disable(Port);
+  Mvpp2IngressDisable(Port);
 
-  mvpp2_defaults_set(Port);
+  Mvpp2DefaultsSet(Port);
 
   return Pp2DxeOpen(Pp2Context);
 }
@@ -401,8 +402,8 @@ Pp2DxeLateInitialize (
       return Status;
     }
     /* Attach pool to rxq */
-    mvpp2_rxq_long_pool_set(Port, 0, MVPP2_BM_POOL);
-    mvpp2_rxq_short_pool_set(Port, 0, MVPP2_BM_POOL);
+    Mvpp2RxqLongPoolSet(Port, 0, MVPP2_BM_POOL);
+    Mvpp2RxqShortPoolSet(Port, 0, MVPP2_BM_POOL);
     /* mark this port being fully inited,
      * otherwise it will be inited again
      * during next networking transaction,
@@ -413,8 +414,8 @@ Pp2DxeLateInitialize (
     Pp2Context->LateInitialized = TRUE;
   } else {
     /* Upon all following calls, this is enough */
-    mv_gop110_port_events_mask(Port);
-    mv_gop110_port_enable(Port);
+    MvGop110PortEventsMask(Port);
+    MvGop110PortEnable(Port);
   }
   return 0;
 }
@@ -443,7 +444,7 @@ Pp2DxePhyInitialize (
   Status = Pp2Context->Phy->Init(
             Pp2Context->Phy,
             PhyAddresses[Pp2Context->Instance],
-            Pp2Context->Port.phy_interface,
+            Pp2Context->Port.PhyInterface,
             &Pp2Context->PhyDev
             );
   if (EFI_ERROR(Status) && Status != EFI_TIMEOUT)
@@ -457,9 +458,11 @@ Pp2DxePhyInitialize (
   DEBUG((DEBUG_INFO,
     Pp2Context->PhyDev->FullDuplex ? "full duplex, " : "half duplex, "));
   DEBUG((DEBUG_INFO,
-    Pp2Context->PhyDev->Speed == SPEED_10 ? "speed 10\n" : (Pp2Context->PhyDev->Speed == SPEED_100 ? "speed 100\n" : "speed 1000\n")));
+    Pp2Context->PhyDev->Speed == SPEED_10 ? "speed 10\n" :
+    (Pp2Context->PhyDev->Speed == SPEED_100 ? "speed 100\n" : "speed 1000\n")));
 
-  mvpp2_smi_phy_addr_cfg(&Pp2Context->Port, Pp2Context->Port.gop_index, Pp2Context->PhyDev->Addr);
+  Mvpp2SmiPhyAddrCfg(&Pp2Context->Port, Pp2Context->Port.GopIndex,
+                     Pp2Context->PhyDev->Addr);
 
   return EFI_SUCCESS;
 }
@@ -590,15 +593,15 @@ Pp2DxeHalt (
   STATIC BOOLEAN CommonPartHalted = FALSE;
 
   if (!CommonPartHalted) {
-    mvpp2_bm_stop(Mvpp2Shared, MVPP2_BM_POOL);
+    Mvpp2BmStop(Mvpp2Shared, MVPP2_BM_POOL);
     CommonPartHalted = TRUE;
   }
-  mvpp2_txq_drain_set(Port, 0, TRUE);
-  mvpp2_ingress_disable(Port);
-  mvpp2_egress_disable(Port);
+  Mvpp2TxqDrainSet(Port, 0, TRUE);
+  Mvpp2IngressDisable(Port);
+  Mvpp2EgressDisable(Port);
 
-  mv_gop110_port_events_mask(Port);
-  mv_gop110_port_disable(Port);
+  MvGop110PortEventsMask(Port);
+  MvGop110PortDisable(Port);
 }
 
 EFI_STATUS
@@ -680,8 +683,8 @@ Pp2SnpStationAddress (
   }
 
   /* Invalidate old unicast address in parser */
-  Ret = mvpp2_prs_mac_da_accept(Mvpp2Shared, Port->id,
-                                Snp->Mode->CurrentAddress.Addr, FALSE);
+  Ret = Mvpp2PrsMacDaAccept(Mvpp2Shared, Port->id,
+                            Snp->Mode->CurrentAddress.Addr, FALSE);
   if (Ret) {
     DEBUG((DEBUG_ERROR, "Pp2SnpStationAddress - Fail\n"));
     return EFI_DEVICE_ERROR;
@@ -705,8 +708,8 @@ Pp2SnpStationAddress (
   }
 
   /* Update parser with new unicast address */
-  Ret = mvpp2_prs_mac_da_accept(Mvpp2Shared, Port->id,
-                                Snp->Mode->CurrentAddress.Addr, TRUE);
+  Ret = Mvpp2PrsMacDaAccept(Mvpp2Shared, Port->id,
+                            Snp->Mode->CurrentAddress.Addr, TRUE);
   if (Ret) {
     DEBUG((DEBUG_ERROR, "Pp2SnpStationAddress - Fail\n"));
     return EFI_DEVICE_ERROR;
@@ -775,7 +778,7 @@ Pp2SnpGetStatus (
   if (!Pp2Context->Initialized)
     ReturnUnlock(SavedTpl, EFI_NOT_READY);
 
-  LinkUp = Port->always_up ? TRUE : mv_gop110_port_is_link_up(Port);
+  LinkUp = Port->AlwaysUp ? TRUE : MvGop110PortIsLinkUp(Port);
 
   if (LinkUp != Snp->Mode->MediaPresent) {
     DEBUG((DEBUG_INFO, "Pp2Dxe%d: Link ", Pp2Context->Instance));
@@ -804,10 +807,10 @@ Pp2SnpTransmit (
 {
   PP2DXE_CONTEXT *Pp2Context = INSTANCE_FROM_SNP(This);
   PP2DXE_PORT *Port = &Pp2Context->Port;
-  struct mvpp2_tx_queue *aggr_txq = Mvpp2Shared->aggr_txqs;
-  struct mvpp2_tx_desc *tx_desc;
+  MVPP2_TX_QUEUE *AggrTxq = Mvpp2Shared->AggrTxqs;
+  MVPP2_TX_DESC *TxDesc;
   INTN timeout = 0;
-  INTN tx_done;
+  INTN TxDone;
   UINT8 *DataPtr = Buffer;
   UINT16 Protocol;
   EFI_TPL SavedTpl;
@@ -846,9 +849,9 @@ Pp2SnpTransmit (
 
   Protocol = HTONS(*ProtocolPtr);
 
-  tx_desc = mvpp2_txq_next_desc_get(aggr_txq);
+  TxDesc = Mvpp2TxqNextDescGet(AggrTxq);
 
-  if (!tx_desc) {
+  if (!TxDesc) {
     DEBUG((DEBUG_ERROR, "No tx descriptor to use\n"));
     ReturnUnlock(SavedTpl, EFI_OUT_OF_RESOURCES);
   }
@@ -865,45 +868,45 @@ Pp2SnpTransmit (
   }
 
   /* set descriptor fields */
-  tx_desc->command =  MVPP2_TXD_IP_CSUM_DISABLE |
+  TxDesc->command =  MVPP2_TXD_IP_CSUM_DISABLE |
   MVPP2_TXD_L4_CSUM_NOT | MVPP2_TXD_F_DESC | MVPP2_TXD_L_DESC;
-  tx_desc->data_size = BufferSize;
+  TxDesc->DataSize = BufferSize;
 
-  tx_desc->packet_offset = (phys_addr_t)DataPtr & MVPP2_TX_DESC_ALIGN;
+  TxDesc->PacketOffset = (PhysAddrT)DataPtr & MVPP2_TX_DESC_ALIGN;
 
-  mvpp2x2_txdesc_phys_addr_set(
-    (phys_addr_t)DataPtr & ~MVPP2_TX_DESC_ALIGN, tx_desc);
-  tx_desc->phys_txq = mvpp2_txq_phys(Port->id, 0);
+  Mvpp2x2TxdescPhysAddrSet(
+    (PhysAddrT)DataPtr & ~MVPP2_TX_DESC_ALIGN, TxDesc);
+  TxDesc->PhysTxq = Mvpp2TxqPhys(Port->id, 0);
 
   InvalidateDataCacheRange (DataPtr, BufferSize);
 
   /* iowmb */
   __asm__ __volatile__ ("" : : : "memory");
   /* send */
-  mvpp2_aggr_txq_pend_desc_add(Port, 1);
+  Mvpp2AggrTxqPendDescAdd(Port, 1);
 
   /* Tx done processing */
   /* wait for agrregated to physical TXQ transfer */
-  tx_done = mvpp2_aggr_txq_pend_desc_num_get(Mvpp2Shared, 0);
+  TxDone = Mvpp2AggrTxqPendDescNumGet(Mvpp2Shared, 0);
   do {
     if (timeout++ > MVPP2_TX_SEND_TIMEOUT) {
       DEBUG((DEBUG_ERROR, "Pp2Dxe: transmit timeout\n"));
       ReturnUnlock(SavedTpl, EFI_TIMEOUT);
     }
-    tx_done = mvpp2_aggr_txq_pend_desc_num_get(Mvpp2Shared, 0);
-  } while (tx_done);
+    TxDone = Mvpp2AggrTxqPendDescNumGet(Mvpp2Shared, 0);
+  } while (TxDone);
 
   timeout = 0;
-  tx_done = mvpp2_txq_sent_desc_proc(Port, &Port->txqs[0]);
+  TxDone = Mvpp2TxqSentDescProc(Port, &Port->txqs[0]);
   /* wait for packet to be transmitted */
-  while (!tx_done) {
+  while (!TxDone) {
     if (timeout++ > MVPP2_TX_SEND_TIMEOUT) {
       DEBUG((DEBUG_ERROR, "Pp2Dxe: transmit timeout\n"));
       ReturnUnlock(SavedTpl, EFI_TIMEOUT);
     }
-    tx_done = mvpp2_txq_sent_desc_proc(Port, &Port->txqs[0]);
+    TxDone = Mvpp2TxqSentDescProc(Port, &Port->txqs[0]);
   }
-  /* tx_done has increased - hw sent packet */
+  /* TxDone has increased - hw sent packet */
 
   /* add buffer to completion queue and return */
   ReturnUnlock (SavedTpl, QueueInsert (Pp2Context, Buffer));
@@ -931,25 +934,25 @@ Pp2SnpReceive (
   INTN PoolId;
   UINTN PktLength;
   UINT8 *DataPtr;
-  struct mvpp2_rx_desc *RxDesc;
-  struct mvpp2_rx_queue *Rxq = &Port->rxqs[0];
+  MVPP2_RX_DESC *RxDesc;
+  MVPP2_RX_QUEUE *Rxq = &Port->rxqs[0];
 
   SavedTpl = gBS->RaiseTPL (TPL_CALLBACK);
-  ReceivedPackets = mvpp2_rxq_received(Port, Rxq->id);
+  ReceivedPackets = Mvpp2RxqReceived(Port, Rxq->id);
 
   if (ReceivedPackets == 0) {
     ReturnUnlock(SavedTpl, EFI_NOT_READY);
   }
 
   /* process one packet per call */
-  RxDesc = mvpp2_rxq_next_desc_get(Rxq);
+  RxDesc = Mvpp2RxqNextDescGet(Rxq);
 
   StatusReg = RxDesc->status;
 
   /* extract addresses from descriptor */
-  PhysAddr = RxDesc->buf_phys_addr_key_hash &
+  PhysAddr = RxDesc->BufPhysAddrKeyHash &
   MVPP22_ADDR_MASK;
-  VirtAddr = RxDesc->buf_cookie_bm_qset_cls_info &
+  VirtAddr = RxDesc->BufCookieBmQsetClsInfo &
   MVPP22_ADDR_MASK;
 
   /* drop packets with error or with buffer header (MC, SG) */
@@ -960,7 +963,7 @@ Pp2SnpReceive (
     goto drop;
   }
 
-  PktLength = (UINTN) RxDesc->data_size - 2;
+  PktLength = (UINTN) RxDesc->DataSize - 2;
   if (PktLength > *BufferSize) {
     *BufferSize = PktLength;
     DEBUG((DEBUG_ERROR, "Pp2Dxe: buffer too small\n"));
@@ -998,14 +1001,14 @@ drop:
   /* refill: pass packet back to BM */
   PoolId = (StatusReg & MVPP2_RXD_BM_POOL_ID_MASK) >>
   MVPP2_RXD_BM_POOL_ID_OFFS;
-  mvpp2_bm_pool_put(Mvpp2Shared, PoolId, PhysAddr, VirtAddr);
+  Mvpp2BmPoolPut(Mvpp2Shared, PoolId, PhysAddr, VirtAddr);
 
   /* iowmb */
   __asm__ __volatile__ ("" : : : "memory");
 
   ASSERT (Port != NULL);
   ASSERT (Rxq != NULL);
-  mvpp2_rxq_status_update(Port, Rxq->id, 1, 1);
+  Mvpp2RxqStatusUpdate(Port, Rxq->id, 1, 1);
   ReturnUnlock(SavedTpl, Status);
 }
 
@@ -1125,14 +1128,14 @@ Pp2DxeParsePortPcd (
   ASSERT (PcdGetSize (PcdPp2InterfaceSpeed) == PcdGetSize (PcdPp2PortIds));
 
   Pp2Context->Port.id = PortIds[Pp2Context->Instance];
-  Pp2Context->Port.gop_index = GopIndexes[Pp2Context->Instance];
-  Pp2Context->Port.phy_interface = PhyConnectionTypes[Pp2Context->Instance];
-  Pp2Context->Port.always_up = AlwaysUp[Pp2Context->Instance];
+  Pp2Context->Port.GopIndex = GopIndexes[Pp2Context->Instance];
+  Pp2Context->Port.PhyInterface = PhyConnectionTypes[Pp2Context->Instance];
+  Pp2Context->Port.AlwaysUp = AlwaysUp[Pp2Context->Instance];
   Pp2Context->Port.speed = Speed[Pp2Context->Instance];
-  Pp2Context->Port.gmac_base = PcdGet64 (PcdPp2GmacBaseAddress) +
-    PcdGet32 (PcdPp2GmacObjSize) * Pp2Context->Port.gop_index;
-  Pp2Context->Port.xlg_base = PcdGet64 (PcdPp2XlgBaseAddress) +
-    PcdGet32 (PcdPp2XlgObjSize) * Pp2Context->Port.gop_index;
+  Pp2Context->Port.GmacBase = PcdGet64 (PcdPp2GmacBaseAddress) +
+    PcdGet32 (PcdPp2GmacObjSize) * Pp2Context->Port.GopIndex;
+  Pp2Context->Port.XlgBase = PcdGet64 (PcdPp2XlgBaseAddress) +
+    PcdGet32 (PcdPp2XlgObjSize) * Pp2Context->Port.GopIndex;
 }
 
 EFI_STATUS
@@ -1155,12 +1158,12 @@ Pp2DxeInitialise (
   }
 
   Mvpp2Shared->base = PcdGet64 (PcdPp2SharedAddress);
-  Mvpp2Shared->rfu1_base = PcdGet64 (PcdPp2Rfu1BaseAddress);
-  Mvpp2Shared->smi_base = PcdGet64 (PcdPp2SmiBaseAddress);
+  Mvpp2Shared->Rfu1Base = PcdGet64 (PcdPp2Rfu1BaseAddress);
+  Mvpp2Shared->SmiBase = PcdGet64 (PcdPp2SmiBaseAddress);
   Mvpp2Shared->tclk = PcdGet32 (PcdPp2ClockFrequency);
   DEBUG((DEBUG_INFO, "Pp2Dxe: shared base is 0x%lx\n", Mvpp2Shared->base));
-  DEBUG((DEBUG_INFO, "Pp2Dxe: RFU1 base is 0x%lx\n", Mvpp2Shared->rfu1_base));
-  DEBUG((DEBUG_INFO, "Pp2Dxe: SMI base is 0x%lx\n", Mvpp2Shared->smi_base));
+  DEBUG((DEBUG_INFO, "Pp2Dxe: RFU1 base is 0x%lx\n", Mvpp2Shared->Rfu1Base));
+  DEBUG((DEBUG_INFO, "Pp2Dxe: SMI base is 0x%lx\n", Mvpp2Shared->SmiBase));
 
   BufferSpace = UncachedAllocateAlignedPool (BD_SPACE, MVPP2_BUFFER_ALIGN_SIZE);
   if (BufferSpace == NULL) {
@@ -1169,39 +1172,39 @@ Pp2DxeInitialise (
   }
   SetMem (BufferSpace, BD_SPACE, 0x0);
 
-  BufferLocation.tx_descs = (struct mvpp2_tx_desc *)BufferSpace;
+  BufferLocation.TxDescs = (MVPP2_TX_DESC *)BufferSpace;
 
-  BufferLocation.aggr_tx_descs = (struct mvpp2_tx_desc *)
+  BufferLocation.AggrTxDescs = (MVPP2_TX_DESC *)
     ((UINT64)BufferSpace + MVPP2_MAX_TXD
-    * sizeof(struct mvpp2_tx_desc));
+    * sizeof(MVPP2_TX_DESC));
 
-  BufferLocation.rx_descs = (struct mvpp2_rx_desc *)
+  BufferLocation.RxDescs = (MVPP2_RX_DESC *)
     ((UINT64)BufferSpace +
     (MVPP2_MAX_TXD + MVPP2_AGGR_TXQ_SIZE)
-    * sizeof(struct mvpp2_tx_desc));
+    * sizeof(MVPP2_TX_DESC));
 
-  BufferLocation.rx_buffers = (UINT64)
+  BufferLocation.RxBuffers = (UINT64)
     (BufferSpace + (MVPP2_MAX_TXD + MVPP2_AGGR_TXQ_SIZE)
-    * sizeof(struct mvpp2_tx_desc) +
-    MVPP2_MAX_RXD * sizeof(struct mvpp2_rx_desc));
+    * sizeof(MVPP2_TX_DESC) +
+    MVPP2_MAX_RXD * sizeof(MVPP2_RX_DESC));
 
-  mvpp2_axi_config(Mvpp2Shared);
+  Mvpp2AxiConfig(Mvpp2Shared);
   Pp2DxeBmPoolInit();
-  mvpp2_rx_fifo_init(Mvpp2Shared);
+  Mvpp2RxFifoInit(Mvpp2Shared);
 
-  Mvpp2Shared->prs_shadow = AllocateZeroPool (sizeof(struct mvpp2_prs_shadow)
+  Mvpp2Shared->PrsShadow = AllocateZeroPool (sizeof(MVPP2_PRS_SHADOW)
                 * MVPP2_PRS_TCAM_SRAM_SIZE);
-  if (Mvpp2Shared->prs_shadow == NULL) {
-    DEBUG((DEBUG_ERROR, "Failed to allocate prs_shadow\n"));
+  if (Mvpp2Shared->PrsShadow == NULL) {
+    DEBUG((DEBUG_ERROR, "Failed to allocate PrsShadow\n"));
     return EFI_OUT_OF_RESOURCES;
   }
 
-  if (mvpp2_prs_default_init(Mvpp2Shared)) {
+  if (Mvpp2PrsDefaultInit(Mvpp2Shared)) {
     DEBUG((DEBUG_ERROR, "Failed to intialize prs\n"));
     return EFI_DEVICE_ERROR;
   }
 
-  mvpp2_cls_init(Mvpp2Shared);
+  Mvpp2ClsInit(Mvpp2Shared);
 
   Status = Pp2DxeBmStart();
   if (EFI_ERROR(Status)) {
@@ -1209,16 +1212,16 @@ Pp2DxeInitialise (
     return Status;
   }
 
-  Mvpp2Shared->aggr_txqs = AllocateZeroPool (sizeof(struct mvpp2_tx_queue));
-  if (Mvpp2Shared->aggr_txqs == NULL) {
+  Mvpp2Shared->AggrTxqs = AllocateZeroPool (sizeof(MVPP2_TX_QUEUE));
+  if (Mvpp2Shared->AggrTxqs == NULL) {
     DEBUG((DEBUG_ERROR, "Failed to allocate aggregated txqs\n"));
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Mvpp2Shared->aggr_txqs->descs = BufferLocation.aggr_tx_descs;
-  Mvpp2Shared->aggr_txqs->id = 0;
-  Mvpp2Shared->aggr_txqs->log_id = 0;
-  Mvpp2Shared->aggr_txqs->size = MVPP2_AGGR_TXQ_SIZE;
+  Mvpp2Shared->AggrTxqs->descs = BufferLocation.AggrTxDescs;
+  Mvpp2Shared->AggrTxqs->id = 0;
+  Mvpp2Shared->AggrTxqs->LogId = 0;
+  Mvpp2Shared->AggrTxqs->size = MVPP2_AGGR_TXQ_SIZE;
 
   if (PcdGet32 (PcdPp2PortNumber) == 0) {
     DEBUG((DEBUG_ERROR, "Pp2Dxe: port number set to 0\n"));
@@ -1247,16 +1250,16 @@ Pp2DxeInitialise (
       return Status;
 
     Pp2DxeParsePortPcd(Pp2Context);
-    Pp2Context->Port.txp_num = 1;
+    Pp2Context->Port.TxpNum = 1;
     Pp2Context->Port.priv = Mvpp2Shared;
-    Pp2Context->Port.first_rxq = 4 * Pp2Context->Instance;
+    Pp2Context->Port.FirstRxq = 4 * Pp2Context->Instance;
     DEBUG((DEBUG_INFO, "Pp2Dxe%d: port%d - gmac at 0x%lx, xlg at 0x%lx\n", Pp2Context->Instance, Pp2Context->Port.id,
-      Pp2Context->Port.gmac_base, Pp2Context->Port.xlg_base));
+      Pp2Context->Port.GmacBase, Pp2Context->Port.XlgBase));
 
-    NetCompConfig |= mvp_pp2x_gop110_netc_cfg_create(&Pp2Context->Port);
+    NetCompConfig |= MvpPp2xGop110NetcCfgCreate(&Pp2Context->Port);
 
-    mv_gop110_port_init(&Pp2Context->Port);
-    mv_gop110_fl_cfg(&Pp2Context->Port);
+    MvGop110PortInit(&Pp2Context->Port);
+    MvGop110FlCfg(&Pp2Context->Port);
 
     Status = gBS->CreateEvent (
               EVT_SIGNAL_EXIT_BOOT_SERVICES,
@@ -1269,9 +1272,9 @@ Pp2DxeInitialise (
       return Status;
   }
 
-  mv_gop110_netc_init(&Pp2Context->Port, NetCompConfig,
+  MvGop110NetcInit(&Pp2Context->Port, NetCompConfig,
     MV_NETC_FIRST_PHASE);
-  mv_gop110_netc_init(&Pp2Context->Port, NetCompConfig,
+  MvGop110NetcInit(&Pp2Context->Port, NetCompConfig,
     MV_NETC_SECOND_PHASE);
 
   return EFI_SUCCESS;

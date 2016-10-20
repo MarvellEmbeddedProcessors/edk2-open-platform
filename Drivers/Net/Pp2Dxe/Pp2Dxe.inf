@@ -40,7 +40,7 @@
 
 [Sources.common]
   Pp2Dxe.c
-  mvpp2_lib.c
+  Mvpp2Lib.c
 
 [Packages]
   MdePkg/MdePkg.dec
