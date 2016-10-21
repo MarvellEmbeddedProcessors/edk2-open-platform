@@ -161,6 +161,7 @@ typedef struct _DDR_DIMM{
     UINT16      DimmSize;
     UINT16      DimmSpeed;
     UINT32      RankSize;
+    UINT8       SpdMirror; //Denote the dram address mapping is standard mode or mirrored mode
     struct DDR_RANK  Rank[MAX_RANK_DIMM];
 }DDR_DIMM;
 
@@ -337,6 +338,7 @@ typedef struct _MEMORY{
     UINT8           Config0;
     UINT8           marginTest;
     UINT8           Config1[5];
+    UINT8           ErrorBypass; //register of spd mirror mode
     UINT32          Config2;
 }MEMORY;
 
@@ -789,6 +791,8 @@ struct ODT_ACTIVE_STRUCT {
 #define SPD_FTB_TAA_DDR4      123   // Fine offset for TAA
 #define SPD_FTB_MAX_TCK_DDR4  124   // Fine offset for max TCK
 #define SPD_FTB_MIN_TCK_DDR4  125   // Fine offset for min TCK
+#define SPD_MIRROR_UNBUFFERED 131   // Unbuffered:Address Mapping from Edge Connector to DRAM
+#define SPD_MIRROR_REGISTERED 136   // Registered:Address Address Mapping from Register to DRAM
 
 #define SPD_MMID_LSB_DDR4     320   // Module Manufacturer ID Code, Least Significant Byte
 #define SPD_MMID_MSB_DDR4     321   // Module Manufacturer ID Code, Most Significant Byte
