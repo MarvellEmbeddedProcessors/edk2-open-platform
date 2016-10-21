@@ -60,7 +60,7 @@
 [0004]                           ID Count : 00000001
 [0004]                        Output Base : 00040080  // device id
 [0004]                   Output Reference : 00000034  // point to its dsa
-[0004]              Flags (decoded below) : 00000000
+[0004]              Flags (decoded below) : 00000001
                            Single Mapping : 1
 
 /* mbi-gen dsa mbi1 - sas1, named component */
@@ -91,7 +91,7 @@
 [0004]                           ID Count : 00000001
 [0004]                        Output Base : 00040000
 [0004]                   Output Reference : 00000034
-[0004]              Flags (decoded below) : 00000000
+[0004]              Flags (decoded below) : 00000001
                            Single Mapping : 1
 
 /* mbi-gen dsa mbi2 - sas2, named component */
@@ -122,7 +122,7 @@
 [0004]                           ID Count : 00000001
 [0004]                        Output Base : 00040040
 [0004]                   Output Reference : 00000034
-[0004]              Flags (decoded below) : 00000000
+[0004]              Flags (decoded below) : 00000001
                            Single Mapping : 1
 
 /* mbi-gen dsa mbi3 - dsa0, srv named component */
@@ -153,7 +153,7 @@
 [0004]                           ID Count : 00000001
 [0004]                        Output Base : 00040800
 [0004]                   Output Reference : 00000034
-[0004]              Flags (decoded below) : 00000000
+[0004]              Flags (decoded below) : 00000001
                            Single Mapping : 1
 
 /* mbi-gen dsa mbi4 - dsa1, dbg0 named component */
@@ -184,7 +184,7 @@
 [0004]                           ID Count : 00000001
 [0004]                        Output Base : 00040b1c
 [0004]                   Output Reference : 00000034
-[0004]              Flags (decoded below) : 00000000
+[0004]              Flags (decoded below) : 00000001
                            Single Mapping : 1
 
 /* mbi-gen dsa mbi5 - dsa2, dbg1  named component */
@@ -215,7 +215,7 @@
 [0004]                           ID Count : 00000001
 [0004]                        Output Base : 00040b1d
 [0004]                   Output Reference : 00000034
-[0004]              Flags (decoded below) : 00000000
+[0004]              Flags (decoded below) : 00000001
                            Single Mapping : 1
 
 /* mbi-gen dsa mbi6 - dsa sas0  named component */
@@ -246,7 +246,7 @@
 [0004]                           ID Count : 00000001
 [0004]                        Output Base : 00040900
 [0004]                   Output Reference : 00000034
-[0004]              Flags (decoded below) : 00000000
+[0004]              Flags (decoded below) : 00000001
                            Single Mapping : 1
 
 /* mbi-gen mbi7 - RoCE named component */
@@ -277,7 +277,7 @@
 [0004]                           ID Count : 00000001
 [0004]                        Output Base : 00040b1e
 [0004]                   Output Reference : 00000034
-[0004]              Flags (decoded below) : 00000000
+[0004]              Flags (decoded below) : 00000001
                            Single Mapping : 1
 
 /* RC 0 */
