@@ -30,6 +30,7 @@
   MdePkg/MdePkg.dec
   EmbeddedPkg/EmbeddedPkg.dec
   OpenPlatformPkg/OpenPlatformPkg.dec
+  OpenPlatformPkg/Platforms/Hisilicon/D03/D03.dec
   OpenPlatformPkg/Chips/Hisilicon/HisiPkg.dec
 
 [LibraryClasses]
@@ -41,6 +42,7 @@
   TimerLib
 # Use EFiAtRuntime to check stage
   UefiRuntimeLib
+  CpldIoLib
   EfiTimeBaseLib
 
 [Pcd]

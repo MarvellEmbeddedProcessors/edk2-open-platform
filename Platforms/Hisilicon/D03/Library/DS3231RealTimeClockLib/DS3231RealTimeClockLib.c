@@ -38,6 +38,7 @@
 #include <Protocol/RealTimeClock.h>
 #include <Library/I2CLib.h>
 #include "DS3231RealTimeClock.h"
+#include <Library/CpldD03.h>
 #include <Library/CpldIoLib.h>
 
 extern I2C_DEVICE gDS3231RtcDevice;
@@ -54,6 +55,54 @@ IdentifyDS3231 (
   Status = EFI_SUCCESS;
   return Status;
 }
+
+EFI_STATUS
+SwitchRtcI2cChannelAndLock (
+  VOID
+  )
+{
+  UINT8   Temp;
+  UINT8   Count;
+
+  for (Count = 0; Count < 20; Count++) {
+    Temp = ReadCpldReg (CPLD_I2C_SWITCH_FLAG);
+
+    if ((Temp & BMC_I2C_STATUS) != 0) {
+      //The I2C channel is shared with BMC,
+      //Check if BMC has taken ownership of I2C.
+      //If so, wait 30ms, then try again.
+      //If not, start using I2C.
+      //And the CPLD_I2C_SWITCH_FLAG will be set to CPU_GET_I2C_CONTROL
+      //BMC will check this flag to decide to use I2C or not.
+      MicroSecondDelay (30000);
+      continue;
+    }
+
+    Temp = ReadCpldReg (CPLD_I2C_SWITCH_FLAG);
+    Temp = Temp | CPU_GET_I2C_CONTROL;
+    WriteCpldReg (CPLD_I2C_SWITCH_FLAG, Temp);
+
+    //This is empirical value,give cpld some time to make sure the
+    //value is wrote in
+    MicroSecondDelay (2);
+    Temp = ReadCpldReg (CPLD_I2C_SWITCH_FLAG);
+
+    if ((Temp & CPU_GET_I2C_CONTROL) == CPU_GET_I2C_CONTROL) {
+      return EFI_SUCCESS;
+    }
+
+    //There need 30ms to keep consistent with the previous loops if the CPU failed
+    //to get control of I2C
+    MicroSecondDelay (30000);
+  }
+
+  Temp = ReadCpldReg (CPLD_I2C_SWITCH_FLAG);
+  Temp = Temp & ~CPU_GET_I2C_CONTROL;
+  WriteCpldReg (CPLD_I2C_SWITCH_FLAG, Temp);
+
+  return EFI_NOT_READY;
+}
+
 
 EFI_STATUS
 InitializeDS3231 (
@@ -136,19 +185,17 @@ LibGetTime (
     return EFI_INVALID_PARAMETER;
   }
 
-
-
-  Temp = ReadCpldReg(0x17);
-  while( (Temp & BIT3) != 0)
-  {
-      Temp = ReadCpldReg(0x17);
+  Status = SwitchRtcI2cChannelAndLock();
+  if(EFI_ERROR (Status)) {
+    return Status;
   }
-  WriteCpldReg(0x17,0x4);
+
   // Initialize the hardware if not already done
   if (!mDS3231Initialized) {
     Status = InitializeDS3231 ();
     if (EFI_ERROR (Status)) {
-      return EFI_NOT_READY;
+      Status = EFI_NOT_READY;
+      goto GExit;
     }
   }
 
@@ -175,7 +222,8 @@ LibGetTime (
 
   BaseHour = 0;
   if((Temp&0x30) == 0x30){
-    return EFI_DEVICE_ERROR;
+    Status = EFI_DEVICE_ERROR;
+    goto GExit;
   }else if(Temp&0x20){
     BaseHour = 20;
   }else if(Temp&0x10){
@@ -196,11 +244,15 @@ LibGetTime (
   Time->TimeZone    = EFI_UNSPECIFIED_TIMEZONE;
 
   if((EFI_ERROR(Status)) || (!IsTimeValid(Time)) || ((Time->Year - BaseYear) > 99)) {
-    return EFI_DEVICE_ERROR;
+    Status = EFI_UNSUPPORTED;
   }
 
-  WriteCpldReg(0x17,0x0);
-  return EFI_SUCCESS;
+GExit:
+  Temp = ReadCpldReg (CPLD_I2C_SWITCH_FLAG);
+  Temp = Temp & ~CPU_GET_I2C_CONTROL;
+  WriteCpldReg (CPLD_I2C_SWITCH_FLAG, Temp);
+
+  return Status;
 
 }
 
@@ -234,13 +286,10 @@ LibSetTime (
     return EFI_INVALID_PARAMETER;
   }
 
-
-  Temp = ReadCpldReg(0x17);
-  while( (Temp & BIT3) != 0)
-  {
-      Temp = ReadCpldReg(0x17);
+  Status = SwitchRtcI2cChannelAndLock();
+  if(EFI_ERROR (Status)) {
+    return Status;
   }
-  WriteCpldReg(0x17,0x4);
 
   // Initialize the hardware if not already done
   if (!mDS3231Initialized) {
@@ -313,7 +362,9 @@ LibSetTime (
 
   EXIT:
 
-  WriteCpldReg(0x17,0x0);
+  Temp = ReadCpldReg (CPLD_I2C_SWITCH_FLAG);
+  Temp = Temp & ~CPU_GET_I2C_CONTROL;
+  WriteCpldReg (CPLD_I2C_SWITCH_FLAG, Temp);
 
   return Status;
 }
