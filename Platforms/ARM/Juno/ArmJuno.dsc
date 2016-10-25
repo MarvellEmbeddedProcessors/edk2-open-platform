@@ -313,7 +313,10 @@
   #
   # Juno platform driver
   #
-  ArmPlatformPkg/ArmJunoPkg/Drivers/ArmJunoDxe/ArmJunoDxe.inf
+  ArmPlatformPkg/ArmJunoPkg/Drivers/ArmJunoDxe/ArmJunoDxe.inf {
+    <LibraryClasses>
+      BdsLib|ArmPkg/Library/BdsLib/BdsLib.inf
+  }
   SecurityPkg/RandomNumberGenerator/RngDxe/RngDxe.inf {
     <LibraryClasses>
       # DO NOT USE THIS LIBRARY FOR PRODUCTION DEVICES

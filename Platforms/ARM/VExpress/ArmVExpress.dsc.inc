@@ -479,7 +479,10 @@
   #
   # Android Fastboot
   #
-  EmbeddedPkg/Application/AndroidFastboot/AndroidFastbootApp.inf
+  EmbeddedPkg/Application/AndroidFastboot/AndroidFastbootApp.inf {
+    <LibraryClasses>
+      BdsLib|ArmPkg/Library/BdsLib/BdsLib.inf
+  }
   EmbeddedPkg/Drivers/AndroidFastbootTransportUsbDxe/FastbootTransportUsbDxe.inf
   ArmPlatformPkg/ArmVExpressPkg/ArmVExpressFastBootDxe/ArmVExpressFastBootDxe.inf
 
@@ -489,7 +492,10 @@
   #
   # FDT installation
   #
-  EmbeddedPkg/Drivers/FdtPlatformDxe/FdtPlatformDxe.inf
+  EmbeddedPkg/Drivers/FdtPlatformDxe/FdtPlatformDxe.inf {
+    <LibraryClasses>
+      BdsLib|ArmPkg/Library/BdsLib/BdsLib.inf
+  }
 
   #
   # UEFI application (Shell Embedded Boot Loader)
@@ -512,4 +518,7 @@
 
 [Components.ARM]
   # Legacy Linux Loader
-  ArmPkg/Application/LinuxLoader/LinuxLoader.inf
+  ArmPkg/Application/LinuxLoader/LinuxLoader.inf {
+    <LibraryClasses>
+      BdsLib|ArmPkg/Library/BdsLib/BdsLib.inf
+  }
