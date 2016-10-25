@@ -162,12 +162,10 @@ FvNameGuid         = 87940482-fc81-41c3-87e6-399cf85ac8a0
   # Bds
   #
   INF MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
-!if $(USE_ARM_BDS) == TRUE
-  INF ArmPlatformPkg/Bds/Bds.inf
-!else
   INF MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe.inf
   INF MdeModulePkg/Universal/SetupBrowserDxe/SetupBrowserDxe.inf
-  INF IntelFrameworkModulePkg/Universal/BdsDxe/BdsDxe.inf
+  INF MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
+  INF MdeModulePkg/Application/UiApp/UiApp.inf
 
   #
   # TianoCore logo (splash screen)
@@ -175,7 +173,6 @@ FvNameGuid         = 87940482-fc81-41c3-87e6-399cf85ac8a0
   FILE FREEFORM = PCD(gEfiIntelFrameworkModulePkgTokenSpaceGuid.PcdLogoFile) {
    SECTION RAW = MdeModulePkg/Logo/Logo.bmp
   }
-!endif
 
   # FV Filesystem
   INF MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf

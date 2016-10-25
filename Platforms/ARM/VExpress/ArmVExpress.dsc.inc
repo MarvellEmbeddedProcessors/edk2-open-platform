@@ -12,7 +12,6 @@
 #
 
 [Defines]
-  USE_ARM_BDS         = FALSE
   SECURE_BOOT_ENABLE  = FALSE
 
 [BuildOptions.common.EDKII.DXE_RUNTIME_DRIVER]
@@ -119,7 +118,6 @@
   SemihostLib|ArmPkg/Library/SemihostLib/SemihostLib.inf
 
   # BDS Libraries
-  BdsLib|ArmPkg/Library/BdsLib/BdsLib.inf
   UefiBootManagerLib|MdeModulePkg/Library/UefiBootManagerLib/UefiBootManagerLib.inf
   PlatformBootManagerLib|ArmPkg/Library/PlatformBootManagerLib/PlatformBootManagerLib.inf
 
@@ -151,12 +149,8 @@
 !endif
   VarCheckLib|MdeModulePkg/Library/VarCheckLib/VarCheckLib.inf
 
-!if $(USE_ARM_BDS) == FALSE
   CapsuleLib|MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf
-  GenericBdsLib|IntelFrameworkModulePkg/Library/GenericBdsLib/GenericBdsLib.inf
-  PlatformBdsLib|ArmPlatformPkg/Library/PlatformIntelBdsLib/PlatformIntelBdsLib.inf
   CustomizedDisplayLib|MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf
-!endif
 
 [LibraryClasses.common.SEC]
   ArmPlatformSecExtraActionLib|ArmPlatformPkg/Library/DebugSecExtraActionLib/DebugSecExtraActionLib.inf
@@ -432,10 +426,8 @@
   # Shell.
   gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
 
-!if $(USE_ARM_BDS) == FALSE
   gEfiMdeModulePkgTokenSpaceGuid.PcdResetOnMemoryTypeInformationChange|FALSE
   gEfiIntelFrameworkModulePkgTokenSpaceGuid.PcdShellFile|{ 0x83, 0xA5, 0x04, 0x7C, 0x3E, 0x9E, 0x1C, 0x4F, 0xAD, 0x65, 0xE0, 0x52, 0x68, 0xD0, 0xB4, 0xD1 }
-!endif
 
   # use the TTY terminal type
   gEfiMdePkgTokenSpaceGuid.PcdDefaultTerminalType|4
