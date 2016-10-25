@@ -430,6 +430,9 @@
   gEfiIntelFrameworkModulePkgTokenSpaceGuid.PcdShellFile|{ 0x83, 0xA5, 0x04, 0x7C, 0x3E, 0x9E, 0x1C, 0x4F, 0xAD, 0x65, 0xE0, 0x52, 0x68, 0xD0, 0xB4, 0xD1 }
 !endif
 
+  # use the TTY terminal type
+  gEfiMdePkgTokenSpaceGuid.PcdDefaultTerminalType|4
+
 !ifdef EDK2_ENABLE_SMSC_91X
   # Ethernet (SMSC 91C111)
   gLan91xDxeTokenSpaceGuid.PcdLan91xDxeBaseAddress|0x1A000000
