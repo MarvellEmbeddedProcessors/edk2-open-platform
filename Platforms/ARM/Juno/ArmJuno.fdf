@@ -214,7 +214,8 @@ FvNameGuid         = B73FE497-B92E-416e-8326-45AD0D270092
   INF MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
   INF MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe.inf
   INF MdeModulePkg/Universal/SetupBrowserDxe/SetupBrowserDxe.inf
-  INF IntelFrameworkModulePkg/Universal/BdsDxe/BdsDxe.inf
+  INF MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
+  INF MdeModulePkg/Application/UiApp/UiApp.inf
 
   #
   # FDT installation
