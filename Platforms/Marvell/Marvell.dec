@@ -62,57 +62,57 @@
   gMarvellTokenSpaceGuid.PcdChip0MppReverseFlag|FALSE|BOOLEAN|0x30000002
   gMarvellTokenSpaceGuid.PcdChip0MppBaseAddress|0|UINT64|0x30000003
   gMarvellTokenSpaceGuid.PcdChip0MppPinCount|0|UINT32|0x30000004
-  gMarvellTokenSpaceGuid.PcdChip0MppSel0|{ 0 }|VOID*|0x30000005
-  gMarvellTokenSpaceGuid.PcdChip0MppSel1|{ 0 }|VOID*|0x30000006
-  gMarvellTokenSpaceGuid.PcdChip0MppSel2|{ 0 }|VOID*|0x30000007
-  gMarvellTokenSpaceGuid.PcdChip0MppSel3|{ 0 }|VOID*|0x30000008
-  gMarvellTokenSpaceGuid.PcdChip0MppSel4|{ 0 }|VOID*|0x30000009
-  gMarvellTokenSpaceGuid.PcdChip0MppSel5|{ 0 }|VOID*|0x30000010
-  gMarvellTokenSpaceGuid.PcdChip0MppSel6|{ 0 }|VOID*|0x30000011
-  gMarvellTokenSpaceGuid.PcdChip0MppSel7|{ 0 }|VOID*|0x30000012
+  gMarvellTokenSpaceGuid.PcdChip0MppSel0|{ 0x0 }|VOID*|0x30000005
+  gMarvellTokenSpaceGuid.PcdChip0MppSel1|{ 0x0 }|VOID*|0x30000006
+  gMarvellTokenSpaceGuid.PcdChip0MppSel2|{ 0x0 }|VOID*|0x30000007
+  gMarvellTokenSpaceGuid.PcdChip0MppSel3|{ 0x0 }|VOID*|0x30000008
+  gMarvellTokenSpaceGuid.PcdChip0MppSel4|{ 0x0 }|VOID*|0x30000009
+  gMarvellTokenSpaceGuid.PcdChip0MppSel5|{ 0x0 }|VOID*|0x30000010
+  gMarvellTokenSpaceGuid.PcdChip0MppSel6|{ 0x0 }|VOID*|0x30000011
+  gMarvellTokenSpaceGuid.PcdChip0MppSel7|{ 0x0 }|VOID*|0x30000012
 
   gMarvellTokenSpaceGuid.PcdChip1MppReverseFlag|FALSE|BOOLEAN|0x30000013
   gMarvellTokenSpaceGuid.PcdChip1MppBaseAddress|0|UINT64|0x30000014
   gMarvellTokenSpaceGuid.PcdChip1MppPinCount|0|UINT32|0x30000015
-  gMarvellTokenSpaceGuid.PcdChip1MppSel0|{ 0 }|VOID*|0x30000016
-  gMarvellTokenSpaceGuid.PcdChip1MppSel1|{ 0 }|VOID*|0x30000017
-  gMarvellTokenSpaceGuid.PcdChip1MppSel2|{ 0 }|VOID*|0x30000018
-  gMarvellTokenSpaceGuid.PcdChip1MppSel3|{ 0 }|VOID*|0x30000019
-  gMarvellTokenSpaceGuid.PcdChip1MppSel4|{ 0 }|VOID*|0x30000020
-  gMarvellTokenSpaceGuid.PcdChip1MppSel5|{ 0 }|VOID*|0x30000021
-  gMarvellTokenSpaceGuid.PcdChip1MppSel6|{ 0 }|VOID*|0x30000022
-  gMarvellTokenSpaceGuid.PcdChip1MppSel7|{ 0 }|VOID*|0x30000023
+  gMarvellTokenSpaceGuid.PcdChip1MppSel0|{ 0x0 }|VOID*|0x30000016
+  gMarvellTokenSpaceGuid.PcdChip1MppSel1|{ 0x0 }|VOID*|0x30000017
+  gMarvellTokenSpaceGuid.PcdChip1MppSel2|{ 0x0 }|VOID*|0x30000018
+  gMarvellTokenSpaceGuid.PcdChip1MppSel3|{ 0x0 }|VOID*|0x30000019
+  gMarvellTokenSpaceGuid.PcdChip1MppSel4|{ 0x0 }|VOID*|0x30000020
+  gMarvellTokenSpaceGuid.PcdChip1MppSel5|{ 0x0 }|VOID*|0x30000021
+  gMarvellTokenSpaceGuid.PcdChip1MppSel6|{ 0x0 }|VOID*|0x30000022
+  gMarvellTokenSpaceGuid.PcdChip1MppSel7|{ 0x0 }|VOID*|0x30000023
 
   gMarvellTokenSpaceGuid.PcdChip2MppReverseFlag|FALSE|BOOLEAN|0x30000024
   gMarvellTokenSpaceGuid.PcdChip2MppBaseAddress|0|UINT64|0x30000025
   gMarvellTokenSpaceGuid.PcdChip2MppPinCount|0|UINT32|0x30000026
-  gMarvellTokenSpaceGuid.PcdChip2MppSel0|{ 0 }|VOID*|0x30000027
-  gMarvellTokenSpaceGuid.PcdChip2MppSel1|{ 0 }|VOID*|0x30000028
-  gMarvellTokenSpaceGuid.PcdChip2MppSel2|{ 0 }|VOID*|0x30000029
-  gMarvellTokenSpaceGuid.PcdChip2MppSel3|{ 0 }|VOID*|0x30000030
-  gMarvellTokenSpaceGuid.PcdChip2MppSel4|{ 0 }|VOID*|0x30000031
-  gMarvellTokenSpaceGuid.PcdChip2MppSel5|{ 0 }|VOID*|0x30000032
-  gMarvellTokenSpaceGuid.PcdChip2MppSel6|{ 0 }|VOID*|0x30000033
-  gMarvellTokenSpaceGuid.PcdChip2MppSel7|{ 0 }|VOID*|0x30000034
+  gMarvellTokenSpaceGuid.PcdChip2MppSel0|{ 0x0 }|VOID*|0x30000027
+  gMarvellTokenSpaceGuid.PcdChip2MppSel1|{ 0x0 }|VOID*|0x30000028
+  gMarvellTokenSpaceGuid.PcdChip2MppSel2|{ 0x0 }|VOID*|0x30000029
+  gMarvellTokenSpaceGuid.PcdChip2MppSel3|{ 0x0 }|VOID*|0x30000030
+  gMarvellTokenSpaceGuid.PcdChip2MppSel4|{ 0x0 }|VOID*|0x30000031
+  gMarvellTokenSpaceGuid.PcdChip2MppSel5|{ 0x0 }|VOID*|0x30000032
+  gMarvellTokenSpaceGuid.PcdChip2MppSel6|{ 0x0 }|VOID*|0x30000033
+  gMarvellTokenSpaceGuid.PcdChip2MppSel7|{ 0x0 }|VOID*|0x30000034
 
   gMarvellTokenSpaceGuid.PcdChip3MppReverseFlag|FALSE|BOOLEAN|0x30000035
   gMarvellTokenSpaceGuid.PcdChip3MppBaseAddress|0|UINT64|0x30000036
   gMarvellTokenSpaceGuid.PcdChip3MppPinCount|0|UINT32|0x30000037
-  gMarvellTokenSpaceGuid.PcdChip3MppSel0|{ 0 }|VOID*|0x30000038
-  gMarvellTokenSpaceGuid.PcdChip3MppSel1|{ 0 }|VOID*|0x30000039
-  gMarvellTokenSpaceGuid.PcdChip3MppSel2|{ 0 }|VOID*|0x30000040
-  gMarvellTokenSpaceGuid.PcdChip3MppSel3|{ 0 }|VOID*|0x30000041
-  gMarvellTokenSpaceGuid.PcdChip3MppSel4|{ 0 }|VOID*|0x30000042
-  gMarvellTokenSpaceGuid.PcdChip3MppSel5|{ 0 }|VOID*|0x30000043
-  gMarvellTokenSpaceGuid.PcdChip3MppSel6|{ 0 }|VOID*|0x30000044
-  gMarvellTokenSpaceGuid.PcdChip3MppSel7|{ 0 }|VOID*|0x30000045
+  gMarvellTokenSpaceGuid.PcdChip3MppSel0|{ 0x0 }|VOID*|0x30000038
+  gMarvellTokenSpaceGuid.PcdChip3MppSel1|{ 0x0 }|VOID*|0x30000039
+  gMarvellTokenSpaceGuid.PcdChip3MppSel2|{ 0x0 }|VOID*|0x30000040
+  gMarvellTokenSpaceGuid.PcdChip3MppSel3|{ 0x0 }|VOID*|0x30000041
+  gMarvellTokenSpaceGuid.PcdChip3MppSel4|{ 0x0 }|VOID*|0x30000042
+  gMarvellTokenSpaceGuid.PcdChip3MppSel5|{ 0x0 }|VOID*|0x30000043
+  gMarvellTokenSpaceGuid.PcdChip3MppSel6|{ 0x0 }|VOID*|0x30000044
+  gMarvellTokenSpaceGuid.PcdChip3MppSel7|{ 0x0 }|VOID*|0x30000045
 
 #I2C
-  gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0 }|VOID*|0x3000046
-  gMarvellTokenSpaceGuid.PcdI2cSlaveBuses|{ 0 }|VOID*|0x3000184
-  gMarvellTokenSpaceGuid.PcdEepromI2cAddresses|{ 0 }|VOID*|0x3000050
-  gMarvellTokenSpaceGuid.PcdEepromI2cBuses|{ 0 }|VOID*|0x3000185
-  gMarvellTokenSpaceGuid.PcdI2cBaseAddresses|{ 0 }|VOID*|0x3000047
+  gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0x0 }|VOID*|0x3000046
+  gMarvellTokenSpaceGuid.PcdI2cSlaveBuses|{ 0x0 }|VOID*|0x3000184
+  gMarvellTokenSpaceGuid.PcdEepromI2cAddresses|{ 0x0 }|VOID*|0x3000050
+  gMarvellTokenSpaceGuid.PcdEepromI2cBuses|{ 0x0 }|VOID*|0x3000185
+  gMarvellTokenSpaceGuid.PcdI2cBaseAddresses|{ 0x0 }|VOID*|0x3000047
   gMarvellTokenSpaceGuid.PcdI2cClockFrequency|0|UINT32|0x3000048
   gMarvellTokenSpaceGuid.PcdI2cBaudRate|0|UINT32|0x3000049
   gMarvellTokenSpaceGuid.PcdI2cBusCount|0|UINT32|0x3000183
@@ -132,65 +132,65 @@
   #Chip0
   gMarvellTokenSpaceGuid.PcdComPhyChipCount|0|UINT32|0x30000098
 
-  gMarvellTokenSpaceGuid.PcdChip0Compatible|{ 0 }|VOID*|0x30000064
+  gMarvellTokenSpaceGuid.PcdChip0Compatible|{ 0x0 }|VOID*|0x30000064
   gMarvellTokenSpaceGuid.PcdChip0ComPhyBaseAddress|0|UINT64|0x30000065
   gMarvellTokenSpaceGuid.PcdChip0Hpipe3BaseAddress|0|UINT64|0x30000066
   gMarvellTokenSpaceGuid.PcdChip0ComPhyMuxBitCount|0|UINT32|0x30000067
   gMarvellTokenSpaceGuid.PcdChip0ComPhyMaxLanes|0|UINT32|0x30001267
 
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|{ 0 }|VOID*|0x30000068
-  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|{ 0 }|VOID*|0x30000069
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlags|{ 0 }|VOID*|0x30000070
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|{ 0x0 }|VOID*|0x30000068
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|{ 0x0 }|VOID*|0x30000069
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlags|{ 0x0 }|VOID*|0x30000070
 
   #Chip1
-  gMarvellTokenSpaceGuid.PcdChip1Compatible|{ 0 }|VOID*|0x30000100
+  gMarvellTokenSpaceGuid.PcdChip1Compatible|{ 0x0 }|VOID*|0x30000100
   gMarvellTokenSpaceGuid.PcdChip1ComPhyBaseAddress|0|UINT64|0x30000101
   gMarvellTokenSpaceGuid.PcdChip1Hpipe3BaseAddress|0|UINT64|0x30000102
   gMarvellTokenSpaceGuid.PcdChip1ComPhyMuxBitCount|0|UINT32|0x30000103
   gMarvellTokenSpaceGuid.PcdChip1ComPhyMaxLanes|0|UINT32|0x30001304
 
-  gMarvellTokenSpaceGuid.PcdChip1ComPhyTypes|{ 0 }|VOID*|0x30000105
-  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeeds|{ 0 }|VOID*|0x30000106
-  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlags|{ 0 }|VOID*|0x30000107
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyTypes|{ 0x0 }|VOID*|0x30000105
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeeds|{ 0x0 }|VOID*|0x30000106
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlags|{ 0x0 }|VOID*|0x30000107
 
   #Chip2
-  gMarvellTokenSpaceGuid.PcdChip2Compatible|{ 0 }|VOID*|0x30000135
+  gMarvellTokenSpaceGuid.PcdChip2Compatible|{ 0x0 }|VOID*|0x30000135
   gMarvellTokenSpaceGuid.PcdChip2ComPhyBaseAddress|0|UINT64|0x30000136
   gMarvellTokenSpaceGuid.PcdChip2Hpipe3BaseAddress|0|UINT64|0x30000137
   gMarvellTokenSpaceGuid.PcdChip2ComPhyMuxBitCount|0|UINT32|0x30000138
   gMarvellTokenSpaceGuid.PcdChip2ComPhyMaxLanes|0|UINT32|0x30000139
 
-  gMarvellTokenSpaceGuid.PcdChip2ComPhyTypes|{ 0 }|VOID*|0x30000140
-  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeeds|{ 0 }|VOID*|0x30000141
-  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlags|{ 0 }|VOID*|0x30000142
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyTypes|{ 0x0 }|VOID*|0x30000140
+  gMarvellTokenSpaceGuid.PcdChip2ComPhySpeeds|{ 0x0 }|VOID*|0x30000141
+  gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlags|{ 0x0 }|VOID*|0x30000142
 
   #Chip3
-  gMarvellTokenSpaceGuid.PcdChip3Compatible|{ 0 }|VOID*|0x30000170
+  gMarvellTokenSpaceGuid.PcdChip3Compatible|{ 0x0 }|VOID*|0x30000170
   gMarvellTokenSpaceGuid.PcdChip3ComPhyBaseAddress|0|UINT64|0x30000171
   gMarvellTokenSpaceGuid.PcdChip3Hpipe3BaseAddress|0|UINT64|0x30000172
   gMarvellTokenSpaceGuid.PcdChip3ComPhyMuxBitCount|0|UINT32|0x30000173
   gMarvellTokenSpaceGuid.PcdChip3ComPhyMaxLanes|0|UINT32|0x30000174
 
-  gMarvellTokenSpaceGuid.PcdChip3ComPhyTypes|{ 0 }|VOID*|0x30000175
-  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeeds|{ 0 }|VOID*|0x30000176
-  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlags|{ 0 }|VOID*|0x30000177
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyTypes|{ 0x0 }|VOID*|0x30000175
+  gMarvellTokenSpaceGuid.PcdChip3ComPhySpeeds|{ 0x0 }|VOID*|0x30000176
+  gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlags|{ 0x0 }|VOID*|0x30000177
 
 #SATA
   gMarvellTokenSpaceGuid.PcdSataBaseAddress|0|UINT32|0x4000052
 
 #UtmiPhy
   gMarvellTokenSpaceGuid.PcdUtmiPhyCount|0|UINT32|0x30000205
-  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUsbCfg|{ 0 }|VOID*|0x30000206
-  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiCfg|{ 0 }|VOID*|0x30000207
-  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiUnit|{ 0 }|VOID*|0x30000208
-  gMarvellTokenSpaceGuid.PcdUtmiPhyUtmiPort|{ 0 }|VOID*|0x30000209
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUsbCfg|{ 0x0 }|VOID*|0x30000206
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiCfg|{ 0x0 }|VOID*|0x30000207
+  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiUnit|{ 0x0 }|VOID*|0x30000208
+  gMarvellTokenSpaceGuid.PcdUtmiPhyUtmiPort|{ 0x0 }|VOID*|0x30000209
 
 #MDIO
   gMarvellTokenSpaceGuid.PcdMdioBaseAddress|0|UINT64|0x3000043
 
 #PHY
-  gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0 }|VOID*|0x3000044
-  gMarvellTokenSpaceGuid.PcdPhyDeviceIds|{ 0 }|VOID*|0x3000095
+  gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0x0 }|VOID*|0x3000044
+  gMarvellTokenSpaceGuid.PcdPhyDeviceIds|{ 0x0 }|VOID*|0x3000095
   gMarvellTokenSpaceGuid.PcdPhyStartupAutoneg|FALSE|BOOLEAN|0x3000070
 
 #ResetLib
