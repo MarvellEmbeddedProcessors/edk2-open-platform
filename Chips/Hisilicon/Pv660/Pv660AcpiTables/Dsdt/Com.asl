@@ -31,6 +31,8 @@ Scope(_SB)
       ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
       Package () {
         Package () {"clock-frequency", 200000000},
+        Package () {"reg-io-width", 4},
+        Package () {"reg-shift", 2},
       }
     })
   }
