@@ -140,17 +140,23 @@
   gMarvellTokenSpaceGuid.PcdPp2XlgDevSize|0x1000
 
   #PciEmulation
-  gMarvellTokenSpaceGuid.PcdPciEDevCount|2
-                                                ## XHCI1       XHCI2
-  gMarvellTokenSpaceGuid.PcdPciEDevBaseAddress|L"0xF2500000;0xF2510000"
+  gMarvellTokenSpaceGuid.PcdPciEDevCount|3
+                                                ## XHCI1       XHCI2       SATA
+  gMarvellTokenSpaceGuid.PcdPciEDevBaseAddress|L"0xF2500000;0xF2510000;0xF2540000"
   ## ClassCode1
-  gMarvellTokenSpaceGuid.PcdPciEDevClassCode1|L"0x30;0x30"
+  gMarvellTokenSpaceGuid.PcdPciEDevClassCode1|L"0x30;0x30;0x01"
   ## ClassCode2
-  gMarvellTokenSpaceGuid.PcdPciEDevClassCode2|L"0x03;0x03"
+  gMarvellTokenSpaceGuid.PcdPciEDevClassCode2|L"0x03;0x03;0x06"
   ## ClassCode3
-  gMarvellTokenSpaceGuid.PcdPciEDevClassCode3|L"0x0C;0x0C"
-  gMarvellTokenSpaceGuid.PcdPciEDevRegSize|L"0x10000;0x10000"
+  gMarvellTokenSpaceGuid.PcdPciEDevClassCode3|L"0x0C;0x0C;0x01"
+  gMarvellTokenSpaceGuid.PcdPciEDevRegSize|L"0x10000;0x10000;0x30000"
 
   #ResetLib
   gMarvellTokenSpaceGuid.PcdResetRegAddress|0xf06f0084
   gMarvellTokenSpaceGuid.PcdResetRegMask|0x1
+
+  #SATA
+  gMarvellTokenSpaceGuid.PcdSataBaseAddress|0xF2540000
+
+[PcdsFeatureFlag.common]
+  gMarvellTokenSpaceGuid.PcdSataMapPortAddress|TRUE
