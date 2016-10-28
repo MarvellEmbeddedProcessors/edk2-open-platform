@@ -68,6 +68,7 @@
 
 [BuildOptions]
   *_*_*_PLATFORM_FLAGS = -I$(WORKSPACE)/ArmPlatformPkg/ArmVExpressPkg/Include -I$(WORKSPACE)/ArmPlatformPkg/ArmJunoPkg/Include
+  GCC:*_*_ARM_PLATFORM_FLAGS = -march=armv8-a
 
 ################################################################################
 #
