@@ -53,6 +53,9 @@
   gHisiTokenSpaceGuid.Pcdsoctype
   gHisiTokenSpaceGuid.PcdPcieMsiTargetAddress
 
+[FeaturePcd]
+  gHisiTokenSpaceGuid.PcdIsPciPerfTuningEnable
+
 [depex]
   TRUE
 

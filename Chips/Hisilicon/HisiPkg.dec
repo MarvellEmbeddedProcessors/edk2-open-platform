@@ -161,6 +161,7 @@
   gHisiTokenSpaceGuid.PcdSerDesFlowCtrlFlag|0|UINT32|0x40000056
 
 [PcdsFeatureFlag]
+  gHisiTokenSpaceGuid.PcdIsPciPerfTuningEnable|FALSE|BOOLEAN|0x00000066
 
 
 
