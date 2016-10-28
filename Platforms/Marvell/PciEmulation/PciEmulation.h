@@ -47,6 +47,12 @@
 
 #define PCI_ROOT_BRIDGE_SIGNATURE SIGNATURE_32 ('P', 'c', 'i', 'F')
 
+#define XHCI_PCI_CLASS_CODE_NR    0x30030C
+#define AHCI_PCI_CLASS_CODE_NR    0x010601
+
+#define EFI_XHCI_BAR_INDEX        0x0
+#define EFI_AHCI_BAR_INDEX        0x5
+
 typedef struct {
   ACPI_HID_DEVICE_PATH              AcpiDevicePath;
   EFI_DEVICE_PATH_PROTOCOL          EndDevicePath;

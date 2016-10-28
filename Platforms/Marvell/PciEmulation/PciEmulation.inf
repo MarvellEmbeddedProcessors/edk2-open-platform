@@ -61,5 +61,7 @@
   gMarvellTokenSpaceGuid.PcdPciEDevCount
   gMarvellTokenSpaceGuid.PcdPciEDevRegSize
 
+  gMarvellTokenSpaceGuid.PcdSataMapPortAddress
+
 [Depex]
   TRUE
