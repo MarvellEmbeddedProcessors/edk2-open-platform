@@ -315,11 +315,6 @@
     <LibraryClasses>
       BdsLib|ArmPkg/Library/BdsLib/BdsLib.inf
   }
-  SecurityPkg/RandomNumberGenerator/RngDxe/RngDxe.inf {
-    <LibraryClasses>
-      # DO NOT USE THIS LIBRARY FOR PRODUCTION DEVICES
-      RngLib|OpenPlatformPkg/Platforms/ARM/Binary/Library/PseudoRngLib/PseudoRngLib.inf
-  }
 
   #
   # SMBIOS/DMI
@@ -341,7 +336,14 @@
       NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf
   }
 
+[Components.AARCH64]
   #
   # EBC
   #
   MdeModulePkg/Universal/EbcDxe/EbcDxe.inf
+
+  SecurityPkg/RandomNumberGenerator/RngDxe/RngDxe.inf {
+    <LibraryClasses>
+      # DO NOT USE THIS LIBRARY FOR PRODUCTION DEVICES
+      RngLib|OpenPlatformPkg/Platforms/ARM/Binary/Library/PseudoRngLib/PseudoRngLib.inf
+  }
