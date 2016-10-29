@@ -23,6 +23,7 @@
 #include <Library/PcdLib.h>
 
 #include <IndustryStandard/Acpi.h>
+#include "UpdateAcpiTable.h"
 
 /**
   Locate the first instance of a protocol.  If the protocol requested is an
@@ -180,6 +181,8 @@ AcpiPlatformEntryPoint (
   UINT32                         FvStatus;
   UINTN                          TableSize;
   UINTN                          Size;
+  EFI_STATUS                     TableStatus;
+  EFI_ACPI_DESCRIPTION_HEADER    *TableHeader;
 
   Instance     = 0;
   CurrentTable = NULL;
@@ -218,26 +221,32 @@ AcpiPlatformEntryPoint (
       //
       // Add the table
       //
-      TableHandle = 0;
+      TableHeader = (EFI_ACPI_DESCRIPTION_HEADER*) (CurrentTable);
+      //Update specfic Acpi Table
+      //If the Table is updated failed, doesn't install it,
+      //go to find next section.
+      TableStatus = UpdateAcpiTable(TableHeader);
+      if (TableStatus == EFI_SUCCESS) {
+        TableHandle = 0;
 
-      TableSize = ((EFI_ACPI_DESCRIPTION_HEADER *) CurrentTable)->Length;
-      ASSERT (Size >= TableSize);
+        TableSize = ((EFI_ACPI_DESCRIPTION_HEADER *) CurrentTable)->Length;
+        ASSERT (Size >= TableSize);
 
-      //
-      // Checksum ACPI table
-      //
-      AcpiPlatformChecksum ((UINT8*)CurrentTable, TableSize);
+        //
+        // Checksum ACPI table
+        //
+        AcpiPlatformChecksum ((UINT8*)CurrentTable, TableSize);
 
-      //
-      // Install ACPI table
-      //
-      Status = AcpiTable->InstallAcpiTable (
-                            AcpiTable,
-                            CurrentTable,
-                            TableSize,
-                            &TableHandle
-                            );
-
+        //
+        // Install ACPI table
+        //
+        Status = AcpiTable->InstallAcpiTable (
+                              AcpiTable,
+                              CurrentTable,
+                              TableSize,
+                              &TableHandle
+                              );
+      }
       //
       // Free memory allocated by ReadSection
       //

@@ -29,10 +29,12 @@
 
 [Sources]
   AcpiPlatform.c
+  UpdateAcpiTable.c
 
 [Packages]
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  OpenPlatformPkg/Chips/Hisilicon/HisiPkg.dec
 
 [LibraryClasses]
   UefiLib
@@ -40,11 +42,15 @@
   PcdLib
   BaseMemoryLib
   DebugLib
+  HobLib
   UefiBootServicesTableLib
   UefiDriverEntryPoint
 
 [Protocols]
   gEfiAcpiTableProtocolGuid                     ## CONSUMES
+
+[Guids]
+  gHisiEfiMemoryMapGuid
 
 [Pcd]
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiTableStorageFile    ## CONSUMES
