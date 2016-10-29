@@ -32,14 +32,14 @@
      GicRBase, GicRlength \
   }
 
-#define EFI_ACPI_5_1_GICC_AFFINITY_STRUCTURE_INIT(                                              \
+#define EFI_ACPI_6_0_GICC_AFFINITY_STRUCTURE_INIT(                                              \
     ProximityDomain, ACPIProcessorUID, Flags, ClockDomain)                                      \
   {                                                                                             \
     3, sizeof (EFI_ACPI_5_1_GICC_AFFINITY_STRUCTURE),ProximityDomain ,                          \
      ACPIProcessorUID,  Flags,  ClockDomain                                                     \
   }
 
-#define EFI_ACPI_5_0_MEMORY_AFFINITY_STRUCTURE_INIT(                                              \
+#define EFI_ACPI_6_0_MEMORY_AFFINITY_STRUCTURE_INIT(                                              \
     ProximityDomain, AddressBaseLow, AddressBaseHigh, LengthLow, LengthHigh, Flags)               \
   {                                                                                               \
     1, sizeof (EFI_ACPI_5_0_MEMORY_AFFINITY_STRUCTURE),ProximityDomain , EFI_ACPI_RESERVED_WORD,  \
@@ -47,6 +47,21 @@
     EFI_ACPI_RESERVED_QWORD                                                                       \
   }
 
+#pragma pack(1)
+//
+// Define the number of each table type.
+// This is where the table layout is modified.
+//
+#define EFI_ACPI_PROCESSOR_LOCAL_GICC_AFFINITY_STRUCTURE_COUNT  64
+#define EFI_ACPI_MEMORY_AFFINITY_STRUCTURE_COUNT                10
 
+
+typedef struct {
+  EFI_ACPI_6_0_SYSTEM_RESOURCE_AFFINITY_TABLE_HEADER          Header;
+  EFI_ACPI_6_0_MEMORY_AFFINITY_STRUCTURE                      Memory[EFI_ACPI_MEMORY_AFFINITY_STRUCTURE_COUNT];
+  EFI_ACPI_6_0_GICC_AFFINITY_STRUCTURE                        Gicc[EFI_ACPI_PROCESSOR_LOCAL_GICC_AFFINITY_STRUCTURE_COUNT];
+} EFI_ACPI_STATIC_RESOURCE_AFFINITY_TABLE;
+
+#pragma pack()
 #endif
 
