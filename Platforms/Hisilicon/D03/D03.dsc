@@ -34,7 +34,7 @@
 
 [LibraryClasses.common]
   ArmLib|ArmPkg/Library/ArmLib/ArmBaseLib.inf
-  ArmPlatformLib|OpenPlatformPkg/Chips/Hisilicon/Library/ArmPlatformLibPv660/ArmPlatformLib.inf
+  ArmPlatformLib|OpenPlatformPkg/Chips/Hisilicon/Library/ArmPlatformLibHisilicon/ArmPlatformLib.inf
 
   ArmPlatformSysConfigLib|ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressSysConfigLib/ArmVExpressSysConfigLib.inf
   NorFlashPlatformLib|ArmPlatformPkg/ArmVExpressPkg/Library/NorFlashArmVExpressLib/NorFlashArmVExpressLib.inf
@@ -85,12 +85,12 @@
 ## GIC on D02/D03 is not fully ARM GIC compatible: IRQ cannot be cancelled when
 ## input signal is de-asserted, except for virtual timer interrupt IRQ #27.
 ## So we choose to use virtual timer instead of physical one as a workaround.
-## This library instance is to override the original define in LibraryClasses.AARCH64 in Pv660.dsc.inc.
+## This library instance is to override the original define in LibraryClasses.AARCH64 in Hisilicon.dsc.inc.
 [LibraryClasses.AARCH64]
   ArmGenericTimerCounterLib|ArmPkg/Library/ArmGenericTimerVirtCounterLib/ArmGenericTimerVirtCounterLib.inf
 
 [LibraryClasses.common.SEC]
-  ArmPlatformLib|OpenPlatformPkg/Chips/Hisilicon/Library/ArmPlatformLibPv660/ArmPlatformLibSec.inf
+  ArmPlatformLib|OpenPlatformPkg/Chips/Hisilicon/Library/ArmPlatformLibHisilicon/ArmPlatformLibSec.inf
 
 
 [LibraryClasses.common.DXE_RUNTIME_DRIVER]
