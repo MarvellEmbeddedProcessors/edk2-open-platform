@@ -29,6 +29,7 @@
 [Packages]
   ArmPlatformPkg/ArmPlatformPkg.dec
   MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
   ArmPkg/ArmPkg.dec
   OpenPlatformPkg/Chips/Hisilicon/HisiPkg.dec
   EmbeddedPkg/EmbeddedPkg.dec
@@ -58,5 +59,4 @@
 
 
 [Depex]
-TRUE
-
+  gEfiGenericMemTestProtocolGuid
