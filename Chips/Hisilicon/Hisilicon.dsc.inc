@@ -1,7 +1,7 @@
 #
 #  Copyright (c) 2011-2012, ARM Limited. All rights reserved.
-#  Copyright (c) 2015, Hisilicon Limited. All rights reserved.
-#  Copyright (c) 2015, Linaro Limited. All rights reserved.
+#  Copyright (c) 2016, Hisilicon Limited. All rights reserved.
+#  Copyright (c) 2016, Linaro Limited. All rights reserved.
 #
 #  This program and the accompanying materials
 #  are licensed and made available under the terms and conditions of the BSD License

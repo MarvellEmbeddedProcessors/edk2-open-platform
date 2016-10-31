@@ -320,5 +320,5 @@ READ_LOCK_STATUS   = TRUE
   }
 
 
-!include OpenPlatformPkg/Chips/Hisilicon/Pv660/Pv660.fdf.inc
+!include OpenPlatformPkg/Chips/Hisilicon/Hisilicon.fdf.inc
 

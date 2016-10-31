@@ -30,7 +30,7 @@
   FLASH_DEFINITION               = OpenPlatformPkg/Platforms/Hisilicon/D02/$(PLATFORM_NAME).fdf
   DEFINE INCLUDE_TFTP_COMMAND=1
 
-!include OpenPlatformPkg/Chips/Hisilicon/Pv660/Pv660.dsc.inc
+!include OpenPlatformPkg/Chips/Hisilicon/Hisilicon.dsc.inc
 
 [LibraryClasses.common]
   ArmLib|ArmPkg/Library/ArmLib/ArmBaseLib.inf
