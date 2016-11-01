@@ -23,7 +23,6 @@
 
 #include <Ppi/ArmMpCoreInfo.h>
 
-#include <ArmPlatform.h>
 UINTN
 ArmGetCpuCountPerCluster (
   VOID

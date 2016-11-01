@@ -22,7 +22,6 @@
 #include <Library/PcdLib.h>
 #include <Library/IoLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <ArmPlatform.h>
 
 #include <Library/OemSetVirtualMapDesc.h>
 

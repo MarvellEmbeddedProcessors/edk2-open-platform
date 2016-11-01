@@ -98,7 +98,7 @@
   SerialPortLib|OpenPlatformPkg/Chips/Hisilicon/Binary/Hi1610/Library/Uart/LpcSerialPortLib/LpcSerialPortLib.inf
 
 [BuildOptions]
-  GCC:*_*_AARCH64_PLATFORM_FLAGS == -I$(WORKSPACE)/ArmPlatformPkg/ArmVExpressPkg/Include -I$(WORKSPACE)/ArmPlatformPkg/ArmVExpressPkg/Include/Platform/RTSM -I$(WORKSPACE)/OpenPlatformPkg/Chips/Hisilicon/Hi1610/Include
+  GCC:*_*_AARCH64_PLATFORM_FLAGS == -I$(WORKSPACE)/OpenPlatformPkg/Chips/Hisilicon/Hi1610/Include
 
 ################################################################################
 #
