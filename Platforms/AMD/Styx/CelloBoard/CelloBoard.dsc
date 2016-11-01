@@ -210,6 +210,7 @@ DEFINE DO_KCS    = 0
   SecurityManagementLib|MdeModulePkg/Library/DxeSecurityManagementLib/DxeSecurityManagementLib.inf
   PerformanceLib|MdeModulePkg/Library/DxePerformanceLib/DxePerformanceLib.inf
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
+  NonDiscoverableDeviceRegistrationLib|MdeModulePkg/Library/NonDiscoverableDeviceRegistrationLib/NonDiscoverableDeviceRegistrationLib.inf
 
 [LibraryClasses.common.DXE_RUNTIME_DRIVER]
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
@@ -402,10 +403,10 @@ DEFINE DO_KCS    = 0
   gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|187500000
 
   #
-  # Bitmask for ports implemented on the SATA controller
-  # (enabling 4 ports by default: 00001111b)
+  # Cello has 2 SATA ports on the first controller.
   #
-  gAmdStyxTokenSpaceGuid.PcdSataPi|0x0F
+  gAmdStyxTokenSpaceGuid.PcdSataPortCount|2
+  gAmdStyxTokenSpaceGuid.PcdSata1PortCount|0
 
   # PCIe Support
   gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0xF0000000
@@ -555,7 +556,9 @@ DEFINE DO_KCS    = 0
   MdeModulePkg/Bus/Ata/AtaBusDxe/AtaBusDxe.inf
   MdeModulePkg/Bus/Scsi/ScsiBusDxe/ScsiBusDxe.inf
   MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf
-  OpenPlatformPkg/Platforms/AMD/Styx/Drivers/SataControllerDxe/SataControllerDxe.inf
+  MdeModulePkg/Bus/Pci/SataControllerDxe/SataControllerDxe.inf
+  MdeModulePkg/Bus/Pci/NonDiscoverablePciDeviceDxe/NonDiscoverablePciDeviceDxe.inf
+  OpenPlatformPkg/Platforms/AMD/Styx/Drivers/StyxSataPlatformDxe/StyxSataPlatformDxe.inf
 
   #
   # USB Support
