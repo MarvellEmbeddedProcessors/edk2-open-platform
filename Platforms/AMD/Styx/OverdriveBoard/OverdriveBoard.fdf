@@ -162,7 +162,9 @@ READ_LOCK_STATUS   = TRUE
   INF MdeModulePkg/Bus/Ata/AtaBusDxe/AtaBusDxe.inf
   INF MdeModulePkg/Bus/Scsi/ScsiBusDxe/ScsiBusDxe.inf
   INF MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf
-  INF OpenPlatformPkg/Platforms/AMD/Styx/Drivers/SataControllerDxe/SataControllerDxe.inf
+  INF MdeModulePkg/Bus/Pci/SataControllerDxe/SataControllerDxe.inf
+  INF MdeModulePkg/Bus/Pci/NonDiscoverablePciDeviceDxe/NonDiscoverablePciDeviceDxe.inf
+  INF OpenPlatformPkg/Platforms/AMD/Styx/Drivers/StyxSataPlatformDxe/StyxSataPlatformDxe.inf
 
   #
   # USB Support
