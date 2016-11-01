@@ -130,7 +130,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "AMDINC", "SEATTLE ", 3)
                     0xE000007C,         // Address Base (SGPIO)
                     0x00000001,         // Address Length
                     )
-                Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, ) {0x00000189, }
+                Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, ) {0x00000182, }
             })
         }
 
