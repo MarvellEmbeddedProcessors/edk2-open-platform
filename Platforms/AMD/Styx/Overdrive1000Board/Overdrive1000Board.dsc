@@ -216,6 +216,7 @@ DEFINE DO_KCS       = 1
   SecurityManagementLib|MdeModulePkg/Library/DxeSecurityManagementLib/DxeSecurityManagementLib.inf
   PerformanceLib|MdeModulePkg/Library/DxePerformanceLib/DxePerformanceLib.inf
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
+  NonDiscoverableDeviceRegistrationLib|MdeModulePkg/Library/NonDiscoverableDeviceRegistrationLib/NonDiscoverableDeviceRegistrationLib.inf
 
 [LibraryClasses.common.DXE_RUNTIME_DRIVER]
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
@@ -407,13 +408,8 @@ DEFINE DO_KCS       = 1
   gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|187500000
 
   #
-  # Bitmask for ports implemented on the SATA controller
-  # (2 ports active on Overdrive 1000: 0b00000011 = 0x03)
+  # 2 ports active on Overdrive 1000
   #
-  gAmdStyxTokenSpaceGuid.PcdSataPi|0x03
-  
-  # Only PcdSataPortCount or PcdSata1PortCount are used. The selection is
-  # made by #define in Drivers/SataControllerDxe/InitController.c
   gAmdStyxTokenSpaceGuid.PcdSataPortCount|2
   gAmdStyxTokenSpaceGuid.PcdSata1PortCount|0
 
@@ -592,7 +588,9 @@ DEFINE DO_KCS       = 1
   MdeModulePkg/Bus/Ata/AtaBusDxe/AtaBusDxe.inf
   MdeModulePkg/Bus/Scsi/ScsiBusDxe/ScsiBusDxe.inf
   MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf
-  OpenPlatformPkg/Platforms/AMD/Styx/Drivers/SataControllerDxe/SataControllerDxe.inf
+  MdeModulePkg/Bus/Pci/SataControllerDxe/SataControllerDxe.inf
+  MdeModulePkg/Bus/Pci/NonDiscoverablePciDeviceDxe/NonDiscoverablePciDeviceDxe.inf
+  OpenPlatformPkg/Platforms/AMD/Styx/Drivers/StyxSataPlatformDxe/StyxSataPlatformDxe.inf
 
   #
   # USB Support
