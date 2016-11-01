@@ -279,11 +279,6 @@ DEFINE DO_KCS       = 1
 ################################################################################
 
 [PcdsFeatureFlag.common]
-  gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable|TRUE
-  gEfiMdePkgTokenSpaceGuid.PcdDriverDiagnosticsDisable|TRUE
-  gEfiMdePkgTokenSpaceGuid.PcdComponentName2Disable|TRUE
-  gEfiMdePkgTokenSpaceGuid.PcdDriverDiagnostics2Disable|TRUE
-
   # All pages are cached by default
   gEmbeddedTokenSpaceGuid.PcdCacheEnable|TRUE
 
