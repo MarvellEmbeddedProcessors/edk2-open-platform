@@ -174,15 +174,10 @@ DsdtHeader (
     else if (AsciiStrCmp(Table->Pathname, "_SB_.ETH1._DSD") == 0) {
       OverrideMacAddr ((UINT8 *)&AmlCode[Table->Offset], PcdGet64 (PcdEthMacB));
     }
-#if DO_SATA1
     else if (AsciiStrCmp(Table->Pathname, "_SB_.AHC1._STA") == 0) {
-      OverrideStatus ((UINT8 *)&AmlCode[Table->Offset], EnableOnB1);
+      OverrideStatus ((UINT8 *)&AmlCode[Table->Offset],
+        EnableOnB1 && FixedPcdGet8(PcdSata1PortCount) > 0);
     }
-#else
-    else if (AsciiStrCmp(Table->Pathname, "_SB_.AHC1._STA") == 0) {
-      OverrideStatus ((UINT8 *)&AmlCode[Table->Offset], FALSE);
-    }
-#endif
     else if (AsciiStrCmp(Table->Pathname, "_SB_.GIO2._STA") == 0) {
       OverrideStatus ((UINT8 *)&AmlCode[Table->Offset], EnableOnB1);
     }
