@@ -247,11 +247,8 @@ SetSocIdStatus (
   SocId = PcdGet32 (PcdSocCpuId);
   IsRevB1 = (SocId & 0xFF0) && (SocId & 0x00F);
 
-#if DO_SATA1
-  SetDeviceStatus (fdt, "sata@e0d00000", IsRevB1);
-#else
-  SetDeviceStatus (fdt, "sata@e0d00000", FALSE);
-#endif
+  SetDeviceStatus (fdt, "sata@e0d00000",
+    IsRevB1 && FixedPcdGet8(PcdSata1PortCount) > 0);
   SetDeviceStatus (fdt, "gpio@e0020000", IsRevB1);
   SetDeviceStatus (fdt, "gpio@e0030000", IsRevB1);
   SetDeviceStatus (fdt, "gwdt@e0bb0000", IsRevB1);
