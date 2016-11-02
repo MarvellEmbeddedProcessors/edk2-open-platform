@@ -160,4 +160,3 @@
 
 [PcdsFeatureFlag.common]
   gMarvellTokenSpaceGuid.PcdSataMapPortAddress|TRUE
-  gEfiMdePkgTokenSpaceGuid.PcdSdForcePioMode|TRUE

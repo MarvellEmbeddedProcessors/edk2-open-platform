@@ -43,7 +43,7 @@
 
 [Sources]
   ../../../MdeModulePkg/Bus/Pci/SdMmcPciHcDxe/SdMmcPciHcDxe.h
-  MvSdMmcPciHcDxe.c
+  MvSdMmcPciHcDxe2.c
   ../../../MdeModulePkg/Bus/Pci/SdMmcPciHcDxe/EmmcDevice.c
   ../../../MdeModulePkg/Bus/Pci/SdMmcPciHcDxe/SdDevice.c
   ../../../MdeModulePkg/Bus/Pci/SdMmcPciHcDxe/SdMmcPciHci.h
