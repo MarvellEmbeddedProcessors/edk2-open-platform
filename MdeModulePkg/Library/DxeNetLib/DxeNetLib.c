@@ -2189,6 +2189,90 @@ NetLibGetMacAddress (
 }
 
 /**
+  Update or reset MAC address associated with the network service handle.
+
+  Locate simple network protocol associated with the Service Binding Handle and
+  try to update/reset the mac address from SNP, using Snp->StationAddress().
+
+  @param[in]   ServiceHandle    The handle where network service binding protocols are
+                                installed on.
+  @param[in]   MacAddress       The pointer with new MAC address.
+  @param[in]   AddressSize      The length of set MAC address.
+  @param[in]   Reset            Reset MAC address to initial settings.
+
+  @retval EFI_SUCCESS           MAC address was updated/reset successfully.
+  @retval Others                Failed to set SNP MAC address.
+
+**/
+EFI_STATUS
+EFIAPI
+NetLibSetMacAddress (
+  IN EFI_HANDLE       ServiceHandle,
+  IN EFI_MAC_ADDRESS  *MacAddress,
+  IN UINT32           AddressSize,
+  IN BOOLEAN          Reset
+  )
+{
+  EFI_STATUS                   Status;
+  EFI_SIMPLE_NETWORK_PROTOCOL  *Snp;
+  EFI_HANDLE                   *SnpHandle;
+
+  ASSERT (AddressSize == NET_ETHER_ADDR_LEN);
+
+  //
+  // Get SNP handle
+  //
+  Snp = NULL;
+  SnpHandle = NetLibGetSnpHandle (ServiceHandle, &Snp);
+
+  if (SnpHandle == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  if (!Snp->StationAddress) {
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Invoke Snp->StationAddress()
+  //
+  Status = Snp->StationAddress (Snp, Reset, MacAddress);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  return EFI_SUCCESS;
+}
+
+/**
+  Reconnect the network service handle.
+
+  Reconnect Service Binding Handle using Boot Services Dis/ConnectController() routines.
+
+  @param[in]   ServiceHandle    The handle where network service binding protocols are
+                                installed on.
+
+  @retval EFI_SUCCESS           Interface handle was reconnected successfully.
+  @retval Others                Failed to reconnect interface handle.
+
+**/
+EFI_STATUS
+EFIAPI
+NetLibReconnectInterface (
+  IN EFI_HANDLE             ServiceHandle
+  )
+{
+  EFI_STATUS Status;
+
+  Status = gBS->DisconnectController(ServiceHandle, NULL, NULL);
+  if (!EFI_ERROR (Status)) {
+    Status = gBS->ConnectController(ServiceHandle, NULL, NULL, TRUE);
+  }
+
+  return Status;
+}
+
+/**
   Convert MAC address of the NIC associated with specified Service Binding Handle
   to a unicode string. Callers are responsible for freeing the string storage.
 
@@ -2709,6 +2793,76 @@ NetLibGetNicHandle (
 }
 
 /**
+  Convert one Null-terminated ASCII string to EFI_MAC_ADDRESS. The format of
+  the string has to be compliant with colon-separated EUI-48.
+
+  @param[in]      String         The pointer to the Ascii string.
+  @param[out]     MacAddress     The pointer to the converted MAC address.
+
+  @retval EFI_SUCCESS            Convert to MAC address successfully.
+  @retval EFI_INVALID_PARAMETER  The string is mal-formated or MacAddress is NULL.
+
+**/
+EFI_STATUS
+EFIAPI
+NetLibAsciiStrToMac (
+  IN CONST CHAR8                 *String,
+  OUT      EFI_MAC_ADDRESS       *MacAddress
+  )
+{
+  UINT8                          Index;
+  CHAR8                          *MacStr;
+  CHAR8                          *TempStr;
+  UINTN                          NodeVal;
+
+  if ((String == NULL) || (MacAddress == NULL)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  MacStr = (CHAR8 *) String;
+
+  for (Index = 0; Index < 6; Index++) {
+    TempStr = MacStr;
+
+    while ((*MacStr != '\0') && (*MacStr != ':')) {
+      if (!NET_IS_HEX (*MacStr)) {
+        return EFI_INVALID_PARAMETER;
+      }
+      MacStr++;
+    }
+
+    //
+    // The MAC address is X:X:X:X:X:X
+    //
+    if (*MacStr == ':') {
+      if (Index == 5) {
+        return EFI_INVALID_PARAMETER;
+      }
+    } else {
+      if (Index != 5) {
+        return EFI_INVALID_PARAMETER;
+      }
+    }
+
+    //
+    // Convert the string to MAC address. AsciiStrHexToUintn stops at the
+    // first character that is not a valid hexadecimal character,
+    // ':' or '\0' here.
+    //
+    NodeVal = AsciiStrHexToUintn (TempStr);
+    if (NodeVal > 0xFF) {
+      return EFI_INVALID_PARAMETER;
+    }
+
+    MacAddress->Addr[Index] = (UINT8) NodeVal;
+
+    MacStr++;
+  }
+
+  return EFI_SUCCESS;
+}
+
+/**
   Convert one Null-terminated ASCII string (decimal dotted) to EFI_IPv4_ADDRESS.
 
   @param[in]      String         The pointer to the Ascii string.
@@ -2764,6 +2918,48 @@ NetLibAsciiStrToIp6 (
   } else {
     return EFI_SUCCESS;
   }
+}
+
+/**
+  Convert one Null-terminated Unicode string to EFI_MAC_ADDRESS. The format of
+  the string has to be compliant with colon-separated EUI-48.
+
+  @param[in]      String         The pointer to the Ascii string.
+  @param[out]     MacAddress     The pointer to the converted MAC address.
+
+  @retval EFI_SUCCESS            Convert to MAC address successfully.
+  @retval EFI_INVALID_PARAMETER  The string is mal-formated or MacAddress is NULL.
+  @retval EFI_OUT_OF_RESOURCES   Fail to perform the operation due to lack of resource.
+
+**/
+EFI_STATUS
+EFIAPI
+NetLibStrToMac (
+  IN CONST CHAR16                *String,
+  OUT      EFI_MAC_ADDRESS       *MacAddress
+  )
+{
+  CHAR8                          *MacStr;
+  UINTN                          StringSize;
+  EFI_STATUS                     Status;
+
+  if ((String == NULL) || (MacAddress == NULL)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  StringSize = StrLen (String) + 1;
+  MacStr = (CHAR8 *) AllocatePool (StringSize * sizeof (CHAR8));
+  if (MacStr == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  UnicodeStrToAsciiStrS (String, MacStr, StringSize);
+
+  Status = NetLibAsciiStrToMac (MacStr, MacAddress);
+
+  FreePool (MacStr);
+
+  return Status;
 }
 
 
