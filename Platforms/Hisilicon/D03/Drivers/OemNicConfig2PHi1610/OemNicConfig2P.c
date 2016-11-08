@@ -26,6 +26,7 @@
 #include <Library/I2CLib.h>
 
 #define EEPROM_I2C_PORT 6
+#define EEPROM_PAGE_SIZE 0x40
 
 EFI_STATUS
 EFIAPI OemGetMac2P (IN OUT EFI_MAC_ADDRESS *Mac, IN UINTN Port);
@@ -110,6 +111,8 @@ EFI_STATUS OemGetMacE2prom(IN UINT32 Port, OUT UINT8 *pucAddr)
     UINT16     I2cOffset;
     UINT16     crc16;
     NIC_MAC_ADDRESS stMacDesc = {0};
+    UINT16     RemainderMacOffset;
+    UINT16     LessSizeOfPage;
 
     Status = I2CInit(0, EEPROM_I2C_PORT, Normal);
     if (EFI_ERROR(Status))
@@ -124,7 +127,25 @@ EFI_STATUS OemGetMacE2prom(IN UINT32 Port, OUT UINT8 *pucAddr)
     stI2cDev.Port = EEPROM_I2C_PORT;
     stI2cDev.SlaveDeviceAddress = I2C_SLAVEADDR_EEPROM;
     stI2cDev.Socket = 0;
-    Status = I2CRead(&stI2cDev, I2cOffset, sizeof(NIC_MAC_ADDRESS), (UINT8 *)&stMacDesc);
+    RemainderMacOffset = I2cOffset % EEPROM_PAGE_SIZE;
+    LessSizeOfPage = EEPROM_PAGE_SIZE - RemainderMacOffset;
+    //The length of NIC_MAC_ADDRESS is 10 bytes long,
+    //It surly less than EEPROM page size, so we could
+    //code as bellow, check the address whether across the page boundary,
+    //and split the data when across page boundary.
+    if (sizeof(NIC_MAC_ADDRESS) <= LessSizeOfPage) {
+      Status = I2CRead(&stI2cDev, I2cOffset, sizeof(NIC_MAC_ADDRESS), (UINT8 *)&stMacDesc);
+    } else {
+      Status = I2CRead(&stI2cDev, I2cOffset, LessSizeOfPage, (UINT8 *)&stMacDesc);
+      if (!(EFI_ERROR(Status))) {
+        Status |= I2CRead(
+                          &stI2cDev,
+                          I2cOffset + LessSizeOfPage,
+                          sizeof(NIC_MAC_ADDRESS) - LessSizeOfPage,
+                          (UINT8 *)&stMacDesc + LessSizeOfPage
+                         );
+      }
+    }
     if (EFI_ERROR(Status))
     {
         DEBUG((EFI_D_ERROR, "[%a]:[%dL] Call I2cRead failed! p1=0x%x.\n", __FUNCTION__, __LINE__, Status));
@@ -153,6 +174,8 @@ EFI_STATUS OemSetMacE2prom(IN UINT32 Port, IN UINT8 *pucAddr)
 
 
     stMacDesc.MacLen = MAC_ADDR_LEN;
+    UINT16     RemainderMacOffset;
+    UINT16     LessSizeOfPage;
     gBS->CopyMem((VOID *)(stMacDesc.Mac), (VOID *)pucAddr, MAC_ADDR_LEN);
 
     stMacDesc.Crc16  = make_crc_checksum((UINT8 *)&(stMacDesc.MacLen), sizeof(stMacDesc.MacLen) + MAC_ADDR_LEN);
@@ -170,7 +193,25 @@ EFI_STATUS OemSetMacE2prom(IN UINT32 Port, IN UINT8 *pucAddr)
     stI2cDev.Port = EEPROM_I2C_PORT;
     stI2cDev.SlaveDeviceAddress = I2C_SLAVEADDR_EEPROM;
     stI2cDev.Socket = 0;
-    Status = I2CWrite(&stI2cDev, I2cOffset, sizeof(NIC_MAC_ADDRESS), (UINT8 *)&stMacDesc);
+    RemainderMacOffset = I2cOffset % EEPROM_PAGE_SIZE;
+    LessSizeOfPage = EEPROM_PAGE_SIZE - RemainderMacOffset;
+    //The length of NIC_MAC_ADDRESS is 10 bytes long,
+    //It surly less than EEPROM page size, so we could
+    //code as bellow, check the address whether across the page boundary,
+    //and split the data when across page boundary.
+    if (sizeof(NIC_MAC_ADDRESS) <= LessSizeOfPage) {
+      Status = I2CWrite(&stI2cDev, I2cOffset, sizeof(NIC_MAC_ADDRESS), (UINT8 *)&stMacDesc);
+    } else {
+      Status = I2CWrite(&stI2cDev, I2cOffset, LessSizeOfPage, (UINT8 *)&stMacDesc);
+      if (!(EFI_ERROR(Status))) {
+        Status |= I2CWrite(
+                           &stI2cDev,
+                           I2cOffset + LessSizeOfPage,
+                           sizeof(NIC_MAC_ADDRESS) - LessSizeOfPage,
+                           (UINT8 *)&stMacDesc + LessSizeOfPage
+                          );
+      }
+    }
     if (EFI_ERROR(Status))
     {
         DEBUG((EFI_D_ERROR, "[%a]:[%dL] Call I2cWrite failed! p1=0x%x.\n", __FUNCTION__, __LINE__, Status));
