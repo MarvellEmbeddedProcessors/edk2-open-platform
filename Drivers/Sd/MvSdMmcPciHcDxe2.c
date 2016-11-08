@@ -1022,9 +1022,15 @@ SdMmcPassThruPassThru (
     return EFI_NO_MEDIA;
   }
 
+  // Currently we don't support SDIO
+  if (Packet->SdMmcCmdBlk->CommandIndex == SDIO_SEND_OP_COND) {
+    return EFI_DEVICE_ERROR;
+  }
+
 /*  if (!Private->Slot[Slot].Initialized) {
     return EFI_DEVICE_ERROR;
   }*/
+  DEBUG((DEBUG_ERROR, "JSD: bef createTrb\n"));
 
   Trb = SdMmcCreateTrb (Private, Slot, Packet, Event);
   if (Trb == NULL) {
@@ -1049,15 +1055,19 @@ SdMmcPassThruPassThru (
     gBS->RestoreTPL (OldTpl);
   }
 
+  DEBUG((DEBUG_ERROR, "JSD: bef waitTrb\n"));
+
   Status = SdMmcWaitTrbEnv (Private, Trb);
   if (EFI_ERROR (Status)) {
     goto Done;
   }
+  DEBUG((DEBUG_ERROR, "JSD: bef execTrb\n"));
 
   Status = SdMmcExecTrb (Private, Trb);
   if (EFI_ERROR (Status)) {
     goto Done;
   }
+  DEBUG((DEBUG_ERROR, "JSD: bef waitTrbreselt\n"));
 
   Status = SdMmcWaitTrbResult (Private, Trb);
   if (EFI_ERROR (Status)) {
