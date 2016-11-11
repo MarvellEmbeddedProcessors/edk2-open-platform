@@ -226,7 +226,7 @@ GetCacheSocketStr (
   OUT CHAR16    *CacheSocketStr
   )
 {
-    UINTN CacheSocketStrLen = 0;
+    UINTN CacheSocketStrLen;
 
     if(CacheLevel == CPU_CACHE_L1_Instruction)
     {
@@ -258,7 +258,6 @@ UpdateSmbiosCacheTable (
     CACHE_SRAM_TYPE_DATA        CacheSramType = {0};
 
     CoreCount = 16;     // Default value is 16 Core
-    CacheSize = 0;
 
     //
     // Set Cache Configuration
