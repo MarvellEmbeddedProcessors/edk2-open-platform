@@ -142,6 +142,7 @@
   #PciEmulation
   gMarvellTokenSpaceGuid.PcdPciEXhci|{ 0x1, 0x1 }
   gMarvellTokenSpaceGuid.PcdPciEAhci|{ 0x1 }
+  gMarvellTokenSpaceGuid.PcdPciESdhci|{ 0x1, 0x1 }
 
   #ResetLib
   gMarvellTokenSpaceGuid.PcdResetRegAddress|0xf06f0084
