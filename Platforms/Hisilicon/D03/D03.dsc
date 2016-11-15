@@ -115,7 +115,6 @@
   gHisiTokenSpaceGuid.PcdIsPciPerfTuningEnable|TRUE
 
 [PcdsFixedAtBuild.common]
-  gArmPlatformTokenSpaceGuid.PcdFirmwareVendor|"ARM Versatile Express"
   gEmbeddedTokenSpaceGuid.PcdEmbeddedPrompt|"D03"
 
   gArmPlatformTokenSpaceGuid.PcdCoreCount|8

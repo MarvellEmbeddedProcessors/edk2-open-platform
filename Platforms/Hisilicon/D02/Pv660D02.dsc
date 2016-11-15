@@ -102,7 +102,6 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutGopSupport|FALSE
 
 [PcdsFixedAtBuild.common]
-  gArmPlatformTokenSpaceGuid.PcdFirmwareVendor|"ARM Versatile Express"
   gEmbeddedTokenSpaceGuid.PcdEmbeddedPrompt|"D02"
 
   gArmPlatformTokenSpaceGuid.PcdCoreCount|8
