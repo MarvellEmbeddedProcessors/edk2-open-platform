@@ -58,14 +58,14 @@ NumBlocks     = 0x30
 gArmTokenSpaceGuid.PcdSecureFvBaseAddress|gArmTokenSpaceGuid.PcdSecureFvSize
 FILE = OpenPlatformPkg/Platforms/Hisilicon/Binary/D03/Sec/FVMAIN_SEC.Fv
 
-0x00040000|0x001C0000
+0x00040000|0x00240000
 gArmTokenSpaceGuid.PcdFvBaseAddress|gArmTokenSpaceGuid.PcdFvSize
 FV = FVMAIN_COMPACT
 
-0x00200000|0x00020000
+0x00280000|0x00020000
 gHisiTokenSpaceGuid.PcdTrustedFirmwareBL1Base
 FILE = OpenPlatformPkg/Platforms/Hisilicon/Binary/D03/bl1.bin
-0x00220000|0x00020000
+0x002A0000|0x00020000
 FILE = OpenPlatformPkg/Platforms/Hisilicon/Binary/D03/fip.bin
 
 0x002D0000|0x0000E000
