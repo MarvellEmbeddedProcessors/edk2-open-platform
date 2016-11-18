@@ -6,6 +6,7 @@
 #  to specified devices from upper layer.
 #
 #  Copyright (c) 2015, Intel Corporation. All rights reserved.<BR>
+#  Copyright (C) 2016 Marvell International Ltd. All rights reserved.<BR>
 #
 #  This program and the accompanying materials
 #  are licensed and made available under the terms and conditions of the BSD License
@@ -18,47 +19,38 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
-  BASE_NAME                      = SdMmcPciHcDxe
+  INF_VERSION                    = 0x00010019
+  BASE_NAME                      = XenonDxe
   MODULE_UNI_FILE                = SdMmcPciHcDxe.uni
-  FILE_GUID                      = 8E325979-3FE1-4927-AAE2-8F5C4BD2AF0D
+  FILE_GUID                      = 17f56b40-f7c1-435c-ab8d-404872da951e
   MODULE_TYPE                    = UEFI_DRIVER
   VERSION_STRING                 = 1.0
   ENTRY_POINT                    = InitializeSdMmcPciHcDxe
 
-#
-# The following information is for reference only and not required by the build tools.
-#
-#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
-#
-#  DRIVER_BINDING                =  gSdMmcPciHcDxeDriverBinding
-#  COMPONENT_NAME                =  gSdMmcPciHcDxeComponentName
-#  COMPONENT_NAME2               =  gSdMmcPciHcDxeComponentName2
-#
-#
-
 [Sources]
-  SdMmcPciHcDxe.h
-  SdMmcPciHcDxe.c
+  ComponentName.c
   EmmcDevice.c
   SdDevice.c
-  SdMmcPciHci.h
+  SdMmcPciHcDxe.c
+  SdMmcPciHcDxe.h
   SdMmcPciHci.c
-  ComponentName.c
+  SdMmcPciHci.h
+  XenonSdhci.c
+  XenonSdhci.h
 
 [Packages]
   MdePkg/MdePkg.dec
 
 [LibraryClasses]
-  DevicePathLib
-  UefiBootServicesTableLib
-  UefiRuntimeServicesTableLib
-  MemoryAllocationLib
-  BaseMemoryLib
-  UefiLib
   BaseLib
-  UefiDriverEntryPoint
+  BaseMemoryLib
   DebugLib
+  DevicePathLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiLib
+  UefiRuntimeServicesTableLib
 
 [Protocols]
   gEfiDevicePathProtocolGuid                    ## TO_START
