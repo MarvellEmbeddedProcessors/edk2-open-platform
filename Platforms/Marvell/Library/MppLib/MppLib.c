@@ -44,6 +44,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MPP_PINS_PER_REG         8
 #define PCD_PINS_PER_GROUP       10
 
+#define SD_MMC_PHY_AP_MPP_OFFSET   0x100
+#define SD_MMC_PHY_CP0_MPP_OFFSET  0x424
+#define MPP_ON_SDPHY_ENABLE        (1 << 0)
+
 #define MAX_CHIPS                4
 
 #define GET_PCD_PTR(id,num)      PcdGetPtr(PcdChip##id##MppSel##num)
@@ -135,6 +139,50 @@ PcdToMppRegs (
   return MppRegCount;
 }
 
+STATIC
+VOID
+SetSdMmcPhyMpp (
+  UINTN  BaseAddr,
+  UINT32 Index
+  )
+{
+  UINTN  Size, Offset;
+  UINT8 *Ptr;
+  UINT32 Reg;
+
+  Size = PcdGetSize(PcdPciESdhci);
+  Ptr = (UINT8 *) PcdGetPtr(PcdPciESdhci);
+
+  if (Ptr == NULL || Index >= Size) {
+    return;
+  }
+
+  /* Check if SDHCI controller is enabled on the HW block */
+  if (Ptr[Index] != 1) {
+    return;
+  }
+
+  /* Choose adequate Offset */
+  switch (Index) {
+  case 0:
+    Offset = SD_MMC_PHY_AP_MPP_OFFSET;
+    break;
+  case 1:
+    Offset = SD_MMC_PHY_CP0_MPP_OFFSET;
+    break;
+  default:
+    return;
+  }
+
+  /*
+   * If there is SDHCI controller on platform, connect SD/MMC PHY to
+   * SD/MMC controller insted of using it as MPP multiplexer
+   */
+  Reg = MmioRead32 (BaseAddr + Offset);
+  Reg &= ~MPP_ON_SDPHY_ENABLE;
+  MmioWrite32 (BaseAddr + Offset, Reg);
+}
+
 EFI_STATUS
 MppInitialize (
   )
@@ -157,6 +205,11 @@ MppInitialize (
       break;
     RegCount = PcdToMppRegs (PinCount[i], MppRegPcd[i]);
     SetRegisterValue (RegCount, MppRegPcd[i], BaseAddr[i], ReverseFlag[i]);
+
+    /*
+     * eMMC PHY IP has its own MPP configuration.
+     */
+    SetSdMmcPhyMpp (BaseAddr[i], i);
   }
 
   return EFI_SUCCESS;

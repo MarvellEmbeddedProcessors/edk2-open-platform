@@ -105,3 +105,4 @@
   gMarvellTokenSpaceGuid.PcdChip3MppSel6
   gMarvellTokenSpaceGuid.PcdChip3MppSel7
 
+  gMarvellTokenSpaceGuid.PcdPciESdhci
