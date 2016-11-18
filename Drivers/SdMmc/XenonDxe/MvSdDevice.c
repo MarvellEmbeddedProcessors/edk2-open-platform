@@ -2,6 +2,8 @@
   This file provides some helper functions which are specific for SD card device.
 
   Copyright (c) 2015 - 2016, Intel Corporation. All rights reserved.<BR>
+  Copyright (C) 2016 Marvell International Ltd. All rigths reserved.<BR>
+
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
@@ -12,7 +14,7 @@
 
 **/
 
-#include "SdMmcPciHcDxe.h"
+#include "XenonSdhci.h"
 
 /**
   Send command GO_IDLE_STATE to the device to make it go to Idle State.

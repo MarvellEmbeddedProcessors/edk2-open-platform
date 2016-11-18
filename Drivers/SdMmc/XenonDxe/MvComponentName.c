@@ -2,6 +2,8 @@
   UEFI Component Name(2) protocol implementation for SD/MMC host controller driver.
 
   Copyright (c) 2015, Intel Corporation. All rights reserved.<BR>
+  Copyright (C) 2016 Marvell International Ltd. All rigths reserved.<BR>
+
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
@@ -12,7 +14,7 @@
 
 **/
 
-#include "SdMmcPciHcDxe.h"
+#include "XenonSdhci.h"
 
 //
 // EFI Component Name Protocol

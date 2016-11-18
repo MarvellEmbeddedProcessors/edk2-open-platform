@@ -3,6 +3,8 @@
   Provides some data structure definitions used by the SD/MMC host controller driver.
 
 Copyright (c) 2015, Intel Corporation. All rights reserved.<BR>
+Copyright (C) 2016 Marvell International Ltd. All rigths reserved.<BR>
+
 This program and the accompanying materials
 are licensed and made available under the terms and conditions of the BSD License
 which accompanies this distribution.  The full text of the license may be found at
@@ -37,7 +39,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/ComponentName2.h>
 #include <Protocol/SdMmcPassThru.h>
 
-#include "SdMmcPciHci.h"
+#include "MvSdMmcPciHci.h"
 
 extern EFI_COMPONENT_NAME_PROTOCOL  gSdMmcPciHcComponentName;
 extern EFI_COMPONENT_NAME2_PROTOCOL gSdMmcPciHcComponentName2;
