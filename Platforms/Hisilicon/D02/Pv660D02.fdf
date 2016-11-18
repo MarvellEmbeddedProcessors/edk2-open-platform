@@ -58,11 +58,18 @@ NumBlocks     = 0x30
 gArmTokenSpaceGuid.PcdSecureFvBaseAddress|gArmTokenSpaceGuid.PcdSecureFvSize
 FILE = OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/Sec/FVMAIN_SEC.Fv
 
-0x00040000|0x00190000
+0x00040000|0x00240000
 gArmTokenSpaceGuid.PcdFvBaseAddress|gArmTokenSpaceGuid.PcdFvSize
 FV = FVMAIN_COMPACT
 
-0x001e0000|0x0000e000
+## Place for Trusted Firmware
+0x00280000|0x00020000
+gHisiTokenSpaceGuid.PcdTrustedFirmwareBL1Base
+FILE = OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/bl1.bin
+0x002a0000|0x00020000
+FILE = OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/fip.bin
+
+0x002e0000|0x0000e000
 gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableBase|gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableSize
 DATA = {
   ## This is the EFI_FIRMWARE_VOLUME_HEADER
@@ -90,7 +97,7 @@ DATA = {
   0x5A, 0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 }
 
-0x001ee000|0x00002000
+0x002ee000|0x00002000
 gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingBase|gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingSize
 #NV_FTW_WORKING
 DATA = {
@@ -103,15 +110,8 @@ DATA = {
   0xE0, 0x1F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 }
 
-0x001f0000|0x00010000
+0x002f0000|0x00010000
 gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareBase|gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareSize
-
-## Place for Trusted Firmware
-0x00200000|0x00020000
-gHisiTokenSpaceGuid.PcdTrustedFirmwareBL1Base
-FILE = OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/bl1.bin
-0x00220000|0x000e0000
-FILE = OpenPlatformPkg/Platforms/Hisilicon/Binary/D02/fip.bin
 
 ################################################################################
 #
