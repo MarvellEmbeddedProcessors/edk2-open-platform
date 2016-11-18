@@ -5,6 +5,8 @@
   It would expose EFI_SD_MMC_PASS_THRU_PROTOCOL for upper layer use.
 
   Copyright (c) 2015 - 2016, Intel Corporation. All rights reserved.<BR>
+  Copyright (C) 2016 Marvell International Ltd. All rigths reserved.<BR>
+
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
@@ -16,6 +18,7 @@
 **/
 
 #include "SdMmcPciHcDxe.h"
+#include "XenonSdhci.h"
 
 //
 // Driver Global Variables
@@ -520,13 +523,10 @@ SdMmcPciHcDriverBindingStart (
   EFI_PCI_IO_PROTOCOL             *PciIo;
   UINT64                          Supports;
   UINT64                          PciAttributes;
-  UINT8                           SlotNum;
-  UINT8                           FirstBar;
   UINT8                           Slot;
   UINT8                           Index;
   CARD_TYPE_DETECT_ROUTINE        *Routine;
   UINT32                          RoutineNum;
-  BOOLEAN                         MediaPresent;
   BOOLEAN                         Support64BitDma;
 
   DEBUG ((DEBUG_INFO, "SdMmcPciHcDriverBindingStart: Start\n"));
@@ -593,78 +593,77 @@ SdMmcPciHcDriverBindingStart (
   Private->PciAttributes    = PciAttributes;
   InitializeListHead (&Private->Queue);
 
+  Support64BitDma = TRUE;
+
   //
-  // Get SD/MMC Pci Host Controller Slot info
+  // There is only one slot 0 on Xenon
   //
-  Status = SdMmcHcGetSlotInfo (PciIo, &FirstBar, &SlotNum);
+  Slot = 0;
+  Private->Slot[Slot].Enable = TRUE;
+
+  Status = SdMmcHcGetCapability (PciIo, Slot, &Private->Capability[Slot]);
   if (EFI_ERROR (Status)) {
-    goto Done;
+    return Status;
   }
 
-  Support64BitDma = TRUE;
-  for (Slot = FirstBar; Slot < (FirstBar + SlotNum); Slot++) {
-    Private->Slot[Slot].Enable = TRUE;
+  Support64BitDma &= Private->Capability[Slot].SysBus64;
 
-    Status = SdMmcHcGetCapability (PciIo, Slot, &Private->Capability[Slot]);
-    if (EFI_ERROR (Status)) {
-      continue;
-    }
-    DumpCapabilityReg (Slot, &Private->Capability[Slot]);
+  //
+  // Override capabilities structure - only 4 Bit width bus is supported
+  // by HW and also force using SDR25 mode
+  //
+  Private->Capability[Slot].Sdr104 = 0;
+  Private->Capability[Slot].Ddr50 = 0;
+  Private->Capability[Slot].Sdr50 = 0;
+  Private->Capability[Slot].BusWidth8 = 0;
 
-    Support64BitDma &= Private->Capability[Slot].SysBus64;
+  if (Private->Capability[Slot].BaseClkFreq == 0) {
+    Private->Capability[Slot].BaseClkFreq = 0xff;
+  }
 
-    Status = SdMmcHcGetMaxCurrent (PciIo, Slot, &Private->MaxCurrent[Slot]);
-    if (EFI_ERROR (Status)) {
-      continue;
-    }
+  DumpCapabilityReg (Slot, &Private->Capability[Slot]);
 
-    Private->Slot[Slot].SlotType = Private->Capability[Slot].SlotType;
-    if ((Private->Slot[Slot].SlotType != RemovableSlot) && (Private->Slot[Slot].SlotType != EmbeddedSlot)) {
-      DEBUG ((DEBUG_INFO, "SdMmcPciHcDxe doesn't support the slot type [%d]!!!\n", Private->Slot[Slot].SlotType));
-      continue;
-    }
+  Status = SdMmcHcGetMaxCurrent (PciIo, Slot, &Private->MaxCurrent[Slot]);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
-    //
-    // Reset the specified slot of the SD/MMC Pci Host Controller
-    //
-    Status = SdMmcHcReset (PciIo, Slot);
-    if (EFI_ERROR (Status)) {
-      continue;
-    }
-    //
-    // Check whether there is a SD/MMC card attached
-    //
-    Status = SdMmcHcCardDetect (PciIo, Slot, &MediaPresent);
-    if (EFI_ERROR (Status) && (Status != EFI_MEDIA_CHANGED)) {
-      continue;
-    } else if (!MediaPresent) {
-      DEBUG ((EFI_ERROR, "SdMmcHcCardDetect: No device attached in Slot[%d]!!!\n", Slot));
-      continue;
-    }
+  Private->Slot[Slot].SlotType = Private->Capability[Slot].SlotType;
+  if ((Private->Slot[Slot].SlotType != RemovableSlot) && (Private->Slot[Slot].SlotType != EmbeddedSlot)) {
+    DEBUG ((DEBUG_INFO, "SdMmcPciHcDxe doesn't support the slot type [%d]!!!\n", Private->Slot[Slot].SlotType));
+    return EFI_D_ERROR;
+  }
 
-    Status = SdMmcHcInitHost (PciIo, Slot, Private->Capability[Slot]);
-    if (EFI_ERROR (Status)) {
-      continue;
-    }
+  //
+  // Perform Xenon-specific init sequence
+  //
+  XenonInit (Private);
 
-    Private->Slot[Slot].MediaPresent = TRUE;
-    Private->Slot[Slot].Initialized  = TRUE;
-    RoutineNum = sizeof (mCardTypeDetectRoutineTable) / sizeof (CARD_TYPE_DETECT_ROUTINE);
-    for (Index = 0; Index < RoutineNum; Index++) {
-      Routine = &mCardTypeDetectRoutineTable[Index];
-      if (*Routine != NULL) {
-        Status = (*Routine) (Private, Slot);
-        if (!EFI_ERROR (Status)) {
-          break;
-        }
+  //
+  // Initialize HC timeout control
+  //
+  Status = SdMmcHcInitTimeoutCtrl (PciIo, Slot);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Private->Slot[Slot].MediaPresent = TRUE;
+  Private->Slot[Slot].Initialized  = TRUE;
+  RoutineNum = sizeof (mCardTypeDetectRoutineTable) / sizeof (CARD_TYPE_DETECT_ROUTINE);
+  for (Index = 0; Index < RoutineNum; Index++) {
+    Routine = &mCardTypeDetectRoutineTable[Index];
+    if (*Routine != NULL) {
+      Status = (*Routine) (Private, Slot);
+      if (!EFI_ERROR (Status)) {
+        break;
       }
     }
-    //
-    // This card doesn't get initialized correctly.
-    //
-    if (Index == RoutineNum) {
-      Private->Slot[Slot].Initialized = FALSE;
-    }
+  }
+  //
+  // This card doesn't get initialized correctly.
+  //
+  if (Index == RoutineNum) {
+    Private->Slot[Slot].Initialized = FALSE;
   }
 
   //
