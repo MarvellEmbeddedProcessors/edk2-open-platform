@@ -12,7 +12,7 @@
 
 **/
 
-#include "SdMmcPciHcDxe.h"
+#include "XenonSdhci.h"
 
 /**
   Send command GO_IDLE_STATE to the device to make it go to Idle State.

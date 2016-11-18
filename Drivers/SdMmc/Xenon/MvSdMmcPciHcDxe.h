@@ -37,7 +37,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/ComponentName2.h>
 #include <Protocol/SdMmcPassThru.h>
 
-#include "SdMmcPciHci.h"
+#include "MvSdMmcPciHci.h"
 
 extern EFI_COMPONENT_NAME_PROTOCOL  gSdMmcPciHcComponentName;
 extern EFI_COMPONENT_NAME2_PROTOCOL gSdMmcPciHcComponentName2;

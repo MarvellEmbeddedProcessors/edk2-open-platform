@@ -12,7 +12,7 @@
 
 **/
 
-#include "SdMmcPciHcDxe.h"
+#include "XenonSdhci.h"
 
 //
 // EFI Component Name Protocol

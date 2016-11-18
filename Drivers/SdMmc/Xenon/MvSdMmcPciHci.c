@@ -15,7 +15,7 @@
 
 **/
 
-#include "SdMmcPciHcDxe.h"
+#include "XenonSdhci.h"
 
 /**
   Dump the content of SD/MMC host controller's Capability Register.
