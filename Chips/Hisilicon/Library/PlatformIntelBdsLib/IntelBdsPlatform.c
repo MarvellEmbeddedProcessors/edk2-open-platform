@@ -157,6 +157,8 @@ PlatformBdsInit (
   VOID
   )
 {
+  //Signal EndofDxe Event
+  EfiEventGroupSignal(&gEfiEndOfDxeEventGroupGuid);
 }
 
 
