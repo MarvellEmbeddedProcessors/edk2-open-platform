@@ -517,10 +517,3 @@
       PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
       BcfgCommandLib|ShellPkg/Library/UefiShellBcfgCommandLib/UefiShellBcfgCommandLib.inf
   }
-
-[Components.ARM]
-  # Legacy Linux Loader
-  ArmPkg/Application/LinuxLoader/LinuxLoader.inf {
-    <LibraryClasses>
-      BdsLib|ArmPkg/Library/BdsLib/BdsLib.inf
-  }

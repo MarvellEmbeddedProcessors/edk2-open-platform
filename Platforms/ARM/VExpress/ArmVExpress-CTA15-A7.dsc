@@ -177,20 +177,6 @@
   gEmbeddedTokenSpaceGuid.PcdFdtDevicePaths|L"VenHw(E7223039-5836-41E1-B542-D7EC736C5E59)/ca15a7"
 
   #
-  # ARM OS Loader
-  #
-  gArmPlatformTokenSpaceGuid.PcdDefaultBootDescription|L"Linux from NorFlash"
-  gArmPlatformTokenSpaceGuid.PcdDefaultBootDevicePath|L"Fv(73DCB643-3862-4904-9076-A94AF1890243)/LinuxLoader.efi"
-  gArmPlatformTokenSpaceGuid.PcdDefaultBootArgument|L"VenHw(E7223039-5836-41E1-B542-D7EC736C5E59)/kernel -c \"console=ttyAMA0,38400 earlyprintk debug verbose\""
-
-  # Use the serial console (ConIn & ConOut) and the Graphic driver (ConOut)
-  # PL111 - CLCD
-  #gArmPlatformTokenSpaceGuid.PcdDefaultConOutPaths|L"VenHw(D3987D4B-971A-435F-8CAF-4967EB627241)/Uart(38400,8,N,1)/VenPcAnsi();VenHw(407B4008-BF5B-11DF-9547-CF16E0D72085)"
-  # HDLCD
-  gArmPlatformTokenSpaceGuid.PcdDefaultConOutPaths|L"VenHw(D3987D4B-971A-435F-8CAF-4967EB627241)/Uart(38400,8,N,1)/VenPcAnsi();VenHw(CE660500-824D-11E0-AC72-0002A5D5C51B)"
-  gArmPlatformTokenSpaceGuid.PcdDefaultConInPaths|L"VenHw(D3987D4B-971A-435F-8CAF-4967EB627241)/Uart(38400,8,N,1)/VenPcAnsi()"
-
-  #
   # ARM Architectural Timer Frequency
   #
 !ifdef ARM_BIGLITTLE_TC2
