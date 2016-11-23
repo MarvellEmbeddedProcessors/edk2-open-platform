@@ -459,6 +459,9 @@
   MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
   MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
 
+  # Ext4/ext3/ext2 file system
+  ExtPkg/ExtPkgDxe/Ext.inf
+
   # Application
   EmbeddedPkg/Ebl/Ebl.inf
 
