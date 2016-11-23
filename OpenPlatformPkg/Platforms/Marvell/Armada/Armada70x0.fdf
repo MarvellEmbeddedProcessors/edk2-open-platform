@@ -163,6 +163,9 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   INF FatBinPkg/EnhancedFatDxe/Fat.inf
   INF MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
 
+  # Ext4/ext3/ext2 file system
+  INF ExtPkg/ExtPkgDxe/Ext.inf
+
   # UEFI application (Shell Embedded Boot Loader)
   INF EmbeddedPkg/Ebl/Ebl.inf
 
