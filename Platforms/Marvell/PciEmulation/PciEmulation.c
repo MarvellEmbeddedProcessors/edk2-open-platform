@@ -70,10 +70,10 @@ STATIC PCIE_PLATFORM_DESC mA70x0PlatDescTemplate = {
   { 0xF2540000 },
   { SIZE_8KB },
   { NonDiscoverableDeviceDmaTypeCoherent },
-  1, // SDHCI
-  { 0xF06E0000 },
-  { SIZE_1KB },
-  { NonDiscoverableDeviceDmaTypeCoherent }
+  2, // SDHCI
+  { 0xF06E0000, 0xF2780000 },
+  { SIZE_1KB, SIZE_1KB },
+  { NonDiscoverableDeviceDmaTypeCoherent, NonDiscoverableDeviceDmaTypeCoherent }
 };
 
 //
