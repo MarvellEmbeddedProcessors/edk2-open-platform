@@ -94,12 +94,7 @@
 #endif
 
 /** Maximum size for a path, specifically symlink target paths. */
-#ifndef HOST_EFI_EDK2
 #define FSW_PATH_MAX (4096)
-#else
-/* Too big allocations are handled with alloca() */
-#define FSW_PATH_MAX (2048)
-#endif
 
 /** Helper macro for token concatenation. */
 #define FSW_CONCAT3(a,b,c) a##b##c
@@ -107,7 +102,7 @@
 #define FSW_FSTYPE_TABLE_NAME(t) FSW_CONCAT3(fsw_,t,_table)
 
 /** Indicates that the block cache entry is empty. */
-#define FSW_INVALID_BNO (~0UL)
+#define FSW_INVALID_BNO 0xFFFFFFFFFFFFFFFF
 
 
 //
@@ -262,7 +257,7 @@ struct fsw_fstype_table;
 struct fsw_blockcache {
     fsw_u32     refcount;           //!< Reference count
     fsw_u32     cache_level;        //!< Level of importance of this block
-    fsw_u32     phys_bno;           //!< Physical block number
+    fsw_u64     phys_bno;           //!< Physical block number
     void        *data;              //!< Block data buffer
 };
 
@@ -299,7 +294,8 @@ struct fsw_dnode {
     struct DNODESTRUCTNAME *parent; //!< Parent directory dnode
     struct fsw_string name;         //!< Name of this item in the parent directory
 
-    fsw_u32     dnode_id;           //!< Unique id number (usually the inode number)
+    fsw_u64     tree_id;            //!< Unique id number (usually the btrfs subvolume)
+    fsw_u64     dnode_id;           //!< Unique id number (usually the inode number)
     int         type;               //!< Type of the dnode - file, dir, symlink, special
     fsw_u64     size;               //!< Data size in bytes
 
@@ -325,9 +321,9 @@ enum {
 
 struct fsw_extent {
     fsw_u32     type;               //!< Type of extent specification
-    fsw_u32     log_start;          //!< Starting logical block number
+    fsw_u64     log_start;          //!< Starting logical block number
     fsw_u32     log_count;          //!< Logical block count
-    fsw_u32     phys_start;         //!< Starting physical block number (for FSW_EXTENT_TYPE_PHYSBLOCK only)
+    fsw_u64     phys_start;         //!< Starting physical block number (for FSW_EXTENT_TYPE_PHYSBLOCK only)
     void        *buffer;            //!< Allocated buffer pointer (for FSW_EXTENT_TYPE_BUFFER only)
 };
 
@@ -369,8 +365,6 @@ struct fsw_volume_stat {
 
 struct fsw_dnode_stat {
     fsw_u64     used_bytes;         //!< Bytes actually used by the file on disk
-    void        (*store_time_posix)(struct fsw_dnode_stat *sb, int which, fsw_u32 posix_time);   //!< Callback for storing a Posix-style timestamp
-    void        (*store_attr_posix)(struct fsw_dnode_stat *sb, fsw_u16 posix_mode);   //!< Callback for storing a Posix-style file mode
     void        *host_data;         //!< Hook for a host-specific data structure
 };
 
@@ -391,10 +385,10 @@ struct fsw_host_table
 {
     int         native_string_type; //!< String type used by the host environment
 
-    void         (*change_blocksize)(struct fsw_volume *vol,
+    void         EFIAPI (*change_blocksize)(struct fsw_volume *vol,
                                      fsw_u32 old_phys_blocksize, fsw_u32 old_log_blocksize,
                                      fsw_u32 new_phys_blocksize, fsw_u32 new_log_blocksize);
-    fsw_status_t (*read_block)(struct fsw_volume *vol, fsw_u32 phys_bno, void *buffer);
+    fsw_status_t EFIAPI (*read_block)(struct fsw_volume *vol, fsw_u64 phys_bno, void *buffer);
 };
 
 /**
@@ -440,8 +434,8 @@ void         fsw_unmount(struct fsw_volume *vol);
 fsw_status_t fsw_volume_stat(struct fsw_volume *vol, struct fsw_volume_stat *sb);
 
 void         fsw_set_blocksize(struct VOLSTRUCTNAME *vol, fsw_u32 phys_blocksize, fsw_u32 log_blocksize);
-fsw_status_t fsw_block_get(struct VOLSTRUCTNAME *vol, fsw_u32 phys_bno, fsw_u32 cache_level, void **buffer_out);
-void         fsw_block_release(struct VOLSTRUCTNAME *vol, fsw_u32 phys_bno, void *buffer);
+fsw_status_t fsw_block_get(struct VOLSTRUCTNAME *vol, fsw_u64 phys_bno, fsw_u32 cache_level, void **buffer_out);
+void         fsw_block_release(struct VOLSTRUCTNAME *vol, fsw_u64 phys_bno, void *buffer);
 
 /*@}*/
 
@@ -451,8 +445,11 @@ void         fsw_block_release(struct VOLSTRUCTNAME *vol, fsw_u32 phys_bno, void
  */
 /*@{*/
 
-fsw_status_t fsw_dnode_create_root(struct VOLSTRUCTNAME *vol, fsw_u32 dnode_id, struct DNODESTRUCTNAME **dno_out);
-fsw_status_t fsw_dnode_create(struct DNODESTRUCTNAME *parent_dno, fsw_u32 dnode_id, int type,
+fsw_status_t fsw_dnode_create_root(struct VOLSTRUCTNAME *vol, fsw_u64 dnode_id, struct DNODESTRUCTNAME **dno_out);
+fsw_status_t fsw_dnode_create(struct DNODESTRUCTNAME *parent_dno, fsw_u64 dnode_id, int type,
+                              struct fsw_string *name, struct DNODESTRUCTNAME **dno_out);
+fsw_status_t fsw_dnode_create_root_with_tree(struct VOLSTRUCTNAME *vol, fsw_u64 tree_id, fsw_u64 dnode_id, struct DNODESTRUCTNAME **dno_out);
+fsw_status_t fsw_dnode_create_with_tree(struct DNODESTRUCTNAME *parent_dno, fsw_u64 tree_id, fsw_u64 dnode_id, int type,
                               struct fsw_string *name, struct DNODESTRUCTNAME **dno_out);
 void         fsw_dnode_retain(struct fsw_dnode *dno);
 void         fsw_dnode_release(struct fsw_dnode *dno);
@@ -469,6 +466,9 @@ fsw_status_t fsw_dnode_dir_read(struct fsw_shandle *shand, struct fsw_dnode **ch
 fsw_status_t fsw_dnode_readlink(struct fsw_dnode *dno, struct fsw_string *link_target);
 fsw_status_t fsw_dnode_readlink_data(struct DNODESTRUCTNAME *dno, struct fsw_string *link_target);
 fsw_status_t fsw_dnode_resolve(struct fsw_dnode *dno, struct fsw_dnode **target_dno_out);
+void fsw_store_time_posix(struct fsw_dnode_stat *sb, int which, fsw_u32 posix_time);
+void fsw_store_attr_posix(struct fsw_dnode_stat *sb, fsw_u16 posix_mode);
+void fsw_store_attr_efi(struct fsw_dnode_stat *sb, fsw_u16 attr);
 
 /*@}*/
 
@@ -508,9 +508,9 @@ fsw_status_t fsw_strdup_coerce(struct fsw_string *dest, int type, struct fsw_str
 void         fsw_strsplit(struct fsw_string *lookup_name, struct fsw_string *buffer, char separator);
 
 void         fsw_strfree(struct fsw_string *s);
-fsw_u16      fsw_to_lower(fsw_u16 ch);
 
 /*@}*/
+
 
 /**
  * \name Posix Mode Macros

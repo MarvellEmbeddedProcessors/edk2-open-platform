@@ -52,6 +52,7 @@
 #ifndef _FSW_EFI_BASE_H_
 #define _FSW_EFI_BASE_H_
 
+#include "fsw_efi_edk2_base.h"
 #define FSW_LITTLE_ENDIAN (1)
 
 // types, reuse EFI types

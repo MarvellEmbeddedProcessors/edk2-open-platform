@@ -128,7 +128,7 @@ UINTN fsw_efi_strsize(struct fsw_string *s)
 
 VOID fsw_efi_strcpy(CHAR16 *Dest, struct fsw_string *src)
 {
-    if (src->type == FSW_STRING_TYPE_EMPTY) {
+    if (src->type == FSW_STRING_TYPE_EMPTY || src->size == 0) {
         Dest[0] = 0;
     } else if (src->type == FSW_STRING_TYPE_UTF16) {
         CopyMem(Dest, src->data, src->size);
@@ -137,23 +137,6 @@ VOID fsw_efi_strcpy(CHAR16 *Dest, struct fsw_string *src)
         // TODO: coerce, recurse
         Dest[0] = 0;
     }
-}
-
-int fsw_streq_ISO88591_UTF16(void *s1data, void *s2data, int len)
-{
-    int i;
-    fsw_u8 *p1 = (fsw_u8 *)s1data;
-    fsw_u16 *p2 = (fsw_u16 *)s2data;
-
-    for (i = 0; i<len; i++)
-    {
-        if (fsw_to_lower(p1[i]) != fsw_to_lower(p2[i]))
-        {
-            return 0;
-        }
-    }
-
-    return 1;
 }
 
 // EOF

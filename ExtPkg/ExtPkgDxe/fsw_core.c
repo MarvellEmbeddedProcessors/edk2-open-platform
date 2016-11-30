@@ -178,7 +178,7 @@ void fsw_set_blocksize(struct fsw_volume *vol, fsw_u32 phys_blocksize, fsw_u32 l
  * caller calls fsw_block_release.
  */
 
-fsw_status_t fsw_block_get(struct VOLSTRUCTNAME *vol, fsw_u32 phys_bno, fsw_u32 cache_level, void **buffer_out)
+fsw_status_t fsw_block_get(struct VOLSTRUCTNAME *vol, fsw_u64 phys_bno, fsw_u32 cache_level, void **buffer_out)
 {
     fsw_status_t    status;
     fsw_u32         i, discard_level, new_bcache_size;
@@ -189,6 +189,21 @@ fsw_status_t fsw_block_get(struct VOLSTRUCTNAME *vol, fsw_u32 phys_bno, fsw_u32 
 
     if (cache_level > MAX_CACHE_LEVEL)
         cache_level = MAX_CACHE_LEVEL;
+
+    if (vol->bcache_size > 0 && vol->bcache == NULL) {
+        /* driver set the initial cache size */
+        status = fsw_alloc(vol->bcache_size * sizeof(struct fsw_blockcache), &vol->bcache);
+        if(status)
+            return status;
+        for (i = 0; i < vol->bcache_size; i++) {
+            vol->bcache[i].refcount = 0;
+            vol->bcache[i].cache_level = 0;
+            vol->bcache[i].phys_bno = (fsw_u64)FSW_INVALID_BNO;
+            vol->bcache[i].data = NULL;
+        }
+        i = 0;
+        goto miss;
+    }
 
     // check block cache
     for (i = 0; i < vol->bcache_size; i++) {
@@ -204,7 +219,7 @@ fsw_status_t fsw_block_get(struct VOLSTRUCTNAME *vol, fsw_u32 phys_bno, fsw_u32 
 
     // find a free entry in the cache table
     for (i = 0; i < vol->bcache_size; i++) {
-        if (vol->bcache[i].phys_bno == (fsw_u32)FSW_INVALID_BNO)
+        if (vol->bcache[i].phys_bno == (fsw_u64)FSW_INVALID_BNO)
             break;
     }
     if (i >= vol->bcache_size) {
@@ -231,7 +246,7 @@ fsw_status_t fsw_block_get(struct VOLSTRUCTNAME *vol, fsw_u32 phys_bno, fsw_u32 
         for (i = vol->bcache_size; i < new_bcache_size; i++) {
             new_bcache[i].refcount = 0;
             new_bcache[i].cache_level = 0;
-            new_bcache[i].phys_bno = (fsw_u32)FSW_INVALID_BNO;
+            new_bcache[i].phys_bno = (fsw_u64)FSW_INVALID_BNO;
             new_bcache[i].data = NULL;
         }
         i = vol->bcache_size;
@@ -242,7 +257,8 @@ fsw_status_t fsw_block_get(struct VOLSTRUCTNAME *vol, fsw_u32 phys_bno, fsw_u32 
         vol->bcache = new_bcache;
         vol->bcache_size = new_bcache_size;
     }
-    vol->bcache[i].phys_bno = (fsw_u32)FSW_INVALID_BNO;
+    vol->bcache[i].phys_bno = (fsw_u64)FSW_INVALID_BNO;
+miss:
 
     // read the data
     if (vol->bcache[i].data == NULL) {
@@ -266,7 +282,7 @@ fsw_status_t fsw_block_get(struct VOLSTRUCTNAME *vol, fsw_u32 phys_bno, fsw_u32 
  * from fsw_block_get.
  */
 
-void fsw_block_release(struct VOLSTRUCTNAME *vol, fsw_u32 phys_bno, void *buffer)
+void fsw_block_release(struct VOLSTRUCTNAME *vol, fsw_u64 phys_bno, void *buffer)
 {
     fsw_u32 i;
 
@@ -322,7 +338,7 @@ static void fsw_dnode_register(struct fsw_volume *vol, struct fsw_dnode *dno)
  * behaves in the same way as fsw_dnode_create.
  */
 
-fsw_status_t fsw_dnode_create_root(struct fsw_volume *vol, fsw_u32 dnode_id, struct fsw_dnode **dno_out)
+fsw_status_t fsw_dnode_create_root_with_tree(struct fsw_volume *vol, fsw_u64 tree_id, fsw_u64 dnode_id, struct fsw_dnode **dno_out)
 {
     fsw_status_t    status;
     struct fsw_dnode *dno;
@@ -335,6 +351,7 @@ fsw_status_t fsw_dnode_create_root(struct fsw_volume *vol, fsw_u32 dnode_id, str
     // fill the structure
     dno->vol = vol;
     dno->parent = NULL;
+    dno->tree_id = tree_id;
     dno->dnode_id = dnode_id;
     dno->type = FSW_DNODE_TYPE_DIR;
     dno->refcount = 1;
@@ -347,6 +364,10 @@ fsw_status_t fsw_dnode_create_root(struct fsw_volume *vol, fsw_u32 dnode_id, str
     return FSW_SUCCESS;
 }
 
+fsw_status_t fsw_dnode_create_root(struct fsw_volume *vol, fsw_u64 dnode_id, struct fsw_dnode **dno_out)
+{
+	return fsw_dnode_create_root_with_tree( vol, 0, dnode_id, dno_out);
+}
 /**
  * Create a new dnode representing a file system object. This function is called by
  * the file system driver in response to directory lookup or read requests. Note that
@@ -365,7 +386,7 @@ fsw_status_t fsw_dnode_create_root(struct fsw_volume *vol, fsw_u32 dnode_id, str
  * that must be released by the caller with fsw_dnode_release.
  */
 
-fsw_status_t fsw_dnode_create(struct fsw_dnode *parent_dno, fsw_u32 dnode_id, int type,
+fsw_status_t fsw_dnode_create_with_tree(struct fsw_dnode *parent_dno, fsw_u64 tree_id, fsw_u64 dnode_id, int type,
                               struct fsw_string *name, struct fsw_dnode **dno_out)
 {
     fsw_status_t    status;
@@ -374,7 +395,7 @@ fsw_status_t fsw_dnode_create(struct fsw_dnode *parent_dno, fsw_u32 dnode_id, in
 
     // check if we already have a dnode with the same id
     for (dno = vol->dnode_head; dno; dno = dno->next) {
-        if (dno->dnode_id == dnode_id) {
+        if (dno->dnode_id == dnode_id && dno->tree_id == tree_id) {
             fsw_dnode_retain(dno);
             *dno_out = dno;
             return FSW_SUCCESS;
@@ -390,6 +411,7 @@ fsw_status_t fsw_dnode_create(struct fsw_dnode *parent_dno, fsw_u32 dnode_id, in
     dno->vol = vol;
     dno->parent = parent_dno;
     fsw_dnode_retain(dno->parent);
+    dno->tree_id = tree_id;
     dno->dnode_id = dnode_id;
     dno->type = type;
     dno->refcount = 1;
@@ -403,6 +425,12 @@ fsw_status_t fsw_dnode_create(struct fsw_dnode *parent_dno, fsw_u32 dnode_id, in
 
     *dno_out = dno;
     return FSW_SUCCESS;
+}
+
+fsw_status_t fsw_dnode_create(struct fsw_dnode *parent_dno, fsw_u64 dnode_id, int type,
+                              struct fsw_string *name, struct fsw_dnode **dno_out)
+{
+	return fsw_dnode_create_with_tree(parent_dno, 0, dnode_id, type, name, dno_out);
 }
 
 /**
@@ -492,7 +520,7 @@ fsw_status_t fsw_dnode_stat(struct fsw_dnode *dno, struct fsw_dnode_stat *sb)
     sb->used_bytes = 0;
     status = dno->vol->fstype_table->dnode_stat(dno->vol, dno, sb);
     if (!status && !sb->used_bytes)
-        sb->used_bytes = (dno->size + dno->vol->log_blocksize - 1)/(dno->vol->log_blocksize);
+        sb->used_bytes = FSW_U64_DIV(dno->size + dno->vol->log_blocksize - 1, dno->vol->log_blocksize);
     return status;
 }
 
@@ -749,10 +777,12 @@ fsw_status_t fsw_dnode_resolve(struct fsw_dnode *dno, struct fsw_dnode **target_
     fsw_status_t    status;
     struct fsw_string target_name;
     struct fsw_dnode *target_dno;
+    /* Linux kernel max link count is 40 */
+    int link_count = 40;
 
     fsw_dnode_retain(dno);
 
-    while (1) {
+    while (--link_count > 0) {
         // get full information
         status = fsw_dnode_fill(dno);
         if (status)
@@ -782,6 +812,8 @@ fsw_status_t fsw_dnode_resolve(struct fsw_dnode *dno, struct fsw_dnode **target_
         fsw_dnode_release(dno);
         dno = target_dno;   // is already retained
     }
+    if(link_count == 0)
+      status = FSW_NOT_FOUND;
 
 errorexit:
     fsw_dnode_release(dno);
@@ -847,8 +879,8 @@ fsw_status_t fsw_shandle_read(struct fsw_shandle *shand, fsw_u32 *buffer_size_in
     struct fsw_dnode *dno = shand->dnode;
     struct fsw_volume *vol = dno->vol;
     fsw_u8          *buffer, *block_buffer;
-    fsw_u32         buflen, copylen, pos;
-    fsw_u32         log_bno, pos_in_extent, phys_bno, pos_in_physblock;
+    fsw_u64         buflen, copylen, pos;
+    fsw_u64         log_bno, pos_in_extent, phys_bno, pos_in_physblock;
     fsw_u32         cache_level;
 
     if (shand->pos >= dno->size) {   // already at EOF
@@ -867,7 +899,7 @@ fsw_status_t fsw_shandle_read(struct fsw_shandle *shand, fsw_u32 *buffer_size_in
 
     while (buflen > 0) {
         // get extent for the current logical block
-        log_bno = pos / vol->log_blocksize;
+        log_bno = FSW_U64_DIV(pos, vol->log_blocksize);
         if (shand->extent.type == FSW_EXTENT_TYPE_INVALID ||
             log_bno < shand->extent.log_start ||
             log_bno >= shand->extent.log_start + shand->extent.log_count) {
@@ -889,7 +921,7 @@ fsw_status_t fsw_shandle_read(struct fsw_shandle *shand, fsw_u32 *buffer_size_in
         // dispatch by extent type
         if (shand->extent.type == FSW_EXTENT_TYPE_PHYSBLOCK) {
             // convert to physical block number and offset
-            phys_bno = shand->extent.phys_start + pos_in_extent / vol->phys_blocksize;
+            phys_bno = shand->extent.phys_start + FSW_U64_DIV(pos_in_extent, vol->phys_blocksize);
             pos_in_physblock = pos_in_extent & (vol->phys_blocksize - 1);
             copylen = vol->phys_blocksize - pos_in_physblock;
             if (copylen > buflen)

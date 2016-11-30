@@ -84,10 +84,10 @@ EFI_STATUS EFIAPI fsw_efi_DriverBinding_Stop(IN  EFI_DRIVER_BINDING_PROTOCOL  *T
                                              IN  UINTN                        NumberOfChildren,
                                              IN  EFI_HANDLE                   *ChildHandleBuffer);
 
-void fsw_efi_change_blocksize(struct fsw_volume *vol,
+void EFIAPI fsw_efi_change_blocksize(struct fsw_volume *vol,
                               fsw_u32 old_phys_blocksize, fsw_u32 old_log_blocksize,
                               fsw_u32 new_phys_blocksize, fsw_u32 new_log_blocksize);
-fsw_status_t fsw_efi_read_block(struct fsw_volume *vol, fsw_u32 phys_bno, void *buffer);
+fsw_status_t EFIAPI fsw_efi_read_block(struct fsw_volume *vol, fsw_u64 phys_bno, void *buffer);
 
 EFI_STATUS fsw_efi_map_status(fsw_status_t fsw_status, FSW_VOLUME_DATA *Volume);
 
@@ -123,6 +123,22 @@ EFI_STATUS fsw_efi_dnode_fill_FileInfo(IN FSW_VOLUME_DATA *Volume,
                                        IN struct fsw_dnode *dno,
                                        IN OUT UINTN *BufferSize,
                                        OUT VOID *Buffer);
+
+/**
+ * Structure for holding disk cache data.
+ */
+
+#define CACHE_SIZE 131072 /* 128KiB */
+struct cache_data {
+   fsw_u8            *Cache;
+   fsw_u64           CacheStart;
+   BOOLEAN           CacheValid;
+   FSW_VOLUME_DATA   *Volume; // NOTE: Do not deallocate; copied here to ID volume
+};
+
+#define NUM_CACHES 2 /* Don't increase without modifying fsw_efi_read_block() */
+static struct cache_data    Caches[NUM_CACHES];
+static int LastRead = -1;
 
 /**
  * Interface structure for the EFI Driver Binding protocol.
@@ -271,6 +287,21 @@ struct fsw_host_table   fsw_efi_host_table = {
 
 extern struct fsw_fstype_table   FSW_FSTYPE_TABLE_NAME(FSTYPE);
 
+static VOID EFIAPI fsw_efi_clear_cache(VOID) {
+   int i;
+
+   // clear the cache
+   for (i = 0; i < NUM_CACHES; i++) {
+      if (Caches[i].Cache != NULL) {
+         FreePool(Caches[i].Cache);
+         Caches[i].Cache = NULL;
+      } // if
+            Caches[i].CacheStart = 0;
+            Caches[i].CacheValid = FALSE;
+            Caches[i].Volume = NULL;
+   }
+   LastRead = -1;
+} // VOID EFIAPI fsw_efi_clear_cache();
 
 /**
  * Image entry point. Installs the Driver Binding and Component Name protocols
@@ -537,6 +568,9 @@ EFI_STATUS EFIAPI fsw_efi_DriverBinding_Stop(IN  EFI_DRIVER_BINDING_PROTOCOL  *T
                                This->DriverBindingHandle,
                                ControllerHandle);
 
+    // clear the cache
+    fsw_efi_clear_cache();
+
     return Status;
 }
 
@@ -545,7 +579,7 @@ EFI_STATUS EFIAPI fsw_efi_DriverBinding_Stop(IN  EFI_DRIVER_BINDING_PROTOCOL  *T
  * when the file system driver changes the block sizes for the volume.
  */
 
-void fsw_efi_change_blocksize(struct fsw_volume *vol,
+void EFIAPI fsw_efi_change_blocksize(struct fsw_volume *vol,
                               fsw_u32 old_phys_blocksize, fsw_u32 old_log_blocksize,
                               fsw_u32 new_phys_blocksize, fsw_u32 new_log_blocksize)
 {
@@ -555,25 +589,91 @@ void fsw_efi_change_blocksize(struct fsw_volume *vol,
 /**
  * FSW interface function to read data blocks. This function is called by the FSW core
  * to read a block of data from the device. The buffer is allocated by the core code.
+ * Two caches are maintained, so as to improve performance on some systems. (VirtualBox
+ * is particularly susceptible to performance problems with an uncached driver -- the
+ * ext2 driver can take 200 seconds to load a Linux kernel under VirtualBox, whereas
+ * the time is more like 3 seconds with a cache!) Two independent caches are maintained
+ * because the ext2fs driver tends to alternate between accessing two parts of the
+ * disk.
  */
 
-fsw_status_t fsw_efi_read_block(struct fsw_volume *vol, fsw_u32 phys_bno, void *buffer)
-{
-    EFI_STATUS          Status;
-    FSW_VOLUME_DATA     *Volume = (FSW_VOLUME_DATA *)vol->host_data;
+fsw_status_t EFIAPI fsw_efi_read_block(struct fsw_volume *vol, fsw_u64 phys_bno, void *buffer) {
+   int              i, ReadCache = -1;
+   FSW_VOLUME_DATA  *Volume = (FSW_VOLUME_DATA *)vol->host_data;
+   EFI_STATUS       Status = EFI_SUCCESS;
+   BOOLEAN          ReadOneBlock = FALSE;
+   UINT64           StartRead = (UINT64) phys_bno * (UINT64) vol->phys_blocksize;
 
-//    FSW_MSG_DEBUGV((FSW_MSGSTR("fsw_efi_read_block: %d  (%d)\n"), phys_bno, vol->phys_blocksize));
+   if (buffer == NULL)
+      return (fsw_status_t) EFI_BAD_BUFFER_SIZE;
 
-    // read from disk
-    Status = Volume->DiskIo->ReadDisk( Volume->DiskIo, Volume->MediaId,
-                                      (UINT64)phys_bno * vol->phys_blocksize,
-                                      vol->phys_blocksize,
-                                      buffer);
-    Volume->LastIOStatus = Status;
-    if (EFI_ERROR(Status))
-        return FSW_IO_ERROR;
-    return FSW_SUCCESS;
-}
+   // Initialize static data structures, if necessary....
+   if (LastRead < 0) {
+      fsw_efi_clear_cache();
+   } // if
+
+   // Look for a cache hit on the current query....
+   i = 0;
+   do {
+      if ((Caches[i].Volume == Volume) &&
+          (Caches[i].CacheValid == TRUE) &&
+          (StartRead >= Caches[i].CacheStart) &&
+          ((StartRead + vol->phys_blocksize) <= (Caches[i].CacheStart + CACHE_SIZE))) {
+         ReadCache = i;
+      }
+      i++;
+   } while ((i < NUM_CACHES) && (ReadCache < 0));
+
+   // No cache hit found; load new cache and pass it on....
+   if (ReadCache < 0) {
+      if (LastRead == -1)
+         LastRead = 1;
+      ReadCache = 1 - LastRead; // NOTE: If NUM_CACHES > 2, this must become more complex
+      Caches[ReadCache].CacheValid = FALSE;
+      if (Caches[ReadCache].Cache == NULL)
+         Caches[ReadCache].Cache = AllocatePool(CACHE_SIZE);
+      if (Caches[ReadCache].Cache != NULL) {
+         // TODO: Below call hangs on my 32-bit Mac Mini when compiled with GNU-EFI.
+         // The same binary is fine under VirtualBox, and the same call is fine when
+         // compiled with Tianocore. Further clue: Omitting "Status =" avoids the
+         // hang but produces a failure to mount the filesystem, even when the same
+         // change is made to later similar call. Calling Volume->DiskIo->ReadDisk()
+         // directly (without refit_call5_wrapper()) changes nothing. Placing Print()
+         // statements at the start and end of the function, and before and after the
+         // ReadDisk() call, suggests that when it fails, the program is executing
+         // code starting mid-function, so there seems to be something messed up in
+         // the way the function is being called. FIGURE THIS OUT!
+         Status = refit_call5_wrapper(Volume->DiskIo->ReadDisk, Volume->DiskIo, Volume->MediaId,
+                                      StartRead, (UINTN) CACHE_SIZE, (VOID*) Caches[ReadCache].Cache);
+         if (!EFI_ERROR(Status)) {
+            Caches[ReadCache].CacheStart = StartRead;
+            Caches[ReadCache].CacheValid = TRUE;
+            Caches[ReadCache].Volume = Volume;
+            LastRead = ReadCache;
+         } else {
+            ReadOneBlock = TRUE;
+         }
+      } else {
+         ReadOneBlock = TRUE;
+      } // if cache memory allocated
+   } // if (ReadCache < 0)
+
+   if (Caches[ReadCache].Cache != NULL && Caches[ReadCache].CacheValid == TRUE && vol->phys_blocksize > 0) {
+      CopyMem(buffer, &Caches[ReadCache].Cache[StartRead - Caches[ReadCache].CacheStart], vol->phys_blocksize);
+   } else {
+      ReadOneBlock = TRUE;
+   }
+
+   if (ReadOneBlock) { // Something's failed, so try a simple disk read of one block....
+      Status = refit_call5_wrapper(Volume->DiskIo->ReadDisk, Volume->DiskIo, Volume->MediaId,
+                                   phys_bno * vol->phys_blocksize,
+                                   (UINTN) vol->phys_blocksize,
+                                   (VOID*) buffer);
+   }
+   Volume->LastIOStatus = Status;
+
+   return Status;
+} // fsw_status_t *fsw_efi_read_block()
 
 /**
  * Map FSW status codes to EFI status codes. The FSW_IO_ERROR code is only produced
@@ -618,6 +718,7 @@ EFI_STATUS EFIAPI fsw_efi_FileSystem_OpenVolume(IN EFI_FILE_IO_INTERFACE *This,
     Print(L"fsw_efi_FileSystem_OpenVolume\n");
 #endif
 
+    fsw_efi_clear_cache();
     Status = fsw_efi_dnode_to_FileHandle(Volume->vol->root, Root);
 
     return Status;
@@ -1077,7 +1178,7 @@ EFI_STATUS fsw_efi_dnode_getinfo(IN FSW_FILE_DATA *File,
  * appropriate member of the EFI_FILE_INFO structure that we're filling.
  */
 
-static void fsw_efi_store_time_posix(struct fsw_dnode_stat *sb, int which, fsw_u32 posix_time)
+void fsw_store_time_posix(struct fsw_dnode_stat *sb, int which, fsw_u32 posix_time)
 {
     EFI_FILE_INFO       *FileInfo = (EFI_FILE_INFO *)sb->host_data;
 
@@ -1095,12 +1196,19 @@ static void fsw_efi_store_time_posix(struct fsw_dnode_stat *sb, int which, fsw_u
  * adjustments to the EFI_FILE_INFO structure that we're filling.
  */
 
-static void fsw_efi_store_attr_posix(struct fsw_dnode_stat *sb, fsw_u16 posix_mode)
+void fsw_store_attr_posix(struct fsw_dnode_stat *sb, fsw_u16 posix_mode)
 {
     EFI_FILE_INFO       *FileInfo = (EFI_FILE_INFO *)sb->host_data;
 
     if ((posix_mode & S_IWUSR) == 0)
         FileInfo->Attribute |= EFI_FILE_READ_ONLY;
+}
+
+void fsw_store_attr_efi(struct fsw_dnode_stat *sb, fsw_u16 attr)
+{
+    EFI_FILE_INFO       *FileInfo = (EFI_FILE_INFO *)sb->host_data;
+
+    FileInfo->Attribute |= attr;
 }
 
 /**
@@ -1148,8 +1256,6 @@ EFI_STATUS fsw_efi_dnode_fill_FileInfo(IN FSW_VOLUME_DATA *Volume,
 
     // get the missing info from the fs driver
     ZeroMem(&sb, sizeof(struct fsw_dnode_stat));
-    sb.store_time_posix = fsw_efi_store_time_posix;
-    sb.store_attr_posix = fsw_efi_store_attr_posix;
     sb.host_data = FileInfo;
     Status = fsw_efi_map_status(fsw_dnode_stat(dno, &sb), Volume);
     if (EFI_ERROR(Status))

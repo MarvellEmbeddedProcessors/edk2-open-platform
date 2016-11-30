@@ -73,9 +73,9 @@ struct fsw_fstype_table   FSW_FSTYPE_TABLE_NAME(ext4) = {
 };
 
 
-static inline int test_root(fsw_u32 a, int b)
+static __inline int test_root(fsw_u32 a, int b)
 {
-        int num = b;
+        fsw_u32 num = b;
 
         while (a > num)
                 num *= b;
@@ -93,10 +93,10 @@ static int fsw_ext4_group_sparse(fsw_u32 group)
 }
 
 /* calculate the first block number of the group */
-static inline fsw_u32
+static __inline fsw_u64
 fsw_ext4_group_first_block_no(struct ext4_super_block *sb, fsw_u32 group_no)
 {
-        return group_no * (fsw_u32)EXT4_BLOCKS_PER_GROUP(sb) +
+        return group_no * (fsw_u64)EXT4_BLOCKS_PER_GROUP(sb) +
                 sb->s_first_data_block;
 }
 
@@ -110,7 +110,8 @@ static fsw_status_t fsw_ext4_volume_mount(struct fsw_ext4_volume *vol)
     fsw_status_t    status;
     void            *buffer;
     fsw_u32         blocksize;
-    fsw_u32         groupcnt, groupno, gdesc_per_block, gdesc_bno, gdesc_index, metabg_of_gdesc;
+    fsw_u32         groupcnt, groupno, gdesc_per_block, gdesc_index, metabg_of_gdesc;
+    fsw_u64         gdesc_bno;
     struct ext4_group_desc *gdesc;
     int             i;
     struct fsw_string s;
@@ -140,9 +141,8 @@ static fsw_status_t fsw_ext4_volume_mount(struct fsw_ext4_volume *vol)
     if (vol->sb->s_rev_level == EXT4_DYNAMIC_REV &&
         (vol->sb->s_feature_incompat & ~(EXT4_FEATURE_INCOMPAT_FILETYPE | EXT4_FEATURE_INCOMPAT_RECOVER |
                                          EXT4_FEATURE_INCOMPAT_EXTENTS | EXT4_FEATURE_INCOMPAT_FLEX_BG |
-                                         EXT4_FEATURE_INCOMPAT_META_BG)))
+                                         EXT4_FEATURE_INCOMPAT_64BIT | EXT4_FEATURE_INCOMPAT_META_BG)))
         return FSW_UNSUPPORTED;
-
 
     if (vol->sb->s_rev_level == EXT4_DYNAMIC_REV &&
         (vol->sb->s_feature_incompat & EXT4_FEATURE_INCOMPAT_RECOVER))
@@ -188,7 +188,7 @@ static fsw_status_t fsw_ext4_volume_mount(struct fsw_ext4_volume *vol)
     gdesc_per_block = EXT4_DESC_PER_BLOCK(vol->sb);
     
     // Read the group descriptors to get inode table offsets
-    status = fsw_alloc(sizeof(fsw_u32) * groupcnt, &vol->inotab_bno);
+    status = fsw_alloc(sizeof(fsw_u64) * groupcnt, &vol->inotab_bno);
     if (status)
         return status;
 
@@ -219,8 +219,10 @@ static fsw_status_t fsw_ext4_volume_mount(struct fsw_ext4_volume *vol)
             return status;
 
         // Get group descriptor table and block number of inode table...
-        gdesc = (struct ext4_group_desc *)(buffer + gdesc_index * vol->sb->s_desc_size);
+        gdesc = (struct ext4_group_desc *)((char *)buffer + gdesc_index * vol->sb->s_desc_size);
         vol->inotab_bno[groupno] = gdesc->bg_inode_table_lo;
+        if (vol->sb->s_desc_size >= EXT4_MIN_DESC_SIZE_64BIT)
+            vol->inotab_bno[groupno] |= (fsw_u64)gdesc->bg_inode_table_hi << 32;
 
         fsw_block_release(vol, gdesc_bno, buffer);
     }
@@ -256,8 +258,18 @@ static void fsw_ext4_volume_free(struct fsw_ext4_volume *vol)
 
 static fsw_status_t fsw_ext4_volume_stat(struct fsw_ext4_volume *vol, struct fsw_volume_stat *sb)
 {
-    sb->total_bytes = (fsw_u64)vol->sb->s_blocks_count_lo * vol->g.log_blocksize;
-    sb->free_bytes  = (fsw_u64)vol->sb->s_free_blocks_count_lo * vol->g.log_blocksize;
+    fsw_u64         count;
+
+    count = vol->sb->s_blocks_count_lo;
+    if (vol->sb->s_desc_size >= EXT4_MIN_DESC_SIZE_64BIT)
+        count |= (fsw_u64)vol->sb->s_blocks_count_hi << 32;
+    sb->total_bytes = count * vol->g.log_blocksize;
+
+    count = vol->sb->s_free_blocks_count_lo;
+    if (vol->sb->s_desc_size >= EXT4_MIN_DESC_SIZE_64BIT)
+        count |= (fsw_u64)vol->sb->s_free_blocks_count_hi << 32;
+    sb->free_bytes  = count * vol->g.log_blocksize;
+
     return FSW_SUCCESS;
 }
 
@@ -272,7 +284,8 @@ static fsw_status_t fsw_ext4_volume_stat(struct fsw_ext4_volume *vol, struct fsw
 static fsw_status_t fsw_ext4_dnode_fill(struct fsw_ext4_volume *vol, struct fsw_ext4_dnode *dno)
 {
     fsw_status_t    status;
-    fsw_u32         groupno, ino_in_group, ino_bno, ino_index;
+    fsw_u32         groupno, ino_in_group, ino_index;
+    fsw_u64         ino_bno;
     fsw_u8          *buffer;
 
     if (dno->raw)
@@ -280,8 +293,8 @@ static fsw_status_t fsw_ext4_dnode_fill(struct fsw_ext4_volume *vol, struct fsw_
 
 
     // read the inode block
-    groupno = (dno->g.dnode_id - 1) / vol->sb->s_inodes_per_group;
-    ino_in_group = (dno->g.dnode_id - 1) % vol->sb->s_inodes_per_group;
+    groupno = (fsw_u32) (dno->g.dnode_id - 1) / vol->sb->s_inodes_per_group;
+    ino_in_group = (fsw_u32) (dno->g.dnode_id - 1) % vol->sb->s_inodes_per_group;
     ino_bno = vol->inotab_bno[groupno] +
         ino_in_group / (vol->g.phys_blocksize / vol->inode_size);
     ino_index = ino_in_group % (vol->g.phys_blocksize / vol->inode_size);
@@ -336,10 +349,10 @@ static fsw_status_t fsw_ext4_dnode_stat(struct fsw_ext4_volume *vol, struct fsw_
                                         struct fsw_dnode_stat *sb)
 {
     sb->used_bytes = dno->raw->i_blocks_lo * EXT4_BLOCK_SIZE(vol->sb);   // very, very strange...
-    sb->store_time_posix(sb, FSW_DNODE_STAT_CTIME, dno->raw->i_ctime);
-    sb->store_time_posix(sb, FSW_DNODE_STAT_ATIME, dno->raw->i_atime);
-    sb->store_time_posix(sb, FSW_DNODE_STAT_MTIME, dno->raw->i_mtime);
-    sb->store_attr_posix(sb, dno->raw->i_mode);
+    fsw_store_time_posix(sb, FSW_DNODE_STAT_CTIME, dno->raw->i_ctime);
+    fsw_store_time_posix(sb, FSW_DNODE_STAT_ATIME, dno->raw->i_atime);
+    fsw_store_time_posix(sb, FSW_DNODE_STAT_MTIME, dno->raw->i_mtime);
+    fsw_store_attr_posix(sb, dno->raw->i_mode);
 
     return FSW_SUCCESS;
 }
@@ -401,7 +414,7 @@ static fsw_status_t fsw_ext4_get_by_extent(struct fsw_ext4_volume *vol, struct f
     buffer = (void *)dno->raw->i_block;
     buf_offset = 0;
     while(1) {
-        ext4_extent_header = (struct ext4_extent_header *)buffer + buf_offset;
+        ext4_extent_header = (struct ext4_extent_header *)((char *)buffer + buf_offset);
         buf_offset += sizeof(struct ext4_extent_header);
         FSW_MSG_DEBUG((FSW_MSGSTR("fsw_ext4_get_by_extent: extent header with %d entries\n"), 
                       ext4_extent_header->eh_entries));
@@ -413,14 +426,15 @@ static fsw_status_t fsw_ext4_get_by_extent(struct fsw_ext4_volume *vol, struct f
             if(ext4_extent_header->eh_depth == 0)
             {
                 // Leaf node, the header follows actual extents
-                ext4_extent = (struct ext4_extent *)(buffer + buf_offset);
+                ext4_extent = (struct ext4_extent *)((char *)buffer + buf_offset);
                 buf_offset += sizeof(struct ext4_extent);
                 FSW_MSG_DEBUG((FSW_MSGSTR("fsw_ext4_get_by_extent: extent node cover %d...\n"), ext4_extent->ee_block));
 
                 // Is the requested block in this extent?
                 if(bno >= ext4_extent->ee_block && bno < ext4_extent->ee_block + ext4_extent->ee_len)
                 {
-                    extent->phys_start = ext4_extent->ee_start_lo + (bno - ext4_extent->ee_block);
+                    extent->phys_start = ((fsw_u64)ext4_extent->ee_start_hi << 32) | ext4_extent->ee_start_lo;
+                    extent->phys_start += (bno - ext4_extent->ee_block);
                     extent->log_count = ext4_extent->ee_len - (bno - ext4_extent->ee_block);
                     return FSW_SUCCESS;
                 }
@@ -429,7 +443,7 @@ static fsw_status_t fsw_ext4_get_by_extent(struct fsw_ext4_volume *vol, struct f
             {
                 FSW_MSG_DEBUG((FSW_MSGSTR("fsw_ext4_get_by_extent: index extents, depth %d\n"), 
                           ext4_extent_header->eh_depth));
-                ext4_extent_idx = (struct ext4_extent_idx *)(buffer + buf_offset);
+                ext4_extent_idx = (struct ext4_extent_idx *)((char *)buffer + buf_offset);
                 buf_offset += sizeof(struct ext4_extent_idx);
 
                 FSW_MSG_DEBUG((FSW_MSGSTR("fsw_ext4_get_by_extent: index node covers block %d...\n"),
@@ -437,7 +451,8 @@ static fsw_status_t fsw_ext4_get_by_extent(struct fsw_ext4_volume *vol, struct f
                 if(bno >= ext4_extent_idx->ei_block)
                 {
                     // Follow extent tree...
-                    status = fsw_block_get(vol, ext4_extent_idx->ei_leaf_lo, 1, (void **)&buffer);
+                    fsw_u64 phys_bno = ((fsw_u64)ext4_extent_idx->ei_leaf_hi << 32) | ext4_extent_idx->ei_leaf_lo;
+                    status = fsw_block_get(vol, phys_bno, 1, (void **)&buffer);
                     if (status)
                         return status;
                     buf_offset = 0;
