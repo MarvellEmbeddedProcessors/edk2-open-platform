@@ -237,9 +237,8 @@ MvI2cClearIflg (
  IN I2C_MASTER_CONTEXT *I2cMasterContext
  )
 {
-  gBS->Stall(I2C_OPERATION_TIMEOUT);
+  MvI2cPollCtrl(I2cMasterContext, I2C_OPERATION_TIMEOUT, I2C_CONTROL_IFLG);
   MvI2cControlClear(I2cMasterContext, I2C_CONTROL_IFLG);
-  gBS->Stall(I2C_OPERATION_TIMEOUT);
 }
 
 /* Timeout is given in us */
@@ -289,18 +288,15 @@ MvI2cLockedStart (
     MvI2cClearIflg(I2cMasterContext);
   }
 
-  /* Without this delay we Timeout checking IFLG if the Timeout is 0 */
-  gBS->Stall(I2C_OPERATION_TIMEOUT);
-
   if (MvI2cPollCtrl(I2cMasterContext, Timeout, I2C_CONTROL_IFLG)) {
-    DEBUG((DEBUG_ERROR, "MvI2cDxe: Timeout sending %sSTART condition\n",
+    DEBUG((DEBUG_WARN, "MvI2cDxe: Timeout sending %aSTART condition\n",
         Mask == I2C_STATUS_START ? "" : "repeated "));
     return EFI_NO_RESPONSE;
   }
 
   I2cStatus = I2C_READ(I2cMasterContext, I2C_STATUS);
   if (I2cStatus != Mask) {
-    DEBUG((DEBUG_ERROR, "MvI2cDxe: wrong I2cStatus (%02x) after sending %sSTART condition\n",
+    DEBUG((DEBUG_WARN, "MvI2cDxe: wrong I2cStatus (%02x) after sending %aSTART condition\n",
         I2cStatus, Mask == I2C_STATUS_START ? "" : "repeated "));
     return EFI_DEVICE_ERROR;
   }
@@ -310,7 +306,7 @@ MvI2cLockedStart (
   MvI2cClearIflg(I2cMasterContext);
 
   if (MvI2cPollCtrl(I2cMasterContext, Timeout, I2C_CONTROL_IFLG)) {
-    DEBUG((DEBUG_ERROR, "MvI2cDxe: Timeout sending Slave address\n"));
+    DEBUG((DEBUG_WARN, "MvI2cDxe: Timeout sending Slave address\n"));
     return EFI_NO_RESPONSE;
   }
 
@@ -318,7 +314,7 @@ MvI2cLockedStart (
   I2cStatus = I2C_READ(I2cMasterContext, I2C_STATUS);
   if (I2cStatus != (ReadAccess ?
       I2C_STATUS_ADDR_R_ACK : I2C_STATUS_ADDR_W_ACK)) {
-    DEBUG((DEBUG_ERROR, "MvI2cDxe: no ACK (I2cStatus: %02x) after sending Slave address\n",
+    DEBUG((DEBUG_WARN, "MvI2cDxe: no ACK (I2cStatus: %02x) after sending Slave address\n",
         I2cStatus));
     return EFI_NO_RESPONSE;
   }
@@ -479,7 +475,7 @@ MvI2cRead (
     MvI2cClearIflg(I2cMasterContext);
 
     if (MvI2cPollCtrl(I2cMasterContext, delay, I2C_CONTROL_IFLG)) {
-      DEBUG((DEBUG_ERROR, "MvI2cDxe: Timeout reading data\n"));
+      DEBUG((DEBUG_WARN, "MvI2cDxe: Timeout reading data\n"));
       Status = EFI_NO_RESPONSE;
       goto out;
     }
@@ -487,7 +483,7 @@ MvI2cRead (
     I2cStatus = I2C_READ(I2cMasterContext, I2C_STATUS);
     if (I2cStatus != (LastByte ?
         I2C_STATUS_DATA_RD_NOACK : I2C_STATUS_DATA_RD_ACK)) {
-      DEBUG((DEBUG_ERROR, "MvI2cDxe: wrong I2cStatus (%02x) while reading\n", I2cStatus));
+      DEBUG((DEBUG_WARN, "MvI2cDxe: wrong I2cStatus (%02x) while reading\n", I2cStatus));
       Status = EFI_DEVICE_ERROR;
       goto out;
     }
@@ -521,14 +517,14 @@ MvI2cWrite (
 
     MvI2cClearIflg(I2cMasterContext);
     if (MvI2cPollCtrl(I2cMasterContext, Timeout, I2C_CONTROL_IFLG)) {
-      DEBUG((DEBUG_ERROR, "MvI2cDxe: Timeout writing data\n"));
+      DEBUG((DEBUG_WARN, "MvI2cDxe: Timeout writing data\n"));
       Status = EFI_NO_RESPONSE;
       goto out;
     }
 
     status = I2C_READ(I2cMasterContext, I2C_STATUS);
     if (status != I2C_STATUS_DATA_WR_ACK) {
-      DEBUG((DEBUG_ERROR, "MvI2cDxe: wrong status (%02x) while writing\n", status));
+      DEBUG((DEBUG_WARN, "MvI2cDxe: wrong status (%02x) while writing\n", status));
       Status = EFI_DEVICE_ERROR;
       goto out;
     }
@@ -559,6 +555,7 @@ MvI2cStartRequest (
   UINTN Transmitted;
   I2C_MASTER_CONTEXT *I2cMasterContext = I2C_SC_FROM_MASTER(This);
   EFI_I2C_OPERATION *Operation;
+  EFI_STATUS         Status = EFI_SUCCESS;
 
   ASSERT (RequestPacket != NULL);
   ASSERT (I2cMasterContext != NULL);
@@ -568,40 +565,64 @@ MvI2cStartRequest (
     ReadMode = Operation->Flags & I2C_FLAG_READ;
 
     if (Count == 0) {
-      MvI2cStart ( I2cMasterContext,
+      Status = MvI2cStart ( I2cMasterContext,
                    (SlaveAddress << 1) | ReadMode,
                    I2C_TRANSFER_TIMEOUT
                  );
     } else if (!(Operation->Flags & I2C_FLAG_NORESTART)) {
-      MvI2cRepeatedStart ( I2cMasterContext,
+      Status = MvI2cRepeatedStart ( I2cMasterContext,
                            (SlaveAddress << 1) | ReadMode,
                            I2C_TRANSFER_TIMEOUT
                          );
     }
 
-    if (ReadMode) {
-      MvI2cRead ( I2cMasterContext,
-                  Operation->Buffer,
-                  Operation->LengthInBytes,
-                  &Transmitted,
-                  Count == 1,
-                  I2C_TRANSFER_TIMEOUT
-                 );
+    /*
+     * If successful sending the Slave address,
+     * proceed to read or write section.
+     * Otherwise, abort the I2C transaction.
+     */
+    if (!EFI_ERROR (Status)) {
+      if (ReadMode) {
+          Status = MvI2cRead ( I2cMasterContext,
+                    Operation->Buffer,
+                    Operation->LengthInBytes,
+                    &Transmitted,
+                    Count == 1,
+                    I2C_TRANSFER_TIMEOUT
+                   );
+          Operation->LengthInBytes = Transmitted;
+      } else {
+          Status = MvI2cWrite ( I2cMasterContext,
+                     Operation->Buffer,
+                     Operation->LengthInBytes,
+                     &Transmitted,
+                     I2C_TRANSFER_TIMEOUT
+                    );
+          Operation->LengthInBytes = Transmitted;
+      }
+
+      if (EFI_ERROR (Status)) {
+        /*
+         * The I2C Read or Write transaction failed.
+         * Stop the I2C transaction.
+         */
+        MvI2cStop ( I2cMasterContext );
+        break;
+      }
+
+      if (Count == RequestPacket->OperationCount - 1) {
+        MvI2cStop ( I2cMasterContext );
+      }
+
     } else {
-      MvI2cWrite ( I2cMasterContext,
-                   Operation->Buffer,
-                   Operation->LengthInBytes,
-                   &Transmitted,
-                   I2C_TRANSFER_TIMEOUT
-                  );
-    }
-    if (Count == RequestPacket->OperationCount - 1) {
+      /* I2C transaction was aborted, stop the I2C transaction */
       MvI2cStop ( I2cMasterContext );
+      break;
     }
   }
 
   if (I2cStatus != NULL)
-    I2cStatus = EFI_SUCCESS;
+    *I2cStatus = Status;
   if (Event != NULL)
     gBS->SignalEvent(Event);
   return EFI_SUCCESS;
