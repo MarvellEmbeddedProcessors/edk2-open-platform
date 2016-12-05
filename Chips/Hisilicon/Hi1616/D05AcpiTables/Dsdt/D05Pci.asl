@@ -19,6 +19,27 @@
 //#include "ArmPlatform.h"
 Scope(_SB)
 {
+  /* 0xD000E014:Hi1616 chip version reg[19:8], 0x102-after EC, 0x101/0-before EC. */
+  OperationRegion (ECRA, SystemMemory, 0xD000E014, 0x4)
+  Field (ECRA, AnyAcc, NoLock, Preserve)
+  {
+    VECA, 32,
+  }
+
+  /* RBYV:Return by chip version
+   * the pcie device should be disable for chip's reason before EC,
+   * and the pcie device should be enable after EC for OS */
+  Method (RBYV)
+  {
+    Store(VECA, local0)
+    And (local0, 0xFFF00, local1)
+    If (LEqual (local1, 0x10200)) {
+      Return (0xf)
+    } Else {
+      Return (0x0)
+    }
+  }
+
   // 1P NA PCIe2
   Device (PCI2)
   {
@@ -147,7 +168,7 @@ Scope(_SB)
     }
     Method (_STA, 0x0, NotSerialized)
     {
-      Return (0x0)
+      Return (RBYV())
     }
 
   } // Device(PCI4)
@@ -220,7 +241,7 @@ Scope(_SB)
     }
     Method (_STA, 0x0, NotSerialized)
     {
-      Return (0x0)
+      Return (RBYV())
     }
   } // Device(PCI5)
 
@@ -292,7 +313,7 @@ Scope(_SB)
     }
     Method (_STA, 0x0, NotSerialized)
     {
-      Return (0x0)
+      Return (RBYV())
     }
   } // Device(PCI6)
   // 1P NB PCIe3
@@ -363,7 +384,7 @@ Scope(_SB)
     }
     Method (_STA, 0x0, NotSerialized)
     {
-      Return (0x0)
+      Return (RBYV())
     }
   } // Device(PCI7)
   // 2P NA PCIe2
@@ -505,7 +526,7 @@ Scope(_SB)
     }
     Method (_STA, 0x0, NotSerialized)
     {
-      Return (0x0)
+      Return (RBYV())
     }
   } // Device(PCIc)
 
@@ -577,7 +598,7 @@ Scope(_SB)
     }
     Method (_STA, 0x0, NotSerialized)
     {
-      Return (0x0)
+      Return (RBYV())
     }
   } // Device(PCId)
 }
