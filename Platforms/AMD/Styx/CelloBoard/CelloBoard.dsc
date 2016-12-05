@@ -254,8 +254,8 @@ DEFINE DO_KCS    = 0
   GCC:RELEASE_*_*_CC_FLAGS  = -DMDEPKG_NDEBUG
 
   *_*_*_ASL_FLAGS               = -tc -li -l -so
-  *_*_*_ASLPP_FLAGS             = -x c -E -P $(ARCHCC_FLAGS)
-  *_*_*_ASLCC_FLAGS             = -x c $(ARCHCC_FLAGS)
+  *_*_*_ASLPP_FLAGS             = $(ARCHCC_FLAGS)
+  *_*_*_ASLCC_FLAGS             = $(ARCHCC_FLAGS)
 
   GCC:*_*_AARCH64_ARCHCC_FLAGS = -DDO_KCS=$(DO_KCS) -DNUM_CORES=$(NUM_CORES) -DARM_CPU_AARCH64
   GCC:*_*_AARCH64_PP_FLAGS = -DDO_KCS=$(DO_KCS) -DNUM_CORES=$(NUM_CORES) -DARM_CPU_AARCH64
