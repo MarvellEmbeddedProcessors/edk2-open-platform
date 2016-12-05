@@ -1,0 +1,58 @@
+UEFI Build Instructions
+=======================
+
+For toolchain versions limitations please refer to edk2 wiki page:
+https://github.com/tianocore/tianocore.github.io/wiki/Using-EDK-II-with-Native-GCC
+
+Fully supported are gcc4.5 - gcc4.9, so possible {toolchain_name} are:
+	- GCC45
+	- GCC46
+	- GCC47
+	- GCC48
+	- GCC49
+	- GCC5
+
+Supported {platform} are:
+	- Armada70x0
+
+Supported {target} are
+	- DEBUG
+	- RELEASE
+
+Build procedure
+---------------
+1. Prerequisites:
+
+	Clone into edk2 repositories and apply Marvell patches (Please refer to
+	Release notes for instructions).
+
+2. Prepare environment:
+
+	2.1 Several packages will be needed to fully set up an edk2 build environment:
+
+			# sudo apt-get install build-essential uuid-dev
+			# sudo apt-get install lib32stdc++6 lib32z1
+
+	2.2 Set up EDK2 environment
+
+			# source edksetup.sh
+
+	2.3 Build base tools
+
+			# make -C BaseTools
+
+	2.4 Set {toolchain_name}_AARCH64_PREFIX to path to your cross compiler
+
+			# export {toolchain_name}_AARCH64_PREFIX=/path/to/toolchain
+
+		Example:
+		--------
+			# export GCC5_AARCH64_PREFIX=/opt/gcc-linaro-5.3.1-2016.05-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+
+3. Build EDK2 for selected {platform}:
+
+			# build -a AARCH64 -t {toolchain_name} -b {target} -p OpenPlatformPkg/Platforms/Marvell/Armada/{platform}.dsc
+
+	Example for building edk2 for Armada70x0 platform with GCC5 for DEBUG:
+
+			# build -a AARCH64 -t GCC5 -b DEBUG -p OpenPlatformPkg/Platforms/Marvell/Armada/Armada70x0.dsc
