@@ -459,6 +459,9 @@ DEFINE DO_KCS       = 1
   gAmdModulePkgTokenSpaceGuid.PcdSataSerdesBase|0xE1200000
   gAmdModulePkgTokenSpaceGuid.PcdSataSerdesOffset|0x00010000
 
+  # map the stack as non-executable when entering the DXE phase
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetNxForStack|TRUE
+
 !if $(DO_XGBE)
   gAmdModulePkgTokenSpaceGuid.PcdXgbeEnable|TRUE
 

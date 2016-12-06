@@ -440,6 +440,9 @@ DEFINE DO_KCS    = 0
   gAmdModulePkgTokenSpaceGuid.PcdSataSerdesBase|0xE1200000
   gAmdModulePkgTokenSpaceGuid.PcdSataSerdesOffset|0x00010000
 
+  # map the stack as non-executable when entering the DXE phase
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSetNxForStack|TRUE
+
 [PcdsPatchableInModule]
 # PCIe Configuration: x4x2x2
   gAmdModulePkgTokenSpaceGuid.PcdPcieCoreConfiguration|2
