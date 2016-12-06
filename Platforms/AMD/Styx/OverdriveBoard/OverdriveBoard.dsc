@@ -412,7 +412,7 @@ DEFINE DO_KCS       = 1
   #
   # Overdrive B1 has 14 SATA ports across 2 controllers.
   #
-  gAmdStyxTokenSpaceGuid.PcdSataPortCount|8
+  gAmdStyxTokenSpaceGuid.PcdSata0PortCount|8
   gAmdStyxTokenSpaceGuid.PcdSata1PortCount|6
 
   # PCIe Support

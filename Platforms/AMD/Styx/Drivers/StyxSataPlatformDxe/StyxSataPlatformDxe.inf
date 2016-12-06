@@ -46,15 +46,15 @@
   gAmdModulePkgTokenSpaceGuid.PcdSataSerdesOffset
   gAmdModulePkgTokenSpaceGuid.PcdSataNumChPerSerdes
 
-  gAmdStyxTokenSpaceGuid.PcdSataCtrlAxiSlvPort
-  gAmdStyxTokenSpaceGuid.PcdSataPortCount
+  gAmdStyxTokenSpaceGuid.PcdSata0CtrlAxiSlvPort
+  gAmdStyxTokenSpaceGuid.PcdSata0PortCount
+  gAmdStyxTokenSpaceGuid.PcdSata1CtrlAxiSlvPort
+  gAmdStyxTokenSpaceGuid.PcdSata1PortCount
   gAmdStyxTokenSpaceGuid.PcdSataPortMode
   gAmdStyxTokenSpaceGuid.PcdSataSmpsSupport
   gAmdStyxTokenSpaceGuid.PcdSataSssSupport
   gAmdStyxTokenSpaceGuid.PcdSataPortCpd
   gAmdStyxTokenSpaceGuid.PcdSataPortMpsp
-  gAmdStyxTokenSpaceGuid.PcdSata1CtrlAxiSlvPort
-  gAmdStyxTokenSpaceGuid.PcdSata1PortCount
 
 [Depex]
   TRUE

@@ -410,7 +410,7 @@ DEFINE DO_KCS       = 1
   #
   # 2 ports active on Overdrive 1000
   #
-  gAmdStyxTokenSpaceGuid.PcdSataPortCount|2
+  gAmdStyxTokenSpaceGuid.PcdSata0PortCount|2
   gAmdStyxTokenSpaceGuid.PcdSata1PortCount|0
 
   # PCIe Support

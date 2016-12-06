@@ -405,7 +405,7 @@ DEFINE DO_KCS    = 0
   #
   # Cello has 2 SATA ports on the first controller.
   #
-  gAmdStyxTokenSpaceGuid.PcdSataPortCount|2
+  gAmdStyxTokenSpaceGuid.PcdSata0PortCount|2
   gAmdStyxTokenSpaceGuid.PcdSata1PortCount|0
 
   # PCIe Support
