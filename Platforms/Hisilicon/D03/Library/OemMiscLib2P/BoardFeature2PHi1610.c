@@ -42,40 +42,40 @@ SERDES_POLARITY_INVERT gSerdesPolarityRxDesc[] =
     {SERDES_INVALID_MACRO_ID, SERDES_INVALID_LANE_NUM}
 };
 
-serdes_param_t gSerdesParam = {
-    .hilink0_mode = EM_HILINK0_PCIE1_8LANE,
-    .hilink1_mode = EM_HILINK1_PCIE0_8LANE,
-    .hilink2_mode = EM_HILINK2_PCIE2_8LANE,
-    .hilink3_mode = 0x0,
-    .hilink4_mode = 0xF,
-    .hilink5_mode = EM_HILINK5_SAS1_4LANE,
-    .hilink6_mode = 0x0,
-    .use_ssc      = 0,
-    };
+SERDES_PARAM gSerdesParam = {
+  .Hilink0Mode = EmHilink0Pcie1X8,
+  .Hilink1Mode = EmHilink1Pcie0X8,
+  .Hilink2Mode = EmHilink2Pcie2X8,
+  .Hilink3Mode = 0x0,
+  .Hilink4Mode = 0xF,
+  .Hilink5Mode = EmHilink5Sas1X4,
+  .Hilink6Mode = 0x0,
+  .UseSsc      = 0,
+};
 
-serdes_param_t gSerdesParam0 = {
-    .hilink0_mode = EM_HILINK0_HCCS1_8LANE_16,
-    .hilink1_mode = EM_HILINK1_HCCS0_8LANE_16,
-    .hilink2_mode = EM_HILINK2_PCIE2_8LANE,
-    .hilink3_mode = 0x0,
-    .hilink4_mode = 0xF,
-    .hilink5_mode = EM_HILINK5_SAS1_4LANE,
-    .hilink6_mode = 0x0,
-    .use_ssc      = 0,
-    };
+SERDES_PARAM gSerdesParam0 = {
+  .Hilink0Mode = EmHilink0Hccs1X8Width16,
+  .Hilink1Mode = EmHilink1Hccs0X8Width16,
+  .Hilink2Mode = EmHilink2Pcie2X8,
+  .Hilink3Mode = 0x0,
+  .Hilink4Mode = 0xF,
+  .Hilink5Mode = EmHilink5Sas1X4,
+  .Hilink6Mode = 0x0,
+  .UseSsc      = 0,
+};
 
-serdes_param_t gSerdesParam1 = {
-    .hilink0_mode = EM_HILINK0_HCCS1_8LANE_16,
-    .hilink1_mode = EM_HILINK1_HCCS0_8LANE_16,
-    .hilink2_mode = EM_HILINK2_PCIE2_8LANE,
-    .hilink3_mode = 0x0,
-    .hilink4_mode = 0xF,
-    .hilink5_mode = EM_HILINK5_PCIE3_4LANE,
-    .hilink6_mode = 0xF,
-    .use_ssc      = 0,
-    };
+SERDES_PARAM gSerdesParam1 = {
+  .Hilink0Mode = EmHilink0Hccs1X8Width16,
+  .Hilink1Mode = EmHilink1Hccs0X8Width16,
+  .Hilink2Mode = EmHilink2Pcie2X8,
+  .Hilink3Mode = 0x0,
+  .Hilink4Mode = 0xF,
+  .Hilink5Mode = EmHilink5Pcie3X4,
+  .Hilink6Mode = 0xF,
+  .UseSsc      = 0,
+};
 
-EFI_STATUS OemGetSerdesParam (serdes_param_t *ParamA, serdes_param_t *ParamB, UINT32 SocketId)
+EFI_STATUS OemGetSerdesParam (SERDES_PARAM *ParamA, SERDES_PARAM *ParamB, UINT32 SocketId)
 {
   if (ParamA == NULL) {
     DEBUG((EFI_D_ERROR, "[%a]:[%dL] Param == NULL!\n", __FUNCTION__, __LINE__));

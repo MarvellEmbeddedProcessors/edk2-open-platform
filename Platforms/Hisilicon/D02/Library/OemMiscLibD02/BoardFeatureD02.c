@@ -50,16 +50,16 @@ SERDES_POLARITY_INVERT gSerdesPolarityRxDesc[] =
     {SERDES_INVALID_MACRO_ID, SERDES_INVALID_LANE_NUM}
 };
 
-serdes_param_t gSerdesParam = {
-    .hilink0_mode = EM_HILINK0_PCIE1_8LANE,
-    .hilink1_mode = EM_HILINK1_PCIE0_8LANE,
-    .hilink2_mode = EM_HILINK2_PCIE2_8LANE,
-    .hilink3_mode = EM_HILINK3_GE_4LANE,
-    .hilink4_mode = EM_HILINK4_XGE_4LANE,
-    .hilink5_mode = EM_HILINK5_SAS1_4LANE,
-    };
+SERDES_PARAM gSerdesParam = {
+  .Hilink0Mode = EmHilink0Pcie1X8,
+  .Hilink1Mode = EmHilink1Pcie0X8,
+  .Hilink2Mode = EmHilink2Pcie2X8,
+  .Hilink3Mode = EmHilink3GeX4,
+  .Hilink4Mode = EmHilink4XgeX4,
+  .Hilink5Mode = EmHilink5Sas1X4,
+};
 
-EFI_STATUS OemGetSerdesParam (serdes_param_t *ParamA, serdes_param_t *ParamB, UINT32 SocketId)
+EFI_STATUS OemGetSerdesParam (SERDES_PARAM *ParamA, SERDES_PARAM *ParamB, UINT32 SocketId)
 {
   if (ParamA == NULL) {
     DEBUG((DEBUG_ERROR, "[%a]:[%dL] ParamA == NULL!\n", __FUNCTION__, __LINE__));

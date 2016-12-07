@@ -73,8 +73,8 @@ UpdateSlotUsage(
   )
 {
     EFI_STATUS        Status;
-    serdes_param_t    SerdesParamA;
-    serdes_param_t    SerdesParamB;
+    SERDES_PARAM    SerdesParamA;
+    SERDES_PARAM    SerdesParamB;
 
     Status = OemGetSerdesParam (&SerdesParamA, &SerdesParamB, 0);
     if(EFI_ERROR(Status))
@@ -87,7 +87,7 @@ UpdateSlotUsage(
     // PCIE0
     //
     if (((UINTN)InputData == (UINTN)&MiscSystemSlotDesignationPcie0Data)
-        && SerdesParamA.hilink1_mode == EM_HILINK1_PCIE0_8LANE) {
+        && SerdesParamA.Hilink1Mode == EmHilink1Pcie0X8) {
         InputData->CurrentUsage = SlotUsageAvailable;
     }
 
@@ -96,7 +96,7 @@ UpdateSlotUsage(
     //
     if ((UINTN)InputData == (UINTN)&MiscSystemSlotDesignationPcie1Data)
     {
-        if (SerdesParamA.hilink0_mode == EM_HILINK0_PCIE1_4LANE_PCIE2_4LANE) {
+        if (SerdesParamA.Hilink0Mode == EmHilink0Pcie1X4Pcie2X4) {
             InputData->SlotDataBusWidth = SlotDataBusWidth4X;
         }
     }
@@ -106,10 +106,10 @@ UpdateSlotUsage(
     //
     if ((UINTN)InputData == (UINTN)&MiscSystemSlotDesignationPcie2Data)
     {
-        if (SerdesParamA.hilink0_mode == EM_HILINK0_PCIE1_4LANE_PCIE2_4LANE) {
+        if (SerdesParamA.Hilink0Mode == EmHilink0Pcie1X4Pcie2X4) {
             InputData->SlotDataBusWidth = SlotDataBusWidth4X;
             InputData->CurrentUsage = SlotUsageAvailable;
-        } else if (SerdesParamA.hilink2_mode == EM_HILINK2_PCIE2_8LANE) {
+        } else if (SerdesParamA.Hilink2Mode == EmHilink2Pcie2X8) {
             InputData->CurrentUsage = SlotUsageAvailable;
         }
     }
@@ -118,7 +118,7 @@ UpdateSlotUsage(
     // PCIE3
     //
     if (((UINTN)InputData == (UINTN)&MiscSystemSlotDesignationPcie3Data)
-        && SerdesParamA.hilink5_mode == EM_HILINK5_PCIE3_4LANE) {
+        && SerdesParamA.Hilink5Mode == EmHilink5Pcie3X4) {
         InputData->CurrentUsage = SlotUsageAvailable;
     }
 }

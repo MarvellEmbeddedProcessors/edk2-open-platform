@@ -18,53 +18,46 @@
 #define _SERDES_LIB_H_
 
 
-typedef enum hilink0_mode_type
-{
-  EM_HILINK0_PCIE1_8LANE = 0,
-  EM_HILINK0_PCIE1_4LANE_PCIE2_4LANE = 1,
-}hilink0_mode_type_e;
+typedef enum {
+  EmHilink0Pcie1X8 = 0,
+  EmHilink0Pcie1X4Pcie2X4 = 1,
+} HILINK0_MODE_TYPE;
 
-typedef enum hilink1_mode_type
-{
-  EM_HILINK1_PCIE0_8LANE = 0,
-  EM_HILINK1_HCCS_8LANE = 1,
-}hilink1_mode_type_e;
+typedef enum {
+  EmHilink1Pcie0X8 = 0,
+  EmHilink1HccsX8 = 1,
+} HILINK1_MODE_TYPE;
 
-typedef enum hilink2_mode_type
-{
-  EM_HILINK2_PCIE2_8LANE = 0,
-  EM_HILINK2_SAS0_8LANE = 1,
-}hilink2_mode_type_e;
+typedef enum {
+  EmHilink2Pcie2X8 = 0,
+  EmHilink2Sas0X8 = 1,
+} HILINK2_MODE_TYPE;
 
-typedef enum hilink3_mode_type
-{
-  EM_HILINK3_GE_4LANE = 0,
-  EM_HILINK3_GE_2LANE_XGE_2LANE = 1, //lane0,lane1-ge,lane2,lane3 xge
-}hilink3_mode_type_e;
+typedef enum {
+  EmHilink3GeX4 = 0,
+  EmHilink3GeX2XgeX2 = 1, //lane0,lane1-ge,lane2,lane3 xge
+} HILINK3_MODE_TYPE;
 
 
-typedef enum hilink4_mode_type
-{
-  EM_HILINK4_GE_4LANE = 0,
-  EM_HILINK4_XGE_4LANE = 1,
-}hilink4_mode_type_e;
+typedef enum {
+  EmHilink4GeX4 = 0,
+  EmHilink4XgeX4 = 1,
+} HILINK4_MODE_TYPE;
 
-typedef enum hilink5_mode_type
-{
-  EM_HILINK5_SAS1_4LANE = 0,
-  EM_HILINK5_PCIE3_4LANE = 1,
-}hilink5_mode_type_e;
+typedef enum {
+  EmHilink5Sas1X4 = 0,
+  EmHilink5Pcie3X4 = 1,
+} HILINK5_MODE_TYPE;
 
 
-typedef struct serdes_param
-{
-  hilink0_mode_type_e hilink0_mode;
-  hilink1_mode_type_e hilink1_mode;
-  hilink2_mode_type_e hilink2_mode;
-  hilink3_mode_type_e hilink3_mode;
-  hilink4_mode_type_e hilink4_mode;
-  hilink5_mode_type_e hilink5_mode;
-}serdes_param_t;
+typedef struct {
+  HILINK0_MODE_TYPE Hilink0Mode;
+  HILINK1_MODE_TYPE Hilink1Mode;
+  HILINK2_MODE_TYPE Hilink2Mode;
+  HILINK3_MODE_TYPE Hilink3Mode;
+  HILINK4_MODE_TYPE Hilink4Mode;
+  HILINK5_MODE_TYPE Hilink5Mode;
+} SERDES_PARAM;
 
 
 #define SERDES_INVALID_MACRO_ID  0xFFFFFFFF
@@ -76,7 +69,7 @@ typedef struct {
 } SERDES_POLARITY_INVERT;
 
 
-EFI_STATUS OemGetSerdesParam (serdes_param_t *ParamA, serdes_param_t *ParamB, UINT32 SocketId);
+EFI_STATUS OemGetSerdesParam (SERDES_PARAM *ParamA, SERDES_PARAM *ParamB, UINT32 SocketId);
 extern SERDES_POLARITY_INVERT gSerdesPolarityTxDesc[];
 extern SERDES_POLARITY_INVERT gSerdesPolarityRxDesc[];
 UINT32 GetEthType(UINT8 EthChannel);
