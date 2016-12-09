@@ -195,7 +195,7 @@
 
   gHisiTokenSpaceGuid.PcdIsMPBoot|1
   gHisiTokenSpaceGuid.PcdSocketMask|0x3
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"Hisilicon D05 UEFI 16.08 RC1"
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"Hisilicon D05 UEFI 16.12 Release"
 
   gHisiTokenSpaceGuid.PcdBiosVersionString|L"10.01.01T18"
 
