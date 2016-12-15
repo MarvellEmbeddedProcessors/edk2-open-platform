@@ -139,6 +139,11 @@ InitializeSataController (
            AhciBaseAddr, SIZE_4KB);
 }
 
+#define STYX_SOC_VERSION_MASK    0xFFF
+#define STYX_SOC_VERSION_A0      0x000
+#define STYX_SOC_VERSION_B0      0x010
+#define STYX_SOC_VERSION_B1      0x011
+
 EFI_STATUS
 EFIAPI
 StyxSataPlatformDxeEntryPoint (
@@ -166,6 +171,13 @@ StyxSataPlatformDxeEntryPoint (
 
   for (PortNum = 0; PortNum < FixedPcdGet8(PcdSata0PortCount); PortNum++) {
       SetPrdSingleSata0 (PortNum);
+  }
+
+  //
+  // Ignore the second SATA controller on pre-B1 silicon
+  //
+  if ((PcdGet32 (PcdSocCpuId) & STYX_SOC_VERSION_MASK) < STYX_SOC_VERSION_B1) {
+    return EFI_SUCCESS;
   }
 
   if (FixedPcdGet8(PcdSata1PortCount) > 0) {
