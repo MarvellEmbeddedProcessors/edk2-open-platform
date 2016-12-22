@@ -662,6 +662,10 @@ Scope(_SB)
         Package () {"port-idx-in-ae", 2},
       }
     })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (0)
+    }
   }
   Device (ETH3) {
     Name(_HID, "HISI00C2")
@@ -674,6 +678,10 @@ Scope(_SB)
         Package () {"port-idx-in-ae", 3},
       }
     })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (0)
+    }
   }
 
   Device (ROCE) {
@@ -1216,6 +1224,10 @@ Scope(_SB)
         Package () {"port-idx-in-ae", 0},
       }
     })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (0)
+    }
   }
   Device (ETH7) {
     Name(_HID, "HISI00C2")
@@ -1228,6 +1240,10 @@ Scope(_SB)
         Package () {"port-idx-in-ae", 1},
       }
     })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (0)
+    }
   }
 
 }
