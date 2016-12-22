@@ -174,6 +174,15 @@ Scope(_SB)
       H3L3, 16,    // port5
       , 16,    //RESERVED
     }
+    OperationRegion(HSFP, SystemMemory, 0x78000010, 0x100)
+    Field(HSFP, ByteAcc, NoLock, Preserve) {
+      Offset (0x2),
+      HSF0, 1,  // port0
+      , 7,    //RESERVED
+      Offset (0x6),
+      HSF1, 1,    // port1
+      , 7,    //RESERVED
+    }
     Name (_HID, "HISI00B2")
     Name (_CCA, 1) // Cache-coherent controller
     Name (_CRS, ResourceTemplate (){
@@ -520,7 +529,21 @@ Scope(_SB)
             //Get sfp status
             case (0x5)
             {
+              Store (1, Local1) //set no sfp default
+              Store (DeRefOf (Index (Arg3, 0)), Local0)
+              If (LEqual (Local0, 0))
+              {
+                // port 0:
+                Store (HSF0, Local1)
+              }
+              ElseIf (LEqual (Local0, 1))
+              {
+                // port 1
+                Store (HSF1, Local1)
+              }
 
+              XOr (Local1, 1, local1)
+              Return (Local1)
             }
           }
         }
