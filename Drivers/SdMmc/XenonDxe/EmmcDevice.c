@@ -819,8 +819,8 @@ EmmcSwitchToHS200 (
 {
   EFI_STATUS          Status;
   UINT8               HsTiming;
+  UINT8               HostCtrl1;
   UINT8               HostCtrl2;
-  UINT16              ClockCtrl;
 
   if ((BusWidth != 4) && (BusWidth != 8)) {
     return EFI_INVALID_PARAMETER;
@@ -831,12 +831,10 @@ EmmcSwitchToHS200 (
     return Status;
   }
   //
-  // Set to HS200/SDR104 timing
+  // Set to High Speed timing
   //
-  //
-  // Stop bus clock at first
-  //
-  Status = SdMmcHcStopClock (PciIo, Slot);
+  HostCtrl1 = BIT2;
+  Status = SdMmcHcOrMmio (PciIo, Slot, SD_MMC_HC_HOST_CTRL1, sizeof (HostCtrl1), &HostCtrl1);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -849,33 +847,13 @@ EmmcSwitchToHS200 (
     return Status;
   }
   //
-  // Set UHS Mode Select field of Host Control 2 reigster to SDR104
+  // Set UHS Mode Select field of Host Control 2 reigster to Xenon-specific HS200 value.
   //
-  HostCtrl2 = BIT0 | BIT1;
+  HostCtrl2 = 0x5;
   Status = SdMmcHcOrMmio (PciIo, Slot, SD_MMC_HC_HOST_CTRL2, sizeof (HostCtrl2), &HostCtrl2);
   if (EFI_ERROR (Status)) {
     return Status;
   }
-  //
-  // Wait Internal Clock Stable in the Clock Control register to be 1 before set SD Clock Enable bit
-  //
-  Status = SdMmcHcWaitMmioSet (
-             PciIo,
-             Slot,
-             SD_MMC_HC_CLOCK_CTRL,
-             sizeof (ClockCtrl),
-             BIT1,
-             BIT1,
-             SD_MMC_HC_GENERIC_TIMEOUT
-             );
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-  //
-  // Set SD Clock Enable in the Clock Control register to 1
-  //
-  ClockCtrl = BIT2;
-  Status = SdMmcHcOrMmio (PciIo, Slot, SD_MMC_HC_CLOCK_CTRL, sizeof (ClockCtrl), &ClockCtrl);
 
   HsTiming = 2;
   Status = EmmcSwitchClockFreq (PciIo, PassThru, Slot, Rca, HsTiming, ClockFreq);
