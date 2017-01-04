@@ -69,8 +69,10 @@
   UefiHiiServicesLib|MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
   UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
 
-  # Assume everything is fixed at build. do not use runtime PCD feature
-  PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+  #
+  # Allow dynamic PCDs
+  #
+  PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
 
   BaseMemoryLib|MdePkg/Library/BaseMemoryLibOptDxe/BaseMemoryLibOptDxe.inf
 
@@ -143,6 +145,8 @@
   BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
 
 [LibraryClasses.common.SEC]
+  PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+
   DebugAgentLib|ArmPkg/Library/DebugAgentSymbolsBaseLib/DebugAgentSymbolsBaseLib.inf
   DefaultExceptionHandlerLib|ArmPkg/Library/DefaultExceptionHandlerLib/DefaultExceptionHandlerLibBase.inf
 
@@ -380,8 +384,11 @@
   # DXE
   MdeModulePkg/Core/Dxe/DxeMain.inf {
     <LibraryClasses>
-      PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
       NULL|MdeModulePkg/Library/DxeCrc32GuidedSectionExtractLib/DxeCrc32GuidedSectionExtractLib.inf
+  }
+  MdeModulePkg/Universal/PCD/Dxe/Pcd.inf {
+    <LibraryClasses>
+      PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   }
 
   # Architectural Protocols DXE
