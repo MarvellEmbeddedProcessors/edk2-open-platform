@@ -16,6 +16,10 @@ Indicates, whether the interface is supplied with 1.8V.
 
 Indicates, whether the interface is using 8-bit bus.
 
+  gMarvellTokenSpaceGuid.PcdXenonSlowModeEnable
+
+Indicates, whether the interface is using so called 'slow mode' (PHY bypassing).
+
 Examples
 --------
 Assuming we want to enable both SdMmc ports on Armada 70x0 board, first one is
@@ -26,3 +30,6 @@ supplied with 3.3V and second one with 1.8V:
 
 Use 8-bit bus only with first controller:
   gMarvellTokenSpaceGuid.PcdXenon8BitBusEnable|{ 0x1, 0x0 }
+
+Use 'slow mode' for both controllers:
+  gMarvellTokenSpaceGuid.PcdXenonSlowModeEnable|{ 0x1, 0x1 }
