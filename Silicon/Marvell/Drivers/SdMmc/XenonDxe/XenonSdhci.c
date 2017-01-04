@@ -330,7 +330,8 @@ STATIC
 VOID
 XenonSetPhy (
   IN EFI_PCI_IO_PROTOCOL   *PciIo,
-  UINT8 Timing
+  IN UINT8 Timing,
+  IN BOOLEAN SlowMode
   )
 {
   UINT32 Var = 0;
@@ -354,7 +355,13 @@ XenonSetPhy (
     SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, TRUE, SDHC_REG_SIZE_4B, &Var);
 
     // Set SLOW_MODE for PHY
-    Var |= OUTPUT_QSN_PHASE_SELECT | QSN_PHASE_SLOW_MODE_BIT;
+    if (SlowMode) {
+      Var |= QSN_PHASE_SLOW_MODE_BIT;
+    }
+
+    // Set output clock polarity
+    Var |= OUTPUT_QSN_PHASE_SELECT;
+
     SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, FALSE, SDHC_REG_SIZE_4B, &Var);
   }
 
@@ -612,7 +619,8 @@ XenonTransferData (
 
 EFI_STATUS
 XenonInit (
-  IN SD_MMC_HC_PRIVATE_DATA *Private
+  IN SD_MMC_HC_PRIVATE_DATA *Private,
+  IN BOOLEAN SlowMode
   )
 {
   EFI_PCI_IO_PROTOCOL *PciIo = Private->PciIo;
@@ -630,7 +638,7 @@ XenonInit (
 
   // Set MAX_CLOCK for configuring PHY
   XenonSetClk (PciIo, Private, XENON_MMC_MAX_CLK);
-  XenonSetPhy (PciIo, MMC_TIMING_UHS_SDR50);
+  XenonSetPhy (PciIo, MMC_TIMING_UHS_SDR50, SlowMode);
 
   XenonConfigureInterrupts (PciIo);
 

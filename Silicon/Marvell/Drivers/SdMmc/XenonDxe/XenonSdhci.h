@@ -334,7 +334,8 @@ XenonTransferData (
 
 EFI_STATUS
 XenonInit (
-  IN SD_MMC_HC_PRIVATE_DATA *Private
+  IN SD_MMC_HC_PRIVATE_DATA *Private,
+  IN BOOLEAN SlowMode
   );
 
 EFI_STATUS

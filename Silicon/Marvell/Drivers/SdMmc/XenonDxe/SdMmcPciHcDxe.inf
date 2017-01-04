@@ -57,6 +57,7 @@
   gMarvellTokenSpaceGuid.PcdPciESdhci
   gMarvellTokenSpaceGuid.PcdXenon1v8Enable
   gMarvellTokenSpaceGuid.PcdXenon8BitBusEnable
+  gMarvellTokenSpaceGuid.PcdXenonSlowModeEnable
 
 [Protocols]
   gEfiDevicePathProtocolGuid                    ## TO_START

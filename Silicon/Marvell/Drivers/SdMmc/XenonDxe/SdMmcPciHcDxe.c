@@ -101,6 +101,7 @@ STATIC UINT8 XenonIdx;
 STATIC UINT8 * CONST XenonDevEnabled = FixedPcdGetPtr (PcdPciESdhci);
 STATIC UINT8 * CONST Xenon1v8Enabled = FixedPcdGetPtr (PcdXenon1v8Enable);
 STATIC UINT8 * CONST Xenon8BitBusEnabled = FixedPcdGetPtr (PcdXenon8BitBusEnable);
+STATIC UINT8 * CONST XenonSlowModeEnabled = FixedPcdGetPtr (PcdXenonSlowModeEnable);
 
 //
 // Prioritized function list to detect card type.
@@ -545,6 +546,7 @@ SdMmcPciHcDriverBindingStart (
   BOOLEAN                         Support64BitDma;
   BOOLEAN                         Support1v8;
   BOOLEAN                         Support8Bit;
+  BOOLEAN                         SlowMode;
 
   DEBUG ((DEBUG_INFO, "SdMmcPciHcDriverBindingStart: Start\n"));
 
@@ -560,6 +562,7 @@ SdMmcPciHcDriverBindingStart (
   //
   Support1v8 = Xenon1v8Enabled[XenonIdx];
   Support8Bit = Xenon8BitBusEnabled[XenonIdx];
+  SlowMode = XenonSlowModeEnabled[XenonIdx];
   XenonIdx++;
 
   //
@@ -677,7 +680,7 @@ SdMmcPciHcDriverBindingStart (
   //
   // Perform Xenon-specific init sequence
   //
-  XenonInit (Private);
+  XenonInit (Private, SlowMode);
 
   //
   // Initialize HC timeout control
