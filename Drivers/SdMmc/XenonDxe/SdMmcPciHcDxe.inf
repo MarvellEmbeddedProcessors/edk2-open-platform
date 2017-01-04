@@ -40,6 +40,7 @@
 
 [Packages]
   MdePkg/MdePkg.dec
+  OpenPlatformPkg/Platforms/Marvell/Marvell.dec
 
 [LibraryClasses]
   BaseLib
@@ -51,6 +52,10 @@
   UefiDriverEntryPoint
   UefiLib
   UefiRuntimeServicesTableLib
+
+[Pcd]
+  gMarvellTokenSpaceGuid.PcdPciESdhci
+  gMarvellTokenSpaceGuid.PcdXenon1v8Enable
 
 [Protocols]
   gEfiDevicePathProtocolGuid                    ## TO_START
