@@ -191,6 +191,7 @@
 
 #SdMmc
   gMarvellTokenSpaceGuid.PcdXenon1v8Enable|{ 0x0 }|VOID*|0x3000036
+  gMarvellTokenSpaceGuid.PcdXenon8BitBusEnable|{ 0x0 }|VOID*|0x3000037
 
 [Protocols]
   gMarvellEepromProtocolGuid               = { 0x71954bda, 0x60d3, 0x4ef8, { 0x8e, 0x3c, 0x0e, 0x33, 0x9f, 0x3b, 0xc2, 0x2b }}
