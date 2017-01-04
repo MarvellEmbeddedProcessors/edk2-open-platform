@@ -100,6 +100,7 @@ STATIC UINT8 XenonIdx;
 //
 STATIC UINT8 * CONST XenonDevEnabled = FixedPcdGetPtr (PcdPciESdhci);
 STATIC UINT8 * CONST Xenon1v8Enabled = FixedPcdGetPtr (PcdXenon1v8Enable);
+STATIC UINT8 * CONST Xenon8BitBusEnabled = FixedPcdGetPtr (PcdXenon8BitBusEnable);
 
 //
 // Prioritized function list to detect card type.
@@ -543,6 +544,7 @@ SdMmcPciHcDriverBindingStart (
   UINT32                          RoutineNum;
   BOOLEAN                         Support64BitDma;
   BOOLEAN                         Support1v8;
+  BOOLEAN                         Support8Bit;
 
   DEBUG ((DEBUG_INFO, "SdMmcPciHcDriverBindingStart: Start\n"));
 
@@ -557,6 +559,7 @@ SdMmcPciHcDriverBindingStart (
   // Obtain configuration data for this device and increase index afterwards.
   //
   Support1v8 = Xenon1v8Enabled[XenonIdx];
+  Support8Bit = Xenon8BitBusEnabled[XenonIdx];
   XenonIdx++;
 
   //
@@ -648,7 +651,9 @@ SdMmcPciHcDriverBindingStart (
     Private->Capability[Slot].Sdr50 = 0;
   }
 
-  Private->Capability[Slot].BusWidth8 = 0;
+  if (!Support8Bit) {
+    Private->Capability[Slot].BusWidth8 = 0;
+  }
 
   //
   // Override inappropriate base clock frequency from Capabilities Register 1.
