@@ -91,6 +91,17 @@ EMMC_DEVICE_PATH    mEmmcDpTemplate = {
 };
 
 //
+// Device global index
+//
+STATIC UINT8 XenonIdx;
+
+//
+// Tables with used Xenon instances and their configuration
+//
+STATIC UINT8 * CONST XenonDevEnabled = FixedPcdGetPtr (PcdPciESdhci);
+STATIC UINT8 * CONST Xenon1v8Enabled = FixedPcdGetPtr (PcdXenon1v8Enable);
+
+//
 // Prioritized function list to detect card type.
 // User could add other card detection logic here.
 //
@@ -528,8 +539,22 @@ SdMmcPciHcDriverBindingStart (
   CARD_TYPE_DETECT_ROUTINE        *Routine;
   UINT32                          RoutineNum;
   BOOLEAN                         Support64BitDma;
+  BOOLEAN                         Support1v8;
 
   DEBUG ((DEBUG_INFO, "SdMmcPciHcDriverBindingStart: Start\n"));
+
+  //
+  // Set current Xenon device index.
+  //
+  while (!XenonDevEnabled[XenonIdx]) {
+    XenonIdx++;
+  }
+
+  //
+  // Obtain configuration data for this device and increase index afterwards.
+  //
+  Support1v8 = Xenon1v8Enabled[XenonIdx];
+  XenonIdx++;
 
   //
   // Open PCI I/O Protocol and save pointer to open protocol
@@ -609,12 +634,17 @@ SdMmcPciHcDriverBindingStart (
   Support64BitDma &= Private->Capability[Slot].SysBus64;
 
   //
-  // Override capabilities structure - only 4 Bit width bus is supported
-  // by HW and also force using SDR25 mode
+  // Override capabilities structure according to board configuration.
   //
-  Private->Capability[Slot].Sdr104 = 0;
-  Private->Capability[Slot].Ddr50 = 0;
-  Private->Capability[Slot].Sdr50 = 0;
+  if (Support1v8) {
+    Private->Capability[Slot].Voltage33 = 0;
+    Private->Capability[Slot].Voltage30 = 0;
+  } else {
+    Private->Capability[Slot].Sdr104 = 0;
+    Private->Capability[Slot].Ddr50 = 0;
+    Private->Capability[Slot].Sdr50 = 0;
+  }
+
   Private->Capability[Slot].BusWidth8 = 0;
 
   if (Private->Capability[Slot].BaseClkFreq == 0) {

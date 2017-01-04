@@ -1,0 +1,21 @@
+XenonDxe porting guide
+--------------------
+XenonDxe is a driver supporting SdMmc interface on Marvell platforms.
+Following PCDs are required to operate:
+
+  gMarvellTokenSpaceGuid.PcdPciESdhci
+
+Indication of enabled Xenon controllers. It is common PCD with Marvell
+PciEmulation driver (see Documentation/Marvell/PortingGuide/PciEmulation.txt):
+
+  gMarvellTokenSpaceGuid.PcdXenon1v8Enable
+
+Indicates, whether the interface is supplied with 1.8V.
+
+Examples
+--------
+Assuming we want to enable both SdMmc ports on Armada 70x0 board, first one is
+supplied with 3.3V and second one with 1.8V:
+
+  gMarvellTokenSpaceGuid.PcdPciESdhci|{ 0x1, 0x1 }
+  gMarvellTokenSpaceGuid.PcdXenon1v8Enable|{0x0, 0x1}
