@@ -145,3 +145,8 @@
 
   #RTC
   gMarvellTokenSpaceGuid.PcdRtcBaseAddress|0xF2284000
+
+  #SdMmc
+  gMarvellTokenSpaceGuid.PcdXenon1v8Enable|{ 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdXenon8BitBusEnable|{ 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdXenonSlowModeEnable|{ 0x1, 0x0 }
