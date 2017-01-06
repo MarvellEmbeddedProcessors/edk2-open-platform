@@ -55,6 +55,7 @@
  */
 
 #include <Library/MemoryAllocationLib.h>
+#include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -65,26 +66,22 @@
 #include "e1000phyreg.h"
 
 static EFI_STATUS e1000phy_probe (const struct mii_attach_args *ma);
-static void  e1000phy_attach (const struct mii_attach_args *ma);
+STATIC VOID  e1000phy_attach (struct e1000phy_softc *, const struct mii_attach_args *ma);
+STATIC VOID  e1000phy_service (struct e1000phy_softc *, INTN);
+STATIC VOID  e1000phy_status (struct e1000phy_softc *);
+STATIC VOID  e1000phy_reset (struct e1000phy_softc *);
+STATIC VOID  e1000phy_mii_phy_auto (struct e1000phy_softc *);
+
+INTN msk_phy_readreg (VOID *, INTN);
+INTN msk_phy_writereg (VOID *, INTN, INTN);
+VOID msk_miibus_statchg (VOID *);
+
 static const struct mii_phydesc * mii_phy_match (const struct mii_attach_args *ma,
                                                  const struct mii_phydesc *mpd);
 static const struct mii_phydesc * mii_phy_match_gen (const struct mii_attach_args *ma,
                                                      const struct mii_phydesc *mpd, UINTN endlen);
 static EFI_STATUS mii_phy_dev_probe (const struct mii_attach_args *ma, const struct mii_phydesc *mpd);
-
-struct e1000phy_softc {
-  struct mii_softc mii_sc;
-  INTN mii_model;
-  const struct msk_mii_data *mmd;
-};
-
-struct e1000phy_softc *mPhySoftc;
-
-static void mii_phy_update (INTN);
-static void  e1000phy_service (INTN);
-static void  e1000phy_status (struct mii_softc *);
-static void  e1000phy_reset (struct mii_softc *);
-static void  e1000phy_mii_phy_auto (void);
+STATIC VOID mii_phy_update (struct e1000phy_softc *, INTN);
 
 static const struct mii_phydesc e1000phys[] = {
   MII_PHY_DESC (MARVELL, E1000),
@@ -113,51 +110,68 @@ static const struct mii_phydesc e1000phys[] = {
 EFI_STATUS
 e1000_probe_and_attach (
     struct mii_data             *mii,
-    const struct msk_mii_data   *mmd
+    const struct msk_mii_data   *mmd,
+    VOID                        *sc_if,
+    VOID                        **rsc_phy
     )
 {
   struct mii_attach_args    ma;
   INTN                      bmsr;
   EFI_STATUS                Status;
+  struct e1000phy_softc        *sc_phy;
 
   Status = gBS->AllocatePool (EfiBootServicesData,
                               sizeof (struct e1000phy_softc),
-                              (VOID**) &mPhySoftc);
+                              (VOID**) &sc_phy);
   if (EFI_ERROR (Status)) {
     return Status;
   }
-  gBS->SetMem (mPhySoftc, sizeof (struct e1000phy_softc), 0);
-  mPhySoftc->mmd = mmd;
+  gBS->SetMem (sc_phy, sizeof (struct e1000phy_softc), 0);
+  sc_phy->mmd = mmd;
 
+  sc_phy->sc_if = sc_if;
 
   /*
    * Check to see if there is a PHY at this address.  Note,
    * many braindead PHYs report 0/0 in their ID registers,
    * so we test for media in the BMSR.
    */
-  bmsr = PHY_READ (mPhySoftc, E1000_SR);
+  bmsr = PHY_READ (sc_phy, E1000_SR);
   if (bmsr == 0 || bmsr == 0xffff || (bmsr & (E1000_SR_EXTENDED_STATUS|E1000_SR_MEDIAMASK)) == 0) {
     /* Assume no PHY at this address. */
-    gBS->FreePool (mPhySoftc);
+    gBS->FreePool (sc_phy);
     return EFI_DEVICE_ERROR;
   }
 
   /*
    * Extract the IDs.
    */
-  ma.mii_id1 = PHY_READ (mPhySoftc, E1000_ID1);
-  ma.mii_id2 = PHY_READ (mPhySoftc, E1000_ID2);
+  ma.mii_id1 = PHY_READ (sc_phy, E1000_ID1);
+  ma.mii_id2 = PHY_READ (sc_phy, E1000_ID2);
 
   ma.mii_data = mii;
 
   Status = e1000phy_probe (&ma);
   if (EFI_ERROR (Status)) {
-    gBS->FreePool (mPhySoftc);
+    gBS->FreePool (sc_phy);
     return Status;
   }
 
-  e1000phy_attach (&ma);
+  e1000phy_attach (sc_phy, &ma);
+
+  *rsc_phy = sc_phy;
+
   return EFI_SUCCESS;
+}
+
+VOID
+e1000phy_detach (
+    struct e1000phy_softc *sc_phy
+    )
+{
+  if (sc_phy != NULL) {
+    gBS->FreePool (sc_phy);
+  }
 }
 
 EFI_STATUS
@@ -170,25 +184,26 @@ e1000phy_probe (
 
 static void
 e1000phy_attach (
-    const struct mii_attach_args    *ma
+    struct e1000phy_softc        *sc_phy,
+    const struct mii_attach_args *ma
     )
 {
   struct mii_softc    *sc;
 
-  sc = &mPhySoftc->mii_sc;
+  sc = &sc_phy->mii_sc;
   sc->mii_pdata = ma->mii_data;
   sc->mii_anegticks = MII_ANEGTICKS_GIGE;
 
-  mPhySoftc->mii_model = MII_MODEL (ma->mii_id2);
+  sc_phy->mii_model = MII_MODEL (ma->mii_id2);
 
-  if (mPhySoftc->mmd != NULL && (mPhySoftc->mmd->mii_flags & MIIF_HAVEFIBER) != 0) {
+  if (sc_phy->mmd != NULL && (sc_phy->mmd->mii_flags & MIIF_HAVEFIBER) != 0) {
     sc->mii_flags |= MIIF_HAVEFIBER;
   }
 
-  switch (mPhySoftc->mii_model) {
+  switch (sc_phy->mii_model) {
     case MII_MODEL_MARVELL_E1011:
     case MII_MODEL_MARVELL_E1112:
-      if (PHY_READ (mPhySoftc, E1000_ESSR) & E1000_ESSR_FIBER_LINK) {
+      if (PHY_READ (sc_phy, E1000_ESSR) & E1000_ESSR_FIBER_LINK) {
         sc->mii_flags |= MIIF_HAVEFIBER;
       }
       break;
@@ -204,49 +219,52 @@ e1000phy_attach (
      * that information should be used to select default
      * type of PHY.
      */
-      PHY_WRITE (mPhySoftc, E1000_EADR, 0);
+      PHY_WRITE (sc_phy, E1000_EADR, 0);
       break;
   }
 
-  e1000phy_reset (sc);
+  e1000phy_reset (sc_phy);
 
-  sc->mii_capabilities = PHY_READ (mPhySoftc, E1000_SR) & 0xFFFFFFFF;
+  sc->mii_capabilities = PHY_READ (sc_phy, E1000_SR) & 0xFFFFFFFF;
   if (sc->mii_capabilities & E1000_SR_EXTENDED_STATUS) {
-    sc->mii_extcapabilities = PHY_READ (mPhySoftc, E1000_ESR);
+    sc->mii_extcapabilities = PHY_READ (sc_phy, E1000_ESR);
   }
 }
 
 static void
 e1000phy_reset (
-    struct mii_softc    *sc
+    struct e1000phy_softc  *sc_phy
     )
 {
   UINT16  reg;
   UINT16  page;
+  struct mii_softc *sc;
 
-  reg = PHY_READ (mPhySoftc, E1000_SCR);
+  sc = &sc_phy->mii_sc;
+
+  reg = PHY_READ (sc_phy, E1000_SCR);
   if ((sc->mii_flags & MIIF_HAVEFIBER) != 0) {
     reg &= ~E1000_SCR_AUTO_X_MODE;
-    PHY_WRITE (mPhySoftc, E1000_SCR, reg);
-    if (mPhySoftc->mii_model == MII_MODEL_MARVELL_E1112) {
+    PHY_WRITE (sc_phy, E1000_SCR, reg);
+    if (sc_phy->mii_model == MII_MODEL_MARVELL_E1112) {
       // Select 1000BASE-X only mode.
-      page = PHY_READ (mPhySoftc, E1000_EADR);
-      PHY_WRITE (mPhySoftc, E1000_EADR, 2);
-      reg = PHY_READ (mPhySoftc, E1000_SCR);
+      page = PHY_READ (sc_phy, E1000_EADR);
+      PHY_WRITE (sc_phy, E1000_EADR, 2);
+      reg = PHY_READ (sc_phy, E1000_SCR);
       reg &= ~E1000_SCR_MODE_MASK;
       reg |= E1000_SCR_MODE_1000BX;
-      PHY_WRITE (mPhySoftc, E1000_SCR, reg);
-      if (mPhySoftc->mmd != NULL && mPhySoftc->mmd->pmd == 'P') {
+      PHY_WRITE (sc_phy, E1000_SCR, reg);
+      if (sc_phy->mmd != NULL && sc_phy->mmd->pmd == 'P') {
         // Set SIGDET polarity low for SFP module
-        PHY_WRITE (mPhySoftc, E1000_EADR, 1);
-        reg = PHY_READ (mPhySoftc, E1000_SCR);
+        PHY_WRITE (sc_phy, E1000_EADR, 1);
+        reg = PHY_READ (sc_phy, E1000_SCR);
         reg |= E1000_SCR_FIB_SIGDET_POLARITY;
-        PHY_WRITE (mPhySoftc, E1000_SCR, reg);
+        PHY_WRITE (sc_phy, E1000_SCR, reg);
       }
-      PHY_WRITE (mPhySoftc, E1000_EADR, page);
+      PHY_WRITE (sc_phy, E1000_EADR, page);
     }
   } else {
-    switch (mPhySoftc->mii_model) {
+    switch (sc_phy->mii_model) {
       case MII_MODEL_MARVELL_E1111:
       case MII_MODEL_MARVELL_E1112:
       case MII_MODEL_MARVELL_E1116:
@@ -256,7 +274,7 @@ e1000phy_reset (
         // Disable energy detect mode
         reg &= ~E1000_SCR_EN_DETECT_MASK;
         reg |= E1000_SCR_AUTO_X_MODE;
-        if (mPhySoftc->mii_model == MII_MODEL_MARVELL_E1116)
+        if (sc_phy->mii_model == MII_MODEL_MARVELL_E1116)
           reg &= ~E1000_SCR_POWER_DOWN;
         reg |= E1000_SCR_ASSERT_CRS_ON_TX;
         break;
@@ -270,81 +288,82 @@ e1000phy_reset (
                  E1000_SCR_SCRAMBLER_DISABLE);
         reg |= E1000_SCR_LPNP;
         // XXX Enable class A driver for Yukon FE+ A0
-        PHY_WRITE (mPhySoftc, 0x1C, PHY_READ (mPhySoftc, 0x1C) | 0x0001);
+        PHY_WRITE (sc_phy, 0x1C, PHY_READ (sc_phy, 0x1C) | 0x0001);
         break;
       default:
         reg &= ~E1000_SCR_AUTO_X_MODE;
         reg |= E1000_SCR_ASSERT_CRS_ON_TX;
         break;
     }
-    if (mPhySoftc->mii_model != MII_MODEL_MARVELL_E3016) {
+    if (sc_phy->mii_model != MII_MODEL_MARVELL_E3016) {
       /* Auto correction for reversed cable polarity. */
       reg &= ~E1000_SCR_POLARITY_REVERSAL;
     }
-    PHY_WRITE (mPhySoftc, E1000_SCR, reg);
+    PHY_WRITE (sc_phy, E1000_SCR, reg);
 
-    if (mPhySoftc->mii_model == MII_MODEL_MARVELL_E1116 ||
-        mPhySoftc->mii_model == MII_MODEL_MARVELL_E1149) {
-      PHY_WRITE (mPhySoftc, E1000_EADR, 2);
-      reg = PHY_READ (mPhySoftc, E1000_SCR);
+    if (sc_phy->mii_model == MII_MODEL_MARVELL_E1116 ||
+        sc_phy->mii_model == MII_MODEL_MARVELL_E1149) {
+      PHY_WRITE (sc_phy, E1000_EADR, 2);
+      reg = PHY_READ (sc_phy, E1000_SCR);
       reg |= E1000_SCR_RGMII_POWER_UP;
-      PHY_WRITE (mPhySoftc, E1000_SCR, reg);
-      PHY_WRITE (mPhySoftc, E1000_EADR, 0);
+      PHY_WRITE (sc_phy, E1000_SCR, reg);
+      PHY_WRITE (sc_phy, E1000_EADR, 0);
     }
   }
 
-  switch (mPhySoftc->mii_model) {
+  switch (sc_phy->mii_model) {
     case MII_MODEL_MARVELL_E3082:
     case MII_MODEL_MARVELL_E1112:
     case MII_MODEL_MARVELL_E1118:
       break;
     case MII_MODEL_MARVELL_E1116:
-      page = PHY_READ (mPhySoftc, E1000_EADR);
+      page = PHY_READ (sc_phy, E1000_EADR);
       /* Select page 3, LED control register. */
-      PHY_WRITE (mPhySoftc, E1000_EADR, 3);
-      PHY_WRITE (mPhySoftc, E1000_SCR,
+      PHY_WRITE (sc_phy, E1000_EADR, 3);
+      PHY_WRITE (sc_phy, E1000_SCR,
                  E1000_SCR_LED_LOS (1) |  /* Link/Act */
                  E1000_SCR_LED_INIT (8) |  /* 10Mbps */
                  E1000_SCR_LED_STAT1 (7) |  /* 100Mbps */
                  E1000_SCR_LED_STAT0 (7));  /* 1000Mbps */
       /* Set blink rate. */
-      PHY_WRITE (mPhySoftc, E1000_IER, E1000_PULSE_DUR (E1000_PULSE_170MS) | E1000_BLINK_RATE (E1000_BLINK_84MS));
-      PHY_WRITE (mPhySoftc, E1000_EADR, page);
+      PHY_WRITE (sc_phy, E1000_IER, E1000_PULSE_DUR (E1000_PULSE_170MS) | E1000_BLINK_RATE (E1000_BLINK_84MS));
+      PHY_WRITE (sc_phy, E1000_EADR, page);
       break;
     case MII_MODEL_MARVELL_E3016:
       /* LED2 -> ACT, LED1 -> LINK, LED0 -> SPEED. */
-      PHY_WRITE (mPhySoftc, 0x16, 0x0B << 8 | 0x05 << 4 | 0x04);
+      PHY_WRITE (sc_phy, 0x16, 0x0B << 8 | 0x05 << 4 | 0x04);
       /* Integrated register calibration workaround. */
-      PHY_WRITE (mPhySoftc, 0x1D, 17);
-      PHY_WRITE (mPhySoftc, 0x1E, 0x3F60);
+      PHY_WRITE (sc_phy, 0x1D, 17);
+      PHY_WRITE (sc_phy, 0x1E, 0x3F60);
       break;
     default:
       /* Force TX_CLK to 25MHz clock. */
-      reg = PHY_READ (mPhySoftc, E1000_ESCR);
+      reg = PHY_READ (sc_phy, E1000_ESCR);
       reg |= E1000_ESCR_TX_CLK_25;
-      PHY_WRITE (mPhySoftc, E1000_ESCR, reg);
+      PHY_WRITE (sc_phy, E1000_ESCR, reg);
       break;
   }
 
   /* Reset the PHY so all changes take effect. */
-  reg = PHY_READ (mPhySoftc, E1000_CR);
+  reg = PHY_READ (sc_phy, E1000_CR);
   reg |= E1000_CR_RESET;
-  PHY_WRITE (mPhySoftc, E1000_CR, reg);
+  PHY_WRITE (sc_phy, E1000_CR, reg);
 }
 
 static void
 mii_phy_update (
-    INTN    cmd
+    struct e1000phy_softc  *sc_phy,
+    INTN                   cmd
     )
 {
-  struct mii_softc      *sc = &mPhySoftc->mii_sc;
+  struct mii_softc      *sc = &sc_phy->mii_sc;
   struct mii_data       *mii = sc->mii_pdata;
 
   if (sc->mii_media_active != mii->mii_media_active ||
       sc->mii_media_status != mii->mii_media_status ||
       cmd == MII_MEDIACHG)
   {
-    msk_miibus_statchg (mPhySoftc->mmd->port);
+    msk_miibus_statchg (sc_phy->sc_if);
     sc->mii_media_active = mii->mii_media_active;
     sc->mii_media_status = mii->mii_media_status;
   }
@@ -352,30 +371,36 @@ mii_phy_update (
 
 void
 e1000phy_tick (
-    VOID
+    struct e1000phy_softc  *sc_phy
     )
 {
-  e1000phy_service (MII_TICK);
+  e1000phy_service (sc_phy, MII_TICK);
 }
 
 void
 e1000phy_mediachg (
-    VOID
+    struct e1000phy_softc  *sc_phy
     )
 {
-  struct mii_data *mii = mPhySoftc->mii_sc.mii_pdata;
+  struct mii_data *mii;
+
+  mii = sc_phy->mii_sc.mii_pdata;
+
   mii->mii_media_status = 0;
   mii->mii_media_active = IFM_NONE;
-  e1000phy_service (MII_MEDIACHG);
+  e1000phy_service (sc_phy, MII_MEDIACHG);
 }
 
 static void
 e1000phy_service (
-    INTN cmd
+    struct e1000phy_softc  *sc_phy,
+    INTN                   cmd
     )
 {
-  struct mii_softc    *sc = &mPhySoftc->mii_sc;
+  struct mii_softc    *sc;
   INTN                reg;
+
+  sc = &sc_phy->mii_sc;
 
   switch (cmd) {
     case MII_POLLSTAT:
@@ -385,7 +410,7 @@ e1000phy_service (
       //
       // Always try to auto-negotiate
       //
-      e1000phy_mii_phy_auto ();
+      e1000phy_mii_phy_auto (sc_phy);
       break;
 
     case MII_TICK:
@@ -393,7 +418,7 @@ e1000phy_service (
      * check for link.
      * Read the status register twice; Link Status is latch-low.
      */
-      reg = PHY_READ (mPhySoftc, E1000_SR) | PHY_READ (mPhySoftc, E1000_SR);
+      reg = PHY_READ (sc_phy, E1000_SR) | PHY_READ (sc_phy, E1000_SR);
       if (reg & E1000_SR_LINK_STATUS) {
         sc->mii_ticks = 0;
         break;
@@ -411,24 +436,25 @@ e1000phy_service (
       // Restart the auto-negotiation
       //
       sc->mii_ticks = 0;
-      e1000phy_reset (sc);
-      e1000phy_mii_phy_auto ();
+      e1000phy_reset (sc_phy);
+      e1000phy_mii_phy_auto (sc_phy);
       break;
   }
 
   /* Update the media status. */
-  e1000phy_status (sc);
+  e1000phy_status (sc_phy);
 
   /* Callback if something changed. */
-  mii_phy_update (cmd);
+  mii_phy_update (sc_phy, cmd);
 }
 
 static void
 e1000phy_status (
-    struct mii_softc  *sc
+    struct e1000phy_softc  *sc_phy
     )
 {
-  struct mii_data     *mii = sc->mii_pdata;
+  struct mii_softc    *sc;
+  struct mii_data     *mii;
   INTN                bmcr;
   INTN                bmsr;
   INTN                gsr;
@@ -436,12 +462,15 @@ e1000phy_status (
   INTN                ar;
   INTN                lpar;
 
+  sc = &sc_phy->mii_sc;
+  mii = sc->mii_pdata;
+
   mii->mii_media_status = IFM_AVALID;
   mii->mii_media_active = IFM_ETHER;
 
-  bmsr = PHY_READ (mPhySoftc, E1000_SR) | PHY_READ (mPhySoftc, E1000_SR);
-  bmcr = PHY_READ (mPhySoftc, E1000_CR);
-  ssr = PHY_READ (mPhySoftc, E1000_SSR);
+  bmsr = PHY_READ (sc_phy, E1000_SR) | PHY_READ (sc_phy, E1000_SR);
+  bmcr = PHY_READ (sc_phy, E1000_CR);
+  ssr = PHY_READ (sc_phy, E1000_SSR);
 
   if (bmsr & E1000_SR_LINK_STATUS) {
     DEBUG ((EFI_D_NET, "Marvell Yukon: e1000phy_status, link up\n"));
@@ -489,8 +518,8 @@ e1000phy_status (
   }
 
   if ((sc->mii_flags & MIIF_HAVEFIBER) == 0) {
-    ar = PHY_READ (mPhySoftc, E1000_AR);
-    lpar = PHY_READ (mPhySoftc, E1000_LPAR);
+    ar = PHY_READ (sc_phy, E1000_AR);
+    lpar = PHY_READ (sc_phy, E1000_LPAR);
     /* FLAG0==rx-flow-control FLAG1==tx-flow-control */
     if ((ar & E1000_AR_PAUSE) && (lpar & E1000_LPAR_PAUSE)) {
       mii->mii_media_active |= IFM_FLAG0 | IFM_FLAG1;
@@ -506,8 +535,8 @@ e1000phy_status (
   /* FLAG2 : local PHY resolved to MASTER */
   if ((IFM_SUBTYPE (mii->mii_media_active) == IFM_1000_T) ||
       (IFM_SUBTYPE (mii->mii_media_active) == IFM_1000_SX)) {
-    PHY_READ (mPhySoftc, E1000_1GSR);
-    gsr = PHY_READ (mPhySoftc, E1000_1GSR);
+    PHY_READ (sc_phy, E1000_1GSR);
+    gsr = PHY_READ (sc_phy, E1000_1GSR);
     if ((gsr & E1000_1GSR_MS_CONFIG_RES) != 0) {
       mii->mii_media_active |= IFM_FLAG2;
     }
@@ -516,29 +545,29 @@ e1000phy_status (
 
 static void
 e1000phy_mii_phy_auto (
-    VOID
+    struct e1000phy_softc  *sc_phy
     )
 {
   struct mii_softc    *sc;
   UINT16              reg;
 
   DEBUG ((EFI_D_NET, "Marvell Yukon: e1000phy_mii_phy_auto negotiation started\n"));
-  sc = &mPhySoftc->mii_sc;
+  sc = &sc_phy->mii_sc;
   if ((sc->mii_flags & MIIF_HAVEFIBER) == 0) {
-    reg = PHY_READ (mPhySoftc, E1000_AR);
+    reg = PHY_READ (sc_phy, E1000_AR);
     reg |= E1000_AR_10T | E1000_AR_10T_FD |
         E1000_AR_100TX | E1000_AR_100TX_FD |
         E1000_AR_PAUSE | E1000_AR_ASM_DIR;
-    PHY_WRITE (mPhySoftc, E1000_AR, reg | E1000_AR_SELECTOR_FIELD);
+    PHY_WRITE (sc_phy, E1000_AR, reg | E1000_AR_SELECTOR_FIELD);
   } else {
-    PHY_WRITE (mPhySoftc, E1000_AR, E1000_FA_1000X_FD | E1000_FA_1000X | E1000_FA_SYM_PAUSE | E1000_FA_ASYM_PAUSE);
+    PHY_WRITE (sc_phy, E1000_AR, E1000_FA_1000X_FD | E1000_FA_1000X | E1000_FA_SYM_PAUSE | E1000_FA_ASYM_PAUSE);
   }
 
   if ((sc->mii_extcapabilities & (E1000_ESR_1000T_FD | E1000_ESR_1000T)) != 0) {
-    PHY_WRITE (mPhySoftc, E1000_1GCR, E1000_1GCR_1000T_FD | E1000_1GCR_1000T);
+    PHY_WRITE (sc_phy, E1000_1GCR, E1000_1GCR_1000T_FD | E1000_1GCR_1000T);
   }
 
-  PHY_WRITE (mPhySoftc, E1000_CR, E1000_CR_AUTO_NEG_ENABLE | E1000_CR_RESTART_AUTO_NEG);
+  PHY_WRITE (sc_phy, E1000_CR, E1000_CR_AUTO_NEG_ENABLE | E1000_CR_RESTART_AUTO_NEG);
 }
 
 //
@@ -586,6 +615,7 @@ mii_phy_dev_probe (
     return EFI_SUCCESS;
   }
 
-  DEBUG ((EFI_D_NET, "Marvell Yukon: PHY not found (OUI=0x%x, MODEL=0x%x)\n", MII_OUI (ma->mii_id1, ma->mii_id2), MII_MODEL (ma->mii_id2)));
+  DEBUG ((DEBUG_NET, "Marvell Yukon: PHY not found (OUI=0x%x, MODEL=0x%x)\n",
+         MII_OUI (ma->mii_id1, ma->mii_id2), MII_MODEL (ma->mii_id2)));
   return EFI_NOT_FOUND;
 }

@@ -123,6 +123,7 @@ SnpGetStatus (
   EFI_STATUS    Status;
   YUKON_DRIVER    *Snp;
   EFI_TPL       OldTpl;
+  struct msk_softc *ScData;
 
   if (This == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -131,6 +132,11 @@ SnpGetStatus (
   Snp = YUKON_DEV_FROM_THIS_SNP (This);
   if (Snp == NULL) {
     return EFI_INVALID_PARAMETER;
+  }
+
+  Status = MarvellYukonGetControllerData (Snp->Controller, &ScData);
+  if (EFI_ERROR (Status)) {
+    return Status;
   }
 
   OldTpl = gBS->RaiseTPL (TPL_CALLBACK);
@@ -148,7 +154,7 @@ SnpGetStatus (
       goto ON_EXIT;
   }
 
-  mskc_getstatus (InterruptStatus, TxBuf);
+  mskc_getstatus (ScData->msk_if[Snp->Port], InterruptStatus, TxBuf);
   Status = EFI_SUCCESS;
 
 ON_EXIT:
@@ -201,6 +207,7 @@ SnpInitialize (
   EFI_STATUS    Status;
   YUKON_DRIVER    *YukonDriver;
   EFI_TPL       OldTpl;
+  struct msk_softc *ScData;
 
   DEBUG ((EFI_D_NET, "Marvell Yukon: SnpInitialize()\n"));
   if (This == NULL) {
@@ -209,6 +216,11 @@ SnpInitialize (
   }
 
   YukonDriver = YUKON_DEV_FROM_THIS_SNP (This);
+
+  Status = MarvellYukonGetControllerData (YukonDriver->Controller, &ScData);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   OldTpl = gBS->RaiseTPL (TPL_CALLBACK);
 
@@ -230,7 +242,7 @@ SnpInitialize (
   gBS->SetMem (YukonDriver->SnpMode.MCastFilter, sizeof YukonDriver->SnpMode.MCastFilter, 0);
   gBS->CopyMem (&YukonDriver->SnpMode.CurrentAddress, &YukonDriver->SnpMode.PermanentAddress, sizeof (EFI_MAC_ADDRESS));
 
-  Status = mskc_init ();
+  Status = mskc_init (ScData->msk_if[YukonDriver->Port]);
 
   if (EFI_ERROR (Status)) {
      goto ON_ERROR_RESTORE_TPL;
@@ -511,12 +523,18 @@ SnpReceive (
   EFI_STATUS    Status;
   YUKON_DRIVER    *Snp;
   EFI_TPL       OldTpl;
+  struct msk_softc *ScData;
 
   if (This == NULL) {
     return EFI_INVALID_PARAMETER;
   }
 
   Snp = YUKON_DEV_FROM_THIS_SNP (This);
+
+  Status = MarvellYukonGetControllerData (Snp->Controller, &ScData);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   OldTpl = gBS->RaiseTPL (TPL_CALLBACK);
 
@@ -538,7 +556,7 @@ SnpReceive (
     goto ON_EXIT;
   }
 
-  Status = mskc_receive (BufferSize, Buffer);
+  Status = mskc_receive (ScData->msk_if[Snp->Port], BufferSize, Buffer);
   if (EFI_ERROR (Status)) {
     if (Status == EFI_NOT_READY) {
       goto ON_EXIT_NO_DEBUG;
@@ -681,6 +699,7 @@ SnpReceiveFilters (
   YUKON_DRIVER    *YukonDriver;
   EFI_TPL       OldTpl;
   UINT32        newReceiveFilter;
+  struct msk_softc *ScData;
 
   DEBUG ((EFI_D_NET, "Marvell Yukon: SnpReceiveFilters()\n"));
   if (This == NULL) {
@@ -689,6 +708,11 @@ SnpReceiveFilters (
   }
 
   YukonDriver = YUKON_DEV_FROM_THIS_SNP (This);
+
+  Status = MarvellYukonGetControllerData (YukonDriver->Controller, &ScData);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   OldTpl = gBS->RaiseTPL (TPL_CALLBACK);
 
@@ -710,7 +734,8 @@ SnpReceiveFilters (
   //
   newReceiveFilter = (YukonDriver->SnpMode.ReceiveFilterSetting | Enable) & ~Disable;
   if ((newReceiveFilter & ~YukonDriver->SnpMode.ReceiveFilterMask) != 0) {
-    DEBUG ((EFI_D_NET, "Marvell Yukon: SnpReceiveFilters() NIC does not support Enable = 0x%x, Disable = 0x%x\n", Enable, Disable));
+    DEBUG ((DEBUG_NET,
+           "Marvell Yukon: SnpReceiveFilters() NIC does not support Enable = 0x%x, Disable = 0x%x\n", Enable, Disable));
     Status = EFI_INVALID_PARAMETER;
     goto ON_ERROR_RESTORE_TPL;
   }
@@ -724,8 +749,9 @@ SnpReceiveFilters (
       if ((MCastFilterCnt > YukonDriver->SnpMode.MaxMCastFilterCount) ||
           (MCastFilter == NULL)) {
 
-        DEBUG ((EFI_D_NET, "Marvell Yukon: SnpReceiveFilters() NIC does not support MCastFilterCnt = %d (Max = %d)\n", MCastFilterCnt,
-                YukonDriver->SnpMode.MaxMCastFilterCount));
+        DEBUG ((DEBUG_NET,
+               "Marvell Yukon: SnpReceiveFilters() NIC does not support MCastFilterCnt = %d (Max = %d)\n",
+               MCastFilterCnt, YukonDriver->SnpMode.MaxMCastFilterCount));
         Status = EFI_INVALID_PARAMETER;
         goto ON_ERROR_RESTORE_TPL;
       }
@@ -743,7 +769,8 @@ SnpReceiveFilters (
   }
 
   YukonDriver->SnpMode.ReceiveFilterSetting = newReceiveFilter;
-  mskc_rxfilter (YukonDriver->SnpMode.ReceiveFilterSetting, MCastFilterCnt, MCastFilter);
+  mskc_rxfilter (ScData->msk_if[YukonDriver->Port], YukonDriver->SnpMode.ReceiveFilterSetting,
+                 MCastFilterCnt, MCastFilter);
 
   Status = EFI_SUCCESS;
   goto ON_EXIT;
@@ -860,6 +887,7 @@ SnpShutdown (
   EFI_STATUS    Status;
   YUKON_DRIVER    *YukonDriver;
   EFI_TPL       OldTpl;
+  struct msk_softc *ScData;
 
   DEBUG ((EFI_D_NET, "Marvell Yukon: SnpShutdown()\n"));
   //
@@ -871,6 +899,11 @@ SnpShutdown (
   }
 
   YukonDriver = YUKON_DEV_FROM_THIS_SNP (This);
+
+  Status = MarvellYukonGetControllerData (YukonDriver->Controller, &ScData);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   OldTpl = gBS->RaiseTPL (TPL_CALLBACK);
 
@@ -890,7 +923,7 @@ SnpShutdown (
       goto ON_ERROR_RESTORE_TPL;
   }
 
-  mskc_shutdown ();
+  mskc_stop_if (ScData->msk_if[YukonDriver->Port]);
   YukonDriver->SnpMode.State = EfiSimpleNetworkStarted;
   Status = EFI_SUCCESS;
 
@@ -941,6 +974,7 @@ SnpStart (
   YUKON_DRIVER    *YukonDriver;
   EFI_TPL       OldTpl;
   EFI_STATUS    Status;
+  struct msk_softc  *ScData;
 
   DEBUG ((EFI_D_NET, "Marvell Yukon: SnpStart()\n"));
   if (This == NULL) {
@@ -949,6 +983,11 @@ SnpStart (
   }
 
   YukonDriver = YUKON_DEV_FROM_THIS_SNP (This);
+
+  Status = MarvellYukonGetControllerData (YukonDriver->Controller, &ScData);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   OldTpl = gBS->RaiseTPL (TPL_CALLBACK);
 
@@ -966,7 +1005,7 @@ SnpStart (
       goto ON_ERROR_RESTORE_TPL;
   }
 
-  Status = mskc_attach (YukonDriver->PciIo, &YukonDriver->SnpMode.PermanentAddress);
+  Status = mskc_attach_if (ScData->msk_if[YukonDriver->Port], YukonDriver->Port);
 
   if (EFI_ERROR (Status)) {
     goto ON_ERROR_RESTORE_TPL;
@@ -1244,6 +1283,7 @@ SnpStop (
   EFI_STATUS    Status;
   YUKON_DRIVER    *YukonDriver;
   EFI_TPL       OldTpl;
+  struct msk_softc *ScData;
 
   DEBUG ((EFI_D_NET, "Marvell Yukon: SnpStop()\n"));
   if (This == NULL) {
@@ -1252,6 +1292,11 @@ SnpStop (
   }
 
   YukonDriver = YUKON_DEV_FROM_THIS_SNP (This);
+
+  Status = MarvellYukonGetControllerData (YukonDriver->Controller, &ScData);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   OldTpl = gBS->RaiseTPL (TPL_CALLBACK);
 
@@ -1269,7 +1314,7 @@ SnpStop (
       goto ON_ERROR_RESTORE_TPL;
   }
 
-  mskc_detach ();
+  mskc_detach_if (ScData->msk_if[YukonDriver->Port]);
   YukonDriver->SnpMode.State = EfiSimpleNetworkStopped;
   gBS->SetMem (&YukonDriver->SnpMode.CurrentAddress, sizeof (EFI_MAC_ADDRESS), 0);
   Status = EFI_SUCCESS;
@@ -1354,6 +1399,7 @@ SnpTransmit (
   EFI_TPL       OldTpl;
   ETHER_HEAD    *Frame;
   UINT16        ProtocolNet;
+  struct msk_softc  *ScData;
 
   DEBUG ((EFI_D_NET, "Marvell Yukon: SnpTransmit()\n"));
   if (This == NULL) {
@@ -1364,6 +1410,11 @@ SnpTransmit (
 
   if (YukonDriver == NULL) {
     return EFI_DEVICE_ERROR;
+  }
+
+  Status = MarvellYukonGetControllerData (YukonDriver->Controller, &ScData);
+  if (EFI_ERROR (Status)) {
+    return Status;
   }
 
   OldTpl = gBS->RaiseTPL (TPL_CALLBACK);
@@ -1407,7 +1458,7 @@ SnpTransmit (
     gBS->CopyMem (&Frame->EtherType, &ProtocolNet, sizeof (UINT16));
   }
 
-  Status = mskc_transmit (BufferSize, Buffer);
+  Status = mskc_transmit (ScData->msk_if[YukonDriver->Port], BufferSize, Buffer);
 
 ON_EXIT:
   gBS->RestoreTPL (OldTpl);

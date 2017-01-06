@@ -43,6 +43,7 @@ typedef struct {
   EFI_LOCK                    Lock;
 
   EFI_HANDLE                  Controller;
+  UINTN                       Port;
   EFI_EVENT                   ExitBootEvent;
 
   EFI_SIMPLE_NETWORK_PROTOCOL Snp;
@@ -57,6 +58,22 @@ typedef struct {
 #define YUKON_DEV_FROM_THIS_SNP(a) CR (a, YUKON_DRIVER, Snp, YUKON_DRIVER_SIGNATURE)
 
 #define SNP_MEM_PAGES(x)  (((x) - 1) / 4096 + 1)
+
+typedef struct {
+  UINT32                      Signature;
+  LIST_ENTRY                  Link;
+  EFI_HANDLE                  Controller;
+  struct msk_softc            *Data;
+} MSK_LINKED_DRV_BUF;
+
+#define MSK_DRV_SIGNATURE  SIGNATURE_32 ('m', 's', 'k', 'c')
+
+#define MSK_DRV_INFO_FROM_THIS(a) \
+  CR (a, \
+      MSK_LINKED_DRV_BUF, \
+      Link, \
+      MSK_DRV_SIGNATURE \
+      );
 
 //
 // Global Variables
@@ -706,6 +723,60 @@ EFIAPI
 MarvellYukonNotifyExitBoot (
   IN EFI_EVENT Event,
   IN VOID *Context
+  );
+
+/**
+  Get driver's data structure associated with controller
+
+  @param [in] Controller           Controller Id.
+  @param [out] Data                Driver's data.
+
+**/
+EFI_STATUS
+EFIAPI
+MarvellYukonGetControllerData (
+  IN EFI_HANDLE Controller,
+  OUT struct msk_softc **Data
+  );
+
+/**
+  Add driver's data structure associated with controller
+
+  @param [in] Controller           Controller Id.
+  @param [in] Data                 Driver's data.
+
+**/
+EFI_STATUS
+EFIAPI
+MarvellYukonAddControllerData (
+  IN EFI_HANDLE Controller,
+  IN struct msk_softc *
+  );
+
+/**
+  Delete driver's data structure associated with controller
+
+  @param [in] Controller           Controller Id.
+
+**/
+EFI_STATUS
+EFIAPI
+MarvellYukonDelControllerData (
+  IN EFI_HANDLE Controller
+  );
+
+/**
+  Find node associated with controller
+
+  @param [in] Controller           Controller Id.
+  @param [out] DrvLinkedBuff       Controller's node.
+
+**/
+EFI_STATUS
+EFIAPI
+MarvellYukonFindControllerNode (
+  IN EFI_HANDLE Controller,
+  OUT MSK_LINKED_DRV_BUF **DrvLinkedBuff
   );
 
 /*  _SNP_H_  */

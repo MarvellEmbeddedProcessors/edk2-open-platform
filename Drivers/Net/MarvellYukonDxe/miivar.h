@@ -55,13 +55,6 @@
 #define  _DEV_MII_MIIVAR_H_
 
 /*
- * Callbacks from MII layer into network interface device driver.
- */
-INTN msk_phy_readreg (INTN, INTN);
-INTN msk_phy_writereg (INTN, INTN, INTN);
-void msk_miibus_statchg (INTN);
-
-/*
  * A network interface driver has one of these structures in its softc.
  * It is the interface from the network interface driver to the MII
  * layer.
@@ -181,18 +174,14 @@ struct mii_phydesc {
 #define MII_PHY_DESC(a, b)          { MII_OUI_ ## a, MII_MODEL_ ## a ## _ ## b, MII_STR_ ## a ## _ ## b }
 #define MII_PHY_END                 { 0, 0, NULL }
 
-#define PHY_READ(p, r)              msk_phy_readreg ((p)->mmd->port, (r))
+#define PHY_READ(p, r)           msk_phy_readreg ((p)->sc_if, (r))
 
-#define PHY_WRITE(p, r, v)          msk_phy_writereg ((p)->mmd->port, (r), (v))
+#define PHY_WRITE(p, r, v)       msk_phy_writereg ((p)->sc_if, (r), (v))
 
 struct msk_mii_data {
   INTN    port;
   UINT32  pmd;
   INTN    mii_flags;
 };
-
-EFI_STATUS e1000_probe_and_attach (struct mii_data *mii, const struct msk_mii_data *mmd);
-void e1000phy_tick (void);
-void e1000phy_mediachg (void);
 
 #endif /* _DEV_MII_MIIVAR_H_ */

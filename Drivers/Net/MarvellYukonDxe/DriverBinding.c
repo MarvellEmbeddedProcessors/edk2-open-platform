@@ -19,6 +19,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include "MarvellYukon.h"
 #include "if_msk.h"
 
+STATIC LIST_ENTRY MarvellYukonDrvDataHead;
+
 /**
   Test to see if this driver supports ControllerHandle. This service
   is called by the EFI boot service ConnectController(). In
@@ -110,27 +112,14 @@ MarvellYukonDriverStart (
   MAC_ADDR_DEVICE_PATH             MacDeviceNode;
   VOID                            *ChildPciIo;
   YUKON_DRIVER                    *YukonDriver;
-
-  Status = gBS->AllocatePool (EfiBootServicesData,
-                              sizeof (YUKON_DRIVER),
-                              (VOID**) &YukonDriver);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "Marvell Yukon: AllocatePool() failed with Status = %r\n", EFI_OUT_OF_RESOURCES));
-    return Status;
-  }
-
-  gBS->SetMem (YukonDriver, sizeof (YUKON_DRIVER), 0);
-  EfiInitializeLock (&YukonDriver->Lock, TPL_NOTIFY);
-
-  //
-  //  Set the structure signature
-  //
-  YukonDriver->Signature = YUKON_DRIVER_SIGNATURE;
+  struct msk_softc                *ScData;
+  EFI_PCI_IO_PROTOCOL             *PciIo;
+  UINTN                            Port;
 
   Status = gBS->OpenProtocol (
         Controller,
         &gEfiPciIoProtocolGuid,
-        (VOID **) &YukonDriver->PciIo,
+        (VOID **) &PciIo,
         pThis->DriverBindingHandle,
         Controller,
         EFI_OPEN_PROTOCOL_BY_DRIVER
@@ -143,131 +132,135 @@ MarvellYukonDriverStart (
   }
 
   //
-  //  Initialize the simple network protocol
+  // Initialize Marvell Yukon controller
+  // Get number of ports and MAC address for each port
   //
-  Status = InitializeSNPProtocol (YukonDriver);
-
-  if (EFI_ERROR(Status)){
-    DEBUG ((EFI_D_ERROR, "Marvell Yukon: InitializeSNPProtocol: ERROR Status = %r\n", Status));
-    gBS->CloseProtocol (
-          Controller,
-          &gEfiPciIoProtocolGuid,
-          pThis->DriverBindingHandle,
-          Controller
-          );
-  }
-
-  //
-  // Set Device Path
-  //
-  Status = gBS->OpenProtocol (
-        Controller,
-        &gEfiDevicePathProtocolGuid,
-        (VOID **) &ParentDevicePath,
-        pThis->DriverBindingHandle,
-        Controller,
-        EFI_OPEN_PROTOCOL_GET_PROTOCOL
-        );
-
-  if (EFI_ERROR(Status)) {
-    DEBUG ((EFI_D_ERROR, "Marvell Yukon: OpenProtocol:EFI_DEVICE_PATH_PROTOCOL error. Status = %r\n", Status));
-
-    gBS->CloseProtocol (
-          Controller,
-          &gEfiPciIoProtocolGuid,
-          pThis->DriverBindingHandle,
-          Controller
-          );
-
-    gBS->FreePool (YukonDriver);
-    return Status;
-  }
-
-  gBS->SetMem (&MacDeviceNode, sizeof (MAC_ADDR_DEVICE_PATH), 0);
-  MacDeviceNode.Header.Type = MESSAGING_DEVICE_PATH;
-  MacDeviceNode.Header.SubType = MSG_MAC_ADDR_DP;
-
-  SetDevicePathNodeLength (&MacDeviceNode, sizeof (MacDeviceNode));
-
-  //
-  // Initialize Yukon card so we can get the MAC address
-  //
-  Status = mskc_attach (YukonDriver->PciIo, &YukonDriver->SnpMode.PermanentAddress);
-
+  Status = mskc_attach (PciIo, &ScData);
   if (EFI_ERROR (Status)) {
-    gBS->FreePool (YukonDriver);
     return Status;
   }
 
-  mskc_detach();
-
-  //
-  // Assign fields for device path
-  //
-  gBS->CopyMem (&YukonDriver->SnpMode.CurrentAddress, &YukonDriver->SnpMode.PermanentAddress, sizeof (EFI_MAC_ADDRESS));
-  gBS->CopyMem (&MacDeviceNode.MacAddress, &YukonDriver->SnpMode.CurrentAddress, sizeof (EFI_MAC_ADDRESS));
-
-  MacDeviceNode.IfType = YukonDriver->SnpMode.IfType;
-  YukonDriver->DevicePath = AppendDevicePathNode (ParentDevicePath, &MacDeviceNode.Header);
-  if (YukonDriver->DevicePath == NULL) {
-    DEBUG ((EFI_D_ERROR, "Marvell Yukon: AppendDevicePathNode: ERROR Status = %r\n", EFI_OUT_OF_RESOURCES));
-    gBS->CloseProtocol (
-          Controller,
-          &gEfiPciIoProtocolGuid,
-          pThis->DriverBindingHandle,
-          Controller
-          );
-    gBS->FreePool (YukonDriver);
-    return EFI_OUT_OF_RESOURCES;
+  Status = MarvellYukonAddControllerData (Controller, ScData);
+  if (EFI_ERROR (Status)) {
+    return Status;
   }
 
-  //
-  //  Install both the simple network and device path protocols.
-  //
-  Status = gBS->InstallMultipleProtocolInterfaces (
-        &YukonDriver->Controller,
-        &gEfiSimpleNetworkProtocolGuid,
-        &YukonDriver->Snp,
-        &gEfiDevicePathProtocolGuid,
-        YukonDriver->DevicePath,
-        NULL
-        );
+  for (Port = 0; Port < ScData->msk_num_port; Port++) {
 
-  if (EFI_ERROR(Status)){
-    DEBUG ((EFI_D_ERROR, "Marvell Yukon: InstallMultipleProtocolInterfaces error. Status = %r\n", Status));
+    Status = gBS->AllocatePool (EfiBootServicesData,
+                                sizeof (YUKON_DRIVER),
+                                (VOID**) &YukonDriver);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "Marvell Yukon: AllocatePool() failed with Status = %r\n", Status));
+      return Status;
+    }
 
-    gBS->CloseProtocol (
-          Controller,
-          &gEfiPciIoProtocolGuid,
-          pThis->DriverBindingHandle,
-          Controller
-          );
+    if (ScData->msk_if[Port] == NULL) {
+      DEBUG ((DEBUG_ERROR, "Marvell Yukon: AllocatePool() failed with Status = %r\n", EFI_BAD_BUFFER_SIZE));
+      return EFI_BAD_BUFFER_SIZE;
+    }
 
-    gBS->FreePool (YukonDriver->DevicePath);
-    gBS->FreePool (YukonDriver);
-    return Status;
-  } else {
+    gBS->SetMem (YukonDriver, sizeof (YUKON_DRIVER), 0);
+    EfiInitializeLock (&YukonDriver->Lock, TPL_NOTIFY);
 
     //
-    // Hook as a child device
+    //  Set the structure signature
     //
-    Status = gBS->OpenProtocol (Controller,
-                                &gEfiPciIoProtocolGuid,
-                                &ChildPciIo,
-                                pThis->DriverBindingHandle,
-                                YukonDriver->Controller,
-                                EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER);
-    if (EFI_ERROR(Status)){
-      DEBUG ((EFI_D_ERROR, "Marvell Yukon: OpenProtocol: child controller error. Status = %r\n", Status));
+    YukonDriver->Signature = YUKON_DRIVER_SIGNATURE;
 
-      gBS->UninstallMultipleProtocolInterfaces (
+    //
+    // Set MAC address
+    //
+    gBS->CopyMem (&YukonDriver->SnpMode.PermanentAddress, &(ScData->msk_if[Port])->MacAddress,
+                  sizeof (EFI_MAC_ADDRESS));
+
+    //
+    // Set Port number
+    //
+    YukonDriver->Port = Port;
+
+    //
+    //  Initialize the simple network protocol
+    //
+    Status = InitializeSNPProtocol (YukonDriver);
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "Marvell Yukon: InitializeSNPProtocol: ERROR Status = %r\n", Status));
+      gBS->CloseProtocol (
             Controller,
-            &gEfiSimpleNetworkProtocolGuid,
-            &YukonDriver->Snp,
-            &gEfiDevicePathProtocolGuid,
-            YukonDriver->DevicePath,
-            NULL
+            &gEfiPciIoProtocolGuid,
+            pThis->DriverBindingHandle,
+            Controller
             );
+    }
+
+    //
+    // Set Device Path
+    //
+    Status = gBS->OpenProtocol (
+          Controller,
+          &gEfiDevicePathProtocolGuid,
+          (VOID **) &ParentDevicePath,
+          pThis->DriverBindingHandle,
+          Controller,
+          EFI_OPEN_PROTOCOL_GET_PROTOCOL
+          );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "Marvell Yukon: OpenProtocol:EFI_DEVICE_PATH_PROTOCOL error. Status = %r\n", Status));
+
+      gBS->CloseProtocol (
+            Controller,
+            &gEfiPciIoProtocolGuid,
+            pThis->DriverBindingHandle,
+            Controller
+            );
+
+      gBS->FreePool (YukonDriver);
+      return Status;
+    }
+
+    gBS->SetMem (&MacDeviceNode, sizeof (MAC_ADDR_DEVICE_PATH), 0);
+    MacDeviceNode.Header.Type = MESSAGING_DEVICE_PATH;
+    MacDeviceNode.Header.SubType = MSG_MAC_ADDR_DP;
+
+    SetDevicePathNodeLength (&MacDeviceNode, sizeof (MacDeviceNode));
+
+    //
+    // Assign fields for device path
+    //
+    gBS->CopyMem (&YukonDriver->SnpMode.CurrentAddress, &YukonDriver->SnpMode.PermanentAddress,
+                  sizeof (EFI_MAC_ADDRESS));
+    gBS->CopyMem (&MacDeviceNode.MacAddress, &YukonDriver->SnpMode.CurrentAddress, sizeof (EFI_MAC_ADDRESS));
+
+    MacDeviceNode.IfType = YukonDriver->SnpMode.IfType;
+    YukonDriver->DevicePath = AppendDevicePathNode (ParentDevicePath, &MacDeviceNode.Header);
+    if (YukonDriver->DevicePath == NULL) {
+      DEBUG ((DEBUG_ERROR, "Marvell Yukon: AppendDevicePathNode: ERROR Status = %r\n", EFI_OUT_OF_RESOURCES));
+      gBS->CloseProtocol (
+            Controller,
+            &gEfiPciIoProtocolGuid,
+            pThis->DriverBindingHandle,
+            Controller
+            );
+      gBS->FreePool (YukonDriver);
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    //
+    //  Install both the simple network and device path protocols.
+    //
+    Status = gBS->InstallMultipleProtocolInterfaces (
+          &YukonDriver->Controller,
+          &gEfiSimpleNetworkProtocolGuid,
+          &YukonDriver->Snp,
+          &gEfiDevicePathProtocolGuid,
+          YukonDriver->DevicePath,
+          NULL
+          );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "Marvell Yukon: InstallMultipleProtocolInterfaces error. Status = %r\n", Status));
 
       gBS->CloseProtocol (
             Controller,
@@ -280,13 +273,55 @@ MarvellYukonDriverStart (
       gBS->FreePool (YukonDriver);
       return Status;
     } else {
-      DEBUG ((EFI_D_NET, "Marvell Yukon: MarvellYukonDriverSupported: New Controller Handle = %p\n", YukonDriver->Controller));
-    }
-  }
 
-  if (!EFI_ERROR(Status)) {
-    Status = gBS->CreateEvent (EVT_SIGNAL_EXIT_BOOT_SERVICES, TPL_CALLBACK,
-                    &MarvellYukonNotifyExitBoot, YukonDriver, &YukonDriver->ExitBootEvent);
+      //
+      // Hook as a child device
+      //
+      Status = gBS->OpenProtocol (Controller,
+                                  &gEfiPciIoProtocolGuid,
+                                  &ChildPciIo,
+                                  pThis->DriverBindingHandle,
+                                  YukonDriver->Controller,
+                                  EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_ERROR, "Marvell Yukon: OpenProtocol: child controller error. Status = %r\n", Status));
+
+        gBS->UninstallMultipleProtocolInterfaces (
+              Controller,
+              &gEfiSimpleNetworkProtocolGuid,
+              &YukonDriver->Snp,
+              &gEfiDevicePathProtocolGuid,
+              YukonDriver->DevicePath,
+              NULL
+              );
+
+        gBS->CloseProtocol (
+              Controller,
+              &gEfiPciIoProtocolGuid,
+              pThis->DriverBindingHandle,
+              Controller
+              );
+
+        gBS->FreePool (YukonDriver->DevicePath);
+        gBS->FreePool (YukonDriver);
+        return Status;
+      } else {
+        DEBUG ((DEBUG_NET, "Marvell Yukon: MarvellYukonDriverSupported: New Controller Handle = %p\n",
+               YukonDriver->Controller));
+      }
+
+      Status = MarvellYukonAddControllerData (YukonDriver->Controller, ScData);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_ERROR, "Marvell Yukon: Failed to register port %d with controller handle %p\n", Port,
+               YukonDriver->Controller));
+      }
+
+    }
+
+    if (!EFI_ERROR (Status)) {
+      Status = gBS->CreateEvent (EVT_SIGNAL_EXIT_BOOT_SERVICES, TPL_CALLBACK,
+                      &MarvellYukonNotifyExitBoot, YukonDriver, &YukonDriver->ExitBootEvent);
+    }
   }
 
   return Status;
@@ -319,6 +354,8 @@ MarvellYukonDriverStop (
   EFI_STATUS                   Status;
   YUKON_DRIVER                 *YukonDriver;
   EFI_TPL                      OldTpl;
+  UINTN                        ChildController;
+  struct msk_softc             *ScData;
 
   if (pThis == NULL) {
     DEBUG ((EFI_D_ERROR, "Marvell Yukon: MarvellYukonDriverStop() failed with Status = %r\n", EFI_INVALID_PARAMETER));
@@ -330,15 +367,10 @@ MarvellYukonDriverStop (
     return EFI_INVALID_PARAMETER;
   }
 
-  if (NumberOfChildren > 0) {
-
-    //
-    // Currently support only one network port
-    //
-    ASSERT (NumberOfChildren == 1);
+  for (ChildController = 0; ChildController < NumberOfChildren; ChildController ++) {
 
     Status = gBS->OpenProtocol (
-          ChildHandleBuffer[0],
+          ChildHandleBuffer[ChildController],
           &gEfiSimpleNetworkProtocolGuid,
           (VOID **) &SimpleNetwork,
           pThis->DriverBindingHandle,
@@ -349,25 +381,37 @@ MarvellYukonDriverStop (
     if (!EFI_ERROR(Status)) {
 
       YukonDriver = YUKON_DEV_FROM_THIS_SNP (SimpleNetwork);
+
+      Status = MarvellYukonGetControllerData (YukonDriver->Controller, &ScData);
+      if (EFI_ERROR (Status)) {
+        continue;
+      }
+
       OldTpl = gBS->RaiseTPL (TPL_CALLBACK);
 
-      ASSERT (YukonDriver->Controller == ChildHandleBuffer[0]);
-       if (YukonDriver->SnpMode.State != EfiSimpleNetworkStopped) {
+      ASSERT (YukonDriver->Controller == ChildHandleBuffer[ChildController]);
+      if (YukonDriver->SnpMode.State != EfiSimpleNetworkStopped) {
 
          //
          // Device in use, cannot stop driver instance
          //
          Status = EFI_DEVICE_ERROR;
-         DEBUG ((EFI_D_ERROR, "Marvell Yukon: MarvellYukonDriverStop: Error: SNP is not stopped. Status %r\n", Status));
+         DEBUG ((DEBUG_ERROR,
+                "Marvell Yukon: MarvellYukonDriverStop: Error: SNP is not stopped. Status %r\n", Status));
        } else {
 
          //
          // Unhook the child controller
          //
-         gBS->CloseProtocol (Controller,
+         Status = gBS->CloseProtocol (Controller,
                              &gEfiPciIoProtocolGuid,
                              pThis->DriverBindingHandle,
                              YukonDriver->Controller);
+
+         if (EFI_ERROR (Status)) {
+           DEBUG ((DEBUG_ERROR,
+                  "Marvell Yukon: MarvellYukonDriverStop:Close Child EfiPciIoProtocol error. Status %r\n", Status));
+         }
 
          Status = gBS->UninstallMultipleProtocolInterfaces (
               YukonDriver->Controller,
@@ -379,8 +423,12 @@ MarvellYukonDriverStop (
               );
 
          if (EFI_ERROR(Status)){
-           DEBUG ((EFI_D_ERROR, "Marvell Yukon: MarvellYukonDriverStop:UninstallMultipleProtocolInterfaces error. Status %r\n", Status));
+           DEBUG ((DEBUG_ERROR,
+                  "Marvell Yukon: MarvellYukonDriverStop:UninstallMultipleProtocolInterfaces error. Status %r\n",
+                  Status));
          }
+
+         MarvellYukonDelControllerData (YukonDriver->Controller);
 
          gBS->CloseEvent (YukonDriver->ExitBootEvent);
          gBS->FreePool (YukonDriver->DevicePath);
@@ -388,18 +436,27 @@ MarvellYukonDriverStop (
        }
        gBS->RestoreTPL (OldTpl);
     }
-  } else {
-    Status = gBS->CloseProtocol (
-          Controller,
-          &gEfiPciIoProtocolGuid,
-          pThis->DriverBindingHandle,
-          Controller
-          );
-
-    if (EFI_ERROR(Status)){
-      DEBUG ((EFI_D_ERROR, "Marvell Yukon: MarvellYukonDriverStop:Close EfiPciIoProtocol error. Status %r\n", Status));
-    }
   }
+
+  Status = gBS->CloseProtocol (
+        Controller,
+        &gEfiPciIoProtocolGuid,
+        pThis->DriverBindingHandle,
+        Controller
+        );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Marvell Yukon: MarvellYukonDriverStop:Close EfiPciIoProtocol error. Status %r\n", Status));
+  }
+
+  Status = MarvellYukonGetControllerData (Controller, &ScData);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  mskc_detach (ScData);
+  gBS->FreePool (ScData);
+  Status = MarvellYukonDelControllerData (Controller);
 
   return Status;
 }
@@ -422,7 +479,8 @@ MarvellYukonNotifyExitBoot (
   EFI_STATUS      Status;
 
   if (Context == NULL) {
-    DEBUG ((EFI_D_ERROR, "Marvell Yukon: MarvellYukonNotifyExitBoot() failed with Status = %r\n", EFI_INVALID_PARAMETER));
+    DEBUG ((DEBUG_ERROR,
+           "Marvell Yukon: MarvellYukonNotifyExitBoot() failed with Status = %r\n", EFI_INVALID_PARAMETER));
   } else {
 
     YukonDriver = Context;
@@ -434,6 +492,123 @@ MarvellYukonNotifyExitBoot (
       }
     }
   }
+}
+
+/**
+  Get driver's data structure associated with controller
+
+  @param [in] Controller           Controller Id.
+  @param [out] Data                Driver's data.
+
+**/
+EFI_STATUS
+EFIAPI
+MarvellYukonGetControllerData (
+  IN EFI_HANDLE Controller,
+  OUT struct msk_softc **Data
+  )
+{
+  MSK_LINKED_DRV_BUF *DrvNode;
+  EFI_STATUS         Status;
+
+  Status = MarvellYukonFindControllerNode (Controller, &DrvNode);
+  if (!EFI_ERROR (Status)) {
+    *Data = DrvNode->Data;
+  }
+  return Status;
+}
+
+/**
+  Add driver's data structure associated with controller
+
+  @param [in] Controller           Controller Id.
+  @param [in] Data                 Driver's data.
+
+**/
+EFI_STATUS
+EFIAPI
+MarvellYukonAddControllerData (
+  IN EFI_HANDLE Controller,
+  IN struct msk_softc *Data
+  )
+{
+  MSK_LINKED_DRV_BUF *DrvNode;
+  EFI_STATUS         Status;
+
+  Status = MarvellYukonFindControllerNode (Controller, &DrvNode);
+  if (EFI_ERROR (Status)) {
+    Status = gBS->AllocatePool (EfiBootServicesData,
+                                sizeof (MSK_LINKED_DRV_BUF),
+                                (VOID**) &DrvNode);
+    if (!EFI_ERROR (Status)) {
+      DrvNode->Signature = MSK_DRV_SIGNATURE;
+      DrvNode->Controller = Controller;
+      DrvNode->Data = Data;
+      InsertTailList (&MarvellYukonDrvDataHead, &DrvNode->Link);
+    }
+  } else {
+    Status = EFI_ALREADY_STARTED;
+  }
+
+  return Status;
+}
+
+/**
+  Delete driver's data structure associated with controller
+
+  @param [in] Controller           Controller Id.
+
+**/
+EFI_STATUS
+EFIAPI
+MarvellYukonDelControllerData (
+  IN EFI_HANDLE Controller
+  )
+{
+  MSK_LINKED_DRV_BUF *DrvNode;
+  EFI_STATUS         Status;
+
+  Status = MarvellYukonFindControllerNode (Controller, &DrvNode);
+  if (!EFI_ERROR (Status)) {
+    RemoveEntryList (&DrvNode->Link);
+    gBS->FreePool (DrvNode);
+  }
+
+  return Status;
+}
+
+/**
+  Find node associated with controller
+
+  @param [in] Controller           Controller Id.
+  @param [out] DrvLinkedBuff       Controller's node.
+
+**/
+EFI_STATUS
+EFIAPI
+MarvellYukonFindControllerNode (
+  IN EFI_HANDLE Controller,
+  OUT MSK_LINKED_DRV_BUF **DrvLinkedBuff
+  )
+{
+  MSK_LINKED_DRV_BUF *DrvBuffNode;
+  EFI_STATUS         Status;
+  LIST_ENTRY         *Node;
+
+  Status = EFI_NOT_FOUND;
+
+  Node = GetFirstNode (&MarvellYukonDrvDataHead);
+  while (!IsNull (&MarvellYukonDrvDataHead, Node)) {
+    DrvBuffNode = MSK_DRV_INFO_FROM_THIS (Node);
+    if (DrvBuffNode->Controller == Controller) {
+      *DrvLinkedBuff = DrvBuffNode;
+      Status = EFI_SUCCESS;
+      break;
+    }
+    Node = GetNextNode (&MarvellYukonDrvDataHead, Node);
+  }
+
+  return Status;
 }
 
 //
@@ -472,7 +647,8 @@ InitializeMarvellYukonDriver (
   DEBUG ((EFI_D_NET, "Marvell Yukon: InitializeMarvellYukonDriver()\n"));
 
   if (SystemTable == NULL) {
-    DEBUG ((EFI_D_ERROR, "Marvell Yukon: InitializeMarvellYukonDriver() failed with Status = %r\n", EFI_INVALID_PARAMETER));
+    DEBUG ((DEBUG_ERROR,
+           "Marvell Yukon: InitializeMarvellYukonDriver() failed with Status = %r\n", EFI_INVALID_PARAMETER));
     return EFI_INVALID_PARAMETER;
   }
 
@@ -487,7 +663,10 @@ InitializeMarvellYukonDriver (
 
   if (EFI_ERROR (Status)) {
     DEBUG ((EFI_D_ERROR, "Marvell Yukon: InitializeMarvellYukonDriver(): Driver binding failed\n"));
+    return Status;
   }
+
+  InitializeListHead (&MarvellYukonDrvDataHead);
 
   return Status;
 }

@@ -82,6 +82,9 @@
  * Marvell E1000 PHY registers
  */
 
+#ifndef _E1000_PHYREG_H_
+#define _E1000_PHYREG_H_
+
 #define E1000_MAX_REG_ADDRESS        0x1F
 
 #define E1000_CR            0x00    /* control register */
@@ -396,3 +399,12 @@
 #define E1000_ESSR_GMII_FIBER       0x0007
 #define E1000_ESSR_TBI_COPPER       0x000d
 #define E1000_ESSR_TBI_FIBER        0x0005
+
+struct e1000phy_softc {
+  struct mii_softc mii_sc;
+  INTN mii_model;
+  const struct msk_mii_data *mmd;
+  VOID *sc_if; /* parent logical controller */
+};
+
+#endif /* _E1000_PHYREG_H_ */

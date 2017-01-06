@@ -99,6 +99,11 @@
 
 /*$FreeBSD: src/sys/dev/msk/if_mskreg.h,v 1.27.2.10.2.1 2010/06/14 02:09:06 kensmith Exp $*/
 
+#ifndef _IF_MSKREG_H_
+#define _IF_MSKREG_H_
+
+#include "miivar.h"
+
 /*
  * SysKonnect PCI vendor ID
  */
@@ -2460,10 +2465,8 @@ struct msk_softc {
   INTN      msk_int_holdoff;
   INTN      msk_process_limit;
   INTN      msk_stat_cons;
-  LIST_ENTRY TransmitQueueHead;
-  LIST_ENTRY TransmitFreeQueueHead;
-  LIST_ENTRY ReceiveQueueHead;
   EFI_EVENT Timer;
+  EFI_PCI_IO_PROTOCOL *PciIo;
 };
 
 #define  MSK_USECS(sc, us)                   ((sc)->msk_clock * (us))
@@ -2497,9 +2500,17 @@ struct msk_if_softc {
   struct msk_chain_data  msk_cdata;
   struct msk_ring_data  msk_rdata;
   struct msk_hw_stats  msk_stats;
+  struct msk_softc *msk_softc; /* parent controller */
+  VOID        *phy_softc; /* interface phy */
+  BOOLEAN     active;
+  LIST_ENTRY  TransmitQueueHead;
+  LIST_ENTRY  TransmitFreeQueueHead;
+  LIST_ENTRY  ReceiveQueueHead;
   EFI_MAC_ADDRESS MacAddress;
 };
 
 #define MSK_TIMEOUT                          1000
 #define  MSK_PHY_POWERUP                     1
 #define  MSK_PHY_POWERDOWN                   0
+
+#endif /* _IF_MSKREG_H_ */

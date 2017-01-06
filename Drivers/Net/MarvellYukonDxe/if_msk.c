@@ -121,12 +121,6 @@
 #include "if_mskreg.h"
 #include "if_msk.h"
 
-//
-// Global Variables
-//
-static EFI_PCI_IO_PROTOCOL         *mPciIo;
-static struct msk_softc            *mSoftc;
-
 #define MSK_CSUM_FEATURES  (CSUM_TCP | CSUM_UDP)
 
 /*
@@ -189,32 +183,34 @@ static const CHAR8 *model_name[] = {
 //
 // Forward declarations
 //
-static VOID mskc_setup_rambuffer (VOID);
-static VOID mskc_reset (VOID);
+STATIC VOID mskc_setup_rambuffer (struct msk_softc *);
+STATIC VOID mskc_reset (struct msk_softc *);
 
-static EFI_STATUS msk_attach (INT32);
-static VOID msk_detach (INT32);
+EFI_STATUS mskc_attach_if (struct msk_if_softc *, UINTN);
+VOID mskc_detach_if (struct msk_if_softc *);
 
 static VOID mskc_tick (IN EFI_EVENT, IN VOID*);
-static VOID msk_intr (VOID);
+STATIC VOID msk_intr (struct msk_softc *);
 static VOID msk_intr_phy (struct msk_if_softc *);
 static VOID msk_intr_gmac (struct msk_if_softc *);
 static __inline VOID msk_rxput (struct msk_if_softc *);
-static INTN msk_handle_events (VOID);
+STATIC INTN msk_handle_events (struct msk_softc *);
 static VOID msk_handle_hwerr (struct msk_if_softc *, UINT32);
-static VOID msk_intr_hwerr (VOID);
+STATIC VOID msk_intr_hwerr (struct msk_softc *);
 static VOID msk_rxeof (struct msk_if_softc *, UINT32, UINT32, INTN);
 static VOID msk_txeof (struct msk_if_softc *, INTN);
 static EFI_STATUS msk_encap (struct msk_if_softc *, MSK_SYSTEM_BUF *);
-static VOID msk_start (INT32);
-static VOID msk_set_prefetch (INTN, EFI_PHYSICAL_ADDRESS, UINT32);
+STATIC VOID msk_start (struct msk_if_softc *);
+STATIC VOID msk_set_prefetch (struct msk_if_softc *, INTN, EFI_PHYSICAL_ADDRESS, UINT32);
 static VOID msk_set_rambuffer (struct msk_if_softc *);
 static VOID msk_set_tx_stfwd (struct msk_if_softc *);
 static EFI_STATUS msk_init (struct msk_if_softc *);
-static VOID msk_stop (struct msk_if_softc *);
+VOID mskc_stop_if (struct msk_if_softc *);
 static VOID msk_phy_power (struct msk_softc *, INTN);
-static EFI_STATUS msk_status_dma_alloc (VOID);
-static VOID msk_status_dma_free (VOID);
+INTN msk_phy_readreg (struct msk_if_softc *, INTN);
+INTN msk_phy_writereg (struct msk_if_softc *, INTN, INTN);
+STATIC EFI_STATUS msk_status_dma_alloc (struct msk_softc *);
+STATIC VOID msk_status_dma_free (struct msk_softc *);
 static EFI_STATUS msk_txrx_dma_alloc (struct msk_if_softc *);
 static VOID msk_txrx_dma_free (struct msk_if_softc *);
 static EFI_STATUS msk_init_rx_ring (struct msk_if_softc *);
@@ -232,6 +228,12 @@ static VOID msk_setvlan (struct msk_if_softc *);
 
 static VOID msk_stats_clear (struct msk_if_softc *);
 static VOID msk_stats_update (struct msk_if_softc *);
+STATIC VOID clear_pci_errors (struct msk_softc *);
+
+EFI_STATUS e1000_probe_and_attach (struct mii_data *, const struct msk_mii_data *, VOID *, VOID **);
+VOID e1000phy_tick (VOID *);
+VOID e1000phy_mediachg (VOID *);
+EFI_STATUS e1000phy_detach (VOID *);
 
 //
 // Functions
@@ -239,20 +241,25 @@ static VOID msk_stats_update (struct msk_if_softc *);
 
 INTN
 msk_phy_readreg (
-    INTN  port,
-    INTN  reg
+    struct msk_if_softc  *sc_if,
+    INTN                 reg
     )
 {
   INTN  i;
   INTN  val;
+  INTN              port;
+  struct msk_softc  *sc;
 
-  GMAC_WRITE_2 (mSoftc, port, GM_SMI_CTRL, GM_SMI_CT_PHY_AD(PHY_ADDR_MARV) | GM_SMI_CT_REG_AD(reg) | GM_SMI_CT_OP_RD);
+  sc = sc_if->msk_softc;
+  port = sc_if->msk_md.port;
+
+  GMAC_WRITE_2 (sc, port, GM_SMI_CTRL, GM_SMI_CT_PHY_AD (PHY_ADDR_MARV) | GM_SMI_CT_REG_AD (reg) | GM_SMI_CT_OP_RD);
 
   for (i = 0; i < MSK_TIMEOUT; i++) {
     gBS->Stall (1);
-    val = GMAC_READ_2 (mSoftc, port, GM_SMI_CTRL);
+    val = GMAC_READ_2 (sc, port, GM_SMI_CTRL);
     if ((val & GM_SMI_CT_RD_VAL) != 0) {
-      val = GMAC_READ_2 (mSoftc, port, GM_SMI_DATA);
+      val = GMAC_READ_2 (sc, port, GM_SMI_DATA);
       break;
     }
   }
@@ -267,18 +274,23 @@ msk_phy_readreg (
 
 INTN
 msk_phy_writereg (
-    INTN  port,
+    struct msk_if_softc  *sc_if,
     INTN  reg,
     INTN  val
     )
 {
   INTN i;
+  INTN              port;
+  struct msk_softc  *sc;
 
-  GMAC_WRITE_2 (mSoftc, port, GM_SMI_DATA, val);
-  GMAC_WRITE_2 (mSoftc, port, GM_SMI_CTRL, GM_SMI_CT_PHY_AD(PHY_ADDR_MARV) | GM_SMI_CT_REG_AD(reg));
+  sc = sc_if->msk_softc;
+  port = sc_if->msk_md.port;
+
+  GMAC_WRITE_2 (sc, port, GM_SMI_DATA, val);
+  GMAC_WRITE_2 (sc, port, GM_SMI_CTRL, GM_SMI_CT_PHY_AD (PHY_ADDR_MARV) | GM_SMI_CT_REG_AD (reg));
   for (i = 0; i < MSK_TIMEOUT; i++) {
     gBS->Stall (1);
-    if ((GMAC_READ_2 (mSoftc, port, GM_SMI_CTRL) & GM_SMI_CT_BUSY) == 0) {
+    if ((GMAC_READ_2 (sc, port, GM_SMI_CTRL) & GM_SMI_CT_BUSY) == 0) {
       break;
     }
   }
@@ -291,13 +303,17 @@ msk_phy_writereg (
 
 VOID
 msk_miibus_statchg (
-    INTN  port
+    struct msk_if_softc  *sc_if
     )
 {
-  struct msk_if_softc   *sc_if = mSoftc->msk_if[port];
-  struct mii_data       *mii = &sc_if->mii_d;
+  struct mii_data       *mii;
   UINT32                gmac;
+  UINTN                 port;
+  struct msk_softc      *sc;
 
+  sc = sc_if->msk_softc;
+  port = sc_if->msk_md.port;
+  mii = &sc_if->mii_d;
   sc_if->msk_flags &= ~MSK_FLAG_LINK;
 
   if ((mii->mii_media_status & (IFM_AVALID | IFM_ACTIVE)) == (IFM_AVALID | IFM_ACTIVE)) {
@@ -325,7 +341,7 @@ msk_miibus_statchg (
     // Enable Tx FIFO Underrun
     DEBUG ((EFI_D_NET, "Marvell Yukon: msk_miibus_statchg, link up\n"));
 
-    CSR_WRITE_1 (mSoftc, MR_ADDR (port, GMAC_IRQ_MSK), GM_IS_TX_FF_UR | GM_IS_RX_FF_OR);
+    CSR_WRITE_1 (sc, MR_ADDR (port, GMAC_IRQ_MSK), GM_IS_TX_FF_UR | GM_IS_RX_FF_OR);
     //
     // Because mii(4) notify msk (4) that it detected link status
     // change, there is no need to enable automatic
@@ -358,33 +374,33 @@ msk_miibus_statchg (
       gmac |= GM_GPCR_FC_RX_DIS | GM_GPCR_FC_TX_DIS;
     }
     gmac |= GM_GPCR_RX_ENA | GM_GPCR_TX_ENA;
-    GMAC_WRITE_2 (mSoftc, port, GM_GP_CTRL, gmac);
+    GMAC_WRITE_2 (sc, port, GM_GP_CTRL, gmac);
     // Read again to ensure writing
-    GMAC_READ_2 (mSoftc, port, GM_GP_CTRL);
+    GMAC_READ_2 (sc, port, GM_GP_CTRL);
     gmac = GMC_PAUSE_OFF;
     if ((IFM_OPTIONS (mii->mii_media_active) & IFM_FDX) != 0) {
       if ((IFM_OPTIONS (mii->mii_media_active) & IFM_FLAG0) != 0) {
         gmac = GMC_PAUSE_ON;
       }
     }
-    CSR_WRITE_4 (mSoftc, MR_ADDR (port, GMAC_CTRL), gmac);
+    CSR_WRITE_4 (sc, MR_ADDR (port, GMAC_CTRL), gmac);
 
     // Enable PHY interrupt for FIFO underrun/overflow
-    msk_phy_writereg (port, PHY_MARV_INT_MASK, PHY_M_IS_FIFO_ERROR);
+    msk_phy_writereg (sc_if, PHY_MARV_INT_MASK, PHY_M_IS_FIFO_ERROR);
   } else {
     //
     // Link state changed to down.
     // Disable PHY interrupts.
     //
     DEBUG ((EFI_D_NET, "Marvell Yukon: msk_miibus_statchg, link down\n"));
-    msk_phy_writereg (port, PHY_MARV_INT_MASK, 0);
+    msk_phy_writereg (sc_if, PHY_MARV_INT_MASK, 0);
     // Disable Rx/Tx MAC
-    gmac = GMAC_READ_2 (mSoftc, port, GM_GP_CTRL);
+    gmac = GMAC_READ_2 (sc, port, GM_GP_CTRL);
     if ((GM_GPCR_RX_ENA | GM_GPCR_TX_ENA) != 0) {
       gmac &= ~(GM_GPCR_RX_ENA | GM_GPCR_TX_ENA);
-      GMAC_WRITE_2 (mSoftc, port, GM_GP_CTRL, gmac);
+      GMAC_WRITE_2 (sc, port, GM_GP_CTRL, gmac);
       // Read again to ensure writing
-      GMAC_READ_2 (mSoftc, port, GM_GP_CTRL);
+      GMAC_READ_2 (sc, port, GM_GP_CTRL);
     }
   }
 }
@@ -418,12 +434,13 @@ ether_crc32_be (
 
 VOID
 mskc_rxfilter (
+    struct msk_if_softc         *sc_if,
     UINT32                      FilterFlags,
     UINTN                       MCastFilterCnt,
     EFI_MAC_ADDRESS             *MCastFilter
     )
 {
-  msk_rxfilter (mSoftc->msk_if[MSK_PORT_A], FilterFlags, MCastFilterCnt, MCastFilter);
+  msk_rxfilter (sc_if, FilterFlags, MCastFilterCnt, MCastFilter);
 }
 
 static VOID
@@ -437,10 +454,14 @@ msk_rxfilter (
   UINT32  mchash[2];
   UINT32  crc;
   UINT16  mode;
-  INTN    port = sc_if->msk_md.port;
+  INTN              port;
+  struct msk_softc  *sc;
+
+  sc = sc_if->msk_softc;
+  port = sc_if->msk_md.port;
 
   gBS->SetMem (mchash, sizeof (mchash), 0);
-  mode = GMAC_READ_2 (mSoftc, port, GM_RX_CTRL);
+  mode = GMAC_READ_2 (sc, port, GM_RX_CTRL);
   if ((FilterFlags & EFI_SIMPLE_NETWORK_RECEIVE_PROMISCUOUS) != 0) {
     mode &= ~(GM_RXCR_UCF_ENA | GM_RXCR_MCF_ENA);
   }
@@ -462,11 +483,11 @@ msk_rxfilter (
     }
   }
 
-  GMAC_WRITE_2 (mSoftc, port, GM_MC_ADDR_H1,  mchash[0]        & 0xffff  );
-  GMAC_WRITE_2 (mSoftc, port, GM_MC_ADDR_H2, (mchash[0] >> 16) & 0xffff  );
-  GMAC_WRITE_2 (mSoftc, port, GM_MC_ADDR_H3,  mchash[1]        & 0xffff  );
-  GMAC_WRITE_2 (mSoftc, port, GM_MC_ADDR_H4, (mchash[1] >> 16) & 0xffff  );
-  GMAC_WRITE_2 (mSoftc, port, GM_RX_CTRL,    mode                        );
+  GMAC_WRITE_2 (sc, port, GM_MC_ADDR_H1,  mchash[0]        & 0xffff  );
+  GMAC_WRITE_2 (sc, port, GM_MC_ADDR_H2, (mchash[0] >> 16) & 0xffff  );
+  GMAC_WRITE_2 (sc, port, GM_MC_ADDR_H3,  mchash[1]        & 0xffff  );
+  GMAC_WRITE_2 (sc, port, GM_MC_ADDR_H4, (mchash[1] >> 16) & 0xffff  );
+  GMAC_WRITE_2 (sc, port, GM_RX_CTRL,    mode                        );
 }
 
 static
@@ -478,8 +499,8 @@ msk_setvlan (
   //
   // Disable automatic VLAN tagging/stripping
   //
-  CSR_WRITE_4 (mSoftc, MR_ADDR (sc_if->msk_md.port, RX_GMF_CTRL_T), RX_VLAN_STRIP_OFF);
-  CSR_WRITE_4 (mSoftc, MR_ADDR (sc_if->msk_md.port, TX_GMF_CTRL_T), TX_VLAN_TAG_OFF);
+  CSR_WRITE_4 (sc_if->msk_softc, MR_ADDR (sc_if->msk_md.port, RX_GMF_CTRL_T), RX_VLAN_STRIP_OFF);
+  CSR_WRITE_4 (sc_if->msk_softc, MR_ADDR (sc_if->msk_md.port, TX_GMF_CTRL_T), TX_VLAN_TAG_OFF);
 }
 
 static
@@ -520,7 +541,7 @@ msk_init_rx_ring (
 
   // Update prefetch unit.
   sc_if->msk_cdata.msk_rx_prod = MSK_RX_RING_CNT - 1;
-  CSR_WRITE_2 (mSoftc, Y2_PREF_Q_ADDR (sc_if->msk_rxq, PREF_UNIT_PUT_IDX_REG), sc_if->msk_cdata.msk_rx_prod);
+  CSR_WRITE_2 (sc_if->msk_softc, Y2_PREF_Q_ADDR (sc_if->msk_rxq, PREF_UNIT_PUT_IDX_REG), sc_if->msk_cdata.msk_rx_prod);
 
   return EFI_SUCCESS;
 }
@@ -589,8 +610,10 @@ msk_newbuf (
   VOID                  *Buffer;
   VOID                  *Mapping;
   EFI_PHYSICAL_ADDRESS  PhysAddr;
+  EFI_PCI_IO_PROTOCOL   *PciIo;
   EFI_STATUS            Status;
 
+  PciIo = sc_if->msk_softc->PciIo;
   Length = MAX_SUPPORTED_PACKET_SIZE;
 
   rxd = &sc_if->msk_cdata.msk_rxdesc[idx];
@@ -601,7 +624,7 @@ msk_newbuf (
   }
   gBS->SetMem (Buffer, Length, 0);
 
-  Status = mPciIo->Map (mPciIo, EfiPciIoOperationBusMasterWrite, Buffer, &Length, &PhysAddr, &Mapping);
+  Status = PciIo->Map (PciIo, EfiPciIoOperationBusMasterWrite, Buffer, &Length, &PhysAddr, &Mapping);
   if (EFI_ERROR (Status)) {
     gBS->FreePool (Buffer);
     return Status;
@@ -663,38 +686,38 @@ mskc_probe (
 static
 VOID
 mskc_setup_rambuffer (
-    VOID
+    struct msk_softc  *sc
     )
 {
   INTN next;
   INTN i;
 
   /* Get adapter SRAM size. */
-  mSoftc->msk_ramsize = CSR_READ_1 (mSoftc, B2_E_0) * 4;
-  DEBUG ((EFI_D_NET, "Marvell Yukon: RAM buffer size : %dKB\n", mSoftc->msk_ramsize));
-  if (mSoftc->msk_ramsize == 0) {
+  sc->msk_ramsize = CSR_READ_1 (sc, B2_E_0) * 4;
+  DEBUG ((DEBUG_NET, "Marvell Yukon: RAM buffer size : %dKB\n", sc->msk_ramsize));
+  if (sc->msk_ramsize == 0) {
     return;
   }
 
-  mSoftc->msk_pflags |= MSK_FLAG_RAMBUF;
+  sc->msk_pflags |= MSK_FLAG_RAMBUF;
   /*
    * Give receiver 2/3 of memory and round down to the multiple
    * of 1024. Tx/Rx RAM buffer size of Yukon II shoud be multiple
    * of 1024.
    */
-  mSoftc->msk_rxqsize = (((mSoftc->msk_ramsize * 1024 * 2) / 3) / 1024) * 1024;
-  mSoftc->msk_txqsize = (mSoftc->msk_ramsize * 1024) - mSoftc->msk_rxqsize;
-  for (i = 0, next = 0; i < mSoftc->msk_num_port; i++) {
-    mSoftc->msk_rxqstart[i] = next;
-    mSoftc->msk_rxqend[i] = next + mSoftc->msk_rxqsize - 1;
-    next = mSoftc->msk_rxqend[i] + 1;
-    mSoftc->msk_txqstart[i] = next;
-    mSoftc->msk_txqend[i] = next + mSoftc->msk_txqsize - 1;
-    next = mSoftc->msk_txqend[i] + 1;
+  sc->msk_rxqsize = (((sc->msk_ramsize * 1024 * 2) / 3) / 1024) * 1024;
+  sc->msk_txqsize = (sc->msk_ramsize * 1024) - sc->msk_rxqsize;
+  for (i = 0, next = 0; i < sc->msk_num_port; i++) {
+    sc->msk_rxqstart[i] = next;
+    sc->msk_rxqend[i] = next + sc->msk_rxqsize - 1;
+    next = sc->msk_rxqend[i] + 1;
+    sc->msk_txqstart[i] = next;
+    sc->msk_txqend[i] = next + sc->msk_txqsize - 1;
+    next = sc->msk_txqend[i] + 1;
     DEBUG ((EFI_D_NET, "Marvell Yukon: Port %d : Rx Queue %dKB(0x%08x:0x%08x)\n", i,
-            mSoftc->msk_rxqsize / 1024, mSoftc->msk_rxqstart[i], mSoftc->msk_rxqend[i]));
+            sc->msk_rxqsize / 1024, sc->msk_rxqstart[i], sc->msk_rxqend[i]));
     DEBUG ((EFI_D_NET, "Marvell Yukon: Port %d : Tx Queue %dKB(0x%08x:0x%08x)\n", i,
-            mSoftc->msk_txqsize / 1024, mSoftc->msk_txqstart[i], mSoftc->msk_txqend[i]));
+            sc->msk_txqsize / 1024, sc->msk_txqstart[i], sc->msk_txqend[i]));
   }
 }
 
@@ -811,15 +834,18 @@ msk_phy_power (
 static
 VOID
 clear_pci_errors (
-    VOID
+    struct msk_softc  *sc
     )
 {
   EFI_STATUS  Status;
   UINT16      val;
+  EFI_PCI_IO_PROTOCOL  *PciIo;
+
+  PciIo = sc->PciIo;
 
   // Clear all error bits in the PCI status register.
-  Status = mPciIo->Pci.Read (
-        mPciIo,
+  Status = PciIo->Pci.Read (
+        PciIo,
         EfiPciIoWidthUint16,
         PCI_PRIMARY_STATUS_OFFSET,
         1,
@@ -828,11 +854,11 @@ clear_pci_errors (
   if (EFI_ERROR (Status)) {
     DEBUG ((EFI_D_ERROR, "Marvell Yukon: Warning - Reading PCI Status failed: %r", Status));
   }
-  CSR_WRITE_1 (mSoftc, B2_TST_CTRL1, TST_CFG_WRITE_ON);
+  CSR_WRITE_1 (sc, B2_TST_CTRL1, TST_CFG_WRITE_ON);
   val |= PCIM_STATUS_PERR | PCIM_STATUS_SERR | PCIM_STATUS_RMABORT |
       PCIM_STATUS_RTABORT | PCIM_STATUS_PERRREPORT;
-  Status = mPciIo->Pci.Write (
-        mPciIo,
+  Status = PciIo->Pci.Write (
+        PciIo,
         EfiPciIoWidthUint16,
         PCI_PRIMARY_STATUS_OFFSET,
         1,
@@ -841,13 +867,13 @@ clear_pci_errors (
   if (EFI_ERROR (Status)) {
     DEBUG ((EFI_D_ERROR, "Marvell Yukon: Warning - Writing PCI Status failed: %r", Status));
   }
-  CSR_WRITE_2 (mSoftc, B0_CTST, CS_MRST_CLR);
+  CSR_WRITE_2 (sc, B0_CTST, CS_MRST_CLR);
 }
 
 static
 VOID
 mskc_reset (
-    VOID
+    struct msk_softc  *sc
     )
 {
   EFI_STATUS            Status;
@@ -855,44 +881,47 @@ mskc_reset (
   UINT16                status;
   UINT32                val;
   INTN                  i;
+  EFI_PCI_IO_PROTOCOL   *PciIo;
 
-  CSR_WRITE_2 (mSoftc, B0_CTST, CS_RST_CLR);
+  PciIo = sc->PciIo;
+
+  CSR_WRITE_2 (sc, B0_CTST, CS_RST_CLR);
 
   // Disable ASF
-  if (mSoftc->msk_hw_id == CHIP_ID_YUKON_EX) {
-    status = CSR_READ_2 (mSoftc, B28_Y2_ASF_HCU_CCSR);
+  if (sc->msk_hw_id == CHIP_ID_YUKON_EX) {
+    status = CSR_READ_2 (sc, B28_Y2_ASF_HCU_CCSR);
     // Clear AHB bridge & microcontroller reset
     status &= ~(Y2_ASF_HCU_CCSR_AHB_RST | Y2_ASF_HCU_CCSR_CPU_RST_MODE);
     // Clear ASF microcontroller state
     status &= ~ Y2_ASF_HCU_CCSR_UC_STATE_MSK;
-    CSR_WRITE_2 (mSoftc, B28_Y2_ASF_HCU_CCSR, status);
+    CSR_WRITE_2 (sc, B28_Y2_ASF_HCU_CCSR, status);
   } else {
-    CSR_WRITE_1 (mSoftc, B28_Y2_ASF_STAT_CMD, Y2_ASF_RESET);
+    CSR_WRITE_1 (sc, B28_Y2_ASF_STAT_CMD, Y2_ASF_RESET);
   }
-  CSR_WRITE_2 (mSoftc, B0_CTST, Y2_ASF_DISABLE);
+  CSR_WRITE_2 (sc, B0_CTST, Y2_ASF_DISABLE);
 
   //
   // Since we disabled ASF, S/W reset is required for Power Management.
   //
-  CSR_WRITE_2 (mSoftc, B0_CTST, CS_RST_SET);
-  CSR_WRITE_2 (mSoftc, B0_CTST, CS_RST_CLR);
+  CSR_WRITE_2 (sc, B0_CTST, CS_RST_SET);
+  CSR_WRITE_2 (sc, B0_CTST, CS_RST_CLR);
 
-  clear_pci_errors ();
-  switch (mSoftc->msk_bustype) {
+  clear_pci_errors (sc);
+  switch (sc->msk_bustype) {
     case MSK_PEX_BUS:
       // Clear all PEX errors
-      CSR_PCI_WRITE_4 (mSoftc, PEX_UNC_ERR_STAT, 0xffffffff);
-      val = CSR_PCI_READ_4 (mSoftc, PEX_UNC_ERR_STAT);
+      CSR_PCI_WRITE_4 (sc, PEX_UNC_ERR_STAT, 0xffffffff);
+      val = CSR_PCI_READ_4 (sc, PEX_UNC_ERR_STAT);
       if ((val & PEX_RX_OV) != 0) {
-        mSoftc->msk_intrmask &= ~Y2_IS_HW_ERR;
-        mSoftc->msk_intrhwemask &= ~Y2_IS_PCI_EXP;
+        sc->msk_intrmask &= ~Y2_IS_HW_ERR;
+        sc->msk_intrhwemask &= ~Y2_IS_PCI_EXP;
       }
       break;
     case MSK_PCI_BUS:
     case MSK_PCIX_BUS:
       // Set Cache Line Size to 2 (8bytes) if configured to 0
-      Status = mPciIo->Pci.Read (
-            mPciIo,
+      Status = PciIo->Pci.Read (
+            PciIo,
             EfiPciIoWidthUint8,
             PCI_CACHELINE_SIZE_OFFSET,
             1,
@@ -903,8 +932,8 @@ mskc_reset (
       }
       if (val == 0) {
         val = 2;
-        Status = mPciIo->Pci.Write (
-              mPciIo,
+        Status = PciIo->Pci.Write (
+              PciIo,
               EfiPciIoWidthUint8,
               PCI_CACHELINE_SIZE_OFFSET,
               1,
@@ -914,9 +943,9 @@ mskc_reset (
           DEBUG ((EFI_D_ERROR, "Marvell Yukon: Warning - Writing PCI cache line size failed: %r", Status));
         }
       }
-      if (mSoftc->msk_bustype == MSK_PCIX_BUS) {
-        Status = mPciIo->Pci.Read (
-              mPciIo,
+      if (sc->msk_bustype == MSK_PCIX_BUS) {
+        Status = PciIo->Pci.Read (
+              PciIo,
               EfiPciIoWidthUint32,
               PCI_OUR_REG_1,
               1,
@@ -926,8 +955,8 @@ mskc_reset (
           DEBUG ((EFI_D_ERROR, "Marvell Yukon: Warning - Reading Our Reg 1 failed: %r", Status));
         }
         val |= PCI_CLS_OPT;
-        Status = mPciIo->Pci.Write (
-              mPciIo,
+        Status = PciIo->Pci.Write (
+              PciIo,
               EfiPciIoWidthUint32,
               PCI_OUR_REG_1,
               1,
@@ -941,130 +970,128 @@ mskc_reset (
   }
 
   // Set PHY power state
-  msk_phy_power (mSoftc, MSK_PHY_POWERUP);
+  msk_phy_power (sc, MSK_PHY_POWERUP);
 
   // Reset GPHY/GMAC Control
-  for (i = 0; i < mSoftc->msk_num_port; i++) {
+  for (i = 0; i < sc->msk_num_port; i++) {
     // GPHY Control reset
-    CSR_WRITE_4 (mSoftc, MR_ADDR (i, GPHY_CTRL), GPC_RST_SET);
-    CSR_WRITE_4 (mSoftc, MR_ADDR (i, GPHY_CTRL), GPC_RST_CLR);
-    if (mSoftc->msk_hw_id == CHIP_ID_YUKON_UL_2) {
+    CSR_WRITE_4 (sc, MR_ADDR (i, GPHY_CTRL), GPC_RST_SET);
+    CSR_WRITE_4 (sc, MR_ADDR (i, GPHY_CTRL), GPC_RST_CLR);
+    if (sc->msk_hw_id == CHIP_ID_YUKON_UL_2) {
       // Magic value observed under Linux.
-      CSR_WRITE_4 (mSoftc, MR_ADDR (i, GPHY_CTRL), 0x00105226);
+      CSR_WRITE_4 (sc, MR_ADDR (i, GPHY_CTRL), 0x00105226);
     }
     // GMAC Control reset
-    CSR_WRITE_4 (mSoftc, MR_ADDR (i, GMAC_CTRL), GMC_RST_SET);
-    CSR_WRITE_4 (mSoftc, MR_ADDR (i, GMAC_CTRL), GMC_RST_CLR);
-    CSR_WRITE_4 (mSoftc, MR_ADDR (i, GMAC_CTRL), GMC_F_LOOPB_OFF);
-    if (mSoftc->msk_hw_id == CHIP_ID_YUKON_EX) {
-      CSR_WRITE_4 (mSoftc, MR_ADDR (i, GMAC_CTRL), GMC_BYP_MACSECRX_ON | GMC_BYP_MACSECTX_ON | GMC_BYP_RETR_ON);
+    CSR_WRITE_4 (sc, MR_ADDR (i, GMAC_CTRL), GMC_RST_SET);
+    CSR_WRITE_4 (sc, MR_ADDR (i, GMAC_CTRL), GMC_RST_CLR);
+    CSR_WRITE_4 (sc, MR_ADDR (i, GMAC_CTRL), GMC_F_LOOPB_OFF);
+    if (sc->msk_hw_id == CHIP_ID_YUKON_EX) {
+      CSR_WRITE_4 (sc, MR_ADDR (i, GMAC_CTRL), GMC_BYP_MACSECRX_ON | GMC_BYP_MACSECTX_ON | GMC_BYP_RETR_ON);
     }
   }
-  if ((mSoftc->msk_hw_id == CHIP_ID_YUKON_OPT) && (mSoftc->msk_hw_rev == 0)) {
+  if ((sc->msk_hw_id == CHIP_ID_YUKON_OPT) && (sc->msk_hw_rev == 0)) {
     // Disable PCIe PHY powerdown (reg 0x80, bit7)
-    CSR_WRITE_4 (mSoftc, Y2_PEX_PHY_DATA, (0x0080 << 16) | 0x0080);
+    CSR_WRITE_4 (sc, Y2_PEX_PHY_DATA, (0x0080 << 16) | 0x0080);
   }
-  CSR_WRITE_1 (mSoftc, B2_TST_CTRL1, TST_CFG_WRITE_OFF);
+  CSR_WRITE_1 (sc, B2_TST_CTRL1, TST_CFG_WRITE_OFF);
 
   // LED On
-  CSR_WRITE_2 (mSoftc, B0_CTST, Y2_LED_STAT_ON);
+  CSR_WRITE_2 (sc, B0_CTST, Y2_LED_STAT_ON);
 
   // Enable plug in go
-  CSR_WRITE_2 (mSoftc, B0_CTST, Y_ULTRA_2_PLUG_IN_GO_EN);
+  CSR_WRITE_2 (sc, B0_CTST, Y_ULTRA_2_PLUG_IN_GO_EN);
 
   // Clear TWSI IRQ
-  CSR_WRITE_4 (mSoftc, B2_I2C_IRQ, I2C_CLR_IRQ);
+  CSR_WRITE_4 (sc, B2_I2C_IRQ, I2C_CLR_IRQ);
 
   // Turn off hardware timer
-  CSR_WRITE_1 (mSoftc, B2_TI_CTRL, TIM_STOP);
-  CSR_WRITE_1 (mSoftc, B2_TI_CTRL, TIM_CLR_IRQ);
+  CSR_WRITE_1 (sc, B2_TI_CTRL, TIM_STOP);
+  CSR_WRITE_1 (sc, B2_TI_CTRL, TIM_CLR_IRQ);
 
   // Turn off descriptor polling
-  CSR_WRITE_1 (mSoftc, B28_DPT_CTRL, DPT_STOP);
+  CSR_WRITE_1 (sc, B28_DPT_CTRL, DPT_STOP);
 
   // Turn off time stamps
-  CSR_WRITE_1 (mSoftc, GMAC_TI_ST_CTRL, GMT_ST_STOP);
-  CSR_WRITE_1 (mSoftc, GMAC_TI_ST_CTRL, GMT_ST_CLR_IRQ);
+  CSR_WRITE_1 (sc, GMAC_TI_ST_CTRL, GMT_ST_STOP);
+  CSR_WRITE_1 (sc, GMAC_TI_ST_CTRL, GMT_ST_CLR_IRQ);
 
   // Configure timeout values
-  for (i = 0; i < mSoftc->msk_num_port; i++) {
-    CSR_WRITE_2 (mSoftc, SELECT_RAM_BUFFER (i, B3_RI_CTRL),    RI_RST_SET);
-    CSR_WRITE_2 (mSoftc, SELECT_RAM_BUFFER (i, B3_RI_CTRL),    RI_RST_CLR);
-    CSR_WRITE_1 (mSoftc, SELECT_RAM_BUFFER (i, B3_RI_WTO_R1),  MSK_RI_TO_53);
-    CSR_WRITE_1 (mSoftc, SELECT_RAM_BUFFER (i, B3_RI_WTO_XA1), MSK_RI_TO_53);
-    CSR_WRITE_1 (mSoftc, SELECT_RAM_BUFFER (i, B3_RI_WTO_XS1), MSK_RI_TO_53);
-    CSR_WRITE_1 (mSoftc, SELECT_RAM_BUFFER (i, B3_RI_RTO_R1),  MSK_RI_TO_53);
-    CSR_WRITE_1 (mSoftc, SELECT_RAM_BUFFER (i, B3_RI_RTO_XA1), MSK_RI_TO_53);
-    CSR_WRITE_1 (mSoftc, SELECT_RAM_BUFFER (i, B3_RI_RTO_XS1), MSK_RI_TO_53);
-    CSR_WRITE_1 (mSoftc, SELECT_RAM_BUFFER (i, B3_RI_WTO_R2),  MSK_RI_TO_53);
-    CSR_WRITE_1 (mSoftc, SELECT_RAM_BUFFER (i, B3_RI_WTO_XA2), MSK_RI_TO_53);
-    CSR_WRITE_1 (mSoftc, SELECT_RAM_BUFFER (i, B3_RI_WTO_XS2), MSK_RI_TO_53);
-    CSR_WRITE_1 (mSoftc, SELECT_RAM_BUFFER (i, B3_RI_RTO_R2),  MSK_RI_TO_53);
-    CSR_WRITE_1 (mSoftc, SELECT_RAM_BUFFER (i, B3_RI_RTO_XA2), MSK_RI_TO_53);
-    CSR_WRITE_1 (mSoftc, SELECT_RAM_BUFFER (i, B3_RI_RTO_XS2), MSK_RI_TO_53);
+  for (i = 0; i < sc->msk_num_port; i++) {
+    CSR_WRITE_2 (sc, SELECT_RAM_BUFFER (i, B3_RI_CTRL),    RI_RST_SET);
+    CSR_WRITE_2 (sc, SELECT_RAM_BUFFER (i, B3_RI_CTRL),    RI_RST_CLR);
+    CSR_WRITE_1 (sc, SELECT_RAM_BUFFER (i, B3_RI_WTO_R1),  MSK_RI_TO_53);
+    CSR_WRITE_1 (sc, SELECT_RAM_BUFFER (i, B3_RI_WTO_XA1), MSK_RI_TO_53);
+    CSR_WRITE_1 (sc, SELECT_RAM_BUFFER (i, B3_RI_WTO_XS1), MSK_RI_TO_53);
+    CSR_WRITE_1 (sc, SELECT_RAM_BUFFER (i, B3_RI_RTO_R1),  MSK_RI_TO_53);
+    CSR_WRITE_1 (sc, SELECT_RAM_BUFFER (i, B3_RI_RTO_XA1), MSK_RI_TO_53);
+    CSR_WRITE_1 (sc, SELECT_RAM_BUFFER (i, B3_RI_RTO_XS1), MSK_RI_TO_53);
+    CSR_WRITE_1 (sc, SELECT_RAM_BUFFER (i, B3_RI_WTO_R2),  MSK_RI_TO_53);
+    CSR_WRITE_1 (sc, SELECT_RAM_BUFFER (i, B3_RI_WTO_XA2), MSK_RI_TO_53);
+    CSR_WRITE_1 (sc, SELECT_RAM_BUFFER (i, B3_RI_WTO_XS2), MSK_RI_TO_53);
+    CSR_WRITE_1 (sc, SELECT_RAM_BUFFER (i, B3_RI_RTO_R2),  MSK_RI_TO_53);
+    CSR_WRITE_1 (sc, SELECT_RAM_BUFFER (i, B3_RI_RTO_XA2), MSK_RI_TO_53);
+    CSR_WRITE_1 (sc, SELECT_RAM_BUFFER (i, B3_RI_RTO_XS2), MSK_RI_TO_53);
   }
 
   // Disable all interrupts
-  CSR_WRITE_4 (mSoftc, B0_HWE_IMSK, 0);
-  CSR_READ_4 (mSoftc, B0_HWE_IMSK);
-  CSR_WRITE_4 (mSoftc, B0_IMSK, 0);
-  CSR_READ_4 (mSoftc, B0_IMSK);
+  CSR_WRITE_4 (sc, B0_HWE_IMSK, 0);
+  CSR_READ_4 (sc, B0_HWE_IMSK);
+  CSR_WRITE_4 (sc, B0_IMSK, 0);
+  CSR_READ_4 (sc, B0_IMSK);
 
   // Clear status list
-  gBS->SetMem (mSoftc->msk_stat_ring, sizeof (struct msk_stat_desc) * MSK_STAT_RING_CNT, 0);
-  mSoftc->msk_stat_cons = 0;
-  CSR_WRITE_4 (mSoftc, STAT_CTRL, SC_STAT_RST_SET);
-  CSR_WRITE_4 (mSoftc, STAT_CTRL, SC_STAT_RST_CLR);
+  gBS->SetMem (sc->msk_stat_ring, sizeof (struct msk_stat_desc) * MSK_STAT_RING_CNT, 0);
+  sc->msk_stat_cons = 0;
+  CSR_WRITE_4 (sc, STAT_CTRL, SC_STAT_RST_SET);
+  CSR_WRITE_4 (sc, STAT_CTRL, SC_STAT_RST_CLR);
 
   // Set the status list base address
-  PhysAddr = mSoftc->msk_stat_ring_paddr;
-  CSR_WRITE_4 (mSoftc, STAT_LIST_ADDR_LO, MSK_ADDR_LO (PhysAddr));
-  CSR_WRITE_4 (mSoftc, STAT_LIST_ADDR_HI, MSK_ADDR_HI (PhysAddr));
+  PhysAddr = sc->msk_stat_ring_paddr;
+  CSR_WRITE_4 (sc, STAT_LIST_ADDR_LO, MSK_ADDR_LO (PhysAddr));
+  CSR_WRITE_4 (sc, STAT_LIST_ADDR_HI, MSK_ADDR_HI (PhysAddr));
 
   // Set the status list last index
-  CSR_WRITE_2 (mSoftc, STAT_LAST_IDX, MSK_STAT_RING_CNT - 1);
-  if ((mSoftc->msk_hw_id == CHIP_ID_YUKON_EC) && (mSoftc->msk_hw_rev == CHIP_REV_YU_EC_A1)) {
+  CSR_WRITE_2 (sc, STAT_LAST_IDX, MSK_STAT_RING_CNT - 1);
+  if ((sc->msk_hw_id == CHIP_ID_YUKON_EC) && (sc->msk_hw_rev == CHIP_REV_YU_EC_A1)) {
     // WA for dev. #4.3
-    CSR_WRITE_2 (mSoftc, STAT_TX_IDX_TH, ST_TXTH_IDX_MASK);
+    CSR_WRITE_2 (sc, STAT_TX_IDX_TH, ST_TXTH_IDX_MASK);
     // WA for dev. #4.18
-    CSR_WRITE_1 (mSoftc, STAT_FIFO_WM, 0x21);
-    CSR_WRITE_1 (mSoftc, STAT_FIFO_ISR_WM, 0x07);
+    CSR_WRITE_1 (sc, STAT_FIFO_WM, 0x21);
+    CSR_WRITE_1 (sc, STAT_FIFO_ISR_WM, 0x07);
   } else {
-    CSR_WRITE_2 (mSoftc, STAT_TX_IDX_TH, 0x0a);
-    CSR_WRITE_1 (mSoftc, STAT_FIFO_WM, 0x10);
-    if ((mSoftc->msk_hw_id == CHIP_ID_YUKON_XL) && (mSoftc->msk_hw_rev == CHIP_REV_YU_XL_A0)) {
-      CSR_WRITE_1 (mSoftc, STAT_FIFO_ISR_WM, 0x04);
+    CSR_WRITE_2 (sc, STAT_TX_IDX_TH, 0x0a);
+    CSR_WRITE_1 (sc, STAT_FIFO_WM, 0x10);
+    if ((sc->msk_hw_id == CHIP_ID_YUKON_XL) && (sc->msk_hw_rev == CHIP_REV_YU_XL_A0)) {
+      CSR_WRITE_1 (sc, STAT_FIFO_ISR_WM, 0x04);
     } else {
-      CSR_WRITE_1 (mSoftc, STAT_FIFO_ISR_WM, 0x10);
+      CSR_WRITE_1 (sc, STAT_FIFO_ISR_WM, 0x10);
     }
-    CSR_WRITE_4 (mSoftc, STAT_ISR_TIMER_INI, 0x0190);
+    CSR_WRITE_4 (sc, STAT_ISR_TIMER_INI, 0x0190);
   }
   //
   // Use default value for STAT_ISR_TIMER_INI, STAT_LEV_TIMER_INI.
   //
-  CSR_WRITE_4 (mSoftc, STAT_TX_TIMER_INI, MSK_USECS (mSoftc, 1000));
+  CSR_WRITE_4 (sc, STAT_TX_TIMER_INI, MSK_USECS (sc, 1000));
 
   // Enable status unit
-  CSR_WRITE_4 (mSoftc, STAT_CTRL, SC_STAT_OP_ON);
+  CSR_WRITE_4 (sc, STAT_CTRL, SC_STAT_OP_ON);
 
-  CSR_WRITE_1 (mSoftc, STAT_TX_TIMER_CTRL, TIM_START);
-  CSR_WRITE_1 (mSoftc, STAT_LEV_TIMER_CTRL, TIM_START);
-  CSR_WRITE_1 (mSoftc, STAT_ISR_TIMER_CTRL, TIM_START);
+  CSR_WRITE_1 (sc, STAT_TX_TIMER_CTRL, TIM_START);
+  CSR_WRITE_1 (sc, STAT_LEV_TIMER_CTRL, TIM_START);
+  CSR_WRITE_1 (sc, STAT_ISR_TIMER_CTRL, TIM_START);
 }
 
-static
 EFI_STATUS
-msk_attach (
-    INT32 Port
+mskc_attach_if (
+    struct msk_if_softc   *sc_if,
+    UINTN                 Port
     )
 {
-  struct msk_if_softc   *sc_if;
   INTN                  i;
   EFI_STATUS            Status;
 
-  sc_if = mSoftc->msk_if[Port];
   sc_if->msk_md.port = Port;
-  sc_if->msk_flags = mSoftc->msk_pflags;
+  sc_if->msk_flags = sc_if->msk_softc->msk_pflags;
 
   // Setup Tx/Rx queue register offsets
   if (Port == MSK_PORT_A) {
@@ -1092,18 +1119,22 @@ msk_attach (
    * use this extra address.
    */
   for (i = 0; i < NET_ETHER_ADDR_LEN; i++) {
-    sc_if->MacAddress.Addr[i] = CSR_READ_1 (mSoftc, B2_MAC_1 + (Port * 8) + i);
+    sc_if->MacAddress.Addr[i] = CSR_READ_1 (sc_if->msk_softc, B2_MAC_1 + (Port * 8) + i);
   }
 
   DEBUG ((EFI_D_NET,"Marvell Yukon: Mac Address %02x:%02x:%02x:%02x:%02x:%02x\n",
           sc_if->MacAddress.Addr[0], sc_if->MacAddress.Addr[1], sc_if->MacAddress.Addr[2],
       sc_if->MacAddress.Addr[3], sc_if->MacAddress.Addr[4], sc_if->MacAddress.Addr[5]));
 
-  Status = e1000_probe_and_attach (&sc_if->mii_d, &sc_if->msk_md);
+  Status = e1000_probe_and_attach (&sc_if->mii_d, &sc_if->msk_md, sc_if, &sc_if->phy_softc);
   if (EFI_ERROR (Status)) {
-    mSoftc->msk_if[Port] = NULL;
-    msk_detach (Port);
+    return Status;
   }
+
+  InitializeListHead (&sc_if->TransmitQueueHead);
+  InitializeListHead (&sc_if->TransmitFreeQueueHead);
+  InitializeListHead (&sc_if->ReceiveQueueHead);
+  sc_if->active = TRUE;
 
   return (Status);
 }
@@ -1115,7 +1146,7 @@ msk_attach (
 EFI_STATUS
 mskc_attach (
     IN  EFI_PCI_IO_PROTOCOL   *PciIo,
-    OUT EFI_MAC_ADDRESS       *Mac
+    OUT struct msk_softc      **ScData
     )
 {
   struct msk_mii_data   *mmd;
@@ -1123,11 +1154,11 @@ mskc_attach (
   UINT8                 *PciBarResources;
   EFI_STATUS            Status;
   struct msk_if_softc   *ScIf;
+  struct msk_softc      *sc;
 
-  mPciIo = PciIo;
   Status = gBS->AllocatePool (EfiBootServicesData,
                               sizeof (struct msk_softc),
-                              (VOID**) &mSoftc);
+                              (VOID**) &sc);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -1135,28 +1166,29 @@ mskc_attach (
   //
   // Save original PCI attributes
   //
-  gBS->SetMem (mSoftc, sizeof (struct msk_softc), 0);
-  Status = mPciIo->Attributes (
-        mPciIo,
+  gBS->SetMem (sc, sizeof (struct msk_softc), 0);
+  sc->PciIo = PciIo;
+  Status = PciIo->Attributes (
+        PciIo,
         EfiPciIoAttributeOperationGet,
         0,
-        &mSoftc->OriginalPciAttributes
+        &sc->OriginalPciAttributes
         );
   if (EFI_ERROR (Status)) {
-    gBS->FreePool (mSoftc);
+    gBS->FreePool (sc);
     return Status;
   }
 
-  Status = mPciIo->Attributes (
-        mPciIo,
+  Status = PciIo->Attributes (
+        PciIo,
         EfiPciIoAttributeOperationSupported,
         0,
         &Supports
         );
   if (!EFI_ERROR (Status)) {
     Supports &= EFI_PCI_DEVICE_ENABLE;
-    Status = mPciIo->Attributes (
-          mPciIo,
+    Status = PciIo->Attributes (
+          PciIo,
           EfiPciIoAttributeOperationEnable,
           Supports | EFI_PCI_IO_ATTRIBUTE_DUAL_ADDRESS_CYCLE,
           NULL
@@ -1167,13 +1199,13 @@ mskc_attach (
     goto RESTORE_PCI_ATTRIBS;
   }
 
-  Status = mPciIo->GetBarAttributes (mPciIo, 0, &Supports, (VOID**)&PciBarResources);
+  Status = PciIo->GetBarAttributes (PciIo, 0, &Supports, (VOID**)&PciBarResources);
   if (!EFI_ERROR (Status) && (((EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR *)PciBarResources)->Desc == ACPI_ADDRESS_SPACE_DESCRIPTOR)) {
     if (((EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR *)PciBarResources)->ResType == ACPI_ADDRESS_SPACE_TYPE_MEM) {
       if (!(((EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR *)PciBarResources)->SpecificFlag & ACPI_SPECFLAG_PREFETCHABLE)) {
-        mSoftc->RegBase = ((EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR *)PciBarResources)->AddrRangeMin;
+        sc->RegBase = ((EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR *)PciBarResources)->AddrRangeMin;
         // Should assert that Bar is 32 bits wide
-        DEBUG ((EFI_D_NET, "Marvell Yukon: GlobalRegistersBase = 0x%x\n", mSoftc->RegBase));
+        DEBUG ((DEBUG_NET, "Marvell Yukon: GlobalRegistersBase = 0x%x\n", sc->RegBase));
       } else {
         Status = EFI_NOT_FOUND;
       }
@@ -1186,85 +1218,85 @@ mskc_attach (
   }
 
   // Clear Software Reset
-  CSR_WRITE_2 (mSoftc, B0_CTST, CS_RST_CLR);
+  CSR_WRITE_2 (sc, B0_CTST, CS_RST_CLR);
 
   // Get Hardware ID & Revision
-  mSoftc->msk_hw_id = CSR_READ_1 (mSoftc, B2_CHIP_ID);
-  mSoftc->msk_hw_rev = (CSR_READ_1 (mSoftc, B2_MAC_CFG) >> 4) & 0x0f;
+  sc->msk_hw_id = CSR_READ_1 (sc, B2_CHIP_ID);
+  sc->msk_hw_rev = (CSR_READ_1 (sc, B2_MAC_CFG) >> 4) & 0x0f;
 
   // Bail out if chip is not recognized
-  if (mSoftc->msk_hw_id < CHIP_ID_YUKON_XL ||
-      mSoftc->msk_hw_id > CHIP_ID_YUKON_OPT ||
-      mSoftc->msk_hw_id == CHIP_ID_YUKON_SUPR ||
-      mSoftc->msk_hw_id == CHIP_ID_YUKON_UNKNOWN) {
-    DEBUG ((EFI_D_NET, "Marvell Yukon: unknown device: id=0x%02x, rev=0x%02x\n", mSoftc->msk_hw_id, mSoftc->msk_hw_rev));
+  if (sc->msk_hw_id < CHIP_ID_YUKON_XL ||
+      sc->msk_hw_id > CHIP_ID_YUKON_OPT ||
+      sc->msk_hw_id == CHIP_ID_YUKON_SUPR ||
+      sc->msk_hw_id == CHIP_ID_YUKON_UNKNOWN) {
+    DEBUG ((DEBUG_NET, "Marvell Yukon: unknown device: id=0x%02x, rev=0x%02x\n", sc->msk_hw_id, sc->msk_hw_rev));
     Status = EFI_DEVICE_ERROR;
     goto RESTORE_PCI_ATTRIBS;
   }
   DEBUG ((EFI_D_NET, "Marvell Yukon: Marvell Technology Group Ltd. %a Id:0x%02x Rev:0x%02x\n",
-          model_name[mSoftc->msk_hw_id - CHIP_ID_YUKON_XL], mSoftc->msk_hw_id, mSoftc->msk_hw_rev));
+          model_name[sc->msk_hw_id - CHIP_ID_YUKON_XL], sc->msk_hw_id, sc->msk_hw_rev));
 
-  mSoftc->msk_process_limit = MSK_PROC_DEFAULT;
-  mSoftc->msk_int_holdoff = MSK_INT_HOLDOFF_DEFAULT;
+  sc->msk_process_limit = MSK_PROC_DEFAULT;
+  sc->msk_int_holdoff = MSK_INT_HOLDOFF_DEFAULT;
 
   // Check if MAC address is valid
-  if ((CSR_READ_4 (mSoftc, B2_MAC_1) == 0) && (CSR_READ_4 (mSoftc, B2_MAC_1+4) == 0)) {
+  if ((CSR_READ_4 (sc, B2_MAC_1) == 0) && (CSR_READ_4 (sc, B2_MAC_1+4) == 0)) {
     DEBUG ((EFI_D_NET, "Marvell Yukon: MAC address is invalid (00:00:00:00:00:00)\n"));
   }
 
   // Soft reset
-  CSR_WRITE_2 (mSoftc, B0_CTST, CS_RST_SET);
-  CSR_WRITE_2 (mSoftc, B0_CTST, CS_RST_CLR);
-  mSoftc->msk_pmd = CSR_READ_1 (mSoftc, B2_PMD_TYP);
+  CSR_WRITE_2 (sc, B0_CTST, CS_RST_SET);
+  CSR_WRITE_2 (sc, B0_CTST, CS_RST_CLR);
+  sc->msk_pmd = CSR_READ_1 (sc, B2_PMD_TYP);
 
   // Check number of MACs
-  mSoftc->msk_num_port = 1;
-  if ((CSR_READ_1 (mSoftc, B2_Y2_HW_RES) & CFG_DUAL_MAC_MSK) == CFG_DUAL_MAC_MSK) {
-    if (!(CSR_READ_1 (mSoftc, B2_Y2_CLK_GATE) & Y2_STATUS_LNK2_INAC)) {
-      mSoftc->msk_num_port++;
+  sc->msk_num_port = 1;
+  if ((CSR_READ_1 (sc, B2_Y2_HW_RES) & CFG_DUAL_MAC_MSK) == CFG_DUAL_MAC_MSK) {
+    if (!(CSR_READ_1 (sc, B2_Y2_CLK_GATE) & Y2_STATUS_LNK2_INAC)) {
+      sc->msk_num_port++;
     }
   }
 
   /* Check bus type. */
-  mSoftc->msk_bustype = MSK_PEX_BUS; /* Only support PCI Express */
-  mSoftc->msk_expcap = 1;
+  sc->msk_bustype = MSK_PEX_BUS; /* Only support PCI Express */
+  sc->msk_expcap = 1;
 
-  switch (mSoftc->msk_hw_id) {
+  switch (sc->msk_hw_id) {
     case CHIP_ID_YUKON_EC:
-      mSoftc->msk_clock = 125;  /* 125 MHz */
-      mSoftc->msk_pflags |= MSK_FLAG_JUMBO;
+      sc->msk_clock = 125;  /* 125 MHz */
+      sc->msk_pflags |= MSK_FLAG_JUMBO;
       break;
     case CHIP_ID_YUKON_EC_U:
-      mSoftc->msk_clock = 125;  /* 125 MHz */
-      mSoftc->msk_pflags |= MSK_FLAG_JUMBO | MSK_FLAG_JUMBO_NOCSUM;
+      sc->msk_clock = 125;  /* 125 MHz */
+      sc->msk_pflags |= MSK_FLAG_JUMBO | MSK_FLAG_JUMBO_NOCSUM;
       break;
     case CHIP_ID_YUKON_EX:
-      mSoftc->msk_clock = 125;  /* 125 MHz */
-      mSoftc->msk_pflags |= MSK_FLAG_JUMBO | MSK_FLAG_DESCV2 | MSK_FLAG_AUTOTX_CSUM;
+      sc->msk_clock = 125;  /* 125 MHz */
+      sc->msk_pflags |= MSK_FLAG_JUMBO | MSK_FLAG_DESCV2 | MSK_FLAG_AUTOTX_CSUM;
       /*
      * Yukon Extreme seems to have silicon bug for
      * automatic Tx checksum calculation capability.
      */
-      if (mSoftc->msk_hw_rev == CHIP_REV_YU_EX_B0) {
-        mSoftc->msk_pflags &= ~MSK_FLAG_AUTOTX_CSUM;
+      if (sc->msk_hw_rev == CHIP_REV_YU_EX_B0) {
+        sc->msk_pflags &= ~MSK_FLAG_AUTOTX_CSUM;
       }
       /*
      * Yukon Extreme A0 could not use store-and-forward
      * for jumbo frames, so disable Tx checksum
      * offloading for jumbo frames.
      */
-      if (mSoftc->msk_hw_rev == CHIP_REV_YU_EX_A0) {
-        mSoftc->msk_pflags |= MSK_FLAG_JUMBO_NOCSUM;
+      if (sc->msk_hw_rev == CHIP_REV_YU_EX_A0) {
+        sc->msk_pflags |= MSK_FLAG_JUMBO_NOCSUM;
       }
       break;
     case CHIP_ID_YUKON_FE:
-      mSoftc->msk_clock = 100;  /* 100 MHz */
-      mSoftc->msk_pflags |= MSK_FLAG_FASTETHER;
+      sc->msk_clock = 100;  /* 100 MHz */
+      sc->msk_pflags |= MSK_FLAG_FASTETHER;
       break;
     case CHIP_ID_YUKON_FE_P:
-      mSoftc->msk_clock = 50;  /* 50 MHz */
-      mSoftc->msk_pflags |= MSK_FLAG_FASTETHER | MSK_FLAG_DESCV2 | MSK_FLAG_AUTOTX_CSUM;
-      if (mSoftc->msk_hw_rev == CHIP_REV_YU_FE_P_A0) {
+      sc->msk_clock = 50;  /* 50 MHz */
+      sc->msk_pflags |= MSK_FLAG_FASTETHER | MSK_FLAG_DESCV2 | MSK_FLAG_AUTOTX_CSUM;
+      if (sc->msk_hw_rev == CHIP_REV_YU_FE_P_A0) {
         /*
        * XXX
        * FE+ A0 has status LE writeback bug so msk (4)
@@ -1275,39 +1307,39 @@ mskc_attach (
        * Just pass received frames to upper stack with
        * minimal test and let upper stack handle them.
        */
-        mSoftc->msk_pflags |= MSK_FLAG_NOHWVLAN | MSK_FLAG_NORXCHK | MSK_FLAG_NORX_CSUM;
+        sc->msk_pflags |= MSK_FLAG_NOHWVLAN | MSK_FLAG_NORXCHK | MSK_FLAG_NORX_CSUM;
       }
       break;
     case CHIP_ID_YUKON_XL:
-      mSoftc->msk_clock = 156;  /* 156 MHz */
-      mSoftc->msk_pflags |= MSK_FLAG_JUMBO;
+      sc->msk_clock = 156;  /* 156 MHz */
+      sc->msk_pflags |= MSK_FLAG_JUMBO;
       break;
     case CHIP_ID_YUKON_UL_2:
-      mSoftc->msk_clock = 125;  /* 125 MHz */
-      mSoftc->msk_pflags |= MSK_FLAG_JUMBO;
+      sc->msk_clock = 125;  /* 125 MHz */
+      sc->msk_pflags |= MSK_FLAG_JUMBO;
       break;
     case CHIP_ID_YUKON_OPT:
-      mSoftc->msk_clock = 125;  /* 125 MHz */
-      mSoftc->msk_pflags |= MSK_FLAG_JUMBO | MSK_FLAG_DESCV2;
+      sc->msk_clock = 125;  /* 125 MHz */
+      sc->msk_pflags |= MSK_FLAG_JUMBO | MSK_FLAG_DESCV2;
       break;
     default:
-      mSoftc->msk_clock = 156;  /* 156 MHz */
+      sc->msk_clock = 156;  /* 156 MHz */
       break;
   }
 
-  Status = msk_status_dma_alloc ();
+  Status = msk_status_dma_alloc (sc);
   if (EFI_ERROR (Status)) {
     goto fail;
   }
 
   // Set base interrupt mask
-  mSoftc->msk_intrmask = Y2_IS_HW_ERR | Y2_IS_STAT_BMU;
-  mSoftc->msk_intrhwemask = Y2_IS_TIST_OV | Y2_IS_MST_ERR | Y2_IS_IRQ_STAT | Y2_IS_PCI_EXP | Y2_IS_PCI_NEXP;
+  sc->msk_intrmask = Y2_IS_HW_ERR | Y2_IS_STAT_BMU;
+  sc->msk_intrhwemask = Y2_IS_TIST_OV | Y2_IS_MST_ERR | Y2_IS_IRQ_STAT | Y2_IS_PCI_EXP | Y2_IS_PCI_NEXP;
 
   // Reset the adapter
-  mskc_reset ();
+  mskc_reset (sc);
 
-  mskc_setup_rambuffer ();
+  mskc_setup_rambuffer (sc);
 
   Status = gBS->AllocatePool (EfiBootServicesData,
                               sizeof (struct msk_if_softc),
@@ -1316,24 +1348,21 @@ mskc_attach (
     goto fail;
   }
   gBS->SetMem (ScIf, sizeof (struct msk_if_softc), 0);
-  mSoftc->msk_if[MSK_PORT_A] = ScIf;
-  Status = msk_attach (MSK_PORT_A);
+  ScIf->msk_softc = sc;
+  sc->msk_if[MSK_PORT_A] = ScIf;
+  Status = mskc_attach_if (sc->msk_if[MSK_PORT_A], MSK_PORT_A);
   if (EFI_ERROR (Status)) {
     goto fail;
   }
 
-  if (Mac != NULL) {
-    gBS->CopyMem (Mac, &ScIf->MacAddress, sizeof (EFI_MAC_ADDRESS));
-  }
-
   mmd = &ScIf->msk_md;
   mmd->port = MSK_PORT_A;
-  mmd->pmd = mSoftc->msk_pmd;
-  if (mSoftc->msk_pmd == 'L' || mSoftc->msk_pmd == 'S' || mSoftc->msk_pmd == 'P') {
+  mmd->pmd = sc->msk_pmd;
+  if (sc->msk_pmd == 'L' || sc->msk_pmd == 'S' || sc->msk_pmd == 'P') {
     mmd->mii_flags |= MIIF_HAVEFIBER;
   }
 
-  if (mSoftc->msk_num_port > 1) {
+  if (sc->msk_num_port > 1) {
     Status = gBS->AllocatePool (EfiBootServicesData,
                                 sizeof (struct msk_if_softc),
                                 (VOID**) &ScIf);
@@ -1341,39 +1370,44 @@ mskc_attach (
       goto fail;
     }
     gBS->SetMem (ScIf, sizeof (struct msk_if_softc), 0);
-    mSoftc->msk_if[MSK_PORT_B] = ScIf;
-    Status = msk_attach (MSK_PORT_B);
+    ScIf->msk_softc = sc;
+    sc->msk_if[MSK_PORT_B] = ScIf;
+    Status = mskc_attach_if (sc->msk_if[MSK_PORT_B], MSK_PORT_B);
     if (EFI_ERROR (Status)) {
       goto fail;
     }
 
     mmd = &ScIf->msk_md;
     mmd->port = MSK_PORT_B;
-    mmd->pmd = mSoftc->msk_pmd;
-    if (mSoftc->msk_pmd == 'L' || mSoftc->msk_pmd == 'S' || mSoftc->msk_pmd == 'P') {
+    mmd->pmd = sc->msk_pmd;
+    if (sc->msk_pmd == 'L' || sc->msk_pmd == 'S' || sc->msk_pmd == 'P') {
       mmd->mii_flags |= MIIF_HAVEFIBER;
     }
   }
+
+  // Return new msk_softc structure
+  *ScData = sc;
 
   // Create timer for tick
   Status = gBS->CreateEvent (
         EVT_NOTIFY_SIGNAL | EVT_TIMER,
         TPL_CALLBACK,
         mskc_tick,
-        mSoftc,
-        &mSoftc->Timer
+        (VOID *)sc,
+        &sc->Timer
         );
   if (EFI_ERROR (Status)) {
     goto fail;
   }
 
-  InitializeListHead (&mSoftc->TransmitQueueHead);
-  InitializeListHead (&mSoftc->TransmitFreeQueueHead);
-  InitializeListHead (&mSoftc->ReceiveQueueHead);
+  Status = gBS->SetTimer (sc->Timer, TimerPeriodic, TICKS_PER_SECOND);
+  if (EFI_ERROR (Status)) {
+    goto fail;
+  }
 
 fail:
   if (EFI_ERROR (Status)) {
-    mskc_detach ();
+    mskc_detach (sc);
   }
 
   return (Status);
@@ -1382,13 +1416,13 @@ RESTORE_PCI_ATTRIBS:
   //
   // Restore original PCI attributes
   //
-  mPciIo->Attributes (
-        mPciIo,
+  PciIo->Attributes (
+        PciIo,
         EfiPciIoAttributeOperationSet,
-        mSoftc->OriginalPciAttributes,
+        sc->OriginalPciAttributes,
         NULL
         );
-  gBS->FreePool (mSoftc);
+  gBS->FreePool (sc);
   return Status;
 }
 
@@ -1399,73 +1433,76 @@ RESTORE_PCI_ATTRIBS:
  * to be careful about only freeing resources that have actually been
  * allocated.
  */
-static
 VOID
-msk_detach (
-    INT32   Port
+mskc_detach_if (
+    struct msk_if_softc  *sc_if
     )
 {
-  struct msk_if_softc   *sc_if;
-
-  sc_if = mSoftc->msk_if[Port];
-
-  msk_stop (sc_if);
-
-  msk_txrx_dma_free (sc_if);
+  if (sc_if->active) {
+    mskc_stop_if (sc_if);
+    msk_txrx_dma_free (sc_if);
+    e1000phy_detach (sc_if->phy_softc);
+    sc_if->phy_softc = NULL;
+    sc_if->active = FALSE;
+  }
 }
 
 VOID
 mskc_detach (
-    VOID
+    struct msk_softc  *sc
     )
 {
   EFI_TPL OldTpl;
+  EFI_PCI_IO_PROTOCOL *PciIo;
+
+  if (sc == NULL) {
+    return;
+  }
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
 
-  if (mSoftc->msk_if[MSK_PORT_A] != NULL) {
-    msk_detach (MSK_PORT_A);
-    gBS->FreePool (mSoftc->msk_if[MSK_PORT_A]);
-    mSoftc->msk_if[MSK_PORT_A] = NULL;
+  PciIo = sc->PciIo;
+
+  if (sc->msk_if[MSK_PORT_A] != NULL) {
+    mskc_detach_if (sc->msk_if[MSK_PORT_A]);
+    gBS->FreePool (sc->msk_if[MSK_PORT_A]);
+    sc->msk_if[MSK_PORT_A] = NULL;
   }
-  if (mSoftc->msk_if[MSK_PORT_B] != NULL) {
-    msk_detach (MSK_PORT_B);
-    gBS->FreePool (mSoftc->msk_if[MSK_PORT_B]);
-    mSoftc->msk_if[MSK_PORT_B] = NULL;
+  if (sc->msk_if[MSK_PORT_B] != NULL) {
+    mskc_detach_if (sc->msk_if[MSK_PORT_B]);
+    gBS->FreePool (sc->msk_if[MSK_PORT_B]);
+    sc->msk_if[MSK_PORT_B] = NULL;
   }
 
   /* Disable all interrupts. */
-  CSR_WRITE_4 (mSoftc, B0_IMSK, 0);
-  CSR_READ_4 (mSoftc, B0_IMSK);
-  CSR_WRITE_4 (mSoftc, B0_HWE_IMSK, 0);
-  CSR_READ_4 (mSoftc, B0_HWE_IMSK);
+  CSR_WRITE_4 (sc, B0_IMSK, 0);
+  CSR_READ_4 (sc, B0_IMSK);
+  CSR_WRITE_4 (sc, B0_HWE_IMSK, 0);
+  CSR_READ_4 (sc, B0_HWE_IMSK);
 
   // LED Off.
-  CSR_WRITE_2 (mSoftc, B0_CTST, Y2_LED_STAT_OFF);
+  CSR_WRITE_2 (sc, B0_CTST, Y2_LED_STAT_OFF);
 
   // Put hardware reset.
-  CSR_WRITE_2 (mSoftc, B0_CTST, CS_RST_SET);
+  CSR_WRITE_2 (sc, B0_CTST, CS_RST_SET);
 
-  msk_status_dma_free ();
+  msk_status_dma_free (sc);
 
-  if (mSoftc->Timer != NULL) {
-    gBS->SetTimer (mSoftc->Timer, TimerCancel, 0);
-    gBS->CloseEvent (mSoftc->Timer);
+  if (sc->Timer != NULL) {
+    gBS->SetTimer (sc->Timer, TimerCancel, 0);
+    gBS->CloseEvent (sc->Timer);
 
-    mSoftc->Timer = NULL;
+    sc->Timer = NULL;
   }
   //
   // Restore original PCI attributes
   //
-  mPciIo->Attributes (
-        mPciIo,
+  PciIo->Attributes (
+        PciIo,
         EfiPciIoAttributeOperationSet,
-        mSoftc->OriginalPciAttributes,
+        sc->OriginalPciAttributes,
         NULL
         );
-  gBS->FreePool (mSoftc);
-  mSoftc = NULL;
-  mPciIo = NULL;
 
   gBS->RestoreTPL (OldTpl);
 }
@@ -1474,24 +1511,27 @@ mskc_detach (
 static
 EFI_STATUS
 msk_status_dma_alloc (
-    VOID
+    struct msk_softc  *sc
     )
 {
   EFI_STATUS  Status;
   UINTN       Length;
+  EFI_PCI_IO_PROTOCOL *PciIo;
 
-  Status = mPciIo->AllocateBuffer (mPciIo, AllocateAnyPages, EfiBootServicesData,
-                                   EFI_SIZE_TO_PAGES (MSK_STAT_RING_SZ), (VOID**)&mSoftc->msk_stat_ring, 0);
+  PciIo = sc->PciIo;
+
+  Status = PciIo->AllocateBuffer (PciIo, AllocateAnyPages, EfiBootServicesData,
+                                   EFI_SIZE_TO_PAGES (MSK_STAT_RING_SZ), (VOID**)&sc->msk_stat_ring, 0);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((EFI_D_ERROR, "Marvell Yukon: failed to allocate DMA'able memory for status ring\n"));
     return Status;
   }
-  ASSERT (mSoftc->msk_stat_ring != NULL);
+  ASSERT (sc->msk_stat_ring != NULL);
 
   Length = MSK_STAT_RING_SZ;
-  Status = mPciIo->Map (mPciIo, EfiPciIoOperationBusMasterCommonBuffer, mSoftc->msk_stat_ring,
-                        &Length, &mSoftc->msk_stat_ring_paddr, &mSoftc->msk_stat_map);
+  Status = PciIo->Map (PciIo, EfiPciIoOperationBusMasterCommonBuffer, sc->msk_stat_ring,
+                        &Length, &sc->msk_stat_ring_paddr, &sc->msk_stat_map);
   ASSERT (Length == MSK_STAT_RING_SZ);
 
   if (EFI_ERROR (Status)) {
@@ -1504,16 +1544,20 @@ msk_status_dma_alloc (
 static
 VOID
 msk_status_dma_free (
-    VOID
+    struct msk_softc  *sc
     )
 {
-  if (mSoftc->msk_stat_map) {
-    mPciIo->Unmap (mPciIo, mSoftc->msk_stat_map);
-    if (mSoftc->msk_stat_ring) {
-      mPciIo->FreeBuffer (mPciIo, EFI_SIZE_TO_PAGES (MSK_STAT_RING_SZ), mSoftc->msk_stat_ring);
-      mSoftc->msk_stat_ring = NULL;
+  EFI_PCI_IO_PROTOCOL *PciIo;
+
+  PciIo = sc->PciIo;
+
+  if (sc->msk_stat_map) {
+    PciIo->Unmap (PciIo, sc->msk_stat_map);
+    if (sc->msk_stat_ring) {
+      PciIo->FreeBuffer (PciIo, EFI_SIZE_TO_PAGES (MSK_STAT_RING_SZ), sc->msk_stat_ring);
+      sc->msk_stat_ring = NULL;
     }
-    mSoftc->msk_stat_map = NULL;
+    sc->msk_stat_map = NULL;
   }
 }
 
@@ -1528,8 +1572,11 @@ msk_txrx_dma_alloc (
   INTN                i;
   UINTN               Length;
   EFI_STATUS          Status;
+  EFI_PCI_IO_PROTOCOL *PciIo;
 
-  Status = mPciIo->AllocateBuffer (mPciIo, AllocateAnyPages, EfiBootServicesData,
+  PciIo = sc_if->msk_softc->PciIo;
+
+  Status = PciIo->AllocateBuffer (PciIo, AllocateAnyPages, EfiBootServicesData,
                                    EFI_SIZE_TO_PAGES (MSK_TX_RING_SZ), (VOID**)&sc_if->msk_rdata.msk_tx_ring, 0);
 
   if (EFI_ERROR (Status)) {
@@ -1539,7 +1586,7 @@ msk_txrx_dma_alloc (
   ASSERT (sc_if->msk_rdata.msk_tx_ring != NULL);
 
   Length = MSK_TX_RING_SZ;
-  Status = mPciIo->Map (mPciIo, EfiPciIoOperationBusMasterCommonBuffer, sc_if->msk_rdata.msk_tx_ring,
+  Status = PciIo->Map (PciIo, EfiPciIoOperationBusMasterCommonBuffer, sc_if->msk_rdata.msk_tx_ring,
                         &Length, &sc_if->msk_rdata.msk_tx_ring_paddr, &sc_if->msk_cdata.msk_tx_ring_map);
 
   if (EFI_ERROR (Status)) {
@@ -1548,7 +1595,7 @@ msk_txrx_dma_alloc (
   }
   ASSERT (Length == MSK_TX_RING_SZ);
 
-  Status = mPciIo->AllocateBuffer (mPciIo, AllocateAnyPages, EfiBootServicesData,
+  Status = PciIo->AllocateBuffer (PciIo, AllocateAnyPages, EfiBootServicesData,
                                    EFI_SIZE_TO_PAGES (MSK_RX_RING_SZ), (VOID**)&sc_if->msk_rdata.msk_rx_ring, 0);
 
   if (EFI_ERROR (Status)) {
@@ -1558,7 +1605,7 @@ msk_txrx_dma_alloc (
   ASSERT (sc_if->msk_rdata.msk_rx_ring != NULL);
 
   Length = MSK_RX_RING_SZ;
-  Status = mPciIo->Map (mPciIo, EfiPciIoOperationBusMasterCommonBuffer, sc_if->msk_rdata.msk_rx_ring,
+  Status = PciIo->Map (PciIo, EfiPciIoOperationBusMasterCommonBuffer, sc_if->msk_rdata.msk_rx_ring,
                         &Length, &sc_if->msk_rdata.msk_rx_ring_paddr, &sc_if->msk_cdata.msk_rx_ring_map);
 
   if (EFI_ERROR (Status)) {
@@ -1591,12 +1638,15 @@ msk_txrx_dma_free (
   struct msk_txdesc   *txd;
   struct msk_rxdesc   *rxd;
   INTN                i;
+  EFI_PCI_IO_PROTOCOL *PciIo;
+
+  PciIo = sc_if->msk_softc->PciIo;
 
   // Tx ring
   if (sc_if->msk_cdata.msk_tx_ring_map) {
-    mPciIo->Unmap (mPciIo, sc_if->msk_cdata.msk_tx_ring_map);
+    PciIo->Unmap (PciIo, sc_if->msk_cdata.msk_tx_ring_map);
     if (sc_if->msk_rdata.msk_tx_ring) {
-      mPciIo->FreeBuffer (mPciIo, EFI_SIZE_TO_PAGES (MSK_TX_RING_SZ), sc_if->msk_rdata.msk_tx_ring);
+      PciIo->FreeBuffer (PciIo, EFI_SIZE_TO_PAGES (MSK_TX_RING_SZ), sc_if->msk_rdata.msk_tx_ring);
       sc_if->msk_rdata.msk_tx_ring = NULL;
     }
     sc_if->msk_cdata.msk_tx_ring_map = NULL;
@@ -1604,9 +1654,9 @@ msk_txrx_dma_free (
 
   // Rx ring
   if (sc_if->msk_cdata.msk_rx_ring_map) {
-    mPciIo->Unmap (mPciIo, sc_if->msk_cdata.msk_rx_ring_map);
+    PciIo->Unmap (PciIo, sc_if->msk_cdata.msk_rx_ring_map);
     if (sc_if->msk_rdata.msk_rx_ring) {
-      mPciIo->FreeBuffer (mPciIo, EFI_SIZE_TO_PAGES (MSK_RX_RING_SZ), sc_if->msk_rdata.msk_rx_ring);
+      PciIo->FreeBuffer (PciIo, EFI_SIZE_TO_PAGES (MSK_RX_RING_SZ), sc_if->msk_rdata.msk_rx_ring);
       sc_if->msk_rdata.msk_rx_ring = NULL;
     }
     sc_if->msk_cdata.msk_rx_ring_map = NULL;
@@ -1616,7 +1666,7 @@ msk_txrx_dma_free (
   for (i = 0; i < MSK_TX_RING_CNT; i++) {
     txd = &sc_if->msk_cdata.msk_txdesc[i];
     if (txd->tx_m.DmaMapping) {
-      mPciIo->Unmap (mPciIo, txd->tx_m.DmaMapping);
+      PciIo->Unmap (PciIo, txd->tx_m.DmaMapping);
       gBS->SetMem (&(txd->tx_m), sizeof (MSK_DMA_BUF), 0);
       // We don't own the transmit buffers so don't free them
     }
@@ -1625,7 +1675,7 @@ msk_txrx_dma_free (
   for (i = 0; i < MSK_RX_RING_CNT; i++) {
     rxd = &sc_if->msk_cdata.msk_rxdesc[i];
     if (rxd->rx_m.DmaMapping) {
-      mPciIo->Unmap (mPciIo, rxd->rx_m.DmaMapping);
+      PciIo->Unmap (PciIo, rxd->rx_m.DmaMapping);
       // Free Rx buffers as we own these
       if(rxd->rx_m.Buf != NULL) {
         gBS->FreePool (rxd->rx_m.Buf);
@@ -1653,12 +1703,14 @@ msk_encap (
   UINT32                prod;
   UINT32                si;
   EFI_STATUS            Status;
+  EFI_PCI_IO_PROTOCOL   *PciIo;
 
+  PciIo = sc_if->msk_softc->PciIo;
   prod = sc_if->msk_cdata.msk_tx_prod;
   txd = &sc_if->msk_cdata.msk_txdesc[prod];
   txd_last = txd;
   BusLength = m_head->Length;
-  Status = mPciIo->Map (mPciIo, EfiPciIoOperationBusMasterRead, m_head->Buf,
+  Status = PciIo->Map (PciIo, EfiPciIoOperationBusMasterRead, m_head->Buf,
                         &BusLength, &BusPhysAddr, &txd->tx_m.DmaMapping);
 
   if (EFI_ERROR (Status)) {
@@ -1713,6 +1765,7 @@ msk_encap (
 
 EFI_STATUS
 mskc_transmit (
+    struct msk_if_softc  *sc_if,
     UINTN   BufferSize,
     VOID    *Buffer
     )
@@ -1733,32 +1786,32 @@ mskc_transmit (
   //
   LinkedSystemBuf->SystemBuf.Buf = Buffer;
   LinkedSystemBuf->SystemBuf.Length = BufferSize;
-  InsertTailList (&mSoftc->TransmitQueueHead, &LinkedSystemBuf->Link);
-  msk_start (MSK_PORT_A);
+  InsertTailList (&sc_if->TransmitQueueHead, &LinkedSystemBuf->Link);
+  msk_start (sc_if);
   return EFI_SUCCESS;
 }
 
 void
 mskc_getstatus (
+    struct msk_if_softc  *sc_if,
     OUT UINT32                     *InterruptStatus, OPTIONAL
     OUT VOID                       **TxBuf           OPTIONAL
     )
 {
-  //struct msk_chain_data* cdata;
   MSK_LINKED_SYSTEM_BUF *m_head;
 
   // Interrupt status is not read from the device when InterruptStatus is NULL
   if (InterruptStatus != NULL) {
     // Check the interrupt lines
-    msk_intr ();
+    msk_intr (sc_if->msk_softc);
   }
 
   // The transmit buffer status is not read when TxBuf is NULL
   if (TxBuf != NULL) {
     *((UINT8 **) TxBuf) = (UINT8 *) 0;
-    if( !IsListEmpty (&mSoftc->TransmitFreeQueueHead))
+    if (!IsListEmpty (&sc_if->TransmitFreeQueueHead))
     {
-      m_head = CR (GetFirstNode (&mSoftc->TransmitFreeQueueHead), MSK_LINKED_SYSTEM_BUF, Link, TX_MBUF_SIGNATURE);
+      m_head = CR (GetFirstNode (&sc_if->TransmitFreeQueueHead), MSK_LINKED_SYSTEM_BUF, Link, TX_MBUF_SIGNATURE);
       if(m_head != NULL) {
         *TxBuf = m_head->SystemBuf.Buf;
         RemoveEntryList (&m_head->Link);
@@ -1771,20 +1824,18 @@ mskc_getstatus (
 static
 VOID
 msk_start (
-    INT32   Port
+    struct msk_if_softc  *sc_if
     )
 {
   EFI_STATUS            Status;
-  struct msk_if_softc   *sc_if;
   MSK_LINKED_SYSTEM_BUF *m_head;
   INTN                  enq;
 
-  sc_if = mSoftc->msk_if[Port];
-  for (enq = 0; !IsListEmpty (&mSoftc->TransmitQueueHead) &&
+  for (enq = 0; !IsListEmpty (&sc_if->TransmitQueueHead) &&
        sc_if->msk_cdata.msk_tx_cnt < (MSK_TX_RING_CNT - MSK_RESERVED_TX_DESC_CNT); )
   {
 
-    m_head = CR (GetFirstNode (&mSoftc->TransmitQueueHead), MSK_LINKED_SYSTEM_BUF, Link, TX_MBUF_SIGNATURE);
+    m_head = CR (GetFirstNode (&sc_if->TransmitQueueHead), MSK_LINKED_SYSTEM_BUF, Link, TX_MBUF_SIGNATURE);
     if (m_head == NULL) {
       break;
     }
@@ -1799,19 +1850,20 @@ msk_start (
     }
 
     RemoveEntryList (&m_head->Link);
-    InsertTailList (&mSoftc->TransmitFreeQueueHead, &m_head->Link);
+    InsertTailList (&sc_if->TransmitFreeQueueHead, &m_head->Link);
     enq++;
   }
 
   if (enq > 0) {
     // Transmit
-    CSR_WRITE_2 (mSoftc, Y2_PREF_Q_ADDR (sc_if->msk_txq, PREF_UNIT_PUT_IDX_REG), sc_if->msk_cdata.msk_tx_prod);
+    CSR_WRITE_2 (sc_if->msk_softc, Y2_PREF_Q_ADDR (sc_if->msk_txq, PREF_UNIT_PUT_IDX_REG),
+                 sc_if->msk_cdata.msk_tx_prod);
   }
 }
 
 VOID
 mskc_shutdown (
-    VOID
+    struct msk_softc  *sc
     )
 {
   INTN i;
@@ -1819,35 +1871,36 @@ mskc_shutdown (
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
 
-  for (i = 0; i < mSoftc->msk_num_port; i++) {
-    if (mSoftc->msk_if[i] != NULL) {
-      msk_stop (mSoftc->msk_if[i]);
+  for (i = 0; i < sc->msk_num_port; i++) {
+    if (sc->msk_if[i] != NULL) {
+      mskc_stop_if (sc->msk_if[i]);
     }
   }
-  gBS->SetTimer (mSoftc->Timer, TimerCancel, 0);
+  gBS->SetTimer (sc->Timer, TimerCancel, 0);
 
   /* Put hardware reset. */
-  CSR_WRITE_2 (mSoftc, B0_CTST, CS_RST_SET);
+  CSR_WRITE_2 (sc, B0_CTST, CS_RST_SET);
 
   gBS->RestoreTPL (OldTpl);
 }
 
 EFI_STATUS
 mskc_receive (
+    struct msk_if_softc  *sc_if,
     IN OUT UINTN  *BufferSize,
     OUT    VOID   *Buffer
     )
 {
   MSK_LINKED_SYSTEM_BUF   *mBuf;
 
-  msk_intr (); // check the interrupt lines
+  msk_intr (sc_if->msk_softc); // check the interrupt lines
 
-  if (IsListEmpty (&mSoftc->ReceiveQueueHead)) {
+  if (IsListEmpty (&sc_if->ReceiveQueueHead)) {
     *BufferSize = 0;
     return EFI_NOT_READY;
   }
 
-  mBuf = CR (GetFirstNode (&mSoftc->ReceiveQueueHead), MSK_LINKED_SYSTEM_BUF, Link, RX_MBUF_SIGNATURE);
+  mBuf = CR (GetFirstNode (&sc_if->ReceiveQueueHead), MSK_LINKED_SYSTEM_BUF, Link, RX_MBUF_SIGNATURE);
   if (mBuf->SystemBuf.Length > *BufferSize) {
     *BufferSize = mBuf->SystemBuf.Length;
     DEBUG ((EFI_D_NET, "Marvell Yukon: Receive buffer is too small: Provided = %d, Received = %d\n",
@@ -1876,9 +1929,11 @@ msk_rxeof (
   INTN                  cons;
   INTN                  rxlen;
   MSK_DMA_BUF           m;
+  EFI_PCI_IO_PROTOCOL    *PciIo;
 
   DEBUG ((EFI_D_NET, "Marvell Yukon: rxeof\n"));
 
+  PciIo = sc_if->msk_softc->PciIo;
   cons = sc_if->msk_cdata.msk_rx_cons;
   do {
     rxlen = status >> 16;
@@ -1917,12 +1972,12 @@ msk_rxeof (
       break;
     }
 
-    Status = mPciIo->Flush (mPciIo);
+    Status = PciIo->Flush (PciIo);
     if (EFI_ERROR (Status)) {
       DEBUG ((EFI_D_NET, "Marvell Yukon: failed to Flush DMA\n"));
     }
 
-    Status = mPciIo->Unmap (mPciIo, rxd->rx_m.DmaMapping);
+    Status = PciIo->Unmap (PciIo, rxd->rx_m.DmaMapping);
     if (EFI_ERROR (Status)) {
       DEBUG ((EFI_D_NET, "Marvell Yukon: failed to Unmap DMA\n"));
     }
@@ -1936,7 +1991,7 @@ msk_rxeof (
       m_link->SystemBuf.Buf = m.Buf;
       m_link->SystemBuf.Length = len;
 
-      InsertTailList (&mSoftc->ReceiveQueueHead, &m_link->Link);
+      InsertTailList (&sc_if->ReceiveQueueHead, &m_link->Link);
     } else {
       DEBUG ((EFI_D_NET, "Marvell Yukon: failed to allocate receive buffer link. Dropping Frame\n"));
       gBS->FreePool (m.Buf);
@@ -1959,8 +2014,12 @@ msk_txeof (
   UINT32              control;
   INTN                cons;
   INTN                prog;
+  EFI_PCI_IO_PROTOCOL  *PciIo;
 
   DEBUG ((EFI_D_NET, "Marvell Yukon: txeof\n"));
+
+  PciIo = sc_if->msk_softc->PciIo;
+
   //
   // Go through our tx ring and free mbufs for those
   // frames that have been sent.
@@ -1979,7 +2038,7 @@ msk_txeof (
       continue;
     }
     txd = &sc_if->msk_cdata.msk_txdesc[cons];
-    mPciIo->Unmap (mPciIo, txd->tx_m.DmaMapping);
+    PciIo->Unmap (PciIo, txd->tx_m.DmaMapping);
     gBS->SetMem (&(txd->tx_m), sizeof (MSK_DMA_BUF), 0);
     // We don't own the transmit buffers so don't free them
   }
@@ -1997,11 +2056,20 @@ mskc_tick (
     )
 {
   EFI_TPL OldTpl;
+  struct msk_softc    *sc;
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
 
-  e1000phy_tick ();
-  msk_handle_events ();
+  sc = (struct msk_softc *)Context;
+
+  if (sc->msk_if[MSK_PORT_A] != NULL && sc->msk_if[MSK_PORT_A]->active) {
+    e1000phy_tick (sc->msk_if[MSK_PORT_A]->phy_softc);
+  }
+  if (sc->msk_if[MSK_PORT_B] != NULL && sc->msk_if[MSK_PORT_B]->active) {
+    e1000phy_tick (sc->msk_if[MSK_PORT_B]->phy_softc);
+  }
+
+  msk_handle_events (sc);
 
   gBS->RestoreTPL (OldTpl);
 }
@@ -2014,8 +2082,8 @@ msk_intr_phy (
 {
   UINT16  status;
 
-  msk_phy_readreg (sc_if->msk_md.port, PHY_MARV_INT_STAT);
-  status = msk_phy_readreg (sc_if->msk_md.port, PHY_MARV_INT_STAT);
+  msk_phy_readreg (sc_if, PHY_MARV_INT_STAT);
+  status = msk_phy_readreg (sc_if, PHY_MARV_INT_STAT);
 
   // Handle FIFO Underrun/Overflow ?
   if ((status & PHY_M_IS_FIFO_ERROR)) {
@@ -2030,16 +2098,19 @@ msk_intr_gmac (
     )
 {
   UINT8   status;
+  struct msk_softc  *sc;
 
-  status = CSR_READ_1 (mSoftc, MR_ADDR (sc_if->msk_md.port, GMAC_IRQ_SRC));
+  sc = sc_if->msk_softc;
+
+  status = CSR_READ_1 (sc, MR_ADDR (sc_if->msk_md.port, GMAC_IRQ_SRC));
 
   // GMAC Rx FIFO overrun.
   if ((status & GM_IS_RX_FF_OR) != 0) {
-    CSR_WRITE_4 (mSoftc, MR_ADDR (sc_if->msk_md.port, RX_GMF_CTRL_T), GMF_CLI_RX_FO);
+    CSR_WRITE_4 (sc, MR_ADDR (sc_if->msk_md.port, RX_GMF_CTRL_T), GMF_CLI_RX_FO);
   }
   // GMAC Tx FIFO underrun.
   if ((status & GM_IS_TX_FF_UR) != 0) {
-    CSR_WRITE_4 (mSoftc, MR_ADDR (sc_if->msk_md.port, TX_GMF_CTRL_T), GMF_CLI_TX_FU);
+    CSR_WRITE_4 (sc, MR_ADDR (sc_if->msk_md.port, TX_GMF_CTRL_T), GMF_CLI_TX_FU);
     //device_printf (sc_if->msk_if_dev, "Tx FIFO underrun!\n");*/
     DEBUG ((EFI_D_NET, "Marvell Yukon: Tx FIFO underrun!\n"));
     /*
@@ -2062,47 +2133,51 @@ msk_handle_hwerr (
     UINT32                status
     )
 {
+  struct msk_softc  *sc;
+
+  sc = sc_if->msk_softc;
+
   if ((status & Y2_IS_PAR_RD1) != 0) {
     DEBUG ((EFI_D_NET, "Marvell Yukon: RAM buffer read parity error\n"));
     // Clear IRQ.
-    CSR_WRITE_2 (mSoftc, SELECT_RAM_BUFFER (sc_if->msk_md.port, B3_RI_CTRL), RI_CLR_RD_PERR);
+    CSR_WRITE_2 (sc, SELECT_RAM_BUFFER (sc_if->msk_md.port, B3_RI_CTRL), RI_CLR_RD_PERR);
   }
   if ((status & Y2_IS_PAR_WR1) != 0) {
     DEBUG ((EFI_D_NET, "Marvell Yukon: RAM buffer write parity error\n"));
     // Clear IRQ
-    CSR_WRITE_2 (mSoftc, SELECT_RAM_BUFFER (sc_if->msk_md.port, B3_RI_CTRL), RI_CLR_WR_PERR);
+    CSR_WRITE_2 (sc, SELECT_RAM_BUFFER (sc_if->msk_md.port, B3_RI_CTRL), RI_CLR_WR_PERR);
   }
   if ((status & Y2_IS_PAR_MAC1) != 0) {
     DEBUG ((EFI_D_NET, "Marvell Yukon: Tx MAC parity error\n"));
     // Clear IRQ
-    CSR_WRITE_4 (mSoftc, MR_ADDR (sc_if->msk_md.port, TX_GMF_CTRL_T), GMF_CLI_TX_PE);
+    CSR_WRITE_4 (sc, MR_ADDR (sc_if->msk_md.port, TX_GMF_CTRL_T), GMF_CLI_TX_PE);
   }
   if ((status & Y2_IS_PAR_RX1) != 0) {
     DEBUG ((EFI_D_NET, "Marvell Yukon: Rx parity error\n"));
     // Clear IRQ
-    CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_rxq, Q_CSR), BMU_CLR_IRQ_PAR);
+    CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_rxq, Q_CSR), BMU_CLR_IRQ_PAR);
   }
   if ((status & (Y2_IS_TCP_TXS1 | Y2_IS_TCP_TXA1)) != 0) {
     DEBUG ((EFI_D_NET, "Marvell Yukon: TCP segmentation error\n"));
     // Clear IRQ
-    CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_txq, Q_CSR), BMU_CLR_IRQ_TCP);
+    CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_txq, Q_CSR), BMU_CLR_IRQ_TCP);
   }
 }
 
 static
 VOID
 msk_intr_hwerr (
-    VOID
+    struct msk_softc    *sc
     )
 {
   UINT32  status;
   UINT32  tlphead[4];
 
-  status = CSR_READ_4 (mSoftc, B0_HWE_ISRC);
+  status = CSR_READ_4 (sc, B0_HWE_ISRC);
 
   // Time Stamp timer overflow.
   if ((status & Y2_IS_TIST_OV) != 0) {
-    CSR_WRITE_1 (mSoftc, GMAC_TI_ST_CTRL, GMT_ST_CLR_IRQ);
+    CSR_WRITE_1 (sc, GMAC_TI_ST_CTRL, GMT_ST_CLR_IRQ);
   }
   if ((status & Y2_IS_PCI_NEXP) != 0) {
     /*
@@ -2123,7 +2198,7 @@ msk_intr_hwerr (
       DEBUG ((EFI_D_NET, "Marvell Yukon: unexpected IRQ Master error\n"));
     }
     // Reset all bits in the PCI status register
-    clear_pci_errors ();
+    clear_pci_errors (sc);
   }
 
   // Check for PCI Express Uncorrectable Error.
@@ -2138,7 +2213,7 @@ msk_intr_hwerr (
      * may be performed any longer.
      */
 
-    v32 = CSR_PCI_READ_4 (mSoftc, PEX_UNC_ERR_STAT);
+    v32 = CSR_PCI_READ_4 (sc, PEX_UNC_ERR_STAT);
     if ((v32 & PEX_UNSUP_REQ) != 0) {
       // Ignore unsupported request error.
       DEBUG ((EFI_D_NET, "Marvell Yukon: Uncorrectable PCI Express error\n"));
@@ -2148,26 +2223,26 @@ msk_intr_hwerr (
 
       // Get TLP header form Log Registers.
       for (i = 0; i < 4; i++) {
-        tlphead[i] = CSR_PCI_READ_4 (mSoftc, PEX_HEADER_LOG + i * 4);
+        tlphead[i] = CSR_PCI_READ_4 (sc, PEX_HEADER_LOG + i * 4);
       }
       // Check for vendor defined broadcast message.
       if (!(tlphead[0] == 0x73004001 && tlphead[1] == 0x7f)) {
-        mSoftc->msk_intrhwemask &= ~Y2_IS_PCI_EXP;
-        CSR_WRITE_4 (mSoftc, B0_HWE_IMSK, mSoftc->msk_intrhwemask);
-        CSR_READ_4 (mSoftc, B0_HWE_IMSK);
+        sc->msk_intrhwemask &= ~Y2_IS_PCI_EXP;
+        CSR_WRITE_4 (sc, B0_HWE_IMSK, sc->msk_intrhwemask);
+        CSR_READ_4 (sc, B0_HWE_IMSK);
       }
     }
     // Clear the interrupt
-    CSR_WRITE_1 (mSoftc, B2_TST_CTRL1, TST_CFG_WRITE_ON);
-    CSR_PCI_WRITE_4 (mSoftc, PEX_UNC_ERR_STAT, 0xffffffff);
-    CSR_WRITE_1 (mSoftc, B2_TST_CTRL1, TST_CFG_WRITE_OFF);
+    CSR_WRITE_1 (sc, B2_TST_CTRL1, TST_CFG_WRITE_ON);
+    CSR_PCI_WRITE_4 (sc, PEX_UNC_ERR_STAT, 0xffffffff);
+    CSR_WRITE_1 (sc, B2_TST_CTRL1, TST_CFG_WRITE_OFF);
   }
 
-  if ((status & Y2_HWE_L1_MASK) != 0 && mSoftc->msk_if[MSK_PORT_A] != NULL) {
-    msk_handle_hwerr (mSoftc->msk_if[MSK_PORT_A], status);
+  if ((status & Y2_HWE_L1_MASK) != 0 && sc->msk_if[MSK_PORT_A] != NULL) {
+    msk_handle_hwerr (sc->msk_if[MSK_PORT_A], status);
   }
-  if ((status & Y2_HWE_L2_MASK) != 0 && mSoftc->msk_if[MSK_PORT_B] != NULL) {
-    msk_handle_hwerr (mSoftc->msk_if[MSK_PORT_B], status >> 8);
+  if ((status & Y2_HWE_L2_MASK) != 0 && sc->msk_if[MSK_PORT_B] != NULL) {
+    msk_handle_hwerr (sc->msk_if[MSK_PORT_B], status >> 8);
   }
 }
 
@@ -2178,16 +2253,15 @@ msk_rxput (
     struct msk_if_softc   *sc_if
     )
 {
-  CSR_WRITE_2 (mSoftc, Y2_PREF_Q_ADDR (sc_if->msk_rxq, PREF_UNIT_PUT_IDX_REG), sc_if->msk_cdata.msk_rx_prod);
+  CSR_WRITE_2 (sc_if->msk_softc, Y2_PREF_Q_ADDR (sc_if->msk_rxq, PREF_UNIT_PUT_IDX_REG), sc_if->msk_cdata.msk_rx_prod);
 }
 
 static
 INTN
 msk_handle_events (
-    VOID
+    struct msk_softc  *sc
     )
 {
-  struct msk_if_softc   *sc_if;
   INTN                  rxput[2];
   struct msk_stat_desc  *sd;
   UINT32                control;
@@ -2196,16 +2270,17 @@ msk_handle_events (
   INTN                  len;
   INTN                  port;
   INTN                  rxprog;
+  struct msk_if_softc   *sc_if;
 
-  if (mSoftc->msk_stat_cons == CSR_READ_2 (mSoftc, STAT_PUT_IDX)) {
+  if (sc->msk_stat_cons == CSR_READ_2 (sc, STAT_PUT_IDX)) {
     return (0);
   }
 
   rxput[MSK_PORT_A] = rxput[MSK_PORT_B] = 0;
   rxprog = 0;
-  cons = mSoftc->msk_stat_cons;
+  cons = sc->msk_stat_cons;
   for (;;) {
-    sd = &mSoftc->msk_stat_ring[cons];
+    sd = &sc->msk_stat_ring[cons];
     control = le32toh (sd->msk_control);
     if ((control & HW_OWNER) == 0) {
       break;
@@ -2215,7 +2290,7 @@ msk_handle_events (
     status = le32toh (sd->msk_status);
     len = control & STLE_LEN_MASK;
     port = (control >> 16) & 0x01;
-    sc_if = mSoftc->msk_if[port];
+    sc_if = sc->msk_if[port];
     if (sc_if == NULL) {
       DEBUG ((EFI_D_NET, "Marvell Yukon: invalid port opcode 0x%08x\n", control & STLE_OP_MASK));
       continue;
@@ -2238,11 +2313,11 @@ msk_handle_events (
         }
         break;
       case OP_TXINDEXLE:
-        if (mSoftc->msk_if[MSK_PORT_A] != NULL) {
-          msk_txeof (mSoftc->msk_if[MSK_PORT_A], status & STLE_TXA1_MSKL);
+        if (sc->msk_if[MSK_PORT_A] != NULL) {
+          msk_txeof (sc->msk_if[MSK_PORT_A], status & STLE_TXA1_MSKL);
         }
-        if (mSoftc->msk_if[MSK_PORT_B] != NULL) {
-          msk_txeof (mSoftc->msk_if[MSK_PORT_B],
+        if (sc->msk_if[MSK_PORT_B] != NULL) {
+          msk_txeof (sc->msk_if[MSK_PORT_B],
                      ((status & STLE_TXA2_MSKL) >>
                       STLE_TXA2_SHIFTL) |
                      ((len & STLE_TXA2_MSKH) <<
@@ -2254,27 +2329,27 @@ msk_handle_events (
         break;
     }
     MSK_INC (cons, MSK_STAT_RING_CNT);
-    if (rxprog > mSoftc->msk_process_limit) {
+    if (rxprog > sc->msk_process_limit) {
       break;
     }
   }
 
-  mSoftc->msk_stat_cons = cons;
+  sc->msk_stat_cons = cons;
 
   if (rxput[MSK_PORT_A] > 0) {
-    msk_rxput (mSoftc->msk_if[MSK_PORT_A]);
+    msk_rxput (sc->msk_if[MSK_PORT_A]);
   }
   if (rxput[MSK_PORT_B] > 0) {
-    msk_rxput (mSoftc->msk_if[MSK_PORT_B]);
+    msk_rxput (sc->msk_if[MSK_PORT_B]);
   }
 
-  return (mSoftc->msk_stat_cons != CSR_READ_2 (mSoftc, STAT_PUT_IDX));
+  return (sc->msk_stat_cons != CSR_READ_2 (sc, STAT_PUT_IDX));
 }
 
 STATIC
 VOID
 msk_intr (
-    VOID
+    struct msk_softc  *sc
     )
 {
   struct msk_if_softc   *sc_if0;
@@ -2283,18 +2358,18 @@ msk_intr (
   INTN                  domore;
 
   // Reading B0_Y2_SP_ISRC2 masks further interrupts
-  Status = CSR_READ_4 (mSoftc, B0_Y2_SP_ISRC2);
+  Status = CSR_READ_4 (sc, B0_Y2_SP_ISRC2);
   if (Status == 0 || Status == 0xffffffff ||
-      (mSoftc->msk_pflags & MSK_FLAG_SUSPEND) != 0 ||
-      (Status & mSoftc->msk_intrmask) == 0)
+      (sc->msk_pflags & MSK_FLAG_SUSPEND) != 0 ||
+      (Status & sc->msk_intrmask) == 0)
   {
     // Leave ISR - Reenable interrupts
-    CSR_WRITE_4 (mSoftc, B0_Y2_SP_ICR, 2);
+    CSR_WRITE_4 (sc, B0_Y2_SP_ICR, 2);
     return;
   }
 
-  sc_if0 = mSoftc->msk_if[MSK_PORT_A];
-  sc_if1 = mSoftc->msk_if[MSK_PORT_B];
+  sc_if0 = sc->msk_if[MSK_PORT_A];
+  sc_if1 = sc->msk_if[MSK_PORT_B];
 
   if ((Status & Y2_IS_IRQ_PHY1) != 0 && sc_if0 != NULL) {
     msk_intr_phy (sc_if0);
@@ -2310,27 +2385,27 @@ msk_intr (
   }
   if ((Status & (Y2_IS_CHK_RX1 | Y2_IS_CHK_RX2)) != 0) {
     DEBUG ((EFI_D_NET, "Marvell Yukon: Rx descriptor error\n"));
-    mSoftc->msk_intrmask &= ~(Y2_IS_CHK_RX1 | Y2_IS_CHK_RX2);
-    CSR_WRITE_4 (mSoftc, B0_IMSK, mSoftc->msk_intrmask);
-    CSR_READ_4 (mSoftc, B0_IMSK);
+    sc->msk_intrmask &= ~(Y2_IS_CHK_RX1 | Y2_IS_CHK_RX2);
+    CSR_WRITE_4 (sc, B0_IMSK, sc->msk_intrmask);
+    CSR_READ_4 (sc, B0_IMSK);
   }
   if ((Status & (Y2_IS_CHK_TXA1 | Y2_IS_CHK_TXA2)) != 0) {
     DEBUG ((EFI_D_NET, "Marvell Yukon: Tx descriptor error\n"));
-    mSoftc->msk_intrmask &= ~(Y2_IS_CHK_TXA1 | Y2_IS_CHK_TXA2);
-    CSR_WRITE_4 (mSoftc, B0_IMSK, mSoftc->msk_intrmask);
-    CSR_READ_4 (mSoftc, B0_IMSK);
+    sc->msk_intrmask &= ~(Y2_IS_CHK_TXA1 | Y2_IS_CHK_TXA2);
+    CSR_WRITE_4 (sc, B0_IMSK, sc->msk_intrmask);
+    CSR_READ_4 (sc, B0_IMSK);
   }
   if ((Status & Y2_IS_HW_ERR) != 0) {
-    msk_intr_hwerr ();
+    msk_intr_hwerr (sc);
   }
 
-  domore = msk_handle_events ();
+  domore = msk_handle_events (sc);
   if ((Status & Y2_IS_STAT_BMU) != 0 && domore == 0) {
-    CSR_WRITE_4 (mSoftc, STAT_CTRL, SC_STAT_CLR_IRQ);
+    CSR_WRITE_4 (sc, STAT_CTRL, SC_STAT_CLR_IRQ);
   }
 
   // Leave ISR - Reenable interrupts
-  CSR_WRITE_4 (mSoftc, B0_Y2_SP_ICR, 2);
+  CSR_WRITE_4 (sc, B0_Y2_SP_ICR, 2);
 }
 
 static
@@ -2340,25 +2415,21 @@ msk_set_tx_stfwd (
     )
 {
   // Disable jumbo frames for Tx
-  CSR_WRITE_4 (mSoftc, MR_ADDR (sc_if->msk_md.port, TX_GMF_CTRL_T), TX_JUMBO_DIS | TX_STFW_ENA);
+  CSR_WRITE_4 (sc_if->msk_softc, MR_ADDR (sc_if->msk_md.port, TX_GMF_CTRL_T), TX_JUMBO_DIS | TX_STFW_ENA);
 }
 
 EFI_STATUS
 mskc_init (
-    VOID
+    struct msk_if_softc  *sc_if
     )
 {
   EFI_STATUS  Status;
 
-  // Just init port A
-  Status = msk_init (mSoftc->msk_if[MSK_PORT_A]);
+  Status = msk_init (sc_if);
   if (EFI_ERROR (Status)) {
     return Status;
   }
-  Status = gBS->SetTimer (mSoftc->Timer, TimerPeriodic, TICKS_PER_SECOND);
-  if (EFI_ERROR (Status)) {
-    mskc_shutdown ();
-  }
+
   return Status;
 }
 
@@ -2372,80 +2443,84 @@ msk_init (
   UINT16      gmac;
   UINT32      reg;
   EFI_STATUS  Status;
-  INTN        port = sc_if->msk_md.port;
+  INTN                 port;
+  IN struct msk_softc  *sc;
+
+  sc = sc_if->msk_softc;
+  port = sc_if->msk_md.port;
 
   // Cancel pending I/O and free all Rx/Tx buffers.
-  msk_stop (sc_if);
+  mskc_stop_if (sc_if);
 
   sc_if->msk_framesize = MAX_SUPPORTED_PACKET_SIZE;
 
   // GMAC Control reset.
-  CSR_WRITE_4 (mSoftc, MR_ADDR (port, GMAC_CTRL), GMC_RST_SET);
-  CSR_WRITE_4 (mSoftc, MR_ADDR (port, GMAC_CTRL), GMC_RST_CLR);
-  CSR_WRITE_4 (mSoftc, MR_ADDR (port, GMAC_CTRL), GMC_F_LOOPB_OFF);
-  if (mSoftc->msk_hw_id == CHIP_ID_YUKON_EX) {
-    CSR_WRITE_4 (mSoftc, MR_ADDR (port, GMAC_CTRL), GMC_BYP_MACSECRX_ON | GMC_BYP_MACSECTX_ON | GMC_BYP_RETR_ON);
+  CSR_WRITE_4 (sc, MR_ADDR (port, GMAC_CTRL), GMC_RST_SET);
+  CSR_WRITE_4 (sc, MR_ADDR (port, GMAC_CTRL), GMC_RST_CLR);
+  CSR_WRITE_4 (sc, MR_ADDR (port, GMAC_CTRL), GMC_F_LOOPB_OFF);
+  if (sc->msk_hw_id == CHIP_ID_YUKON_EX) {
+    CSR_WRITE_4 (sc, MR_ADDR (port, GMAC_CTRL), GMC_BYP_MACSECRX_ON | GMC_BYP_MACSECTX_ON | GMC_BYP_RETR_ON);
   }
 
   //
   // Initialize GMAC first such that speed/duplex/flow-control
   // parameters are renegotiated when interface is brought up.
   //
-  GMAC_WRITE_2 (mSoftc, port, GM_GP_CTRL, 0);
+  GMAC_WRITE_2 (sc, port, GM_GP_CTRL, 0);
 
   // Dummy read the Interrupt Source Register
-  CSR_READ_1 (mSoftc, MR_ADDR (port, GMAC_IRQ_SRC));
+  CSR_READ_1 (sc, MR_ADDR (port, GMAC_IRQ_SRC));
 
   // Clear MIB stats
   msk_stats_clear (sc_if);
 
   // Disable FCS
-  GMAC_WRITE_2 (mSoftc, port, GM_RX_CTRL, GM_RXCR_CRC_DIS);
+  GMAC_WRITE_2 (sc, port, GM_RX_CTRL, GM_RXCR_CRC_DIS);
 
   // Setup Transmit Control Register
-  GMAC_WRITE_2 (mSoftc, port, GM_TX_CTRL, TX_COL_THR (TX_COL_DEF));
+  GMAC_WRITE_2 (sc, port, GM_TX_CTRL, TX_COL_THR (TX_COL_DEF));
 
   // Setup Transmit Flow Control Register
-  GMAC_WRITE_2 (mSoftc, port, GM_TX_FLOW_CTRL, 0xffff);
+  GMAC_WRITE_2 (sc, port, GM_TX_FLOW_CTRL, 0xffff);
 
   // Setup Transmit Parameter Register
-  GMAC_WRITE_2 (mSoftc, port, GM_TX_PARAM,
+  GMAC_WRITE_2 (sc, port, GM_TX_PARAM,
                 TX_JAM_LEN_VAL (TX_JAM_LEN_DEF) | TX_JAM_IPG_VAL (TX_JAM_IPG_DEF) |
                 TX_IPG_JAM_DATA(TX_IPG_JAM_DEF) | TX_BACK_OFF_LIM(TX_BOF_LIM_DEF));
 
   gmac = DATA_BLIND_VAL (DATA_BLIND_DEF) | GM_SMOD_VLAN_ENA | IPG_DATA_VAL (IPG_DATA_DEF);
 
-  GMAC_WRITE_2 (mSoftc, port, GM_SERIAL_MODE, gmac);
+  GMAC_WRITE_2 (sc, port, GM_SERIAL_MODE, gmac);
 
   // Set station address
   eaddr = sc_if->MacAddress.Addr;
-  GMAC_WRITE_2 (mSoftc, port, GM_SRC_ADDR_1L, eaddr[0] | (eaddr[1] << 8));
-  GMAC_WRITE_2 (mSoftc, port, GM_SRC_ADDR_1M, eaddr[2] | (eaddr[3] << 8));
-  GMAC_WRITE_2 (mSoftc, port, GM_SRC_ADDR_1H, eaddr[4] | (eaddr[5] << 8));
-  GMAC_WRITE_2 (mSoftc, port, GM_SRC_ADDR_2L, eaddr[0] | (eaddr[1] << 8));
-  GMAC_WRITE_2 (mSoftc, port, GM_SRC_ADDR_2M, eaddr[2] | (eaddr[3] << 8));
-  GMAC_WRITE_2 (mSoftc, port, GM_SRC_ADDR_2H, eaddr[4] | (eaddr[5] << 8));
+  GMAC_WRITE_2 (sc, port, GM_SRC_ADDR_1L, eaddr[0] | (eaddr[1] << 8));
+  GMAC_WRITE_2 (sc, port, GM_SRC_ADDR_1M, eaddr[2] | (eaddr[3] << 8));
+  GMAC_WRITE_2 (sc, port, GM_SRC_ADDR_1H, eaddr[4] | (eaddr[5] << 8));
+  GMAC_WRITE_2 (sc, port, GM_SRC_ADDR_2L, eaddr[0] | (eaddr[1] << 8));
+  GMAC_WRITE_2 (sc, port, GM_SRC_ADDR_2M, eaddr[2] | (eaddr[3] << 8));
+  GMAC_WRITE_2 (sc, port, GM_SRC_ADDR_2H, eaddr[4] | (eaddr[5] << 8));
 
   // Disable interrupts for counter overflows
-  GMAC_WRITE_2 (mSoftc, port, GM_TX_IRQ_MSK, 0);
-  GMAC_WRITE_2 (mSoftc, port, GM_RX_IRQ_MSK, 0);
-  GMAC_WRITE_2 (mSoftc, port, GM_TR_IRQ_MSK, 0);
+  GMAC_WRITE_2 (sc, port, GM_TX_IRQ_MSK, 0);
+  GMAC_WRITE_2 (sc, port, GM_RX_IRQ_MSK, 0);
+  GMAC_WRITE_2 (sc, port, GM_TR_IRQ_MSK, 0);
 
   // Configure Rx MAC FIFO
-  CSR_WRITE_4 (mSoftc, MR_ADDR (port, RX_GMF_CTRL_T), GMF_RST_SET);
-  CSR_WRITE_4 (mSoftc, MR_ADDR (port, RX_GMF_CTRL_T), GMF_RST_CLR);
+  CSR_WRITE_4 (sc, MR_ADDR (port, RX_GMF_CTRL_T), GMF_RST_SET);
+  CSR_WRITE_4 (sc, MR_ADDR (port, RX_GMF_CTRL_T), GMF_RST_CLR);
   reg = GMF_OPER_ON | GMF_RX_F_FL_ON;
-  if (mSoftc->msk_hw_id == CHIP_ID_YUKON_FE_P || mSoftc->msk_hw_id == CHIP_ID_YUKON_EX) {
+  if (sc->msk_hw_id == CHIP_ID_YUKON_FE_P || sc->msk_hw_id == CHIP_ID_YUKON_EX) {
     reg |= GMF_RX_OVER_ON;
   }
-  CSR_WRITE_4 (mSoftc, MR_ADDR (port, RX_GMF_CTRL_T), reg);
+  CSR_WRITE_4 (sc, MR_ADDR (port, RX_GMF_CTRL_T), reg);
 
-  if (mSoftc->msk_hw_id == CHIP_ID_YUKON_XL) {
+  if (sc->msk_hw_id == CHIP_ID_YUKON_XL) {
     // Clear flush mask - HW bug
-    CSR_WRITE_4 (mSoftc, MR_ADDR (port, RX_GMF_FL_MSK), 0);
+    CSR_WRITE_4 (sc, MR_ADDR (port, RX_GMF_FL_MSK), 0);
   } else {
     // Flush Rx MAC FIFO on any flow control or error
-    CSR_WRITE_4 (mSoftc, MR_ADDR (port, RX_GMF_FL_MSK), GMR_FS_ANY_ERR);
+    CSR_WRITE_4 (sc, MR_ADDR (port, RX_GMF_FL_MSK), GMR_FS_ANY_ERR);
   }
 
   //
@@ -2454,58 +2529,58 @@ msk_init (
   //
   reg = RX_GMF_FL_THR_DEF + 1;
   // Another magic for Yukon FE+ - From Linux
-  if (mSoftc->msk_hw_id == CHIP_ID_YUKON_FE_P && mSoftc->msk_hw_rev == CHIP_REV_YU_FE_P_A0) {
+  if (sc->msk_hw_id == CHIP_ID_YUKON_FE_P && sc->msk_hw_rev == CHIP_REV_YU_FE_P_A0) {
     reg = 0x178;
   }
-  CSR_WRITE_2 (mSoftc, MR_ADDR (port, RX_GMF_FL_THR), reg);
+  CSR_WRITE_2 (sc, MR_ADDR (port, RX_GMF_FL_THR), reg);
 
   // Configure Tx MAC FIFO
-  CSR_WRITE_4 (mSoftc, MR_ADDR (port, TX_GMF_CTRL_T), GMF_RST_SET);
-  CSR_WRITE_4 (mSoftc, MR_ADDR (port, TX_GMF_CTRL_T), GMF_RST_CLR);
-  CSR_WRITE_4 (mSoftc, MR_ADDR (port, TX_GMF_CTRL_T), GMF_OPER_ON);
+  CSR_WRITE_4 (sc, MR_ADDR (port, TX_GMF_CTRL_T), GMF_RST_SET);
+  CSR_WRITE_4 (sc, MR_ADDR (port, TX_GMF_CTRL_T), GMF_RST_CLR);
+  CSR_WRITE_4 (sc, MR_ADDR (port, TX_GMF_CTRL_T), GMF_OPER_ON);
 
   // Configure hardware VLAN tag insertion/stripping
   msk_setvlan (sc_if);
 
   if ((sc_if->msk_flags & MSK_FLAG_RAMBUF) == 0) {
     // Set Rx Pause threshould.
-    CSR_WRITE_2 (mSoftc, MR_ADDR (port, RX_GMF_LP_THR), MSK_ECU_LLPP);
-    CSR_WRITE_2 (mSoftc, MR_ADDR (port, RX_GMF_UP_THR), MSK_ECU_ULPP);
+    CSR_WRITE_2 (sc, MR_ADDR (port, RX_GMF_LP_THR), MSK_ECU_LLPP);
+    CSR_WRITE_2 (sc, MR_ADDR (port, RX_GMF_UP_THR), MSK_ECU_ULPP);
     // Configure store-and-forward for Tx.
     msk_set_tx_stfwd (sc_if);
   }
 
-  if (mSoftc->msk_hw_id == CHIP_ID_YUKON_FE_P && mSoftc->msk_hw_rev == CHIP_REV_YU_FE_P_A0) {
+  if (sc->msk_hw_id == CHIP_ID_YUKON_FE_P && sc->msk_hw_rev == CHIP_REV_YU_FE_P_A0) {
     // Disable dynamic watermark - from Linux
-    reg = CSR_READ_4 (mSoftc, MR_ADDR (port, TX_GMF_EA));
+    reg = CSR_READ_4 (sc, MR_ADDR (port, TX_GMF_EA));
     reg &= ~0x03;
-    CSR_WRITE_4 (mSoftc, MR_ADDR (port, TX_GMF_EA), reg);
+    CSR_WRITE_4 (sc, MR_ADDR (port, TX_GMF_EA), reg);
   }
 
   //
   // Disable Force Sync bit and Alloc bit in Tx RAM interface
   // arbiter as we don't use Sync Tx queue.
   //
-  CSR_WRITE_1 (mSoftc, MR_ADDR (port, TXA_CTRL), TXA_DIS_FSYNC | TXA_DIS_ALLOC | TXA_STOP_RC);
+  CSR_WRITE_1 (sc, MR_ADDR (port, TXA_CTRL), TXA_DIS_FSYNC | TXA_DIS_ALLOC | TXA_STOP_RC);
   // Enable the RAM Interface Arbiter
-  CSR_WRITE_1 (mSoftc, MR_ADDR (port, TXA_CTRL), TXA_ENA_ARB);
+  CSR_WRITE_1 (sc, MR_ADDR (port, TXA_CTRL), TXA_ENA_ARB);
 
   // Setup RAM buffer
   msk_set_rambuffer (sc_if);
 
   // Disable Tx sync Queue
-  CSR_WRITE_1 (mSoftc, RB_ADDR (sc_if->msk_txsq, RB_CTRL), RB_RST_SET);
+  CSR_WRITE_1 (sc, RB_ADDR (sc_if->msk_txsq, RB_CTRL), RB_RST_SET);
 
   // Setup Tx Queue Bus Memory Interface
-  CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_txq, Q_CSR), BMU_CLR_RESET);
-  CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_txq, Q_CSR), BMU_OPER_INIT);
-  CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_txq, Q_CSR), BMU_FIFO_OP_ON);
-  CSR_WRITE_2 (mSoftc, Q_ADDR (sc_if->msk_txq, Q_WM),  MSK_BMU_TX_WM);
-  switch (mSoftc->msk_hw_id) {
+  CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_txq, Q_CSR), BMU_CLR_RESET);
+  CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_txq, Q_CSR), BMU_OPER_INIT);
+  CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_txq, Q_CSR), BMU_FIFO_OP_ON);
+  CSR_WRITE_2 (sc, Q_ADDR (sc_if->msk_txq, Q_WM),  MSK_BMU_TX_WM);
+  switch (sc->msk_hw_id) {
     case CHIP_ID_YUKON_EC_U:
-      if (mSoftc->msk_hw_rev == CHIP_REV_YU_EC_U_A0) {
+      if (sc->msk_hw_rev == CHIP_REV_YU_EC_U_A0) {
         // Fix for Yukon-EC Ultra: set BMU FIFO level
-        CSR_WRITE_2 (mSoftc, Q_ADDR (sc_if->msk_txq, Q_AL), MSK_ECU_TXFF_LEV);
+        CSR_WRITE_2 (sc, Q_ADDR (sc_if->msk_txq, Q_AL), MSK_ECU_TXFF_LEV);
       }
       break;
     case CHIP_ID_YUKON_EX:
@@ -2513,68 +2588,68 @@ msk_init (
       // Yukon Extreme seems to have silicon bug for
       // automatic Tx checksum calculation capability.
       //
-      if (mSoftc->msk_hw_rev == CHIP_REV_YU_EX_B0) {
-        CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_txq, Q_F), F_TX_CHK_AUTO_OFF);
+      if (sc->msk_hw_rev == CHIP_REV_YU_EX_B0) {
+        CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_txq, Q_F), F_TX_CHK_AUTO_OFF);
       }
       break;
   }
 
   // Setup Rx Queue Bus Memory Interface
-  CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_rxq, Q_CSR), BMU_CLR_RESET);
-  CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_rxq, Q_CSR), BMU_OPER_INIT);
-  CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_rxq, Q_CSR), BMU_FIFO_OP_ON);
-  CSR_WRITE_2 (mSoftc, Q_ADDR (sc_if->msk_rxq, Q_WM),  MSK_BMU_RX_WM);
-  if (mSoftc->msk_hw_id == CHIP_ID_YUKON_EC_U && mSoftc->msk_hw_rev >= CHIP_REV_YU_EC_U_A1) {
+  CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_rxq, Q_CSR), BMU_CLR_RESET);
+  CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_rxq, Q_CSR), BMU_OPER_INIT);
+  CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_rxq, Q_CSR), BMU_FIFO_OP_ON);
+  CSR_WRITE_2 (sc, Q_ADDR (sc_if->msk_rxq, Q_WM),  MSK_BMU_RX_WM);
+  if (sc->msk_hw_id == CHIP_ID_YUKON_EC_U && sc->msk_hw_rev >= CHIP_REV_YU_EC_U_A1) {
     // MAC Rx RAM Read is controlled by hardware
-    CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_rxq, Q_F), F_M_RX_RAM_DIS);
+    CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_rxq, Q_F), F_M_RX_RAM_DIS);
   }
 
   // truncate too-large frames - from linux
-  CSR_WRITE_4 (mSoftc, MR_ADDR (port, RX_GMF_TR_THR), 0x17a);
-  CSR_WRITE_4 (mSoftc, MR_ADDR (port, RX_GMF_CTRL_T), RX_TRUNC_ON);
+  CSR_WRITE_4 (sc, MR_ADDR (port, RX_GMF_TR_THR), 0x17a);
+  CSR_WRITE_4 (sc, MR_ADDR (port, RX_GMF_CTRL_T), RX_TRUNC_ON);
 
-  msk_set_prefetch (sc_if->msk_txq, sc_if->msk_rdata.msk_tx_ring_paddr, MSK_TX_RING_CNT - 1);
+  msk_set_prefetch (sc_if, sc_if->msk_txq, sc_if->msk_rdata.msk_tx_ring_paddr, MSK_TX_RING_CNT - 1);
   msk_init_tx_ring (sc_if);
 
   // Disable Rx checksum offload and RSS hash
-  CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_rxq, Q_CSR), BMU_DIS_RX_CHKSUM | BMU_DIS_RX_RSS_HASH);
-  msk_set_prefetch (sc_if->msk_rxq, sc_if->msk_rdata.msk_rx_ring_paddr, MSK_RX_RING_CNT - 1);
+  CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_rxq, Q_CSR), BMU_DIS_RX_CHKSUM | BMU_DIS_RX_RSS_HASH);
+  msk_set_prefetch (sc_if, sc_if->msk_rxq, sc_if->msk_rdata.msk_rx_ring_paddr, MSK_RX_RING_CNT - 1);
   Status = msk_init_rx_ring (sc_if);
   if (EFI_ERROR (Status)) {
     DEBUG ((EFI_D_ERROR, "Marvell Yukon: Initialization failed: no memory for Rx buffers\n"));
-    msk_stop (sc_if);
+    mskc_stop_if (sc_if);
     return Status;
   }
 
-  if (mSoftc->msk_hw_id == CHIP_ID_YUKON_EX) {
+  if (sc->msk_hw_id == CHIP_ID_YUKON_EX) {
     // Disable flushing of non-ASF packets
-    CSR_WRITE_4 (mSoftc, MR_ADDR (port, RX_GMF_CTRL_T), GMF_RX_MACSEC_FLUSH_OFF);
+    CSR_WRITE_4 (sc, MR_ADDR (port, RX_GMF_CTRL_T), GMF_RX_MACSEC_FLUSH_OFF);
   }
 
   // Configure interrupt handling
   if (port == MSK_PORT_A) {
-    mSoftc->msk_intrmask |= Y2_IS_PORT_A;
-    mSoftc->msk_intrhwemask |= Y2_HWE_L1_MASK;
+    sc->msk_intrmask |= Y2_IS_PORT_A;
+    sc->msk_intrhwemask |= Y2_HWE_L1_MASK;
   } else {
-    mSoftc->msk_intrmask |= Y2_IS_PORT_B;
-    mSoftc->msk_intrhwemask |= Y2_HWE_L2_MASK;
+    sc->msk_intrmask |= Y2_IS_PORT_B;
+    sc->msk_intrhwemask |= Y2_HWE_L2_MASK;
   }
   // Configure IRQ moderation mask.
-  CSR_WRITE_4 (mSoftc, B2_IRQM_MSK, mSoftc->msk_intrmask);
-  if (mSoftc->msk_int_holdoff > 0) {
+  CSR_WRITE_4 (sc, B2_IRQM_MSK, sc->msk_intrmask);
+  if (sc->msk_int_holdoff > 0) {
     // Configure initial IRQ moderation timer value.
-    CSR_WRITE_4 (mSoftc, B2_IRQM_INI, MSK_USECS (mSoftc, mSoftc->msk_int_holdoff));
-    CSR_WRITE_4 (mSoftc, B2_IRQM_VAL, MSK_USECS (mSoftc, mSoftc->msk_int_holdoff));
+    CSR_WRITE_4 (sc, B2_IRQM_INI, MSK_USECS (sc, sc->msk_int_holdoff));
+    CSR_WRITE_4 (sc, B2_IRQM_VAL, MSK_USECS (sc, sc->msk_int_holdoff));
     // Start IRQ moderation.
-    CSR_WRITE_1 (mSoftc, B2_IRQM_CTRL, TIM_START);
+    CSR_WRITE_1 (sc, B2_IRQM_CTRL, TIM_START);
   }
-  CSR_WRITE_4 (mSoftc, B0_HWE_IMSK, mSoftc->msk_intrhwemask);
-  CSR_READ_4 (mSoftc, B0_HWE_IMSK);
-  CSR_WRITE_4 (mSoftc, B0_IMSK, mSoftc->msk_intrmask);
-  CSR_READ_4 (mSoftc, B0_IMSK);
+  CSR_WRITE_4 (sc, B0_HWE_IMSK, sc->msk_intrhwemask);
+  CSR_READ_4 (sc, B0_HWE_IMSK);
+  CSR_WRITE_4 (sc, B0_IMSK, sc->msk_intrmask);
+  CSR_READ_4 (sc, B0_IMSK);
 
   sc_if->msk_flags &= ~MSK_FLAG_LINK;
-  e1000phy_mediachg ();
+  e1000phy_mediachg (sc_if->phy_softc);
 
   return Status;
 }
@@ -2586,107 +2661,121 @@ msk_set_rambuffer (
     )
 {
   INTN ltpp, utpp;
-  INTN port = sc_if->msk_md.port;
+  INTN              port;
+  struct msk_softc  *sc;
+
+  sc = sc_if->msk_softc;
+  port = sc_if->msk_md.port;
 
   if ((sc_if->msk_flags & MSK_FLAG_RAMBUF) == 0)
     return;
 
   // Setup Rx Queue
-  CSR_WRITE_1 (mSoftc, RB_ADDR (sc_if->msk_rxq, RB_CTRL), RB_RST_CLR);
-  CSR_WRITE_4 (mSoftc, RB_ADDR (sc_if->msk_rxq, RB_START), mSoftc->msk_rxqstart[port] / 8);
-  CSR_WRITE_4 (mSoftc, RB_ADDR (sc_if->msk_rxq, RB_END), mSoftc->msk_rxqend[port] / 8);
-  CSR_WRITE_4 (mSoftc, RB_ADDR (sc_if->msk_rxq, RB_WP), mSoftc->msk_rxqstart[port] / 8);
-  CSR_WRITE_4 (mSoftc, RB_ADDR (sc_if->msk_rxq, RB_RP), mSoftc->msk_rxqstart[port] / 8);
+  CSR_WRITE_1 (sc, RB_ADDR (sc_if->msk_rxq, RB_CTRL), RB_RST_CLR);
+  CSR_WRITE_4 (sc, RB_ADDR (sc_if->msk_rxq, RB_START), sc->msk_rxqstart[port] / 8);
+  CSR_WRITE_4 (sc, RB_ADDR (sc_if->msk_rxq, RB_END), sc->msk_rxqend[port] / 8);
+  CSR_WRITE_4 (sc, RB_ADDR (sc_if->msk_rxq, RB_WP), sc->msk_rxqstart[port] / 8);
+  CSR_WRITE_4 (sc, RB_ADDR (sc_if->msk_rxq, RB_RP), sc->msk_rxqstart[port] / 8);
 
-  utpp = (mSoftc->msk_rxqend[port] + 1 - mSoftc->msk_rxqstart[port] - MSK_RB_ULPP) / 8;
-  ltpp = (mSoftc->msk_rxqend[port] + 1 - mSoftc->msk_rxqstart[port] - MSK_RB_LLPP_B) / 8;
-  if (mSoftc->msk_rxqsize < MSK_MIN_RXQ_SIZE) {
+  utpp = (sc->msk_rxqend[port] + 1 - sc->msk_rxqstart[port] - MSK_RB_ULPP) / 8;
+  ltpp = (sc->msk_rxqend[port] + 1 - sc->msk_rxqstart[port] - MSK_RB_LLPP_B) / 8;
+  if (sc->msk_rxqsize < MSK_MIN_RXQ_SIZE) {
     ltpp += (MSK_RB_LLPP_B - MSK_RB_LLPP_S) / 8;
   }
-  CSR_WRITE_4 (mSoftc, RB_ADDR (sc_if->msk_rxq, RB_RX_UTPP), utpp);
-  CSR_WRITE_4 (mSoftc, RB_ADDR (sc_if->msk_rxq, RB_RX_LTPP), ltpp);
+  CSR_WRITE_4 (sc, RB_ADDR (sc_if->msk_rxq, RB_RX_UTPP), utpp);
+  CSR_WRITE_4 (sc, RB_ADDR (sc_if->msk_rxq, RB_RX_LTPP), ltpp);
   // Set Rx priority (RB_RX_UTHP/RB_RX_LTHP) thresholds?
 
-  CSR_WRITE_1 (mSoftc, RB_ADDR (sc_if->msk_rxq, RB_CTRL), RB_ENA_OP_MD);
-  CSR_READ_1 (mSoftc, RB_ADDR (sc_if->msk_rxq, RB_CTRL));
+  CSR_WRITE_1 (sc, RB_ADDR (sc_if->msk_rxq, RB_CTRL), RB_ENA_OP_MD);
+  CSR_READ_1 (sc, RB_ADDR (sc_if->msk_rxq, RB_CTRL));
 
   // Setup Tx Queue.
-  CSR_WRITE_1 (mSoftc, RB_ADDR (sc_if->msk_txq, RB_CTRL), RB_RST_CLR);
-  CSR_WRITE_4 (mSoftc, RB_ADDR (sc_if->msk_txq, RB_START), mSoftc->msk_txqstart[port] / 8);
-  CSR_WRITE_4 (mSoftc, RB_ADDR (sc_if->msk_txq, RB_END), mSoftc->msk_txqend[port] / 8);
-  CSR_WRITE_4 (mSoftc, RB_ADDR (sc_if->msk_txq, RB_WP), mSoftc->msk_txqstart[port] / 8);
-  CSR_WRITE_4 (mSoftc, RB_ADDR (sc_if->msk_txq, RB_RP), mSoftc->msk_txqstart[port] / 8);
+  CSR_WRITE_1 (sc, RB_ADDR (sc_if->msk_txq, RB_CTRL), RB_RST_CLR);
+  CSR_WRITE_4 (sc, RB_ADDR (sc_if->msk_txq, RB_START), sc->msk_txqstart[port] / 8);
+  CSR_WRITE_4 (sc, RB_ADDR (sc_if->msk_txq, RB_END), sc->msk_txqend[port] / 8);
+  CSR_WRITE_4 (sc, RB_ADDR (sc_if->msk_txq, RB_WP), sc->msk_txqstart[port] / 8);
+  CSR_WRITE_4 (sc, RB_ADDR (sc_if->msk_txq, RB_RP), sc->msk_txqstart[port] / 8);
 
   // Enable Store & Forward for Tx side
-  CSR_WRITE_1 (mSoftc, RB_ADDR (sc_if->msk_txq, RB_CTRL), RB_ENA_STFWD);
-  CSR_WRITE_1 (mSoftc, RB_ADDR (sc_if->msk_txq, RB_CTRL), RB_ENA_OP_MD);
-  CSR_READ_1 (mSoftc, RB_ADDR (sc_if->msk_txq, RB_CTRL));
+  CSR_WRITE_1 (sc, RB_ADDR (sc_if->msk_txq, RB_CTRL), RB_ENA_STFWD);
+  CSR_WRITE_1 (sc, RB_ADDR (sc_if->msk_txq, RB_CTRL), RB_ENA_OP_MD);
+  CSR_READ_1 (sc, RB_ADDR (sc_if->msk_txq, RB_CTRL));
 }
 
 STATIC
 VOID
 msk_set_prefetch (
+    struct msk_if_softc   *sc_if,
     INTN qaddr,
     EFI_PHYSICAL_ADDRESS addr,
     UINT32 count
     )
 {
+  struct msk_softc     *sc;
+
+  sc = sc_if->msk_softc;
+
   // Reset the prefetch unit
-  CSR_WRITE_4 (mSoftc, Y2_PREF_Q_ADDR (qaddr, PREF_UNIT_CTRL_REG), PREF_UNIT_RST_SET);
-  CSR_WRITE_4 (mSoftc, Y2_PREF_Q_ADDR (qaddr, PREF_UNIT_CTRL_REG), PREF_UNIT_RST_CLR);
+  CSR_WRITE_4 (sc, Y2_PREF_Q_ADDR (qaddr, PREF_UNIT_CTRL_REG), PREF_UNIT_RST_SET);
+  CSR_WRITE_4 (sc, Y2_PREF_Q_ADDR (qaddr, PREF_UNIT_CTRL_REG), PREF_UNIT_RST_CLR);
   // Set LE base address
-  CSR_WRITE_4 (mSoftc, Y2_PREF_Q_ADDR (qaddr, PREF_UNIT_ADDR_LOW_REG), MSK_ADDR_LO (addr));
-  CSR_WRITE_4 (mSoftc, Y2_PREF_Q_ADDR (qaddr, PREF_UNIT_ADDR_HI_REG), MSK_ADDR_HI (addr));
+  CSR_WRITE_4 (sc, Y2_PREF_Q_ADDR (qaddr, PREF_UNIT_ADDR_LOW_REG), MSK_ADDR_LO (addr));
+  CSR_WRITE_4 (sc, Y2_PREF_Q_ADDR (qaddr, PREF_UNIT_ADDR_HI_REG), MSK_ADDR_HI (addr));
 
   // Set the list last index
-  CSR_WRITE_2 (mSoftc, Y2_PREF_Q_ADDR (qaddr, PREF_UNIT_LAST_IDX_REG), count);
+  CSR_WRITE_2 (sc, Y2_PREF_Q_ADDR (qaddr, PREF_UNIT_LAST_IDX_REG), count);
   // Turn on prefetch unit
-  CSR_WRITE_4 (mSoftc, Y2_PREF_Q_ADDR (qaddr, PREF_UNIT_CTRL_REG), PREF_UNIT_OP_ON);
+  CSR_WRITE_4 (sc, Y2_PREF_Q_ADDR (qaddr, PREF_UNIT_CTRL_REG), PREF_UNIT_OP_ON);
   // Dummy read to ensure write
-  CSR_READ_4 (mSoftc, Y2_PREF_Q_ADDR (qaddr, PREF_UNIT_CTRL_REG));
+  CSR_READ_4 (sc, Y2_PREF_Q_ADDR (qaddr, PREF_UNIT_CTRL_REG));
 }
 
-static
 VOID
-msk_stop (
-    struct msk_if_softc *sc_if
+mskc_stop_if (
+    struct msk_if_softc  *sc_if
     )
 {
   struct msk_txdesc   *txd;
   struct msk_rxdesc   *rxd;
   UINT32              val;
   INTN                i;
-  INTN                port = sc_if->msk_md.port;
+  INTN                 port;
+  EFI_PCI_IO_PROTOCOL  *PciIo;
+  struct msk_softc     *sc;
+
+  sc = sc_if->msk_softc;
+  PciIo = sc->PciIo;
+  port = sc_if->msk_md.port;
 
   // Disable interrupts
   if (port == MSK_PORT_A) {
-    mSoftc->msk_intrmask &= ~Y2_IS_PORT_A;
-    mSoftc->msk_intrhwemask &= ~Y2_HWE_L1_MASK;
+    sc->msk_intrmask &= ~Y2_IS_PORT_A;
+    sc->msk_intrhwemask &= ~Y2_HWE_L1_MASK;
   } else {
-    mSoftc->msk_intrmask &= ~Y2_IS_PORT_B;
-    mSoftc->msk_intrhwemask &= ~Y2_HWE_L2_MASK;
+    sc->msk_intrmask &= ~Y2_IS_PORT_B;
+    sc->msk_intrhwemask &= ~Y2_HWE_L2_MASK;
   }
-  CSR_WRITE_4 (mSoftc, B0_HWE_IMSK, mSoftc->msk_intrhwemask);
-  CSR_READ_4 (mSoftc, B0_HWE_IMSK);
-  CSR_WRITE_4 (mSoftc, B0_IMSK, mSoftc->msk_intrmask);
-  CSR_READ_4 (mSoftc, B0_IMSK);
+  CSR_WRITE_4 (sc, B0_HWE_IMSK, sc->msk_intrhwemask);
+  CSR_READ_4 (sc, B0_HWE_IMSK);
+  CSR_WRITE_4 (sc, B0_IMSK, sc->msk_intrmask);
+  CSR_READ_4 (sc, B0_IMSK);
 
   // Disable Tx/Rx MAC.
-  val = GMAC_READ_2 (mSoftc, port, GM_GP_CTRL);
+  val = GMAC_READ_2 (sc, port, GM_GP_CTRL);
   val &= ~(GM_GPCR_RX_ENA | GM_GPCR_TX_ENA);
-  GMAC_WRITE_2 (mSoftc, port, GM_GP_CTRL, val);
+  GMAC_WRITE_2 (sc, port, GM_GP_CTRL, val);
   // Read again to ensure writing.
-  GMAC_READ_2 (mSoftc, port, GM_GP_CTRL);
+  GMAC_READ_2 (sc, port, GM_GP_CTRL);
   // Update stats and clear counters
   msk_stats_update (sc_if);
 
   // Stop Tx BMU
-  CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_txq, Q_CSR), BMU_STOP);
-  val = CSR_READ_4 (mSoftc, Q_ADDR (sc_if->msk_txq, Q_CSR));
+  CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_txq, Q_CSR), BMU_STOP);
+  val = CSR_READ_4 (sc, Q_ADDR (sc_if->msk_txq, Q_CSR));
   for (i = 0; i < MSK_TIMEOUT; i++) {
     if ((val & (BMU_STOP | BMU_IDLE)) == 0) {
-      CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_txq, Q_CSR), BMU_STOP);
-      val = CSR_READ_4 (mSoftc, Q_ADDR (sc_if->msk_txq, Q_CSR));
+      CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_txq, Q_CSR), BMU_STOP);
+      val = CSR_READ_4 (sc, Q_ADDR (sc_if->msk_txq, Q_CSR));
     } else {
       break;
     }
@@ -2695,29 +2784,29 @@ msk_stop (
   if (i == MSK_TIMEOUT) {
     DEBUG ((EFI_D_NET, "Marvell Yukon: Tx BMU stop failed\n"));
   }
-  CSR_WRITE_1 (mSoftc, RB_ADDR (sc_if->msk_txq, RB_CTRL), RB_RST_SET | RB_DIS_OP_MD);
+  CSR_WRITE_1 (sc, RB_ADDR (sc_if->msk_txq, RB_CTRL), RB_RST_SET | RB_DIS_OP_MD);
 
   // Disable all GMAC interrupt.
-  CSR_WRITE_1 (mSoftc, MR_ADDR (port, GMAC_IRQ_MSK), 0);
+  CSR_WRITE_1 (sc, MR_ADDR (port, GMAC_IRQ_MSK), 0);
   // Disable PHY interrupt. */
-  msk_phy_writereg (port, PHY_MARV_INT_MASK, 0);
+  msk_phy_writereg (sc_if, PHY_MARV_INT_MASK, 0);
 
   // Disable the RAM Interface Arbiter.
-  CSR_WRITE_1 (mSoftc, MR_ADDR (port, TXA_CTRL), TXA_DIS_ARB);
+  CSR_WRITE_1 (sc, MR_ADDR (port, TXA_CTRL), TXA_DIS_ARB);
 
   // Reset the PCI FIFO of the async Tx queue
-  CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_txq, Q_CSR), BMU_RST_SET | BMU_FIFO_RST);
+  CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_txq, Q_CSR), BMU_RST_SET | BMU_FIFO_RST);
 
   // Reset the Tx prefetch units
-  CSR_WRITE_4 (mSoftc, Y2_PREF_Q_ADDR (sc_if->msk_txq, PREF_UNIT_CTRL_REG), PREF_UNIT_RST_SET);
+  CSR_WRITE_4 (sc, Y2_PREF_Q_ADDR (sc_if->msk_txq, PREF_UNIT_CTRL_REG), PREF_UNIT_RST_SET);
 
   // Reset the RAM Buffer async Tx queue
-  CSR_WRITE_1 (mSoftc, RB_ADDR (sc_if->msk_txq, RB_CTRL), RB_RST_SET);
+  CSR_WRITE_1 (sc, RB_ADDR (sc_if->msk_txq, RB_CTRL), RB_RST_SET);
 
   // Reset Tx MAC FIFO.
-  CSR_WRITE_4 (mSoftc, MR_ADDR (port, TX_GMF_CTRL_T), GMF_RST_SET);
+  CSR_WRITE_4 (sc, MR_ADDR (port, TX_GMF_CTRL_T), GMF_RST_SET);
   // Set Pause Off.
-  CSR_WRITE_4 (mSoftc, MR_ADDR (port, GMAC_CTRL), GMC_PAUSE_OFF);
+  CSR_WRITE_4 (sc, MR_ADDR (port, GMAC_CTRL), GMC_PAUSE_OFF);
 
   /*
    * The Rx Stop command will not work for Yukon-2 if the BMU does not
@@ -2731,9 +2820,9 @@ msk_stop (
    */
 
   // Disable the RAM Buffer receive queue
-  CSR_WRITE_1 (mSoftc, RB_ADDR (sc_if->msk_rxq, RB_CTRL), RB_DIS_OP_MD);
+  CSR_WRITE_1 (sc, RB_ADDR (sc_if->msk_rxq, RB_CTRL), RB_DIS_OP_MD);
   for (i = 0; i < MSK_TIMEOUT; i++) {
-    if (CSR_READ_1 (mSoftc, RB_ADDR (sc_if->msk_rxq, Q_RSL)) == CSR_READ_1 (mSoftc, RB_ADDR (sc_if->msk_rxq, Q_RL))) {
+    if (CSR_READ_1 (sc, RB_ADDR (sc_if->msk_rxq, Q_RSL)) == CSR_READ_1 (sc, RB_ADDR (sc_if->msk_rxq, Q_RL))) {
       break;
     }
     gBS->Stall (1);
@@ -2741,19 +2830,19 @@ msk_stop (
   if (i == MSK_TIMEOUT) {
     DEBUG ((EFI_D_NET, "Marvell Yukon: Rx BMU stop failed\n"));
   }
-  CSR_WRITE_4 (mSoftc, Q_ADDR (sc_if->msk_rxq, Q_CSR), BMU_RST_SET | BMU_FIFO_RST);
+  CSR_WRITE_4 (sc, Q_ADDR (sc_if->msk_rxq, Q_CSR), BMU_RST_SET | BMU_FIFO_RST);
   // Reset the Rx prefetch unit.
-  CSR_WRITE_4 (mSoftc, Y2_PREF_Q_ADDR (sc_if->msk_rxq, PREF_UNIT_CTRL_REG), PREF_UNIT_RST_SET);
+  CSR_WRITE_4 (sc, Y2_PREF_Q_ADDR (sc_if->msk_rxq, PREF_UNIT_CTRL_REG), PREF_UNIT_RST_SET);
   // Reset the RAM Buffer receive queue.
-  CSR_WRITE_1 (mSoftc, RB_ADDR (sc_if->msk_rxq, RB_CTRL), RB_RST_SET);
+  CSR_WRITE_1 (sc, RB_ADDR (sc_if->msk_rxq, RB_CTRL), RB_RST_SET);
   // Reset Rx MAC FIFO.
-  CSR_WRITE_4 (mSoftc, MR_ADDR (port, RX_GMF_CTRL_T), GMF_RST_SET);
+  CSR_WRITE_4 (sc, MR_ADDR (port, RX_GMF_CTRL_T), GMF_RST_SET);
 
   // Free Rx and Tx mbufs still in the queues
   for (i = 0; i < MSK_RX_RING_CNT; i++) {
     rxd = &sc_if->msk_cdata.msk_rxdesc[i];
     if (rxd->rx_m.Buf != NULL) {
-      mPciIo->Unmap (mPciIo, rxd->rx_m.DmaMapping);
+      PciIo->Unmap (PciIo, rxd->rx_m.DmaMapping);
       if(rxd->rx_m.Buf != NULL) {
         gBS->FreePool (rxd->rx_m.Buf);
         rxd->rx_m.Buf = NULL;
@@ -2765,7 +2854,7 @@ msk_stop (
   for (i = 0; i < MSK_TX_RING_CNT; i++) {
     txd = &sc_if->msk_cdata.msk_txdesc[i];
     if (txd->tx_m.Buf != NULL) {
-      mPciIo->Unmap (mPciIo, txd->tx_m.DmaMapping);
+      PciIo->Unmap (PciIo, txd->tx_m.DmaMapping);
       gBS->SetMem (&(txd->tx_m), sizeof (MSK_DMA_BUF), 0);
       // We don't own the transmit buffers so don't free them
     }
@@ -2782,7 +2871,7 @@ msk_stop (
  * counter clears high 16 bits of the counter such that accessing
  * lower 16 bits should be the last operation.
  */
-#define  MSK_READ_MIB32(x, y)    (((UINT32)GMAC_READ_2 (mSoftc, x, (y) + 4)) << 16) +  (UINT32)GMAC_READ_2 (mSoftc, x, y)
+#define  MSK_READ_MIB32(x, y)    (((UINT32)GMAC_READ_2 (sc, x, (y) + 4)) << 16) +  (UINT32)GMAC_READ_2 (sc, x, y)
 #define  MSK_READ_MIB64(x, y)    (((UINT64)MSK_READ_MIB32 (x, (y) + 8)) << 32) + (UINT64)MSK_READ_MIB32 (x, y)
 
 static
@@ -2794,11 +2883,15 @@ msk_stats_clear (
   UINT16      gmac;
   INTN        val;
   INTN        i;
-  INTN        port = sc_if->msk_md.port;
+  INTN              port;
+  struct msk_softc  *sc;
+
+  sc = sc_if->msk_softc;
+  port = sc_if->msk_md.port;
 
   // Set MIB Clear Counter Mode.
-  gmac = GMAC_READ_2 (mSoftc, port, GM_PHY_ADDR);
-  GMAC_WRITE_2 (mSoftc, port, GM_PHY_ADDR, gmac | GM_PAR_MIB_CLR);
+  gmac = GMAC_READ_2 (sc, port, GM_PHY_ADDR);
+  GMAC_WRITE_2 (sc, port, GM_PHY_ADDR, gmac | GM_PAR_MIB_CLR);
   // Read all MIB Counters with Clear Mode set
   for (i = GM_RXF_UC_OK; i <= GM_TXE_FIFO_UR; i += sizeof (UINT32)) {
     val = MSK_READ_MIB32 (port, i);
@@ -2806,7 +2899,7 @@ msk_stats_clear (
   }
   // Clear MIB Clear Counter Mode
   gmac &= ~GM_PAR_MIB_CLR;
-  GMAC_WRITE_2 (mSoftc, port, GM_PHY_ADDR, gmac);
+  GMAC_WRITE_2 (sc, port, GM_PHY_ADDR, gmac);
 }
 
 static
@@ -2818,12 +2911,15 @@ msk_stats_update (
   struct msk_hw_stats   *stats;
   UINT16                gmac;
   INTN                  val;
-  INTN                  port = sc_if->msk_md.port;
+  INTN                 port;
+  struct msk_softc     *sc;
 
+  sc = sc_if->msk_softc;
+  port = sc_if->msk_md.port;
   stats = &sc_if->msk_stats;
   /* Set MIB Clear Counter Mode. */
-  gmac = GMAC_READ_2 (mSoftc, port, GM_PHY_ADDR);
-  GMAC_WRITE_2 (mSoftc, port, GM_PHY_ADDR, gmac | GM_PAR_MIB_CLR);
+  gmac = GMAC_READ_2 (sc, port, GM_PHY_ADDR);
+  GMAC_WRITE_2 (sc, port, GM_PHY_ADDR, gmac | GM_PAR_MIB_CLR);
 
   /* Rx stats. */
   stats->rx_ucast_frames    += MSK_READ_MIB32 (port, GM_RXF_UC_OK);
@@ -2874,7 +2970,7 @@ msk_stats_update (
 
   /* Clear MIB Clear Counter Mode. */
   gmac &= ~GM_PAR_MIB_CLR;
-  GMAC_WRITE_2 (mSoftc, port, GM_PHY_ADDR, gmac);
+  GMAC_WRITE_2 (sc, port, GM_PHY_ADDR, gmac);
 }
 
 #undef MSK_READ_MIB32
