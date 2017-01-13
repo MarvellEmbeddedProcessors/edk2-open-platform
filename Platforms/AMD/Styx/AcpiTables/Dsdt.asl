@@ -646,6 +646,14 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "AMDINC", "SEATTLE ", 3)
                 Return (RBUF) /* \_SB_.PCI0._CRS.RBUF */
             } // Method(_CRS)
 
+            Device (RES0)
+            {
+                Name (_HID, "PNP0C02")
+                Name (_CRS, ResourceTemplate ()
+                {
+                    Memory32Fixed (ReadWrite, 0xF0000000, 0x8000000)
+                })
+            }
             Name (SUPP, 0x00)
             Name (CTRL, 0x00)
             Method (_OSC, 4, NotSerialized)  // _OSC: Operating System Capabilities
