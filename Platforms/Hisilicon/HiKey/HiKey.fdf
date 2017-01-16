@@ -123,6 +123,7 @@ READ_LOCK_STATUS   = TRUE
   # Multimedia Card Interface
   #
   INF EmbeddedPkg/Universal/MmcDxe/MmcDxe.inf
+  INF OpenPlatformPkg/Drivers/Mmc/DwEmmcDxe/DwEmmcDxe.inf
 
   #
   # USB Host Support

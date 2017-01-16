@@ -333,6 +333,13 @@
   gEmbeddedTokenSpaceGuid.PcdMetronomeTickPeriod|1000
 
   #
+  # DW MMC/SD card controller
+  #
+  gDwEmmcDxeTokenSpaceGuid.PcdDwEmmcDxeBaseAddress|0xF723D000
+  gDwEmmcDxeTokenSpaceGuid.PcdDwEmmcDxeClockFrequencyInHz|100000000
+
+  #
+  #
   # Fastboot
   #
   gEmbeddedTokenSpaceGuid.PcdAndroidFastbootUsbVendorId|0x18d1
@@ -394,6 +401,7 @@
   # MMC/SD
   #
   EmbeddedPkg/Universal/MmcDxe/MmcDxe.inf
+  OpenPlatformPkg/Drivers/Mmc/DwEmmcDxe/DwEmmcDxe.inf
 
   #
   # USB Host Support
