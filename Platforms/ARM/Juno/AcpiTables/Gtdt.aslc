@@ -92,9 +92,15 @@
 #if (JUNO_WATCHDOG_COUNT != 0)
     {
       EFI_ACPI_5_1_SBSA_GENERIC_WATCHDOG_STRUCTURE_INIT(
-          FixedPcdGet32 (PcdGenericWatchdogRefreshBase), FixedPcdGet32 (PcdGenericWatchdogControlBase), 93, 0),
+          FixedPcdGet64 (PcdGenericWatchdogRefreshBase),
+          FixedPcdGet64 (PcdGenericWatchdogControlBase),
+          93,
+          0),
       EFI_ACPI_5_1_SBSA_GENERIC_WATCHDOG_STRUCTURE_INIT(
-          FixedPcdGet32 (PcdGenericWatchdogRefreshBase), FixedPcdGet32 (PcdGenericWatchdogControlBase), 94, EFI_ACPI_5_1_GTDT_SBSA_GENERIC_WATCHDOG_FLAG_SECURE_TIMER)
+          FixedPcdGet64 (PcdGenericWatchdogRefreshBase),
+          FixedPcdGet64 (PcdGenericWatchdogControlBase),
+          94,
+          EFI_ACPI_5_1_GTDT_SBSA_GENERIC_WATCHDOG_FLAG_SECURE_TIMER)
     }
 #endif
   };
