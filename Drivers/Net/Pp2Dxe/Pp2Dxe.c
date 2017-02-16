@@ -188,22 +188,24 @@ Pp2DxeBmPoolInit (
     Mvpp2BmIrqClear(Mvpp2Shared, Index);
   }
 
-  Mvpp2Shared->BmPools = AllocateZeroPool (sizeof(MVPP2_BMS_POOL));
+  for (Index = 0; Index < MVPP2_MAX_PORT; Index++) {
+     Mvpp2Shared->BmPools[Index] = AllocateZeroPool (sizeof(MVPP2_BMS_POOL));
 
-  if (Mvpp2Shared->BmPools == NULL) {
-    return EFI_OUT_OF_RESOURCES;
+     if (Mvpp2Shared->BmPools[Index] == NULL) {
+       return EFI_OUT_OF_RESOURCES;
+     }
+
+     PoolAddr = UncachedAllocateAlignedZeroPool (PoolSize, MVPP2_BM_POOL_PTR_ALIGN);
+     if (PoolAddr == NULL) {
+       return EFI_OUT_OF_RESOURCES;
+     }
+
+     Mvpp2Shared->BmPools[Index]->Id = Index;
+     Mvpp2Shared->BmPools[Index]->VirtAddr = (UINT32 *)PoolAddr;
+     Mvpp2Shared->BmPools[Index]->PhysAddr = (UINTN)PoolAddr;
+
+     Mvpp2BmPoolHwCreate(Mvpp2Shared, Mvpp2Shared->BmPools[Index], MVPP2_BM_SIZE);
   }
-
-  PoolAddr = UncachedAllocateAlignedZeroPool (PoolSize, MVPP2_BM_POOL_PTR_ALIGN);
-  if (PoolAddr == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  Mvpp2Shared->BmPools->Id = MVPP2_BM_POOL;
-  Mvpp2Shared->BmPools->VirtAddr = (UINT32 *)PoolAddr;
-  Mvpp2Shared->BmPools->PhysAddr = (UINTN)PoolAddr;
-
-  Mvpp2BmPoolHwCreate(Mvpp2Shared, Mvpp2Shared->BmPools, MVPP2_BM_SIZE);
 
   return EFI_SUCCESS;
 }
@@ -216,22 +218,24 @@ Pp2DxeBmStart (
   )
 {
   UINT8 *Buff, *BuffPhys;
-  INTN Index;
+  INTN Index, Pool;
 
   ASSERT(BM_ALIGN >= sizeof(UINTN));
 
-  Mvpp2BmPoolCtrl(Mvpp2Shared, MVPP2_BM_POOL, MVPP2_START);
-  Mvpp2BmPoolBufsizeSet(Mvpp2Shared, Mvpp2Shared->BmPools, RX_BUFFER_SIZE);
+  for (Pool = 0; Pool < MVPP2_MAX_PORT; Pool++) {
+    Mvpp2BmPoolCtrl(Mvpp2Shared, Pool, MVPP2_START);
+    Mvpp2BmPoolBufsizeSet(Mvpp2Shared, Mvpp2Shared->BmPools[Pool], RX_BUFFER_SIZE);
 
-  /* Fill BM pool with Buffers */
-  for (Index = 0; Index < MVPP2_BM_SIZE; Index++) {
-    Buff = (UINT8 *)(BufferLocation.RxBuffers + (Index * RX_BUFFER_SIZE));
-    if (Buff == NULL) {
-      return EFI_OUT_OF_RESOURCES;
+    /* Fill BM pool with Buffers */
+    for (Index = 0; Index < MVPP2_BM_SIZE; Index++) {
+      Buff = (UINT8 *)(BufferLocation.RxBuffers[Pool] + (Index * RX_BUFFER_SIZE));
+      if (Buff == NULL) {
+        return EFI_OUT_OF_RESOURCES;
+      }
+
+      BuffPhys = ALIGN_POINTER(Buff, BM_ALIGN);
+      Mvpp2BmPoolPut(Mvpp2Shared, Pool, (UINTN)BuffPhys, (UINTN)BuffPhys);
     }
-
-    BuffPhys = ALIGN_POINTER(Buff, BM_ALIGN);
-    Mvpp2BmPoolPut(Mvpp2Shared, MVPP2_BM_POOL, (UINTN)BuffPhys, (UINTN)BuffPhys);
   }
 
   return EFI_SUCCESS;
@@ -405,7 +409,7 @@ Pp2DxeLatePortInitialize (
   }
 
   /* Use preallocated area */
-  Port->Txqs[0].Descs = BufferLocation.TxDescs;
+  Port->Txqs[0].Descs = BufferLocation.TxDescs[Port->Id];
 
   for (Queue = 0; Queue < TxqNumber; Queue++) {
     MVPP2_TX_QUEUE *Txq = &Port->Txqs[Queue];
@@ -421,7 +425,7 @@ Pp2DxeLatePortInitialize (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Port->Rxqs[0].Descs = BufferLocation.RxDescs;
+  Port->Rxqs[0].Descs = BufferLocation.RxDescs[Port->Id];
 
   for (Queue = 0; Queue < TxqNumber; Queue++) {
     MVPP2_RX_QUEUE *Rxq = &Port->Rxqs[Queue];
@@ -455,8 +459,8 @@ Pp2DxeLateInitialize (
     }
 
     /* Attach pool to Rxq */
-    Mvpp2RxqLongPoolSet(Port, 0, MVPP2_BM_POOL);
-    Mvpp2RxqShortPoolSet(Port, 0, MVPP2_BM_POOL);
+    Mvpp2RxqLongPoolSet(Port, 0, Port->Id);
+    Mvpp2RxqShortPoolSet(Port, 0, Port->Id);
 
     /*
      * Mark this port being fully initialized,
@@ -644,9 +648,13 @@ Pp2DxeHalt (
   PP2DXE_CONTEXT *Pp2Context = Context;
   PP2DXE_PORT *Port = &Pp2Context->Port;
   STATIC BOOLEAN CommonPartHalted = FALSE;
+  INTN Index;
 
   if (!CommonPartHalted) {
-    Mvpp2BmStop(Mvpp2Shared, MVPP2_BM_POOL);
+    for (Index = 0; Index < MVPP2_MAX_PORT; Index++) {
+      Mvpp2BmStop(Mvpp2Shared, Index);
+    }
+
     CommonPartHalted = TRUE;
   }
 
@@ -1173,13 +1181,26 @@ Pp2DxeInitialise (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  BufferLocation.TxDescs = BufferSpace;
-  BufferLocation.AggrTxDescs = (MVPP2_TX_DESC *)((UINTN)BufferSpace + MVPP2_MAX_TXD * sizeof(MVPP2_TX_DESC));
-  BufferLocation.RxDescs = (MVPP2_RX_DESC *)((UINTN)BufferSpace +
-                                             (MVPP2_MAX_TXD + MVPP2_AGGR_TXQ_SIZE) * sizeof(MVPP2_TX_DESC));
-  BufferLocation.RxBuffers = (DmaAddrT)(BufferSpace +
-                                        (MVPP2_MAX_TXD + MVPP2_AGGR_TXQ_SIZE) * sizeof(MVPP2_TX_DESC) +
-                                        MVPP2_MAX_RXD * sizeof(MVPP2_RX_DESC));
+  for (Index = 0; Index < MVPP2_MAX_PORT; Index++) {
+    BufferLocation.TxDescs[Index] = (MVPP2_TX_DESC *)
+      (BufferSpace + Index * MVPP2_MAX_TXD * sizeof(MVPP2_TX_DESC));
+  }
+
+  BufferLocation.AggrTxDescs = (MVPP2_TX_DESC *)
+    ((UINTN)BufferSpace + MVPP2_MAX_TXD * MVPP2_MAX_PORT * sizeof(MVPP2_TX_DESC));
+
+  for (Index = 0; Index < MVPP2_MAX_PORT; Index++) {
+      BufferLocation.RxDescs[Index] = (MVPP2_RX_DESC *)
+        ((UINTN)BufferSpace + (MVPP2_MAX_TXD * MVPP2_MAX_PORT + MVPP2_AGGR_TXQ_SIZE) *
+        sizeof(MVPP2_TX_DESC) + Index * MVPP2_MAX_RXD * sizeof(MVPP2_RX_DESC));
+  }
+
+  for (Index = 0; Index < MVPP2_MAX_PORT; Index++) {
+      BufferLocation.RxBuffers[Index] = (DmaAddrT)
+        (BufferSpace + (MVPP2_MAX_TXD * MVPP2_MAX_PORT + MVPP2_AGGR_TXQ_SIZE) *
+        sizeof(MVPP2_TX_DESC) + MVPP2_MAX_RXD * MVPP2_MAX_PORT * sizeof(MVPP2_RX_DESC) +
+        Index * MVPP2_BM_SIZE * RX_BUFFER_SIZE);
+  }
 
   /* Initialize HW */
   Mvpp2AxiConfig(Mvpp2Shared);
