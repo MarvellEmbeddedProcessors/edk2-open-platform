@@ -359,7 +359,6 @@
   gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
 
   # ARM Pcds
-  gArmTokenSpaceGuid.PcdArmUncachedMemoryMask|0x0000000000000000
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0
   gArmTokenSpaceGuid.PcdSystemMemorySize|0x40000000
   gArmTokenSpaceGuid.PcdArmScr|0x531

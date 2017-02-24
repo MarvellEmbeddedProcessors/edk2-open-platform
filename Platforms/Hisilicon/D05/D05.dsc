@@ -155,13 +155,6 @@
   gArmPlatformTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x10000000
 
   gHisiTokenSpaceGuid.PcdSerDesFlowCtrlFlag|1
-
-
-  #
-  # ARM Pcds
-  #
-  gArmTokenSpaceGuid.PcdArmUncachedMemoryMask|0x0000000040000000
-
   gHisiTokenSpaceGuid.PcdSlotPerChannelNum|0x2
 
 

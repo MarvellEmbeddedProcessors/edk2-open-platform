@@ -126,16 +126,6 @@
   # Size of the region used by UEFI in permanent memory (Reserved 64MB)
   gArmPlatformTokenSpaceGuid.PcdSystemMemoryUefiRegionSize|0x10000000
 
-  #
-  # ARM Pcds
-  #
-  gArmTokenSpaceGuid.PcdArmUncachedMemoryMask|0x0000000040000000
-
-  #
-  # ARM PrimeCell
-  #
-
-
   ## SP805 Watchdog - Motherboard Watchdog
   gArmPlatformTokenSpaceGuid.PcdSP805WatchdogBase|0x801e0000
 
