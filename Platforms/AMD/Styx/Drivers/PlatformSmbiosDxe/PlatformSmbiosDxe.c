@@ -354,17 +354,10 @@ SMBIOS_TABLE_TYPE7  mCacheInfoType7 = {
   CacheTypeUnknown,                     // System Cache Type
   CacheAssociativity2Way        // Associativity
 };
-#if (FixedPcdGetBool (PcdIscpSupport))
-CHAR8  *mCacheInfoType7Strings[] = {
-  "L# Cache",
-  NULL
-};
-#else
 CHAR8  *mCacheInfoType7Strings[] = {
   "Cache1",
   NULL
 };
-#endif
 
 /***********************************************************************
         SMBIOS data definition  TYPE9  System Slot Information
@@ -710,7 +703,7 @@ CacheInfoUpdateSmbiosType7 (
   dstType7.SocketDesignation = 1;  // "L# Cache"
 
   // L1 cache settings
-  mCacheInfoType7Strings[0][1] = '1'; // "L# Cache" --> "L1 Cache"
+  mCacheInfoType7Strings[0] = "L1 Cache";
   SmbiosT7 = &mSmbiosInfo.SmbiosCpuBuffer.T7L1[0];
   dstType7.CacheConfiguration  = SmbiosT7->T7CacheCfg;
   dstType7.MaximumCacheSize    = SmbiosT7->T7MaxCacheSize;
@@ -726,7 +719,7 @@ CacheInfoUpdateSmbiosType7 (
   LogSmbiosData ((EFI_SMBIOS_TABLE_HEADER *)&dstType7, mCacheInfoType7Strings);
 
   // L2 cache settings
-  mCacheInfoType7Strings[0][1] = '2'; // "L# Cache" --> "L2 Cache"
+  mCacheInfoType7Strings[0] = "L2 Cache";
   SmbiosT7 = &mSmbiosInfo.SmbiosCpuBuffer.T7L2[0];
   dstType7.CacheConfiguration  = SmbiosT7->T7CacheCfg;
   dstType7.MaximumCacheSize    = SmbiosT7->T7MaxCacheSize;
@@ -742,7 +735,7 @@ CacheInfoUpdateSmbiosType7 (
   LogSmbiosData ((EFI_SMBIOS_TABLE_HEADER *)&dstType7, mCacheInfoType7Strings);
 
   // L3 cache settings
-  mCacheInfoType7Strings[0][1] = '3'; // "L# Cache" --> "L3 Cache"
+  mCacheInfoType7Strings[0] = "L3 Cache";
   SmbiosT7 = &mSmbiosInfo.SmbiosCpuBuffer.T7L3[0];
   dstType7.CacheConfiguration  = SmbiosT7->T7CacheCfg;
   dstType7.MaximumCacheSize    = SmbiosT7->T7MaxCacheSize;
