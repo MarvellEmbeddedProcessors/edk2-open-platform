@@ -57,15 +57,15 @@ extern  EFI_BOOT_SERVICES       *gBS;
  *                                  G L O B A L S
  *----------------------------------------------------------------------------------------
  */
-EFI_SMBIOS_PROTOCOL   *mSmbiosProtocol;
-AMD_ISCP_DXE_PROTOCOL *mIscpDxeProtocol;
-ISCP_SMBIOS_INFO      mSmbiosInfo;
+STATIC EFI_SMBIOS_PROTOCOL   *mSmbiosProtocol;
+STATIC AMD_ISCP_DXE_PROTOCOL *mIscpDxeProtocol;
+STATIC ISCP_SMBIOS_INFO      mSmbiosInfo;
 
 
 /***********************************************************************
         SMBIOS data definition  TYPE0  BIOS Information
 ************************************************************************/
-SMBIOS_TABLE_TYPE0 mBIOSInfoType0 = {
+STATIC CONST SMBIOS_TABLE_TYPE0 mBIOSInfoType0 = {
   { EFI_SMBIOS_TYPE_BIOS_INFORMATION, sizeof (SMBIOS_TABLE_TYPE0), 0 },
   1,                    // Vendor String
   2,                    // BiosVersion String
@@ -130,7 +130,7 @@ SMBIOS_TABLE_TYPE0 mBIOSInfoType0 = {
   0xFF,                    // EmbeddedControllerFirmwareMinorRelease
 };
 
-CHAR8 *mBIOSInfoType0Strings[] = {
+STATIC CHAR8 CONST * CONST mBIOSInfoType0Strings[] = {
   "edk2.sourceforge.net",  // Vendor String
   __TIME__,                // BiosVersion String
   __DATE__,                // BiosReleaseDate String
@@ -140,7 +140,7 @@ CHAR8 *mBIOSInfoType0Strings[] = {
 /***********************************************************************
         SMBIOS data definition  TYPE1  System Information
 ************************************************************************/
-SMBIOS_TABLE_TYPE1 mSysInfoType1 = {
+STATIC CONST SMBIOS_TABLE_TYPE1 mSysInfoType1 = {
   { EFI_SMBIOS_TYPE_SYSTEM_INFORMATION, sizeof (SMBIOS_TABLE_TYPE1), 0 },
   1,    // Manufacturer String
   2,    // ProductName String
@@ -151,7 +151,7 @@ SMBIOS_TABLE_TYPE1 mSysInfoType1 = {
   5,    // SKUNumber String
   6,    // Family String
 };
-CHAR8  *mSysInfoType1Strings[] = {
+STATIC CHAR8 CONST * CONST mSysInfoType1Strings[] = {
   "AMD",
   "Seattle",
   "1.0",
@@ -164,7 +164,7 @@ CHAR8  *mSysInfoType1Strings[] = {
 /***********************************************************************
         SMBIOS data definition  TYPE2  Board Information
 ************************************************************************/
-SMBIOS_TABLE_TYPE2  mBoardInfoType2 = {
+STATIC CONST SMBIOS_TABLE_TYPE2  mBoardInfoType2 = {
   { EFI_SMBIOS_TYPE_BASEBOARD_INFORMATION, sizeof (SMBIOS_TABLE_TYPE2), 0 },
   1,    // Manufacturer String
   2,    // ProductName String
@@ -185,7 +185,7 @@ SMBIOS_TABLE_TYPE2  mBoardInfoType2 = {
   0,                        // NumberOfContainedObjectHandles;
   { 0 }                     // ContainedObjectHandles[1];
 };
-CHAR8  *mBoardInfoType2Strings[] = {
+STATIC CHAR8 CONST * CONST mBoardInfoType2Strings[] = {
   "AMD",
   "Seattle",
   "1.0",
@@ -198,7 +198,7 @@ CHAR8  *mBoardInfoType2Strings[] = {
 /***********************************************************************
         SMBIOS data definition  TYPE3  Enclosure Information
 ************************************************************************/
-SMBIOS_TABLE_TYPE3  mEnclosureInfoType3 = {
+STATIC CONST SMBIOS_TABLE_TYPE3  mEnclosureInfoType3 = {
   { EFI_SMBIOS_TYPE_SYSTEM_ENCLOSURE, sizeof (SMBIOS_TABLE_TYPE3), 0 },
   1,                        // Manufacturer String
   MiscChassisTypeLapTop,    // Type;
@@ -216,7 +216,7 @@ SMBIOS_TABLE_TYPE3  mEnclosureInfoType3 = {
   0,    // ContainedElementRecordLength;
   { { 0 } },    // ContainedElements[1];
 };
-CHAR8  *mEnclosureInfoType3Strings[] = {
+STATIC CHAR8 CONST * CONST mEnclosureInfoType3Strings[] = {
   "AMD",
   "1.0",
   "Chassis Board Serial#",
@@ -227,7 +227,7 @@ CHAR8  *mEnclosureInfoType3Strings[] = {
 /***********************************************************************
         SMBIOS data definition  TYPE4  Processor Information
 ************************************************************************/
-SMBIOS_TABLE_TYPE4 mProcessorInfoType4 = {
+STATIC SMBIOS_TABLE_TYPE4 mProcessorInfoType4 = {
   { EFI_SMBIOS_TYPE_PROCESSOR_INFORMATION, sizeof (SMBIOS_TABLE_TYPE4), 0},
   1,                    // Socket String
   ProcessorOther,       // ProcessorType;                                     ///< The enumeration value from PROCESSOR_TYPE_DATA.
@@ -306,7 +306,7 @@ SMBIOS_TABLE_TYPE4 mProcessorInfoType4 = {
   ProcessorFamilyARM,     // ARM Processor Family;
 };
 
-CHAR8 *mProcessorInfoType4Strings[] = {
+STATIC CHAR8 CONST * CONST mProcessorInfoType4Strings[] = {
   "Socket",
   "ARM",
 #ifdef ARM_CPU_AARCH64
@@ -323,7 +323,7 @@ CHAR8 *mProcessorInfoType4Strings[] = {
 /***********************************************************************
         SMBIOS data definition  TYPE7  Cache Information
 ************************************************************************/
-SMBIOS_TABLE_TYPE7  mCacheInfoType7 = {
+STATIC SMBIOS_TABLE_TYPE7  mCacheInfoType7 = {
   { EFI_SMBIOS_TYPE_CACHE_INFORMATION, sizeof (SMBIOS_TABLE_TYPE7), 0 },
   1,                        // SocketDesignation String
   0x018A,                                       // Cache Configuration
@@ -354,7 +354,7 @@ SMBIOS_TABLE_TYPE7  mCacheInfoType7 = {
   CacheTypeUnknown,                     // System Cache Type
   CacheAssociativity2Way        // Associativity
 };
-CHAR8  *mCacheInfoType7Strings[] = {
+STATIC CONST CHAR8 *mCacheInfoType7Strings[] = {
   "Cache1",
   NULL
 };
@@ -362,7 +362,7 @@ CHAR8  *mCacheInfoType7Strings[] = {
 /***********************************************************************
         SMBIOS data definition  TYPE9  System Slot Information
 ************************************************************************/
-SMBIOS_TABLE_TYPE9  mSysSlotInfoType9 = {
+STATIC CONST SMBIOS_TABLE_TYPE9  mSysSlotInfoType9 = {
   { EFI_SMBIOS_TYPE_SYSTEM_SLOTS, sizeof (SMBIOS_TABLE_TYPE9), 0 },
   1,    // SlotDesignation String
   SlotTypeOther,          // SlotType;                 ///< The enumeration value from MISC_SLOT_TYPE.
@@ -390,7 +390,7 @@ SMBIOS_TABLE_TYPE9  mSysSlotInfoType9 = {
   0,    // BusNum;
   0,    // DevFuncNum;
 };
-CHAR8  *mSysSlotInfoType9Strings[] = {
+STATIC CHAR8 CONST * CONST mSysSlotInfoType9Strings[] = {
   "SD Card",
   NULL
 };
@@ -398,7 +398,7 @@ CHAR8  *mSysSlotInfoType9Strings[] = {
 /***********************************************************************
         SMBIOS data definition  TYPE16  Physical Memory ArrayInformation
 ************************************************************************/
-SMBIOS_TABLE_TYPE16 mPhyMemArrayInfoType16 = {
+STATIC SMBIOS_TABLE_TYPE16 mPhyMemArrayInfoType16 = {
   { EFI_SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, sizeof (SMBIOS_TABLE_TYPE16), 0 },
   MemoryArrayLocationSystemBoard, // Location;                       ///< The enumeration value from MEMORY_ARRAY_LOCATION.
   MemoryArrayUseSystemMemory,     // Use;                            ///< The enumeration value from MEMORY_ARRAY_USE.
@@ -408,14 +408,14 @@ SMBIOS_TABLE_TYPE16 mPhyMemArrayInfoType16 = {
   1,                              // NumberOfMemoryDevices;
   0x3fffffffffffffffULL,          // ExtendedMaximumCapacity;
 };
-CHAR8 *mPhyMemArrayInfoType16Strings[] = {
+STATIC CHAR8 CONST * CONST mPhyMemArrayInfoType16Strings[] = {
   NULL
 };
 
 /***********************************************************************
         SMBIOS data definition  TYPE17  Memory Device Information
 ************************************************************************/
-SMBIOS_TABLE_TYPE17 mMemDevInfoType17 = {
+STATIC SMBIOS_TABLE_TYPE17 mMemDevInfoType17 = {
   { EFI_SMBIOS_TYPE_MEMORY_DEVICE, sizeof (SMBIOS_TABLE_TYPE17), 0 },
   0,          // MemoryArrayHandle;
   0xFFFE,     // MemoryErrorInformationHandle;
@@ -456,9 +456,9 @@ SMBIOS_TABLE_TYPE17 mMemDevInfoType17 = {
 };
 
 #if (FixedPcdGetBool (PcdIscpSupport))
-CHAR8 *mMemDevInfoType17Strings[ 7 ] = {0};
+STATIC CHAR8 CONST *mMemDevInfoType17Strings[ 7 ] = {0};
 #else
-CHAR8 *mMemDevInfoType17Strings[] = {
+STATIC CHAR8 CONST * CONST mMemDevInfoType17Strings[] = {
   "OS Virtual Memory",
   "malloc",
   "OSV",
@@ -469,7 +469,7 @@ CHAR8 *mMemDevInfoType17Strings[] = {
 /***********************************************************************
         SMBIOS data definition  TYPE19  Memory Array Mapped Address Information
 ************************************************************************/
-SMBIOS_TABLE_TYPE19 mMemArrMapInfoType19 = {
+STATIC SMBIOS_TABLE_TYPE19 mMemArrMapInfoType19 = {
   { EFI_SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, sizeof (SMBIOS_TABLE_TYPE19), 0 },
   0x80000000, // StartingAddress;
   0xbfffffff, // EndingAddress;
@@ -478,20 +478,20 @@ SMBIOS_TABLE_TYPE19 mMemArrMapInfoType19 = {
   0,          // ExtendedStartingAddress;
   0,          // ExtendedEndingAddress;
 };
-CHAR8 *mMemArrMapInfoType19Strings[] = {
+STATIC CHAR8 CONST * CONST mMemArrMapInfoType19Strings[] = {
   NULL
 };
 
 /***********************************************************************
         SMBIOS data definition  TYPE32  Boot Information
 ************************************************************************/
-SMBIOS_TABLE_TYPE32 mBootInfoType32 = {
+STATIC CONST SMBIOS_TABLE_TYPE32 mBootInfoType32 = {
   { EFI_SMBIOS_TYPE_SYSTEM_BOOT_INFORMATION, sizeof (SMBIOS_TABLE_TYPE32), 0 },
   { 0, 0, 0, 0, 0, 0 },         // Reserved[6];
   BootInformationStatusNoError  // BootStatus
 };
 
-CHAR8 *mBootInfoType32Strings[] = {
+STATIC CHAR8 CONST * CONST mBootInfoType32Strings[] = {
   NULL
 };
 
@@ -526,11 +526,12 @@ CHAR8 *mBootInfoType32Strings[] = {
                       NULL is OK.
 **/
 
+STATIC
 EFI_STATUS
 EFIAPI
 LogSmbiosData (
   IN  EFI_SMBIOS_TABLE_HEADER *Template,
-  IN  CHAR8                   **StringPack
+  IN  CONST CHAR8* CONST      *StringPack
   )
 {
   EFI_STATUS                Status;
@@ -593,6 +594,7 @@ LogSmbiosData (
 /***********************************************************************
         SMBIOS data update  TYPE0  BIOS Information
 ************************************************************************/
+STATIC
 VOID
 BIOSInfoUpdateSmbiosType0 (
   VOID
@@ -604,6 +606,7 @@ BIOSInfoUpdateSmbiosType0 (
 /***********************************************************************
         SMBIOS data update  TYPE1  System Information
 ************************************************************************/
+STATIC
 VOID
 SysInfoUpdateSmbiosType1 (
   VOID
@@ -615,6 +618,7 @@ SysInfoUpdateSmbiosType1 (
 /***********************************************************************
         SMBIOS data update  TYPE2  Board Information
 ************************************************************************/
+STATIC
 VOID
 BoardInfoUpdateSmbiosType2 (
   VOID
@@ -626,6 +630,7 @@ BoardInfoUpdateSmbiosType2 (
 /***********************************************************************
         SMBIOS data update  TYPE3  Enclosure Information
 ************************************************************************/
+STATIC
 VOID
 EnclosureInfoUpdateSmbiosType3 (
   VOID
@@ -637,6 +642,7 @@ EnclosureInfoUpdateSmbiosType3 (
 /***********************************************************************
         SMBIOS data update  TYPE4  Processor Information
 ************************************************************************/
+STATIC
 VOID
 ProcessorInfoUpdateSmbiosType4 (
   VOID
@@ -688,6 +694,7 @@ ProcessorInfoUpdateSmbiosType4 (
 /***********************************************************************
         SMBIOS data update  TYPE7  Cache Information
 ************************************************************************/
+STATIC
 VOID
 CacheInfoUpdateSmbiosType7 (
   VOID
@@ -757,6 +764,7 @@ CacheInfoUpdateSmbiosType7 (
 /***********************************************************************
         SMBIOS data update  TYPE9  System Slot Information
 ************************************************************************/
+STATIC
 VOID
 SysSlotInfoUpdateSmbiosType9 (
   VOID
@@ -768,6 +776,7 @@ SysSlotInfoUpdateSmbiosType9 (
 /***********************************************************************
         SMBIOS data update  TYPE16  Physical Memory Array Information
 ************************************************************************/
+STATIC
 VOID
 PhyMemArrayInfoUpdateSmbiosType16 (
   VOID
@@ -790,6 +799,7 @@ PhyMemArrayInfoUpdateSmbiosType16 (
 /***********************************************************************
         SMBIOS data update  TYPE17  Memory Device Information
 ************************************************************************/
+STATIC
 VOID
 MemDevInfoUpdatedstType17 (
   VOID
@@ -872,6 +882,7 @@ MemDevInfoUpdatedstType17 (
 /***********************************************************************
         SMBIOS data update  TYPE19  Memory Array Map Information
 ************************************************************************/
+STATIC
 VOID
 MemArrMapInfoUpdateSmbiosType19 (
   VOID
@@ -897,6 +908,7 @@ MemArrMapInfoUpdateSmbiosType19 (
 /***********************************************************************
         SMBIOS data update  TYPE32  Boot Information
 ************************************************************************/
+STATIC
 VOID
 BootInfoUpdateSmbiosType32 (
   VOID
