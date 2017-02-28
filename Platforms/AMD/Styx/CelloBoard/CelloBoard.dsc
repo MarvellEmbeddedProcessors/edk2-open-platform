@@ -266,6 +266,9 @@ DEFINE DO_KCS    = 0
 [BuildOptions.common.EDKII.DXE_RUNTIME_DRIVER]
   GCC:*_*_AARCH64_DLINK_FLAGS = -z common-page-size=0x10000
 
+[BuildOptions.common.EDKII.DXE_DRIVER,BuildOptions.common.EDKII.UEFI_DRIVER,BuildOptions.common.EDKII.UEFI_APPLICATION]
+  GCC:*_*_AARCH64_DLINK_FLAGS = -z common-page-size=0x1000
+
 ################################################################################
 #
 # Pcd Section - list of all EDK II PCD Entries defined by this Platform
@@ -429,6 +432,19 @@ DEFINE DO_KCS    = 0
 
   ## ACPI (no tables < 4GB)
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiExposedTableVersions|0x20
+
+  #
+  # Enable strict image permissions for all images. (This applies
+  # only to images that were built with >= 4 KB section alignment.)
+  #
+  gEfiMdeModulePkgTokenSpaceGuid.PcdImageProtectionPolicy|0x3
+
+  #
+  # Enable NX memory protection for all non-code regions, including OEM and OS
+  # reserved ones, with the exception of LoaderData regions, of which OS loaders
+  # (i.e., GRUB) may assume that its contents are executable.
+  #
+  gEfiMdeModulePkgTokenSpaceGuid.PcdDxeNxMemoryProtectionPolicy|0xC000000000007FD1
 
   gAmdStyxTokenSpaceGuid.PcdPsciOsSupport|TRUE
   gAmdStyxTokenSpaceGuid.PcdIscpSupport|TRUE
