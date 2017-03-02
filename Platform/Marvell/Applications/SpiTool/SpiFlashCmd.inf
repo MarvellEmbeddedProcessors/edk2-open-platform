@@ -66,6 +66,8 @@
 
 [Pcd]
  gMarvellTokenSpaceGuid.PcdSpiFlashId
+ gMarvellTokenSpaceGuid.PcdSpiFlashCs
+ gMarvellTokenSpaceGuid.PcdSpiFlashMode
 
 [Protocols]
  gMarvellSpiFlashProtocolGuid
