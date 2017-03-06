@@ -56,6 +56,9 @@
 #
 ################################################################################
 [PcdsFixedAtBuild.common]
+  #Timer
+  gEmbeddedTokenSpaceGuid.PcdTimerPeriod|10000
+
   #MPP
   gMarvellTokenSpaceGuid.PcdMppChipCount|2
 
