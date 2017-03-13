@@ -394,7 +394,7 @@ typedef struct {
 } PCD_LANE_MAP;
 
 typedef
-EFI_STATUS
+VOID
 (*COMPHY_CHIP_INIT) (
   IN CHIP_COMPHY_CONFIG *PtrChipCfg
   );
@@ -417,7 +417,7 @@ ComPhyMuxInit (
   IN EFI_PHYSICAL_ADDRESS SelectorBase
   );
 
-EFI_STATUS
+VOID
 ComPhyCp110Init (
   IN CHIP_COMPHY_CONFIG * First
   );
