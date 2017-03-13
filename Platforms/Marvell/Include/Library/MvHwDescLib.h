@@ -70,6 +70,17 @@ typedef struct {
 } MVHW_NONDISCOVERABLE_DESC;
 
 //
+// RealTimeClock devices description template definition
+//
+#define MVHW_MAX_RTC_DEVS         2
+
+typedef struct {
+  UINT8 RtcDevCount;
+  UINTN RtcBaseAddresses[MVHW_MAX_RTC_DEVS];
+  UINTN RtcMemSize[MVHW_MAX_RTC_DEVS];
+} MVHW_RTC_DESC;
+
+//
 // Platform description of NonDiscoverable devices
 //
 #define MVHW_CP0_XHCI0_BASE        0xF2500000
@@ -101,6 +112,20 @@ MVHW_NONDISCOVERABLE_DESC mA7k8kNonDiscoverableDescTemplate = {\
   { MVHW_AP0_SDHCI0_BASE, MVHW_CP0_SDHCI0_BASE },\
   { SIZE_1KB, SIZE_1KB },\
   { NonDiscoverableDeviceDmaTypeCoherent, NonDiscoverableDeviceDmaTypeCoherent }\
+}
+
+//
+// Platform description of RealTimeClock devices
+//
+#define MVHW_CP0_RTC0_BASE       0xF2284000
+#define MVHW_CP1_RTC0_BASE       0xF4284000
+
+#define DECLARE_A7K8K_RTC_TEMPLATE \
+STATIC \
+MVHW_RTC_DESC mA7k8kRtcDescTemplate = {\
+  2,\
+  { MVHW_CP0_RTC0_BASE, MVHW_CP1_RTC0_BASE },\
+  { SIZE_4KB, SIZE_4KB }\
 }
 
 #endif /* __MVHWDESCLIB_H__ */
