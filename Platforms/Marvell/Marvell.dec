@@ -219,6 +219,9 @@
   gMarvellTokenSpaceGuid.PcdResetRegAddress|0|UINT64|0x40000050
   gMarvellTokenSpaceGuid.PcdResetRegMask|0|UINT32|0x4000051
 
+#RTC
+  gMarvellTokenSpaceGuid.PcdRtcBaseAddress|0|UINT64|0x40000052
+
 #SdMmc
   gMarvellTokenSpaceGuid.PcdXenon1v8Enable|{ 0x0 }|VOID*|0x3000036
   gMarvellTokenSpaceGuid.PcdXenon8BitBusEnable|{ 0x0 }|VOID*|0x3000037
