@@ -975,12 +975,12 @@ ComPhyMuxCp110 (
       SerdesMap[Lane].Type = PHY_TYPE_UNCONNECTED;
 }
 
-EFI_STATUS
+VOID
 ComPhyCp110Init (
   IN CHIP_COMPHY_CONFIG *PtrChipCfg
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS Status = EFI_SUCCESS;
   COMPHY_MAP *PtrComPhyMap, *SerdesMap;
   EFI_PHYSICAL_ADDRESS ComPhyBaseAddr, HpipeBaseAddr;
   UINT32 ComPhyMaxCount, Lane;
@@ -1036,12 +1036,11 @@ ComPhyCp110Init (
     default:
       DEBUG((DEBUG_ERROR, "Unknown SerDes Type, skip initialize SerDes %d\n",
         Lane));
+      ASSERT (FALSE);
       break;
     }
     if (EFI_ERROR(Status))
       DEBUG((DEBUG_ERROR, "PLL is not locked - Failed to initialize Lane %d\n",
         Lane));
   }
-
-  return EFI_SUCCESS;
 }
