@@ -980,7 +980,7 @@ ComPhyCp110Init (
   IN CHIP_COMPHY_CONFIG *PtrChipCfg
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS Status = EFI_SUCCESS;
   COMPHY_MAP *PtrComPhyMap, *SerdesMap;
   EFI_PHYSICAL_ADDRESS ComPhyBaseAddr, HpipeBaseAddr;
   UINT32 ComPhyMaxCount, Lane;
@@ -1043,5 +1043,5 @@ ComPhyCp110Init (
         Lane));
   }
 
-  return EFI_SUCCESS;
+  return Status;
 }
