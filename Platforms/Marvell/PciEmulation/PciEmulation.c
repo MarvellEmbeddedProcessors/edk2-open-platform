@@ -35,46 +35,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <PiDxe.h>
 
 #include <Library/DebugLib.h>
+#include <Library/MvHwDescLib.h>
 #include <Library/NonDiscoverableDeviceRegistrationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 #include <Protocol/EmbeddedExternalDevice.h>
 
-//
-// Platform description
-//
-typedef struct {
-  // XHCI
-  UINT8 XhciDevCount;
-  UINTN XhciBaseAddresses[4];
-  UINTN XhciMemSize[4];
-  NON_DISCOVERABLE_DEVICE_DMA_TYPE XhciDmaType[4];
-  // AHCI
-  UINT8 AhciDevCount;
-  UINTN AhciBaseAddresses[4];
-  UINTN AhciMemSize[4];
-  NON_DISCOVERABLE_DEVICE_DMA_TYPE AhciDmaType[4];
-  // SDHCI
-  UINT8 SdhciDevCount;
-  UINTN SdhciBaseAddresses[4];
-  UINTN SdhciMemSize[4];
-  NON_DISCOVERABLE_DEVICE_DMA_TYPE SdhciDmaType[4];
-} PCIE_PLATFORM_DESC;
-
-STATIC PCIE_PLATFORM_DESC mA70x0PlatDescTemplate = {
-  2, // XHCI
-  { 0xF2500000, 0xF2510000 },
-  { SIZE_16KB, SIZE_16KB },
-  { NonDiscoverableDeviceDmaTypeCoherent, NonDiscoverableDeviceDmaTypeCoherent },
-  1, // AHCI
-  { 0xF2540000 },
-  { SIZE_8KB },
-  { NonDiscoverableDeviceDmaTypeCoherent },
-  2, // SDHCI
-  { 0xF06E0000, 0xF2780000 },
-  { SIZE_1KB, SIZE_1KB },
-  { NonDiscoverableDeviceDmaTypeCoherent, NonDiscoverableDeviceDmaTypeCoherent }
-};
+DECLARE_A7K8K_NONDISCOVERABLE_TEMPLATE;
 
 //
 // Tables with used devices
@@ -93,7 +60,7 @@ EFI_STATUS
 PciEmulationInitXhci (
   )
 {
-  PCIE_PLATFORM_DESC *Desc = &mA70x0PlatDescTemplate;
+  MVHW_NONDISCOVERABLE_DESC *Desc = &mA7k8kNonDiscoverableDescTemplate;
   EFI_STATUS Status;
   UINT8 i;
 
@@ -130,7 +97,7 @@ EFI_STATUS
 PciEmulationInitAhci (
   )
 {
-  PCIE_PLATFORM_DESC *Desc = &mA70x0PlatDescTemplate;
+  MVHW_NONDISCOVERABLE_DESC *Desc = &mA7k8kNonDiscoverableDescTemplate;
   EFI_STATUS Status;
   UINT8 i;
 
@@ -167,7 +134,7 @@ EFI_STATUS
 PciEmulationInitSdhci (
   )
 {
-  PCIE_PLATFORM_DESC *Desc = &mA70x0PlatDescTemplate;
+  MVHW_NONDISCOVERABLE_DESC *Desc = &mA7k8kNonDiscoverableDescTemplate;
   EFI_STATUS Status;
   UINT8 i;
 
