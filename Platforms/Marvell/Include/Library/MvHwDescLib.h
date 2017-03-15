@@ -38,6 +38,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/NonDiscoverableDeviceRegistrationLib.h>
 
 //
+// Helper macros
+//
+
+// Check if device is enabled - it expects PCD to be read to '<type>DeviceTable' array
+#define MVHW_DEV_ENABLED(type, index) (type ## DeviceTable[index])
+
+//
 // NonDiscoverable devices description template definition
 //
 #define MVHW_MAX_XHCI_DEVS         4
@@ -71,7 +78,9 @@ typedef struct {
 #define MVHW_CP1_XHCI1_BASE        0xF4510000
 
 #define MVHW_CP0_AHCI0_BASE        0xF2540000
+#define MVHW_CP0_AHCI0_ID          0
 #define MVHW_CP1_AHCI0_BASE        0xF4540000
+#define MVHW_CP1_AHCI0_ID          1
 
 #define MVHW_AP0_SDHCI0_BASE       0xF06E0000
 #define MVHW_CP0_SDHCI0_BASE       0xF2780000

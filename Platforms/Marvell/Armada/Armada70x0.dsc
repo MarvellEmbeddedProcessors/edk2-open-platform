@@ -147,6 +147,3 @@
   #ResetLib
   gMarvellTokenSpaceGuid.PcdResetRegAddress|0xf06f0084
   gMarvellTokenSpaceGuid.PcdResetRegMask|0x1
-
-  #SATA
-  gMarvellTokenSpaceGuid.PcdSataBaseAddress|0xF2540000

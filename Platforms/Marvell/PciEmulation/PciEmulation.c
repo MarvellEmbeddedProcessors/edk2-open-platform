@@ -49,8 +49,6 @@ STATIC UINT8 * CONST XhciDeviceTable = FixedPcdGetPtr (PcdPciEXhci);
 STATIC UINT8 * CONST AhciDeviceTable = FixedPcdGetPtr (PcdPciEAhci);
 STATIC UINT8 * CONST SdhciDeviceTable = FixedPcdGetPtr (PcdPciESdhci);
 
-#define DEV_ENABLED(type, index) (type ## DeviceTable[index])
-
 //
 // NonDiscoverable devices registration
 //
@@ -69,7 +67,7 @@ PciEmulationInitXhci (
   }
 
   for (i = 0; i < Desc->XhciDevCount; i++) {
-    if (!DEV_ENABLED(Xhci, i)) {
+    if (!MVHW_DEV_ENABLED(Xhci, i)) {
       continue;
     }
 
@@ -106,7 +104,7 @@ PciEmulationInitAhci (
   }
 
   for (i = 0; i < Desc->AhciDevCount; i++) {
-    if (!DEV_ENABLED(Ahci, i)) {
+    if (!MVHW_DEV_ENABLED(Ahci, i)) {
       continue;
     }
 
@@ -143,7 +141,7 @@ PciEmulationInitSdhci (
   }
 
   for (i = 0; i < Desc->SdhciDevCount; i++) {
-    if (!DEV_ENABLED(Sdhci, i)) {
+    if (!MVHW_DEV_ENABLED(Sdhci, i)) {
       continue;
     }
 
