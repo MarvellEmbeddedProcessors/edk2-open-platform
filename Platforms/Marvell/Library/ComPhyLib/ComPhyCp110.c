@@ -33,6 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "ComPhyLib.h"
+#include <Library/MvHwDescLib.h>
 
 #define SD_LANE_ADDR_WIDTH          0x1000
 #define HPIPE_ADDR_OFFSET           0x800
@@ -40,6 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SD_ADDR(base, Lane)         (base + SD_LANE_ADDR_WIDTH * Lane)
 #define HPIPE_ADDR(base, Lane)      (SD_ADDR(base, Lane) + HPIPE_ADDR_OFFSET)
 #define COMPHY_ADDR(base, Lane)     (base + COMPHY_ADDR_LANE_WIDTH * Lane)
+
+DECLARE_A7K8K_NONDISCOVERABLE_TEMPLATE;
 
 /*
  * For CP-110 we have 2 Selector registers "PHY Selectors"
@@ -702,24 +705,34 @@ UINTN
 ComPhySataPowerUp (
   IN UINT32 Lane,
   IN EFI_PHYSICAL_ADDRESS HpipeBase,
-  IN EFI_PHYSICAL_ADDRESS ComPhyBase
+  IN EFI_PHYSICAL_ADDRESS ComPhyBase,
+  IN UINT8 SataHostId
   )
 {
   EFI_STATUS Status;
+  UINT8 *SataDeviceTable;
+  MVHW_NONDISCOVERABLE_DESC *Desc = &mA7k8kNonDiscoverableDescTemplate;
   EFI_PHYSICAL_ADDRESS HpipeAddr = HPIPE_ADDR(HpipeBase, Lane);
   EFI_PHYSICAL_ADDRESS SdIpAddr = SD_ADDR(HpipeBase, Lane);
   EFI_PHYSICAL_ADDRESS ComPhyAddr = COMPHY_ADDR(ComPhyBase, Lane);
-  EFI_PHYSICAL_ADDRESS SataBase;
 
-  SataBase = PcdGet32 (PcdSataBaseAddress);
-  if (SataBase == 0) {
-    DEBUG((DEBUG_INFO, "ComPhy: SATA address not defined\n"));
-    return EFI_D_ERROR;
+  SataDeviceTable = (UINT8 *) PcdGetPtr (PcdPciEAhci);
+
+  if (SataDeviceTable == NULL || SataHostId >= PcdGetSize (PcdPciEAhci)) {
+    DEBUG ((DEBUG_ERROR, "ComPhySata: Sata host %d is undefined\n", SataHostId));
+    return EFI_INVALID_PARAMETER;
   }
+
+  if (!MVHW_DEV_ENABLED (Sata, SataHostId)) {
+    DEBUG ((DEBUG_ERROR, "ComPhySata: Sata host %d is disabled\n", SataHostId));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  DEBUG ((DEBUG_INFO, "ComPhySata: Initialize SATA PHYs\n"));
 
   DEBUG((DEBUG_INFO, "ComPhySataPowerUp: stage: MAC configuration - power down ComPhy\n"));
 
-  ComPhySataMacPowerDown (SataBase);
+  ComPhySataMacPowerDown (Desc->AhciBaseAddresses[SataHostId]);
 
   DEBUG((DEBUG_INFO, "ComPhy: stage: RFU configurations - hard reset ComPhy\n"));
 
@@ -735,7 +748,7 @@ ComPhySataPowerUp (
 
   DEBUG((DEBUG_INFO, "ComPhy: stage: ComPhy power up\n"));
 
-  ComPhySataPhyPowerUp (SataBase);
+  ComPhySataPhyPowerUp (Desc->AhciBaseAddresses[SataHostId]);
 
   DEBUG((DEBUG_INFO, "ComPhy: stage: Check PLL\n"));
 
@@ -1018,9 +1031,11 @@ ComPhyCp110Init (
       break;
     case PHY_TYPE_SATA0:
     case PHY_TYPE_SATA1:
+      Status = ComPhySataPowerUp (Lane, HpipeBaseAddr, ComPhyBaseAddr, MVHW_CP0_AHCI0_ID);
+      break;
     case PHY_TYPE_SATA2:
     case PHY_TYPE_SATA3:
-      Status = ComPhySataPowerUp(Lane, HpipeBaseAddr, ComPhyBaseAddr);
+      Status = ComPhySataPowerUp (Lane, HpipeBaseAddr, ComPhyBaseAddr, MVHW_CP1_AHCI0_ID);
       break;
     case PHY_TYPE_USB3_HOST0:
     case PHY_TYPE_USB3_HOST1:
@@ -1040,8 +1055,8 @@ ComPhyCp110Init (
       ASSERT (FALSE);
       break;
     }
-    if (EFI_ERROR(Status))
-      DEBUG((DEBUG_ERROR, "PLL is not locked - Failed to initialize Lane %d\n",
-        Lane));
+    if (EFI_ERROR(Status)) {
+      DEBUG ((DEBUG_ERROR, "Failed to initialize Lane %d\n with Status = 0x%x", Lane, Status));
+    }
   }
 }
