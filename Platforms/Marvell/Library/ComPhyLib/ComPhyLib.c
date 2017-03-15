@@ -46,8 +46,12 @@ CHAR16 * SpeedStringTable [] = {L"-", L"1.25 Gbps", L"1.5 Gbps", L"2.5 Gbps",
                                 L"6 Gbps", L"6.25 Gbps", L"10.31 Gbps"};
 
 CHIP_COMPHY_CONFIG ChipCfgTbl[] = {
-  {
-    .ChipType = L"Cp110",
+  { /* CP master */
+    .ChipType = L"Cp110m",
+    .Init = ComPhyCp110Init
+  },
+  { /* CP slave */
+    .ChipType = L"Cp110s",
     .Init = ComPhyCp110Init
   }
 };
