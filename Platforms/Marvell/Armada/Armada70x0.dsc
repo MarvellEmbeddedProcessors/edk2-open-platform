@@ -103,7 +103,7 @@
   gMarvellTokenSpaceGuid.PcdChip0ComPhyBaseAddress|0xF2441000
   gMarvellTokenSpaceGuid.PcdChip0Hpipe3BaseAddress|0xF2120000
   gMarvellTokenSpaceGuid.PcdChip0ComPhyMuxBitCount|4
-  gMarvellTokenSpaceGuid.PcdChip0Compatible|L"Cp110"
+  gMarvellTokenSpaceGuid.PcdChip0Compatible|L"Cp110m"
 
   #UtmiPhy
   gMarvellTokenSpaceGuid.PcdUtmiPhyCount|2
