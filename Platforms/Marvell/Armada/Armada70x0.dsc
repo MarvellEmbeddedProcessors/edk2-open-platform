@@ -140,8 +140,8 @@
   gMarvellTokenSpaceGuid.PcdPp2XlgDevSize|0x1000
 
   #PciEmulation
-  gMarvellTokenSpaceGuid.PcdPciEXhci|{ 0x1, 0x1 }
-  gMarvellTokenSpaceGuid.PcdPciEAhci|{ 0x1 }
+  gMarvellTokenSpaceGuid.PcdPciEXhci|{ 0x1, 0x1, 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPciEAhci|{ 0x1, 0x0 }
   gMarvellTokenSpaceGuid.PcdPciESdhci|{ 0x1, 0x1 }
 
   #ResetLib
