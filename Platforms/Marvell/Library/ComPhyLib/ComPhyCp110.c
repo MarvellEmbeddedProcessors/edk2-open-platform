@@ -33,6 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "ComPhyLib.h"
+#include <Library/MvHwDescLib.h>
 
 #define SD_LANE_ADDR_WIDTH          0x1000
 #define HPIPE_ADDR_OFFSET           0x800
@@ -40,6 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SD_ADDR(base, Lane)         (base + SD_LANE_ADDR_WIDTH * Lane)
 #define HPIPE_ADDR(base, Lane)      (SD_ADDR(base, Lane) + HPIPE_ADDR_OFFSET)
 #define COMPHY_ADDR(base, Lane)     (base + COMPHY_ADDR_LANE_WIDTH * Lane)
+
+DECLARE_A7K8K_STORAGE_TEMPLATE;
 
 /*
  * For CP-110 we have 2 Selector registers "PHY Selectors"
@@ -702,24 +705,37 @@ UINTN
 ComPhySataPowerUp (
   IN UINT32 Lane,
   IN EFI_PHYSICAL_ADDRESS HpipeBase,
-  IN EFI_PHYSICAL_ADDRESS ComPhyBase
+  IN EFI_PHYSICAL_ADDRESS ComPhyBase,
+  IN UINT32 SataHostId
   )
 {
   EFI_STATUS Status;
+  UINTN  SataArrSize;
+  UINT8 *SataArrPtr;
+  MVHW_STORAGE_DESC *Desc = &mA7k8kStorageDescTemplate;
   EFI_PHYSICAL_ADDRESS HpipeAddr = HPIPE_ADDR(HpipeBase, Lane);
   EFI_PHYSICAL_ADDRESS SdIpAddr = SD_ADDR(HpipeBase, Lane);
   EFI_PHYSICAL_ADDRESS ComPhyAddr = COMPHY_ADDR(ComPhyBase, Lane);
-  EFI_PHYSICAL_ADDRESS SataBase;
 
-  SataBase = PcdGet32 (PcdSataBaseAddress);
-  if (SataBase == 0) {
-    DEBUG((DEBUG_INFO, "ComPhy: SATA address not defined\n"));
-    return EFI_D_ERROR;
+  SataArrSize = PcdGetSize (PcdPciEAhci);
+  SataArrPtr = (UINT8 *) PcdGetPtr (PcdPciEAhci);
+
+  if (SataArrPtr == NULL || SataHostId >= SataArrSize) {
+    DEBUG((DEBUG_ERROR, "ComPhySata: Sata host %d is undefined\n", SataHostId));
+    return EFI_INVALID_PARAMETER;
   }
+
+  if (SataArrPtr[SataHostId] != 1) {
+    /* This SATA host is not enabled in PCD */
+    DEBUG((DEBUG_WARN, "ComPhySata: Sata host %d is disabled\n", SataHostId));
+    return EFI_SUCCESS;
+  }
+
+  DEBUG((DEBUG_INFO, "ComPhySata: Initialize SATA PHYs\n"));
 
   DEBUG((DEBUG_INFO, "ComPhySataPowerUp: stage: MAC configuration - power down ComPhy\n"));
 
-  ComPhySataMacPowerDown (SataBase);
+  ComPhySataMacPowerDown (Desc->AhciBaseAddresses[SataHostId]);
 
   DEBUG((DEBUG_INFO, "ComPhy: stage: RFU configurations - hard reset ComPhy\n"));
 
@@ -735,7 +751,7 @@ ComPhySataPowerUp (
 
   DEBUG((DEBUG_INFO, "ComPhy: stage: ComPhy power up\n"));
 
-  ComPhySataPhyPowerUp (SataBase);
+  ComPhySataPhyPowerUp (Desc->AhciBaseAddresses[SataHostId]);
 
   DEBUG((DEBUG_INFO, "ComPhy: stage: Check PLL\n"));
 
@@ -961,11 +977,11 @@ ComPhyMuxCp110 (
     ComPhyMapPhyData[Lane].Speed = SerdesMap[Lane].Speed;
   }
   PtrChipCfg->MuxData = Cp110ComPhyMuxData;
-  ComPhyMuxInit(PtrChipCfg, ComPhyMapPhyData, ComPhyBaseAddr +
+  ComPhyMuxInit (PtrChipCfg, ComPhyMapPhyData, ComPhyBaseAddr +
     COMMON_SELECTOR_PHY_OFFSET);
 
   PtrChipCfg->MuxData = Cp110ComPhyPipeMuxData;
-  ComPhyMuxInit(PtrChipCfg, ComPhyMapPipeData, ComPhyBaseAddr +
+  ComPhyMuxInit (PtrChipCfg, ComPhyMapPipeData, ComPhyBaseAddr +
     COMMON_SELECTOR_PIPE_OFFSET);
 
   /* Fix the Type after check the PHY and PIPE configuration */
@@ -992,7 +1008,7 @@ ComPhyCp110Init (
   SerdesMap = PtrChipCfg->MapData;
 
   /* Config Comphy mux configuration */
-  ComPhyMuxCp110(PtrChipCfg, SerdesMap);
+  ComPhyMuxCp110 (PtrChipCfg, SerdesMap);
 
   /* Check if the first 4 Lanes configured as By-4 */
   for (Lane = 0, PtrComPhyMap = SerdesMap; Lane < 4; Lane++, PtrComPhyMap++) {
@@ -1014,23 +1030,25 @@ ComPhyCp110Init (
     case PHY_TYPE_PCIE1:
     case PHY_TYPE_PCIE2:
     case PHY_TYPE_PCIE3:
-      Status = ComPhyPciePowerUp(Lane, PcieBy4, HpipeBaseAddr, ComPhyBaseAddr);
+      Status = ComPhyPciePowerUp (Lane, PcieBy4, HpipeBaseAddr, ComPhyBaseAddr);
       break;
     case PHY_TYPE_SATA0:
     case PHY_TYPE_SATA1:
+      Status = ComPhySataPowerUp (Lane, HpipeBaseAddr, ComPhyBaseAddr, 0);
+      break;
     case PHY_TYPE_SATA2:
     case PHY_TYPE_SATA3:
-      Status = ComPhySataPowerUp(Lane, HpipeBaseAddr, ComPhyBaseAddr);
+      Status = ComPhySataPowerUp (Lane, HpipeBaseAddr, ComPhyBaseAddr, 1);
       break;
     case PHY_TYPE_USB3_HOST0:
     case PHY_TYPE_USB3_HOST1:
-      Status = ComphyUsb3PowerUp(Lane, HpipeBaseAddr, ComPhyBaseAddr);
+      Status = ComphyUsb3PowerUp (Lane, HpipeBaseAddr, ComPhyBaseAddr);
       break;
     case PHY_TYPE_SGMII0:
     case PHY_TYPE_SGMII1:
     case PHY_TYPE_SGMII2:
     case PHY_TYPE_SGMII3:
-      Status = ComPhySgmiiPowerUp(Lane, PtrComPhyMap->Speed, HpipeBaseAddr,
+      Status = ComPhySgmiiPowerUp (Lane, PtrComPhyMap->Speed, HpipeBaseAddr,
         ComPhyBaseAddr);
       break;
     default:
