@@ -176,9 +176,6 @@
   gMarvellTokenSpaceGuid.PcdChip3ComPhySpeeds|{ 0x0 }|VOID*|0x30000176
   gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlags|{ 0x0 }|VOID*|0x30000177
 
-#SATA
-  gMarvellTokenSpaceGuid.PcdSataBaseAddress|0|UINT32|0x4000052
-
 #UtmiPhy
   gMarvellTokenSpaceGuid.PcdUtmiPhyCount|0|UINT32|0x30000205
   gMarvellTokenSpaceGuid.PcdUtmiPhyRegUsbCfg|{ 0x0 }|VOID*|0x30000206
