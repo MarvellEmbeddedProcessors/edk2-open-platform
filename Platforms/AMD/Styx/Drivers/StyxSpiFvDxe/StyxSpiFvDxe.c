@@ -439,7 +439,6 @@ StyxSpiFvDxeErase (
   for (Start = VA_ARG (Args, EFI_LBA);
        Start != EFI_LBA_LIST_TERMINATOR;
        Start = VA_ARG (Args, EFI_LBA)) {
-    Start += mNvStorageLbaOffset;
     Length = VA_ARG (Args, UINTN);
     Status = mIscpDxeProtocol->AmdExecuteEraseFvBlockDxe (mIscpDxeProtocol,
                                  (Start + mNvStorageLbaOffset) * BLOCK_SIZE,
