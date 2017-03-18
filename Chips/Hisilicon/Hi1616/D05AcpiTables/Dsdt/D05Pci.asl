@@ -40,6 +40,49 @@ Scope(_SB)
     }
   }
 
+/*
+  See ACPI 6.1 Spec, 6.2.11, PCI Firmware Spec 3.0, 4.5
+*/
+#define PCI_OSC_SUPPORT() \
+  Name(SUPP, Zero) /* PCI _OSC Support Field value */ \
+  Name(CTRL, Zero) /* PCI _OSC Control Field value */ \
+  Method(_OSC,4) { \
+    If(LEqual(Arg0,ToUUID("33DB4D5B-1FF7-401C-9657-7441C03DD766"))) { \
+      /* Create DWord-adressable fields from the Capabilities Buffer */ \
+      CreateDWordField(Arg3,0,CDW1) \
+      CreateDWordField(Arg3,4,CDW2) \
+      CreateDWordField(Arg3,8,CDW3) \
+      /* Save Capabilities DWord2 & 3 */ \
+      Store(CDW2,SUPP) \
+      Store(CDW3,CTRL) \
+      /* Only allow native hot plug control if OS supports: */ \
+      /* ASPM */ \
+      /* Clock PM */ \
+      /* MSI/MSI-X */ \
+      If(LNotEqual(And(SUPP, 0x16), 0x16)) { \
+        And(CTRL,0x1E,CTRL) \
+      }\
+      \
+      /* Do not allow native PME, AER */ \
+      /* Never allow SHPC (no SHPC controller in this system)*/ \
+      And(CTRL,0x10,CTRL) \
+      If(LNotEqual(Arg1,One)) { /* Unknown revision */ \
+        Or(CDW1,0x08,CDW1) \
+      } \
+      \
+      If(LNotEqual(CDW3,CTRL)) { /* Capabilities bits were masked */ \
+        Or(CDW1,0x10,CDW1) \
+      } \
+      \
+      /* Update DWORD3 in the buffer */ \
+      Store(CTRL,CDW3) \
+      Return(Arg3) \
+    } Else { \
+      Or(CDW1,4,CDW1) /* Unrecognized UUID */ \
+      Return(Arg3) \
+    } \
+  } // End _OSC
+
   // 1P NA PCIe2
   Device (PCI2)
   {
@@ -89,17 +132,44 @@ Scope(_SB)
     Device (RES2)
     {
       Name (_HID, "HISI0081") // HiSi PCIe RC config base address
-      Name (_CID, "PNP0C02")  // Motherboard reserved resource
       Name (_CRS, ResourceTemplate (){
         Memory32Fixed (ReadWrite, 0xa00a0000 , 0x10000)
       })
     }
+    PCI_OSC_SUPPORT()
     Method (_STA, 0x0, NotSerialized)
     {
       Return (0xf)
     }
 
   } // Device(PCI2)
+
+  Device (RES2)
+  {
+    Name (_HID, "HISI0081") // HiSi PCIe RC config base address
+    Name (_CID, "PNP0C02")  // Motherboard reserved resource
+    Name (_UID, 0x2)  //  Unique ID
+    Name (_CRS, ResourceTemplate (){
+      Memory32Fixed (ReadWrite, 0xa00a0000 , 0x10000) //host bridge register space
+    })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (0xf)
+    }
+  }
+
+  Device (R1NA) // reserve 1p NA ECAM resource
+  {
+    Name (_HID, "PNP0C02")  // Motherboard reserved resource
+    Name (_CRS, ResourceTemplate (){
+      Memory32Fixed (ReadWrite, 0xa8000000 , 0x800000) //ECAM space for [bus 80-87]
+    })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (0xf)
+    }
+  }
+
   // 1p NB PCIe0
   Device (PCI4)
   {
@@ -149,10 +219,9 @@ Scope(_SB)
     Device (RES4)
     {
       Name (_HID, "HISI0081") // HiSi PCIe RC config base address
-      Name (_CID, "PNP0C02")  // Motherboard reserved resource
       Name (_CRS, ResourceTemplate (){
         QwordMemory (
-          ResourceProducer,
+          ResourceConsumer,
           PosDecode,
           MinFixed,
           MaxFixed,
@@ -166,12 +235,38 @@ Scope(_SB)
        )
       })
     }
+    PCI_OSC_SUPPORT()
     Method (_STA, 0x0, NotSerialized)
     {
       Return (RBYV())
     }
 
   } // Device(PCI4)
+  Device (RES4)
+  {
+    Name (_HID, "HISI0081") // HiSi PCIe RC config base address
+    Name (_CID, "PNP0C02")  // Motherboard reserved resource
+    Name (_UID, 0x4)  //  Unique ID
+    Name (_CRS, ResourceTemplate (){
+        QwordMemory ( //host bridge register space
+        ResourceConsumer,
+        PosDecode,
+        MinFixed,
+        MaxFixed,
+        NonCacheable,
+        ReadWrite,
+        0x0, // Granularity
+        0x8a0090000, // Min Base Address
+        0x8a009ffff, // Max Base Address
+        0x0, // Translate
+        0x10000 // Length
+      )
+    })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (RBYV())
+    }
+  }
 
   // 1P NB PCI1
   Device (PCI5)
@@ -222,10 +317,9 @@ Scope(_SB)
     Device (RES5)
     {
       Name (_HID, "HISI0081") // HiSi PCIe RC config base address
-      Name (_CID, "PNP0C02")  // Motherboard reserved resource
       Name (_CRS, ResourceTemplate (){
         QwordMemory (
-          ResourceProducer,
+          ResourceConsumer,
           PosDecode,
           MinFixed,
           MaxFixed,
@@ -239,11 +333,37 @@ Scope(_SB)
        )
       })
     }
+    PCI_OSC_SUPPORT()
     Method (_STA, 0x0, NotSerialized)
     {
       Return (RBYV())
     }
   } // Device(PCI5)
+  Device (RES5)
+  {
+    Name (_HID, "HISI0081") // HiSi PCIe RC config base address
+    Name (_CID, "PNP0C02")  // Motherboard reserved resource
+    Name (_UID, 0x5)  //  Unique ID
+    Name (_CRS, ResourceTemplate (){
+      QwordMemory (  //host bridge register space
+        ResourceConsumer,
+        PosDecode,
+        MinFixed,
+        MaxFixed,
+        NonCacheable,
+        ReadWrite,
+        0x0, // Granularity
+        0x8a0200000, // Min Base Address
+        0x8a020ffff, // Max Base Address
+        0x0, // Translate
+        0x10000 // Length
+      )
+    })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (RBYV())
+    }
+  }
 
   // 1P NB PCIe2
   Device (PCI6)
@@ -294,10 +414,9 @@ Scope(_SB)
     Device (RES6)
     {
       Name (_HID, "HISI0081") // HiSi PCIe RC config base address
-      Name (_CID, "PNP0C02")  // Motherboard reserved resource
       Name (_CRS, ResourceTemplate (){
         QwordMemory (
-          ResourceProducer,
+          ResourceConsumer,
           PosDecode,
           MinFixed,
           MaxFixed,
@@ -311,11 +430,37 @@ Scope(_SB)
     )
      })
     }
+    PCI_OSC_SUPPORT()
     Method (_STA, 0x0, NotSerialized)
     {
       Return (RBYV())
     }
   } // Device(PCI6)
+  Device (RES6)
+  {
+    Name (_HID, "HISI0081") // HiSi PCIe RC config base address
+    Name (_CID, "PNP0C02")  // Motherboard reserved resource
+    Name (_UID, 0x6)  //  Unique ID
+    Name (_CRS, ResourceTemplate (){
+      QwordMemory ( //host bridge register space
+        ResourceConsumer,
+        PosDecode,
+        MinFixed,
+        MaxFixed,
+        NonCacheable,
+        ReadWrite,
+        0x0, // Granularity
+        0x8a00a0000, // Min Base Address
+        0x8a00affff, // Max Base Address
+        0x0, // Translate
+        0x10000 // Length
+      )
+    })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (RBYV())
+    }
+  }
   // 1P NB PCIe3
   Device (PCI7)
   {
@@ -365,10 +510,9 @@ Scope(_SB)
     Device (RES7)
     {
       Name (_HID, "HISI0081") // HiSi PCIe RC config base address
-      Name (_CID, "PNP0C02")  // Motherboard reserved resource
       Name (_CRS, ResourceTemplate (){
         QwordMemory (
-          ResourceProducer,
+          ResourceConsumer,
           PosDecode,
           MinFixed,
           MaxFixed,
@@ -382,11 +526,100 @@ Scope(_SB)
         )
       })
     }
+    PCI_OSC_SUPPORT()
     Method (_STA, 0x0, NotSerialized)
     {
       Return (RBYV())
     }
   } // Device(PCI7)
+  Device (RES7)
+  {
+    Name (_HID, "HISI0081") // HiSi PCIe RC config base address
+    Name (_CID, "PNP0C02")  // Motherboard reserved resource
+    Name (_UID, 0x7)  //  Unique ID
+    Name (_CRS, ResourceTemplate (){
+      QwordMemory (  //host bridge register space
+        ResourceConsumer,
+        PosDecode,
+        MinFixed,
+        MaxFixed,
+        NonCacheable,
+        ReadWrite,
+        0x0, // Granularity
+        0x8a00b0000, // Min Base Address
+        0x8a00bffff, // Max Base Address
+        0x0, // Translate
+        0x10000 // Length
+      )
+    })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (RBYV())
+    }
+  }
+
+  Device (R1NB) // reserve 1p NB ECAM resource
+  {
+    Name (_HID, "PNP0C02")  // Motherboard reserved resource
+    Name (_CRS, ResourceTemplate (){
+      QwordMemory ( //ECAM space for [bus 88-8f]
+        ResourceConsumer,
+        PosDecode,
+        MinFixed,
+        MaxFixed,
+        NonCacheable,
+        ReadWrite,
+        0x0, // Granularity
+        0x8a8800000, // Min Base Address
+        0x8a8ffffff, // Max Base Address
+        0x0, // Translate
+        0x800000 // Length
+      )
+      QwordMemory ( //ECAM space for [bus 0-7]
+        ResourceConsumer,
+        PosDecode,
+        MinFixed,
+        MaxFixed,
+        NonCacheable,
+        ReadWrite,
+        0x0, // Granularity
+        0x8b0000000, // Min Base Address
+        0x8b07fffff, // Max Base Address
+        0x0, // Translate
+        0x800000 // Length
+      )
+      QwordMemory (  //ECAM space for [bus c0-c7]
+        ResourceConsumer,
+        PosDecode,
+        MinFixed,
+        MaxFixed,
+        NonCacheable,
+        ReadWrite,
+        0x0, // Granularity
+        0x8ac000000, // Min Base Address
+        0x8ac7fffff, // Max Base Address
+        0x0, // Translate
+        0x800000 // Length
+      )
+      QwordMemory (   //ECAM space for [bus 90-97]
+        ResourceConsumer,
+        PosDecode,
+        MinFixed,
+        MaxFixed,
+        NonCacheable,
+        ReadWrite,
+        0x0, // Granularity
+        0x8b9000000, // Min Base Address
+        0x8b97fffff, // Max Base Address
+        0x0, // Translate
+        0x800000 // Length
+      )
+    })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (RBYV())
+    }
+  }
   // 2P NA PCIe2
   Device (PCIa)
   {
@@ -436,10 +669,9 @@ Scope(_SB)
     Device (RESa)
     {
       Name (_HID, "HISI0081") // HiSi PCIe RC config base address
-      Name (_CID, "PNP0C02")  // Motherboard reserved resource
       Name (_CRS, ResourceTemplate (){
         QwordMemory (
-          ResourceProducer,
+          ResourceConsumer,
           PosDecode,
           MinFixed,
           MaxFixed,
@@ -453,11 +685,61 @@ Scope(_SB)
         )
       })
     }
+    PCI_OSC_SUPPORT()
     Method (_STA, 0x0, NotSerialized)
     {
       Return (0xf)
     }
   } // Device(PCIa)
+  Device (RESa)
+  {
+    Name (_HID, "HISI0081") // HiSi PCIe RC config base address
+    Name (_CID, "PNP0C02")  // Motherboard reserved resource
+    Name (_UID, 0xa)  //  Unique ID
+    Name (_CRS, ResourceTemplate (){
+      QwordMemory ( //host bridge register space
+        ResourceConsumer,
+        PosDecode,
+        MinFixed,
+        MaxFixed,
+        NonCacheable,
+        ReadWrite,
+        0x0, // Granularity
+        0x600a00a0000, // Min Base Address
+        0x600a00affff, // Max Base Address
+        0x0, // Translate
+        0x10000 // Length
+      )
+    })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (0xf)
+    }
+  }
+
+  Device (R2NA) //reserve for 2p NA ecam resource
+  {
+    Name (_HID, "PNP0C02") // Motherboard reserved resource
+    Name (_CRS, ResourceTemplate (){
+      QwordMemory ( //ECAM space for [bus 10-1f]
+        ResourceConsumer,
+        PosDecode,
+        MinFixed,
+        MaxFixed,
+        NonCacheable,
+        ReadWrite,
+        0x0, // Granularity
+        0x64001000000, // Min Base Address
+        0x64001ffffff, // Max Base Address
+        0x0, // Translate
+        0x1000000 // Length
+      )
+    })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (0xf)
+    }
+  }
   // 2P NB PCIe0
   Device (PCIc)
   {
@@ -507,10 +789,9 @@ Scope(_SB)
     Device (RESc)
     {
       Name (_HID, "HISI0081") // HiSi PCIe RC config base address
-      Name (_CID, "PNP0C02")  // Motherboard reserved resource
       Name (_CRS, ResourceTemplate (){
         QwordMemory (
-          ResourceProducer,
+          ResourceConsumer,
           PosDecode,
           MinFixed,
           MaxFixed,
@@ -524,12 +805,38 @@ Scope(_SB)
         )
       })
     }
+    PCI_OSC_SUPPORT()
     Method (_STA, 0x0, NotSerialized)
     {
       Return (RBYV())
     }
   } // Device(PCIc)
 
+  Device (RESc)
+  {
+    Name (_HID, "HISI0081") // HiSi PCIe RC config base address
+    Name (_CID, "PNP0C02")  // Motherboard reserved resource
+    Name (_UID, 0xc)  //  Unique ID
+    Name (_CRS, ResourceTemplate (){
+      QwordMemory ( //host bridge register space
+        ResourceConsumer,
+        PosDecode,
+        MinFixed,
+        MaxFixed,
+        NonCacheable,
+        ReadWrite,
+        0x0, // Granularity
+        0x700a0090000, // Min Base Address
+        0x700a009ffff, // Max Base Address
+        0x0, // Translate
+        0x10000 // Length
+      )
+    })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (RBYV())
+    }
+  }
   //2P NB PCIe1
   Device (PCId)
   {
@@ -579,10 +886,9 @@ Scope(_SB)
     Device (RESd)
     {
       Name (_HID, "HISI0081") // HiSi PCIe RC config base address
-      Name (_CID, "PNP0C02")  // Motherboard reserved resource
       Name (_CRS, ResourceTemplate (){
         QwordMemory (
-          ResourceProducer,
+          ResourceConsumer,
           PosDecode,
           MinFixed,
           MaxFixed,
@@ -596,10 +902,73 @@ Scope(_SB)
         )
       })
     }
+    PCI_OSC_SUPPORT()
     Method (_STA, 0x0, NotSerialized)
     {
       Return (RBYV())
     }
   } // Device(PCId)
+  Device (RESd)
+  {
+    Name (_HID, "HISI0081") // HiSi PCIe RC config base address
+    Name (_CID, "PNP0C02")  // Motherboard reserved resource
+    Name (_UID, 0xd)  //  Unique ID
+    Name (_CRS, ResourceTemplate (){ //host bridge register space
+      QwordMemory (
+        ResourceConsumer,
+        PosDecode,
+        MinFixed,
+        MaxFixed,
+        NonCacheable,
+        ReadWrite,
+        0x0, // Granularity
+        0x700a0200000, // Min Base Address
+        0x700a020ffff, // Max Base Address
+        0x0, // Translate
+        0x10000 // Length
+      )
+    })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (RBYV())
+    }
+  }
+
+  Device (R2NB) //reserve for 2p NB ecam resource
+  {
+    Name (_HID, "PNP0C02")  // Motherboard reserved resource
+    Name (_CRS, ResourceTemplate (){
+      QwordMemory (  //ECAM space for [bus 20-2f]
+        ResourceConsumer,
+        PosDecode,
+        MinFixed,
+        MaxFixed,
+        NonCacheable,
+        ReadWrite,
+        0x0, // Granularity
+        0x74002000000, // Min Base Address
+        0x74002ffffff, // Max Base Address
+        0x0, // Translate
+        0x1000000 // Length
+      )
+      QwordMemory (  //ECAM space for [bus 30-3f]
+        ResourceConsumer,
+        PosDecode,
+        MinFixed,
+        MaxFixed,
+        NonCacheable,
+        ReadWrite,
+        0x0, // Granularity
+        0x78003000000, // Min Base Address
+        0x78003ffffff, // Max Base Address
+        0x0, // Translate
+        0x1000000 // Length
+      )
+    })
+    Method (_STA, 0x0, NotSerialized)
+    {
+      Return (RBYV())
+    }
+  }
 }
 
