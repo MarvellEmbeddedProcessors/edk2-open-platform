@@ -901,6 +901,50 @@ void PcieConfigContextHi1610(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
     return;
 }
 
+UINT32
+SysRegRead (
+  IN UINT32 SocType,
+  IN UINT32 HostBridgeNum,
+  IN UINT32 Port,
+  IN UINTN Reg
+  )
+{
+  UINT32 Value;
+  if (SocType == 0x1610) {
+    RegRead (PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + Reg, Value);
+  } else {
+    //PCIE_APB_SLVAE_BASE is for 660,and each PCIe Ccontroller has the same APB_SLVAE_BASE
+    //in the same hostbridge.
+    RegRead (PCIE_APB_SLVAE_BASE[HostBridgeNum] + Reg, Value);
+  }
+  return Value;
+}
+
+VOID
+DisableRcOptionRom (
+  IN UINT32 Soctype,
+  IN UINT32 HostBridgeNum,
+  IN UINT32 Port,
+  IN PCIE_PORT_TYPE PcieType
+)
+{
+  UINT32 Value = 0;
+  if (PcieType == PCIE_ROOT_COMPLEX) {
+    Value = SysRegRead (Soctype, HostBridgeNum, Port, PCIE_SYS_REG_OFFSET + PCIE_SYS_CTRL21_REG);
+    Value |= BIT2; //cs2 enable
+    SysRegWrite (Soctype, HostBridgeNum, Port, PCIE_SYS_REG_OFFSET + PCIE_SYS_CTRL21_REG, Value);
+
+    Value = SysRegRead (Soctype, HostBridgeNum, Port, PCIE_SYS_REG_OFFSET + PCIE_EP_PCI_CFG_HDR12_REG);
+    Value &= ~BIT0; //disable option rom
+    SysRegWrite (Soctype, HostBridgeNum, Port, PCIE_SYS_REG_OFFSET + PCIE_EP_PCI_CFG_HDR12_REG, Value);
+
+    Value = SysRegRead (Soctype, HostBridgeNum, Port, PCIE_SYS_REG_OFFSET + PCIE_SYS_CTRL21_REG);
+    Value &= ~BIT2; //cs2 disable
+    SysRegWrite (Soctype, HostBridgeNum, Port, PCIE_SYS_REG_OFFSET + PCIE_SYS_CTRL21_REG, Value);
+  }
+  return;
+}
+
 EFI_STATUS
 EFIAPI
 PciePortInit (
@@ -961,6 +1005,8 @@ PciePortInit (
      /* Pcie Equalization*/
      (VOID)PcieEqualization(soctype ,HostBridgeNum, PortIndex);
 
+     /* Disable RC Option Rom */
+     DisableRcOptionRom (soctype, HostBridgeNum, PortIndex, PcieCfg->PortInfo.PortType);
      /* assert LTSSM enable */
      (VOID)PcieEnableItssm(soctype, HostBridgeNum, PortIndex);
      if (FeaturePcdGet(PcdIsPciPerfTuningEnable)) {
