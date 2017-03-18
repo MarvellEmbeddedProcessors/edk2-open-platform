@@ -70,6 +70,10 @@
 
 #define PCS_SDS_CFG_REG            0x204
 #define SDS_CFG_STRIDE             0x4
+#define MUX_LOS_ALOS_REG_OFFSET    0x508
+#define MUX_CFG_STRIDE             0x4
+#define CH_RXTX_STATUS_CFG_EN      BIT1
+#define CH_RXTX_STATUS_CFG         BIT2
 #define RegWrite(addr,data)            MmioWrite32((addr), (data))
 #define RegRead(addr,data)             ((data) = MmioRead32 (addr))
 

@@ -470,6 +470,8 @@ VOID PciePcsInit(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
             RegRead(PCIE_PHY_BASE_1610[HostBridgeNum][Port] + PCS_SDS_CFG_REG + i * SDS_CFG_STRIDE, Value);
             Value |= (1 << 20); //bit 20: rxvalid enable
             RegWrite(PCIE_PHY_BASE_1610[HostBridgeNum][Port] + PCS_SDS_CFG_REG + i * SDS_CFG_STRIDE, Value);
+            RegWrite (PCIE_PHY_BASE_1610[HostBridgeNum][Port] + MUX_LOS_ALOS_REG_OFFSET + i * MUX_CFG_STRIDE, \
+              CH_RXTX_STATUS_CFG_EN | CH_RXTX_STATUS_CFG);
         }
         PcieRxValidCtrl(soctype, HostBridgeNum, Port, 0);
         RegWrite(PCIE_PHY_BASE_1610[HostBridgeNum][Port] + 0x264, 0x3D090);
