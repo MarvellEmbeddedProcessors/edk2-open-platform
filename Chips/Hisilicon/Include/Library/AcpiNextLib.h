@@ -35,7 +35,7 @@
 #define EFI_ACPI_6_0_GICC_AFFINITY_STRUCTURE_INIT(                                              \
     ProximityDomain, ACPIProcessorUID, Flags, ClockDomain)                                      \
   {                                                                                             \
-    3, sizeof (EFI_ACPI_5_1_GICC_AFFINITY_STRUCTURE),ProximityDomain ,                          \
+    3, sizeof (EFI_ACPI_6_1_GICC_AFFINITY_STRUCTURE),ProximityDomain ,                          \
      ACPIProcessorUID,  Flags,  ClockDomain                                                     \
   }
 
