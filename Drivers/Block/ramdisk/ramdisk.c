@@ -200,6 +200,18 @@ UINT8 TestSize(UINT32 ts)
 
 EFI_SYSTEM_TABLE  BackupSystemTable;
 
+STATIC
+EFI_STATUS
+EFIAPI
+RamDiskReset(
+  IN EFI_BLOCK_IO_PROTOCOL *This,
+  IN BOOLEAN                ExtendedVerification
+)
+{
+  return EFI_SUCCESS;
+}
+
+
 /*
  * Entry point for RamDisk driver.
  */
@@ -274,6 +286,7 @@ EFI_STATUS InitializeRamDiskDriver(
   RamDiskDev->BlkIo.ReadBlocks  = RamDiskReadBlocks;
   RamDiskDev->BlkIo.WriteBlocks = RamDiskWriteBlocks;
   RamDiskDev->BlkIo.FlushBlocks = RamDiskFlushBlocks;
+  RamDiskDev->BlkIo.Reset       = RamDiskReset;
 
   RamDiskDev->DevicePath = DuplicateDevicePath((EFI_DEVICE_PATH*)&RamDiskDevicePath);
 
