@@ -442,6 +442,29 @@ static EFI_STATUS ProcessDSDT(
   return EFI_SUCCESS;
 }
 
+STATIC
+VOID
+AcpiCheckSum (
+  IN OUT  EFI_ACPI_SDT_HEADER *Table
+  )
+{
+  UINTN ChecksumOffset;
+  UINT8 *Buffer;
+
+  ChecksumOffset = OFFSET_OF (EFI_ACPI_DESCRIPTION_HEADER, Checksum);
+  Buffer = (UINT8 *)Table;
+
+  //
+  // set checksum to 0 first
+  //
+  Buffer[ChecksumOffset] = 0;
+
+  //
+  // Update checksum value
+  //
+  Buffer[ChecksumOffset] = CalculateCheckSum8 (Buffer, Table->Length);
+}
+
 EFI_STATUS EthMacInit(void)
 {
   EFI_STATUS              Status;
@@ -478,6 +501,7 @@ EFI_STATUS EthMacInit(void)
     ProcessDSDT(AcpiTableProtocol, TableHandle);
 
     AcpiTableProtocol->Close(TableHandle);
+    AcpiCheckSum (Table);
   }
 
   return EFI_SUCCESS;
