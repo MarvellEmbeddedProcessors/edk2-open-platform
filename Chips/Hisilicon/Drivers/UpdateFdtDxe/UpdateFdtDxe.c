@@ -112,7 +112,7 @@ EFIAPI UpdateFdt (
     Size = (UINTN)fdt_totalsize ((VOID*)(PcdGet64(FdtFileAddress)));
     NewFdtBlobSize = Size + ADD_FILE_LENGTH;
 
-    Status = gBS->AllocatePages (AllocateAnyPages, EfiRuntimeServicesData, EFI_SIZE_TO_PAGES(Size), &NewFdtBlobBase);
+    Status = gBS->AllocatePages (AllocateAnyPages, EfiRuntimeServicesData, EFI_SIZE_TO_PAGES(NewFdtBlobSize), &NewFdtBlobBase);
     if (EFI_ERROR (Status))
     {
         return EFI_OUT_OF_RESOURCES;
