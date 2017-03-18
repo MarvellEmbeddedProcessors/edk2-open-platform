@@ -17,12 +17,55 @@
 **/
 
 //#include "ArmPlatform.h"
+/*
+  See ACPI 6.1 Spec, 6.2.11, PCI Firmware Spec 3.0, 4.5
+*/
+#define PCI_OSC_SUPPORT() \
+  Name(SUPP, Zero) /* PCI _OSC Support Field value */ \
+  Name(CTRL, Zero) /* PCI _OSC Control Field value */ \
+  Method(_OSC,4) { \
+    If(LEqual(Arg0,ToUUID("33DB4D5B-1FF7-401C-9657-7441C03DD766"))) { \
+      /* Create DWord-adressable fields from the Capabilities Buffer */ \
+      CreateDWordField(Arg3,0,CDW1) \
+      CreateDWordField(Arg3,4,CDW2) \
+      CreateDWordField(Arg3,8,CDW3) \
+      /* Save Capabilities DWord2 & 3 */ \
+      Store(CDW2,SUPP) \
+      Store(CDW3,CTRL) \
+      /* Only allow native hot plug control if OS supports: */ \
+      /* ASPM */ \
+      /* Clock PM */ \
+      /* MSI/MSI-X */ \
+      If(LNotEqual(And(SUPP, 0x16), 0x16)) { \
+        And(CTRL,0x1E,CTRL) \
+      }\
+      \
+      /* Do not allow native PME, AER */ \
+      /* Never allow SHPC (no SHPC controller in this system)*/ \
+      And(CTRL,0x10,CTRL) \
+      If(LNotEqual(Arg1,One)) { /* Unknown revision */ \
+        Or(CDW1,0x08,CDW1) \
+      } \
+      \
+      If(LNotEqual(CDW3,CTRL)) { /* Capabilities bits were masked */ \
+        Or(CDW1,0x10,CDW1) \
+      } \
+      \
+      /* Update DWORD3 in the buffer */ \
+      Store(CTRL,CDW3) \
+      Return(Arg3) \
+    } Else { \
+      Or(CDW1,4,CDW1) /* Unrecognized UUID */ \
+      Return(Arg3) \
+    } \
+  } // End _OSC
+
 Scope(_SB)
 {
   // PCIe Root bus
   Device (PCI0)
   {
-    Name (_HID, "HISI0080") // PCI Express Root Bridge
+    Name (_HID, "PNP0A08") // PCI Express Root Bridge
     Name (_CID, "PNP0A03") // Compatible PCI Root Bridge
     Name(_SEG, 0) // Segment of this Root complex
     Name(_BBN, 0) // Base Bus Number
@@ -65,6 +108,7 @@ Scope(_SB)
       }) // Name(RBUF)
       Return (RBUF)
     } // Method(_CRS)
+    PCI_OSC_SUPPORT()
 
     Device (RES0)
     {
@@ -74,34 +118,22 @@ Scope(_SB)
       })
     }
 
-    OperationRegion(SCTR, SystemMemory, 0xa009131c, 4)
-    Field(SCTR, AnyAcc, NoLock, Preserve) {
-      LSTA, 32,
-    }
-    Method(_DSM, 0x4, Serialized) {
-      If(LEqual(Arg0,ToUUID("6d30f553-836c-408e-b6ad-45bccc957949"))) {
-        switch(ToInteger(Arg2))
-        {
-          // Function 0: Return LinkStatus
-          case(0) {
-              Store (0, Local0)
-              Store (LSTA, Local0)
-              Return (Local0)
-          }
-          default {
-          }
-        }
-      }
-      // If not one of the function identifiers we recognize, then return a buffer
-      // with bit 0 set to 0 indicating no functions supported.
-      return(Buffer(){0})
-    }
   } // Device(PCI0)
+
+  Device (RES0)
+  {
+    Name (_HID, "HISI0081") // HiSi PCIe RC config base address
+    Name (_CID, "PNP0C02") // Motherboard reserved resource
+    Name (_UID, 0x0)  //  Unique ID
+    Name (_CRS, ResourceTemplate (){
+      Memory32Fixed (ReadWrite, 0xa0090000 , 0x10000)
+    })
+  }
 
   // PCIe Root bus
   Device (PCI1)
   {
-    Name (_HID, "HISI0080") // PCI Express Root Bridge
+    Name (_HID, "PNP0A08") // PCI Express Root Bridge
     Name (_CID, "PNP0A03") // Compatible PCI Root Bridge
     Name(_SEG, 1) // Segment of this Root complex
     Name(_BBN, 0xe0) // Base Bus Number
@@ -144,44 +176,33 @@ Scope(_SB)
       }) // Name(RBUF)
       Return (RBUF)
     } // Method(_CRS)
+    PCI_OSC_SUPPORT()
 
     Device (RES1)
     {
       Name (_HID, "HISI0081") // HiSi PCIe RC config base address
+      Name (_CID, "PNP0C02") // Motherboard reserved resource
+      Name (_UID, 0x1)  //  Unique ID
       Name (_CRS, ResourceTemplate (){
         Memory32Fixed (ReadWrite, 0xa0200000 , 0x10000)
       })
     }
 
-    OperationRegion(SCTR, SystemMemory, 0xa020131c, 4)
-    Field(SCTR, AnyAcc, NoLock, Preserve) {
-      LSTA, 32,
-    }
-    Method(_DSM, 0x4, Serialized) {
-      If(LEqual(Arg0,ToUUID("6d30f553-836c-408e-b6ad-45bccc957949"))) {
 
-        switch(ToInteger(Arg2))
-        {
-          // Function 0: Return LinkStatus
-          case(0) {
-              Store (0, Local0)
-              Store (LSTA, Local0)
-              Return (Local0)
-          }
-          default {
-          }
-        }
-      }
-      // If not one of the function identifiers we recognize, then return a buffer
-      // with bit 0 set to 0 indicating no functions supported.
-      return(Buffer(){0})
-    }
   } // Device(PCI1)
+
+  Device (RES1)
+  {
+    Name (_HID, "HISI0081") // HiSi PCIe RC config base address
+    Name (_CRS, ResourceTemplate (){
+      Memory32Fixed (ReadWrite, 0xa0200000 , 0x10000)
+    })
+  }
 
   // PCIe Root bus
   Device (PCI2)
   {
-    Name (_HID, "HISI0080") // PCI Express Root Bridge
+    Name (_HID, "PNP0A08") // PCI Express Root Bridge
     Name (_CID, "PNP0A03") // Compatible PCI Root Bridge
     Name(_SEG, 2) // Segment of this Root complex
     Name(_BBN, 0x80) // Base Bus Number
@@ -224,6 +245,7 @@ Scope(_SB)
       }) // Name(RBUF)
       Return (RBUF)
     } // Method(_CRS)
+    PCI_OSC_SUPPORT()
 
     Device (RES2)
     {
@@ -233,29 +255,26 @@ Scope(_SB)
       })
     }
 
-    OperationRegion(SCTR, SystemMemory, 0xa00a131c, 4)
-    Field(SCTR, AnyAcc, NoLock, Preserve) {
-      LSTA, 32,
-    }
-    Method(_DSM, 0x4, Serialized) {
-      If(LEqual(Arg0,ToUUID("6d30f553-836c-408e-b6ad-45bccc957949")))
-      {
-        switch(ToInteger(Arg2))
-        {
-          // Function 0: Return LinkStatus
-          case(0) {
-              Store (0, Local0)
-              Store (LSTA, Local0)
-              Return (Local0)
-          }
-          default {
-          }
-        }
-      }
-      // If not one of the function identifiers we recognize, then return a buffer
-      // with bit 0 set to 0 indicating no functions supported.
-      return(Buffer(){0})
-    }
   } // Device(PCI2)
+
+  Device (RES2)
+  {
+    Name (_HID, "HISI0081") // HiSi PCIe RC config base address
+    Name (_CID, "PNP0C02") // Motherboard reserved resource
+    Name (_UID, 0x2)  // Unique ID
+    Name (_CRS, ResourceTemplate (){
+      Memory32Fixed (ReadWrite, 0xa00a0000, 0x10000)
+    })
+  }
+
+  Device (RESP)  //reserve for ecam resource
+  {
+    Name (_HID, "PNP0C02")
+    Name (_CRS, ResourceTemplate (){
+      Memory32Fixed (ReadWrite, 0xb0000000, 0x2000000) //ECAM space for PCI0 [bus 00-1f]
+      Memory32Fixed (ReadWrite, 0xbe000000, 0x2000000) //ECAM space for PCI1 [bus e0-ff]
+      Memory32Fixed (ReadWrite, 0xa8000000, 0x2000000) //ECAM space for PCI2 [bus 80-9f]
+    })
+  }
 }
 
