@@ -444,6 +444,18 @@ FvbGetBlockSize (
     return Status;
 }
 
+STATIC
+EFI_STATUS
+EFIAPI
+FvbReset(
+  IN EFI_BLOCK_IO_PROTOCOL *This,
+  IN BOOLEAN                ExtendedVerification
+)
+{
+  return EFI_SUCCESS;
+}
+
+
 /**
  Reads the specified number of bytes into a buffer from the specified block.
 
@@ -921,6 +933,7 @@ FlashCreateInstance (
     Instance->Size = FlashSize;
 
     Instance->BlockIoProtocol.Media = &Instance->Media;
+    Instance->BlockIoProtocol.Reset = FvbReset;
     Instance->Media.MediaId = MediaId;
     Instance->Media.BlockSize = BlockSize;
     Instance->Media.LastBlock = (FlashSize / BlockSize) - 1;
