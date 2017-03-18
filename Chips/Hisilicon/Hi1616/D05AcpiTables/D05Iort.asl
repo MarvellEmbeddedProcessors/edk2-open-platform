@@ -406,8 +406,8 @@
                             Read Allocate : 0
                                  Override : 0
 [0002]                           Reserved : 0000
-[0001]       Memory Flags (decoded below) : 00
-                                Coherency : 0
+[0001]       Memory Flags (decoded below) : 01
+                                Coherency : 1
                          Device Attribute : 0
 [0004]                      ATS Attribute : 00000000
 [0004]                 PCI Segment Number : 00000002
@@ -434,8 +434,8 @@
                             Read Allocate : 0
                                  Override : 0
 [0002]                           Reserved : 0000
-[0001]       Memory Flags (decoded below) : 00
-                                Coherency : 0
+[0001]       Memory Flags (decoded below) : 01
+                                Coherency : 1
                          Device Attribute : 0
 [0004]                      ATS Attribute : 00000000
 [0004]                 PCI Segment Number : 00000004
@@ -463,8 +463,8 @@
                             Read Allocate : 0
                                  Override : 0
 [0002]                           Reserved : 0000
-[0001]       Memory Flags (decoded below) : 00
-                                Coherency : 0
+[0001]       Memory Flags (decoded below) : 01
+                                Coherency : 1
                          Device Attribute : 0
 [0004]                      ATS Attribute : 00000000
 [0004]                 PCI Segment Number : 00000005
@@ -492,8 +492,8 @@
                             Read Allocate : 0
                                  Override : 0
 [0002]                           Reserved : 0000
-[0001]       Memory Flags (decoded below) : 00
-                                Coherency : 0
+[0001]       Memory Flags (decoded below) : 01
+                                Coherency : 1
                          Device Attribute : 0
 [0004]                      ATS Attribute : 00000000
 [0004]                 PCI Segment Number : 00000006
@@ -520,8 +520,8 @@
                             Read Allocate : 0
                                  Override : 0
 [0002]                           Reserved : 0000
-[0001]       Memory Flags (decoded below) : 00
-                                Coherency : 0
+[0001]       Memory Flags (decoded below) : 01
+                                Coherency : 1
                          Device Attribute : 0
 [0004]                      ATS Attribute : 00000000
 [0004]                 PCI Segment Number : 00000007
@@ -548,8 +548,8 @@
                             Read Allocate : 0
                                  Override : 0
 [0002]                           Reserved : 0000
-[0001]       Memory Flags (decoded below) : 00
-                                Coherency : 0
+[0001]       Memory Flags (decoded below) : 01
+                                Coherency : 1
                          Device Attribute : 0
 [0004]                      ATS Attribute : 00000000
 [0004]                 PCI Segment Number : 0000000a
@@ -577,8 +577,8 @@
                             Read Allocate : 0
                                  Override : 0
 [0002]                           Reserved : 0000
-[0001]       Memory Flags (decoded below) : 00
-                                Coherency : 0
+[0001]       Memory Flags (decoded below) : 01
+                                Coherency : 1
                          Device Attribute : 0
 [0004]                      ATS Attribute : 00000000
 [0004]                 PCI Segment Number : 0000000c
@@ -606,8 +606,8 @@
                             Read Allocate : 0
                                  Override : 0
 [0002]                           Reserved : 0000
-[0001]       Memory Flags (decoded below) : 00
-                                Coherency : 0
+[0001]       Memory Flags (decoded below) : 01
+                                Coherency : 1
                          Device Attribute : 0
 [0004]                      ATS Attribute : 00000000
 [0004]                 PCI Segment Number : 0000000d
