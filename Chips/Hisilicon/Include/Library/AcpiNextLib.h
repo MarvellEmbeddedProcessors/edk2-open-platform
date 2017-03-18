@@ -19,9 +19,9 @@
 #ifndef __ACPI_NEXT_LIB_H__
 #define __ACPI_NEXT_LIB_H__
 
-#define EFI_ACPI_6_0_GIC_ITS_INIT(GicITSHwId, GicITSBase) \
+#define EFI_ACPI_6_1_GIC_ITS_INIT(GicITSHwId, GicITSBase) \
   { \
-    EFI_ACPI_6_0_GIC_ITS, sizeof (EFI_ACPI_6_0_GIC_ITS_STRUCTURE), EFI_ACPI_RESERVED_WORD, \
+    EFI_ACPI_6_1_GIC_ITS, sizeof (EFI_ACPI_6_1_GIC_ITS_STRUCTURE), EFI_ACPI_RESERVED_WORD, \
     GicITSHwId, GicITSBase, EFI_ACPI_RESERVED_DWORD\
   }
 
@@ -32,20 +32,36 @@
      GicRBase, GicRlength \
   }
 
-#define EFI_ACPI_6_0_GICC_AFFINITY_STRUCTURE_INIT(                                              \
+#define EFI_ACPI_6_1_GICC_AFFINITY_STRUCTURE_INIT(                                              \
     ProximityDomain, ACPIProcessorUID, Flags, ClockDomain)                                      \
   {                                                                                             \
     3, sizeof (EFI_ACPI_6_1_GICC_AFFINITY_STRUCTURE),ProximityDomain ,                          \
      ACPIProcessorUID,  Flags,  ClockDomain                                                     \
   }
 
-#define EFI_ACPI_6_0_MEMORY_AFFINITY_STRUCTURE_INIT(                                              \
+#define EFI_ACPI_6_1_MEMORY_AFFINITY_STRUCTURE_INIT(                                              \
     ProximityDomain, AddressBaseLow, AddressBaseHigh, LengthLow, LengthHigh, Flags)               \
   {                                                                                               \
-    1, sizeof (EFI_ACPI_5_0_MEMORY_AFFINITY_STRUCTURE),ProximityDomain , EFI_ACPI_RESERVED_WORD,  \
+    1, sizeof (EFI_ACPI_6_1_MEMORY_AFFINITY_STRUCTURE),ProximityDomain , EFI_ACPI_RESERVED_WORD,  \
     AddressBaseLow, AddressBaseHigh, LengthLow, LengthHigh, EFI_ACPI_RESERVED_DWORD, Flags,       \
     EFI_ACPI_RESERVED_QWORD                                                                       \
   }
+
+#define EFI_ACPI_6_1_GICC_STRUCTURE_INIT(GicId, AcpiCpuUid, Mpidr, Flags, PmuIrq,    \
+    GicBase, GicVBase, GicHBase, GsivId, GicRBase, ProcessorPowerEfficiencyClass)    \
+  {                                                                                  \
+    EFI_ACPI_6_1_GIC, sizeof (EFI_ACPI_6_1_GIC_STRUCTURE), EFI_ACPI_RESERVED_WORD,   \
+    GicId, AcpiCpuUid, Flags, 0, PmuIrq, 0, GicBase, GicVBase, GicHBase,             \
+    GsivId, GicRBase, Mpidr, ProcessorPowerEfficiencyClass, {0, 0, 0}                \
+  }
+
+#define EFI_ACPI_6_1_GIC_DISTRIBUTOR_INIT(GicDistHwId, GicDistBase, GicDistVector, GicVersion) \
+  { \
+    EFI_ACPI_6_1_GICD, sizeof (EFI_ACPI_6_1_GIC_DISTRIBUTOR_STRUCTURE), EFI_ACPI_RESERVED_WORD, \
+    GicDistHwId, GicDistBase, GicDistVector, GicVersion, \
+    {EFI_ACPI_RESERVED_BYTE, EFI_ACPI_RESERVED_BYTE, EFI_ACPI_RESERVED_BYTE} \
+  }
+
 
 #pragma pack(1)
 //

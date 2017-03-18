@@ -19,15 +19,15 @@
 
 #include <IndustryStandard/Acpi.h>
 
-EFI_ACPI_5_0_FIRMWARE_ACPI_CONTROL_STRUCTURE Facs = {
-  EFI_ACPI_5_0_FIRMWARE_ACPI_CONTROL_STRUCTURE_SIGNATURE, // UINT32  Signature
-  sizeof (EFI_ACPI_5_0_FIRMWARE_ACPI_CONTROL_STRUCTURE),  // UINT32  Length
+EFI_ACPI_6_1_FIRMWARE_ACPI_CONTROL_STRUCTURE Facs = {
+  EFI_ACPI_6_1_FIRMWARE_ACPI_CONTROL_STRUCTURE_SIGNATURE, // UINT32  Signature
+  sizeof (EFI_ACPI_6_1_FIRMWARE_ACPI_CONTROL_STRUCTURE),  // UINT32  Length
   0xA152,                                                 // UINT32  HardwareSignature
   0,                                                      // UINT32  FirmwareWakingVector
   0,                                                      // UINT32  GlobalLock
   0,                                                      // UINT32  Flags
   0,                                                      // UINT64  XFirmwareWakingVector
-  EFI_ACPI_5_0_FIRMWARE_ACPI_CONTROL_STRUCTURE_VERSION,   // UINT8   Version;
+  EFI_ACPI_6_1_FIRMWARE_ACPI_CONTROL_STRUCTURE_VERSION,   // UINT8   Version;
     { EFI_ACPI_RESERVED_BYTE,                             // UINT8   Reserved0[0]
       EFI_ACPI_RESERVED_BYTE,                             // UINT8   Reserved0[1]
       EFI_ACPI_RESERVED_BYTE },                           // UINT8   Reserved0[2]
