@@ -39,6 +39,14 @@ extern PCIE_DRIVER_CFG gastr_pcie_driver_cfg;
 extern PCIE_IATU gastr_pcie_iatu_cfg;
 extern PCIE_IATU_VA mPcieIatuTable;
 
+EFI_STATUS
+EFIAPI
+PciePortInit (
+  IN UINT32 soctype,
+  IN UINT32 HostBridgeNum,
+  IN PCIE_DRIVER_CFG *PcieCfg
+  );
+
 VOID PcieRegWrite(UINT32 Port, UINTN Offset, UINT32 Value)
 {
     RegWrite((UINT64)mPcieIntCfg.RegResource[Port] + Offset, Value);
@@ -149,8 +157,131 @@ VOID PcieRxValidCtrl(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port, BOOLEAN 
         }
     }
 }
+/*
+ * The ltssm register is assigned in an asynchronous way, the value
+ * of register may not right in metastable state.
+ * Read the register twice to get stable value.
+ */
+VOID PcieGetLtssmValue (
+  IN UINT32 HostBridgeNum,
+  IN UINT32 Port,
+  IN UINT32 *Value
+  )
+{
+  UINT32  ValueA;
+  UINT32  ValueB = 0;
+  UINT32  Count;
 
-EFI_STATUS PcieEnableItssm(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
+  RegRead (PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + PCIE_SYS_REG_OFFSET + PCIE_SYS_STATE4_REG, ValueA);
+  ValueA = ValueA & PCIE_LTSSM_STATE_MASK;
+
+  Count = 0;
+  while (Count < 2) {
+
+    RegRead (PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + PCIE_SYS_REG_OFFSET + PCIE_SYS_STATE4_REG, ValueB);
+    ValueB = ValueB & PCIE_LTSSM_STATE_MASK;
+
+    /* Get the same state in continuous two times*/
+    if (ValueA == ValueB) {
+      break;
+    }
+
+    //If the second value not equal to the first, we return the second one as the stable
+    ValueA = ValueB;
+    Count++;
+  }
+
+  *Value = ValueB;
+
+  return;
+
+}
+
+/*
+ * In some cases, the PCIe device may close part of lanes in
+ * config state of LTSSM, the hip06 RC should reconfig lane num
+ * and try to linkup again.
+ */
+VOID PcieReconfigLaneNum (
+  IN UINT32 soctype,
+  IN UINT32 HostBridgeNum,
+  IN UINT32 Port,
+  IN PCIE_DRIVER_CFG *PcieCfg
+  )
+{
+  EFI_STATUS Status;
+  UINT32  LtssmStatus;
+  UINT32  RegVal;
+  UINT32  LoopCnt = 0;
+  UINT32  LaneNumCnt = 0;
+  PCIE_PORT_WIDTH PortWidth = PcieCfg->PortInfo.PortWidth;
+
+  // 500 * 200us = 100ms, so it takes 100 ms must to reconfig lane numbers
+  while (LoopCnt < 500) {
+
+    /*
+     * The minimum lanenum is 1, no need to try any more.
+     */
+    if (PortWidth <= 1) {
+      DEBUG ((DEBUG_ERROR, "PcieReconfigLanenum  PortWidth <= 1 !\n"));
+      return;
+    }
+
+    /*
+     * Check the lane num config state is normal or not.
+     */
+    PcieGetLtssmValue (HostBridgeNum, Port, &LtssmStatus);
+    if ((LtssmStatus == PCIE_LTSSM_CFG_LANENUM_ACPT) || (LtssmStatus == PCIE_LTSSM_CFG_COMPLETE)) {
+      LaneNumCnt++;
+    } else if (LtssmStatus == PCIE_LTSSM_LINKUP_STATE) {
+      PcieGetLtssmValue (HostBridgeNum, Port, &LtssmStatus);
+      if (LtssmStatus == PCIE_LTSSM_LINKUP_STATE) {
+          break;
+      }
+    } else {
+      LaneNumCnt = 0;
+    }
+
+    /*
+     * The lane num config state is abnormal, need to reconfig
+     * the lane num and try to establish link again.
+     */
+    if (LaneNumCnt > MAX_TRY_LINK_NUM) {
+      /* Disable LTSSM */
+      RegRead (PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + PCIE_CTRL_7_REG, RegVal);
+      RegVal &= ~(LTSSM_ENABLE);
+      RegWrite (PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + PCIE_CTRL_7_REG, RegVal);
+      /*
+       * Decrease the PortWidth and try to link again,
+       * the value of PortWidth 0xf (X8), 0x7(x4), 0x3(X2), 0x1(X1)
+       */
+      PcieCfg->PortInfo.PortWidth = (PCIE_PORT_WIDTH)((UINT8)PcieCfg->PortInfo.PortWidth >> 1);
+
+      Status = PciePortInit (soctype, HostBridgeNum, PcieCfg);
+      if (EFI_ERROR(Status)) {
+          DEBUG ((DEBUG_ERROR, "PcieReconfigLanenum HostBridge %d, Pcie Port %d Init Failed! \n", HostBridgeNum, Port));
+      }
+      return;
+    }
+
+    LoopCnt++;
+    /* Pcie 3.0 Spec,part 4.2.6.3.4.1: the Upstream Lanes are permitted
+     * delay up to 1 ms before transitioning to Configuration.Lanenum.Accept.
+     * So the delay time 200 us * 5(LanNumCnt) = 1ms, not beyond the reasonable range.
+     */
+    MicroSecondDelay (200);
+  }
+
+  return ;
+}
+
+EFI_STATUS
+PcieEnableItssm (
+  IN UINT32 soctype,
+  IN UINT32 HostBridgeNum,
+  IN UINT32 Port,
+  IN PCIE_DRIVER_CFG *PcieCfg
+  )
 {
     PCIE_CTRL_7_U pcie_ctrl7;
     UINT32 Value = 0;
@@ -165,6 +296,7 @@ EFI_STATUS PcieEnableItssm(UINT32 soctype, UINT32 HostBridgeNum, UINT32 Port)
         Value |= BIT11|BIT30|BIT31;
         RegWrite(PCIE_APB_SLAVE_BASE_1610[HostBridgeNum][Port] + 0x1114, Value);
         (VOID)PcieRxValidCtrl(soctype, HostBridgeNum, Port, 1);
+        PcieReconfigLaneNum (soctype, HostBridgeNum, Port, PcieCfg);
         return EFI_SUCCESS;
     }
     else
@@ -1008,7 +1140,7 @@ PciePortInit (
      /* Disable RC Option Rom */
      DisableRcOptionRom (soctype, HostBridgeNum, PortIndex, PcieCfg->PortInfo.PortType);
      /* assert LTSSM enable */
-     (VOID)PcieEnableItssm(soctype, HostBridgeNum, PortIndex);
+     (VOID)PcieEnableItssm (soctype, HostBridgeNum, PortIndex, PcieCfg);
      if (FeaturePcdGet(PcdIsPciPerfTuningEnable)) {
        //PCIe will still work even if performance tuning fails,
        //and there is warning message inside the function to print
