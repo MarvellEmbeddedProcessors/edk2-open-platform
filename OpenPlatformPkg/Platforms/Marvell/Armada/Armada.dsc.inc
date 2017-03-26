@@ -253,7 +253,7 @@
 
 [PcdsFixedAtBuild.common]
   gArmPlatformTokenSpaceGuid.PcdFirmwareVendor|"Marvell"
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"MARVELL_EFI"
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString|L"MARVELL devel-17.04.0"
   gArmPlatformTokenSpaceGuid.PcdCoreCount|4
 
   ## Use the serial console (ConIn & ConOut) and the Graphic driver (ConOut)
