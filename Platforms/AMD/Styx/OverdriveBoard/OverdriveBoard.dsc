@@ -295,7 +295,9 @@ DEFINE DO_KCS       = 1
 
   ## If TRUE, Graphics Output Protocol will be installed on virtual handle
   ## created by ConsplitterDxe. It could be set FALSE to save size.
-  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutGopSupport|FALSE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutGopSupport|TRUE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutUgaSupport|FALSE
+  gEfiMdePkgTokenSpaceGuid.PcdUgaConsumeSupport|FALSE
 
 [PcdsFixedAtBuild.common]
   gEfiMdePkgTokenSpaceGuid.PcdMaximumUnicodeStringLength|1000000
@@ -442,6 +444,9 @@ DEFINE DO_KCS       = 1
   ## ACPI (no tables < 4GB)
   gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiExposedTableVersions|0x20
 
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId|"AMDINC"
+  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId|0x20454c5454414553 # SEATTLE
+
   #
   # Enable strict image permissions for all images. (This applies
   # only to images that were built with >= 4 KB section alignment.)
@@ -569,6 +574,9 @@ DEFINE DO_KCS       = 1
   #
   # Console IO support
   #
+  MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
+  MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
+  MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
   MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf
   MdeModulePkg/Universal/SerialDxe/SerialDxe.inf
 
@@ -637,6 +645,7 @@ DEFINE DO_KCS       = 1
   MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf
   MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
   MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
+  MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf
 
 !if $(DO_XGBE)
   #
@@ -678,6 +687,7 @@ DEFINE DO_KCS       = 1
   MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
   OpenPlatformPkg/Platforms/AMD/Styx/AcpiTables/AcpiAml.inf
   OpenPlatformPkg/Platforms/AMD/Styx/Drivers/AcpiPlatformDxe/AcpiPlatformDxe.inf
+  MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
 
   #
   # SMBIOS Support
@@ -706,6 +716,7 @@ DEFINE DO_KCS       = 1
       NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf
   }
+  MdeModulePkg/Logo/LogoDxe.inf
 
   #
   # Crypto Accelerator support (RNG only)
