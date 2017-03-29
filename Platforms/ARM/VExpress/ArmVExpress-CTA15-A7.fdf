@@ -175,13 +175,6 @@ FvNameGuid         = 73dcb643-3862-4904-9076-a94af1890243
   INF MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
   INF MdeModulePkg/Application/UiApp/UiApp.inf
 
-  #
-  # TianoCore logo (splash screen)
-  #
-  FILE FREEFORM = PCD(gEfiIntelFrameworkModulePkgTokenSpaceGuid.PcdLogoFile) {
-   SECTION RAW = MdeModulePkg/Logo/Logo.bmp
-  }
-
   # FV Filesystem
   INF MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
 
