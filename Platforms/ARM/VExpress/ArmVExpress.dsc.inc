@@ -491,14 +491,6 @@
   MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
 
   #
-  # FDT installation
-  #
-  EmbeddedPkg/Drivers/FdtPlatformDxe/FdtPlatformDxe.inf {
-    <LibraryClasses>
-      BdsLib|ArmPkg/Library/BdsLib/BdsLib.inf
-  }
-
-  #
   # UEFI application (Shell Embedded Boot Loader)
   #
   ShellPkg/Application/Shell/Shell.inf {

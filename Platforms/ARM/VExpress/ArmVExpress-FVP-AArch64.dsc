@@ -35,6 +35,7 @@
   DEFINE EDK2_SKIP_PEICORE=1
 !endif
 
+  DT_SUPPORT                     = FALSE
 
 !include OpenPlatformPkg/Platforms/ARM/VExpress/ArmVExpress.dsc.inc
 
@@ -57,6 +58,8 @@
 !if $(SECURE_BOOT_ENABLE) == TRUE
   FileExplorerLib|MdeModulePkg/Library/FileExplorerLib/FileExplorerLib.inf
 !endif
+
+  DtPlatformDtbLoaderLib|OpenPlatformPkg/Platforms/ARM/VExpress/Library/ArmVExpressDtPlatformDtbLoaderLib/ArmVExpressDtPlatformDtbLoaderLib.inf
 
 [LibraryClasses.common.SEC]
   ArmPlatformSecLib|ArmPlatformPkg/ArmVExpressPkg/Library/ArmVExpressSecLibRTSM/ArmVExpressSecLib.inf
@@ -172,15 +175,6 @@
   # the entire FVP address space can be covered by 36 bit VAs
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuMemorySize|36
 
-[PcdsDynamicDefault.common]
-  #
-  # The size of a dynamic PCD of the (VOID*) type can not be increased at run
-  # time from its size at build time. Set the "PcdFdtDevicePaths" PCD to a 128
-  # character "empty" string, to allow to be able to set FDT text device paths
-  # up to 128 characters long.
-  #
-  gEmbeddedTokenSpaceGuid.PcdFdtDevicePaths|L"                                                                                                                                "
-
 ################################################################################
 #
 # Components Section - list of all EDK II Modules needed by this Platform
@@ -261,7 +255,13 @@
   #
   # ACPI Support
   #
-  MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
+  MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf {
+!if $(DT_SUPPORT) == TRUE
+  <LibraryClasses>
+    NULL|EmbeddedPkg/Library/PlatformHasAcpiLib/PlatformHasAcpiLib.inf
+!endif
+  }
+
   MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
   OpenPlatformPkg/Platforms/ARM/VExpress/AcpiTables/AcpiTables.inf
 
@@ -314,3 +314,10 @@
       NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf
   }
+
+!if $(DT_SUPPORT) == TRUE
+  #
+  # FDT installation
+  #
+  EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+!endif

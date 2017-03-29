@@ -170,35 +170,20 @@ FvNameGuid         = 87940482-fc81-41c3-87e6-399cf85ac8a0
   # FV Filesystem
   INF MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
 
+!if $(DT_SUPPORT) == TRUE
   #
   # FDT installation
   #
-  # The UEFI driver is at the end of the list of the driver to be dispatched
-  # after the device drivers (eg: Ethernet) to ensure we have support for them.
-  INF EmbeddedPkg/Drivers/FdtPlatformDxe/FdtPlatformDxe.inf
+  INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
 
-!ifdef $(DTB_DIR)
-  #
-  # Embed flattened device tree (FDT) images for all known
-  # variants of this platform
-  #
-  FILE RAW = PCD (gArmVExpressTokenSpaceGuid.PcdFdtFvpBaseAEMv8x4GicV2) {
-    $(DTB_DIR)/fvp-base-gicv2-psci.dtb
-  }
-  FILE RAW = PCD (gArmVExpressTokenSpaceGuid.PcdFdtFvpBaseAEMv8x4GicV2Legacy) {
-    $(DTB_DIR)/fvp-base-gicv2legacy-psci.dtb
-  }
-  FILE RAW = PCD (gArmVExpressTokenSpaceGuid.PcdFdtFvpBaseAEMv8x4GicV3) {
-    $(DTB_DIR)/fvp-base-gicv3-psci.dtb
-  }
-  FILE RAW = PCD (gArmVExpressTokenSpaceGuid.PcdFdtFvpFoundationGicV2) {
-    $(DTB_DIR)/fvp-foundation-gicv2-psci.dtb
-  }
-  FILE RAW = PCD (gArmVExpressTokenSpaceGuid.PcdFdtFvpFoundationGicV2Legacy) {
-    $(DTB_DIR)/fvp-foundation-gicv2legacy-psci.dtb
-  }
-  FILE RAW = PCD (gArmVExpressTokenSpaceGuid.PcdFdtFvpFoundationGicV3) {
-    $(DTB_DIR)/fvp-foundation-gicv3-psci.dtb
+  # builtin device tree binaries -- order matches ARM_VEXPRESS_PLATFORM_ID
+  FILE FREEFORM = 25462CDA-221F-47DF-AC1D-259CFAA4E326 {
+    SECTION RAW = OpenPlatformPkg/Platforms/ARM/VExpress/DeviceTree/fvp-base-gicv2-psci.dtb
+    SECTION RAW = OpenPlatformPkg/Platforms/ARM/VExpress/DeviceTree/fvp-base-gicv2legacy-psci.dtb
+    SECTION RAW = OpenPlatformPkg/Platforms/ARM/VExpress/DeviceTree/fvp-base-gicv3-psci.dtb
+    SECTION RAW = OpenPlatformPkg/Platforms/ARM/VExpress/DeviceTree/fvp-foundation-gicv2-psci.dtb
+    SECTION RAW = OpenPlatformPkg/Platforms/ARM/VExpress/DeviceTree/fvp-foundation-gicv2legacy-psci.dtb
+    SECTION RAW = OpenPlatformPkg/Platforms/ARM/VExpress/DeviceTree/fvp-foundation-gicv3-psci.dtb
   }
 !endif
 

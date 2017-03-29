@@ -284,3 +284,11 @@
       NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf
   }
+
+  #
+  # FDT installation
+  #
+  EmbeddedPkg/Drivers/FdtPlatformDxe/FdtPlatformDxe.inf {
+    <LibraryClasses>
+      BdsLib|ArmPkg/Library/BdsLib/BdsLib.inf
+  }
