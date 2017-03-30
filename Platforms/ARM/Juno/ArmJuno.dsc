@@ -66,6 +66,10 @@
 [LibraryClasses.common.UEFI_DRIVER, LibraryClasses.common.UEFI_APPLICATION, LibraryClasses.common.DXE_RUNTIME_DRIVER, LibraryClasses.common.DXE_DRIVER]
   PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
   NonDiscoverableDeviceRegistrationLib|MdeModulePkg/Library/NonDiscoverableDeviceRegistrationLib/NonDiscoverableDeviceRegistrationLib.inf
+  PciHostBridgeLib|OpenPlatformPkg/Platforms/ARM/Juno/Library/JunoPciHostBridgeLib/JunoPciHostBridgeLib.inf
+  PciSegmentLib|MdePkg/Library/BasePciSegmentLibPci/BasePciSegmentLibPci.inf
+  PciLib|MdePkg/Library/BasePciLibPciExpress/BasePciLibPciExpress.inf
+  PciExpressLib|MdePkg/Library/BasePciExpressLib/BasePciExpressLib.inf
 
 [BuildOptions]
   *_*_*_PLATFORM_FLAGS = -I$(WORKSPACE)/ArmPlatformPkg/ArmVExpressPkg/Include -I$(WORKSPACE)/ArmPlatformPkg/ArmJunoPkg/Include
@@ -143,12 +147,16 @@
   # PLDA PCI Root Complex
   #
   gArmTokenSpaceGuid.PcdPciBusMax|255
-  gArmTokenSpaceGuid.PcdPciIoBase|0x5f800000
+  gArmTokenSpaceGuid.PcdPciIoBase|0x0
   gArmTokenSpaceGuid.PcdPciIoSize|0x00800000
   gArmTokenSpaceGuid.PcdPciMmio32Base|0x50000000
   gArmTokenSpaceGuid.PcdPciMmio32Size|0x08000000
   gArmTokenSpaceGuid.PcdPciMmio64Base|0x4000000000
   gArmTokenSpaceGuid.PcdPciMmio64Size|0x100000000
+
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0x40000000
+  gArmTokenSpaceGuid.PcdPciIoTranslation|0x5f800000
+  gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize|24
 
   # List of Device Paths that support BootMonFs
   gArmPlatformTokenSpaceGuid.PcdBootMonFsSupportedDevicePaths|L"VenHw(E7223039-5836-41E1-B542-D7EC736C5E59)"
@@ -270,16 +278,13 @@
   MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
 
   # Required by PCI
-  UefiCpuPkg/CpuIo2Dxe/CpuIo2Dxe.inf
+  ArmPkg/Drivers/ArmPciCpuIo2Dxe/ArmPciCpuIo2Dxe.inf
 
   #
   # PCI Support
   #
   MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
-  ArmPlatformPkg/ArmJunoPkg/Drivers/PciHostBridgeDxe/PciHostBridgeDxe.inf {
-    <LibraryClasses>
-      DmaLib|EmbeddedPkg/Library/NullDmaLib/NullDmaLib.inf
-  }
+  MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
 
   #
   # SATA Controller

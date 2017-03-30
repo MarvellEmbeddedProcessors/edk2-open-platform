@@ -140,7 +140,7 @@ FvNameGuid         = B73FE497-B92E-416e-8326-45AD0D270092
   INF MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
 
   # Required by PCI
-  INF UefiCpuPkg/CpuIo2Dxe/CpuIo2Dxe.inf
+  INF ArmPkg/Drivers/ArmPciCpuIo2Dxe/ArmPciCpuIo2Dxe.inf
 
   # FV FileSystem
   INF MdeModulePkg/Universal/FvSimpleFileSystemDxe/FvSimpleFileSystemDxe.inf
@@ -161,7 +161,7 @@ FvNameGuid         = B73FE497-B92E-416e-8326-45AD0D270092
   # PCI Support
   #
   INF MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
-  INF ArmPlatformPkg/ArmJunoPkg/Drivers/PciHostBridgeDxe/PciHostBridgeDxe.inf
+  INF MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
 
   #
   # SATA Controller
