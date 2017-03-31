@@ -39,7 +39,7 @@ CHAR16 * TypeStringTable [] = {L"unconnected", L"PCIE0", L"PCIE1", L"PCIE2",
                            L"SGMII0", L"SGMII1", L"SGMII2", L"SGMII3",
                            L"QSGMII", L"USB3_HOST0", L"USB3_HOST1",
                            L"USB3_DEVICE", L"XAUI0", L"XAUI1", L"XAUI2",
-                           L"XAUI3", L"RXAUI0", L"RXAUI1", L"KR"};
+                           L"XAUI3", L"RXAUI0", L"RXAUI1", L"SFI"};
 
 CHAR16 * SpeedStringTable [] = {L"-", L"1.25 Gbps", L"1.5 Gbps", L"2.5 Gbps",
                                 L"3.0 Gbps", L"3.125 Gbps", L"5 Gbps",
