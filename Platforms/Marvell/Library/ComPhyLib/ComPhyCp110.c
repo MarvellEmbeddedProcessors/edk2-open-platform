@@ -1051,6 +1051,7 @@ ComPhyCp110Init (
     }
     if (EFI_ERROR(Status)) {
       DEBUG ((DEBUG_ERROR, "Failed to initialize Lane %d\n with Status = 0x%x", Lane, Status));
+      PtrComPhyMap->Type = PHY_TYPE_UNCONNECTED;
     }
   }
 }
