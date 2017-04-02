@@ -256,6 +256,101 @@ ComPhyPciePhyConfiguration (
 
 STATIC
 VOID
+ComPhyPcieSetAnalogParameters (
+  IN EFI_PHYSICAL_ADDRESS HpipeAddr
+)
+{
+  UINT32 Data, Mask;
+
+  /* Set Preset sweep configurations */
+  Mask = HPIPE_TX_TX_STATUS_CHECK_MODE_MASK;
+  Data = 0x1 << HPIPE_TX_STATUS_CHECK_MODE_OFFSET;
+
+  Mask |= HPIPE_TX_NUM_OF_PRESET_MASK;
+  Data |= 0x7 << HPIPE_TX_NUM_OF_PRESET_OFFSET;
+
+  Mask |= HPIPE_TX_SWEEP_PRESET_EN_MASK;
+  Data |= 0x1 << HPIPE_TX_SWEEP_PRESET_EN_OFFSET;
+  RegSet (HpipeAddr + HPIPE_TX_TRAIN_CTRL_11_REG, Data, Mask);
+
+  /* Tx train start configuration */
+  Mask = HPIPE_TX_TRAIN_START_SQ_EN_MASK;
+  Data = 0x1 << HPIPE_TX_TRAIN_START_SQ_EN_OFFSET;
+
+  Mask |= HPIPE_TX_TRAIN_START_FRM_DET_EN_MASK;
+  Data |= 0x0 << HPIPE_TX_TRAIN_START_FRM_DET_EN_OFFSET;
+
+  Mask |= HPIPE_TX_TRAIN_START_FRM_LOCK_EN_MASK;
+  Data |= 0x0 << HPIPE_TX_TRAIN_START_FRM_LOCK_EN_OFFSET;
+
+  Mask |= HPIPE_TX_TRAIN_WAIT_TIME_EN_MASK;
+  Data |= 0x1 << HPIPE_TX_TRAIN_WAIT_TIME_EN_OFFSET;
+  RegSet (HpipeAddr + HPIPE_TX_TRAIN_CTRL_5_REG, Data, Mask);
+
+  /* Enable Tx train P2P */
+  Mask = HPIPE_TX_TRAIN_P2P_HOLD_MASK;
+  Data = 0x1 << HPIPE_TX_TRAIN_P2P_HOLD_OFFSET;
+  RegSet (HpipeAddr + HPIPE_TX_TRAIN_CTRL_0_REG, Data, Mask);
+
+  /* Configure Tx train timeout */
+  Mask = HPIPE_TRX_TRAIN_TIMER_MASK;
+  Data = 0x17 << HPIPE_TRX_TRAIN_TIMER_OFFSET;
+  RegSet (HpipeAddr + HPIPE_TX_TRAIN_CTRL_4_REG, Data, Mask);
+
+  /* Disable G0/G1/GN1 adaptation */
+  Mask = HPIPE_TX_TRAIN_CTRL_G1_MASK | HPIPE_TX_TRAIN_CTRL_GN1_MASK | HPIPE_TX_TRAIN_CTRL_G0_OFFSET;
+  Data = 0;
+  RegSet (HpipeAddr + HPIPE_TX_TRAIN_CTRL_REG, Data, Mask);
+
+  /* Disable DTL frequency loop */
+  Mask = HPIPE_PWR_CTR_DTL_FLOOP_EN_MASK;
+  Data = 0x0 << HPIPE_PWR_CTR_DTL_FLOOP_EN_OFFSET;
+  RegSet (HpipeAddr + HPIPE_PWR_CTR_DTL_REG, Data, Mask);
+
+  /* Configure G3 DFE */
+  Mask = HPIPE_G3_DFE_RES_MASK;
+  Data = 0x3 << HPIPE_G3_DFE_RES_OFFSET;
+  RegSet (HpipeAddr + HPIPE_G3_SETTING_4_REG, Data, Mask);
+
+  /* Force DFE resolution (use GEN table value) */
+  Mask = HPIPE_DFE_RES_FORCE_MASK;
+  Data = 0x1 << HPIPE_DFE_RES_FORCE_OFFSET;
+  RegSet (HpipeAddr + HPIPE_DFE_REG0,  Data, Mask);
+
+  /* Configure initial and final coefficient value for receiver */
+  Mask = HPIPE_G3_SET_1_G3_RX_SELMUPI_MASK;
+  Data = 0x1 << HPIPE_G3_SET_1_G3_RX_SELMUPI_OFFSET;
+
+  Mask |= HPIPE_G3_SET_1_G3_RX_SELMUPF_MASK;
+  Data |= 0x1 << HPIPE_G3_SET_1_G3_RX_SELMUPF_OFFSET;
+
+  Mask |= HPIPE_G3_SET_1_G3_SAMPLER_INPAIRX2_EN_MASK;
+  Data |= 0x0 << HPIPE_G3_SET_1_G3_SAMPLER_INPAIRX2_EN_OFFSET;
+  RegSet (HpipeAddr + HPIPE_G3_SET_1_REG,  Data, Mask);
+
+  /* Trigger sampler 5us enable pulse */
+  Mask = HPIPE_SAMPLER_MASK;
+  Data = 0x1 << HPIPE_SAMPLER_OFFSET;
+  RegSet (HpipeAddr + HPIPE_SAMPLER_N_PROC_CALIB_CTRL_REG, Data, Mask);
+  MicroSecondDelay (5);
+  RegSet (HpipeAddr + HPIPE_SAMPLER_N_PROC_CALIB_CTRL_REG, 0, Mask);
+
+  /* FFE resistor tuning for different bandwidth  */
+  Mask = HPIPE_G3_FFE_DEG_RES_LEVEL_MASK;
+  Data = 0x1 << HPIPE_G3_FFE_DEG_RES_LEVEL_OFFSET;
+
+  Mask |= HPIPE_G3_FFE_LOAD_RES_LEVEL_MASK;
+  Data |= 0x1 << HPIPE_G3_FFE_LOAD_RES_LEVEL_OFFSET;
+  RegSet (HpipeAddr + HPIPE_G3_SETTING_3_REG, Data, Mask);
+
+  /* Set phy in root complex mode */
+  Mask = HPIPE_CFG_PHY_RC_EP_MASK;
+  Data = 0x1 << HPIPE_CFG_PHY_RC_EP_OFFSET;
+  RegSet (HpipeAddr + HPIPE_LANE_EQU_CONFIG_0_REG, Data, Mask);
+}
+
+STATIC
+VOID
 ComPhyPciePhyPowerUp (
   IN EFI_PHYSICAL_ADDRESS HpipeAddr
 )
@@ -311,6 +406,10 @@ ComPhyPciePowerUp (
   DEBUG((DEBUG_INFO, "ComPhy: stage: ComPhy configuration\n"));
 
   ComPhyPciePhyConfiguration (ComPhyAddr, HpipeAddr);
+
+  DEBUG((DEBUG_INFO, "ComPhy: stage: Set analog paramters\n"));
+
+  ComPhyPcieSetAnalogParameters (HpipeAddr);
 
   DEBUG((DEBUG_INFO, "ComPhy: stage: ComPhy power up\n"));
 
