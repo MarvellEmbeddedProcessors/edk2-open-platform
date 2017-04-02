@@ -608,20 +608,203 @@ ComPhySataPhyConfiguration (
 STATIC
 VOID
 ComPhySataSetAnalogParameters (
-  IN EFI_PHYSICAL_ADDRESS HpipeAddr
+  IN EFI_PHYSICAL_ADDRESS HpipeAddr,
+  IN EFI_PHYSICAL_ADDRESS SdIpAddr
 )
 {
+  UINT32 Mask, Data;
+
+  /* Hpipe Generation 1 settings 1 */
+  Mask = HPIPE_GX_SET1_RX_SELMUPI_MASK |
+         HPIPE_GX_SET1_RX_SELMUPP_MASK |
+         HPIPE_GX_SET1_RX_SELMUFI_MASK |
+         HPIPE_GX_SET1_RX_SELMUFF_MASK |
+         HPIPE_GX_SET1_RX_DIGCK_DIV_MASK;
+  Data = (0x1 << HPIPE_GX_SET1_RX_SELMUPP_OFFSET) |
+         (0x3 << HPIPE_GX_SET1_RX_SELMUFF_OFFSET) |
+         (0x1 << HPIPE_GX_SET1_RX_DIGCK_DIV_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G1_SET1_REG, ~Mask, Data);
+
+  /* Hpipe Generation 1 settings 3 */
+  Mask = HPIPE_GX_SET3_FFE_CAP_SEL_MASK |
+         HPIPE_GX_SET3_FFE_RES_SEL_MASK |
+         HPIPE_GX_SET3_FFE_SETTING_FORCE_MASK |
+         HPIPE_GX_SET3_FFE_DEG_RES_LEVEL_MASK |
+         HPIPE_GX_SET3_FFE_LOAD_RES_LEVEL_MASK;
+  Data = 0xf |
+         (0x2 << HPIPE_GX_SET3_FFE_RES_SEL_OFFSET) |
+         (0x1 << HPIPE_GX_SET3_FFE_SETTING_FORCE_OFFSET) |
+         (0x1 << HPIPE_GX_SET3_FFE_DEG_RES_LEVEL_OFFSET) |
+         (0x1 << HPIPE_GX_SET3_FFE_LOAD_RES_LEVEL_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G1_SET3_REG, ~Mask, Data);
+
+  /* Hpipe Generation 2 settings 1 */
+  Mask = HPIPE_GX_SET1_RX_SELMUPI_MASK |
+         HPIPE_GX_SET1_RX_SELMUPP_MASK |
+         HPIPE_GX_SET1_RX_SELMUFI_MASK |
+         HPIPE_GX_SET1_RX_SELMUFF_MASK |
+         HPIPE_GX_SET1_RX_DIGCK_DIV_MASK;
+  Data = (0x1 << HPIPE_GX_SET1_RX_SELMUPP_OFFSET) |
+         (0x3 << HPIPE_GX_SET1_RX_SELMUFF_OFFSET) |
+         (0x1 << HPIPE_GX_SET1_RX_DIGCK_DIV_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G2_SET1_REG, ~Mask, Data);
+
+  /* Hpipe Generation 3 settings 1 */
+  Mask = HPIPE_GX_SET1_RX_SELMUPI_MASK |
+         HPIPE_GX_SET1_RX_SELMUPP_MASK |
+         HPIPE_GX_SET1_RX_SELMUFI_MASK |
+         HPIPE_GX_SET1_RX_SELMUFF_MASK |
+         HPIPE_GX_SET1_RX_DFE_EN_MASK |
+         HPIPE_GX_SET1_RX_DIGCK_DIV_MASK |
+         HPIPE_GX_SET1_SAMPLER_INPAIRX2_EN_MASK;
+  Data = 0x2 |
+         (0x2 << HPIPE_GX_SET1_RX_SELMUPP_OFFSET) |
+         (0x3 << HPIPE_GX_SET1_RX_SELMUFI_OFFSET) |
+         (0x3 << HPIPE_GX_SET1_RX_SELMUFF_OFFSET) |
+         (0x1 << HPIPE_GX_SET1_RX_DFE_EN_OFFSET) |
+         (0x2 << HPIPE_GX_SET1_RX_DIGCK_DIV_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G3_SET1_REG, ~Mask, Data);
+
+  /* DTL Control */
+  Mask = HPIPE_PWR_CTR_DTL_SQ_DET_EN_MASK |
+         HPIPE_PWR_CTR_DTL_SQ_PLOOP_EN_MASK |
+         HPIPE_PWR_CTR_DTL_FLOOP_EN_MASK |
+         HPIPE_PWR_CTR_DTL_CLAMPING_SEL_MASK |
+         HPIPE_PWR_CTR_DTL_INTPCLK_DIV_FORCE_MASK |
+         HPIPE_PWR_CTR_DTL_CLK_MODE_MASK |
+         HPIPE_PWR_CTR_DTL_CLK_MODE_FORCE_MASK;
+  Data = 0x1 |
+         (0x1 << HPIPE_PWR_CTR_DTL_SQ_PLOOP_EN_OFFSET) |
+         (0x1 << HPIPE_PWR_CTR_DTL_FLOOP_EN_OFFSET) |
+         (0x1 << HPIPE_PWR_CTR_DTL_CLAMPING_SEL_OFFSET) |
+         (0x1 << HPIPE_PWR_CTR_DTL_INTPCLK_DIV_FORCE_OFFSET) |
+         (0x1 << HPIPE_PWR_CTR_DTL_CLK_MODE_OFFSET) |
+         (0x1 << HPIPE_PWR_CTR_DTL_CLK_MODE_FORCE_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_PWR_CTR_DTL_REG, ~Mask, Data);
+
+  /* Trigger sampler enable pulse (by toggling the bit) */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_SAMPLER_N_PROC_CALIB_CTRL_REG,
+          ~HPIPE_SAMPLER_MASK,
+          0x1 << HPIPE_SAMPLER_OFFSET
+          );
+  MmioAnd32 (
+          HpipeAddr + HPIPE_SAMPLER_N_PROC_CALIB_CTRL_REG,
+          ~HPIPE_SAMPLER_MASK
+          );
+
+  /* VDD Calibration Control 3 */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_VDD_CAL_CTRL_REG,
+          ~HPIPE_EXT_SELLV_RXSAMPL_MASK,
+          0x10 << HPIPE_EXT_SELLV_RXSAMPL_OFFSET
+          );
+
+  /* DFE Resolution Control */
+  MmioOr32 (HpipeAddr + HPIPE_DFE_REG0, HPIPE_DFE_RES_FORCE_MASK);
+
+  /* DFE F3-F5 Coefficient Control */
+  MmioAnd32 (
+          HpipeAddr + HPIPE_DFE_F3_F5_REG,
+          ~(HPIPE_DFE_F3_F5_DFE_EN_MASK | HPIPE_DFE_F3_F5_DFE_CTRL_MASK)
+          );
+
+  /* Hpipe Generation 3 settings 3 */
+  Mask = HPIPE_GX_SET3_FFE_CAP_SEL_MASK |
+         HPIPE_GX_SET3_FFE_RES_SEL_MASK |
+         HPIPE_GX_SET3_FFE_SETTING_FORCE_MASK |
+         HPIPE_GX_SET3_FFE_DEG_RES_LEVEL_MASK |
+         HPIPE_GX_SET3_FFE_LOAD_RES_LEVEL_MASK;
+  Data = 0xf |
+         (0x4 << HPIPE_GX_SET3_FFE_RES_SEL_OFFSET) |
+         (0x1 << HPIPE_GX_SET3_FFE_SETTING_FORCE_OFFSET) |
+         (0x1 << HPIPE_GX_SET3_FFE_DEG_RES_LEVEL_OFFSET) |
+         (0x3 << HPIPE_GX_SET3_FFE_LOAD_RES_LEVEL_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G3_SET3_REG, ~Mask, Data);
+
+  /* Hpipe Generation 3 settings 4 */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_G3_SET4_REG,
+          ~HPIPE_GX_SET4_DFE_RES_MASK,
+          0x2 << HPIPE_GX_SET4_DFE_RES_OFFSET
+          );
+
+  /* Offset Phase Control - force offset and toggle 'valid' bit */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_PHASE_CONTROL_REG,
+          ~(HPIPE_OS_PH_OFFSET_MASK | HPIPE_OS_PH_OFFSET_FORCE_MASK),
+          0x5c | (0x1 << HPIPE_OS_PH_OFFSET_FORCE_OFFSET)
+          );
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_PHASE_CONTROL_REG,
+          ~HPIPE_OS_PH_VALID_MASK,
+          0x1 << HPIPE_OS_PH_VALID_OFFSET
+          );
+  MmioAnd32 (
+          HpipeAddr + HPIPE_PHASE_CONTROL_REG,
+          ~HPIPE_OS_PH_VALID_MASK
+          );
+
+  /* Set G1 TX amplitude and TX post emphasis value */
+  Mask = HPIPE_GX_SET0_TX_AMP_MASK |
+         HPIPE_GX_SET0_TX_AMP_ADJ_MASK |
+         HPIPE_GX_SET0_TX_EMPH1_MASK |
+         HPIPE_GX_SET0_TX_EMPH1_EN_MASK;
+  Data = (0x8 << HPIPE_GX_SET0_TX_AMP_OFFSET) |
+         (0x1 << HPIPE_GX_SET0_TX_AMP_ADJ_OFFSET) |
+         (0x1 << HPIPE_GX_SET0_TX_EMPH1_OFFSET) |
+         (0x1 << HPIPE_GX_SET0_TX_EMPH1_EN_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G1_SET0_REG, ~Mask, Data);
+
+  /* Set G2 TX amplitude and TX post emphasis value */
+  Mask = HPIPE_GX_SET0_TX_AMP_MASK |
+         HPIPE_GX_SET0_TX_AMP_ADJ_MASK |
+         HPIPE_GX_SET0_TX_EMPH1_MASK |
+         HPIPE_GX_SET0_TX_EMPH1_EN_MASK;
+  Data = (0xa << HPIPE_GX_SET0_TX_AMP_OFFSET) |
+         (0x1 << HPIPE_GX_SET0_TX_AMP_ADJ_OFFSET) |
+         (0x2 << HPIPE_GX_SET0_TX_EMPH1_OFFSET) |
+         (0x1 << HPIPE_GX_SET0_TX_EMPH1_EN_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G2_SET0_REG, ~Mask, Data);
+
+  /* Set G3 TX amplitude and TX post emphasis value */
+  Mask = HPIPE_GX_SET0_TX_AMP_MASK |
+         HPIPE_GX_SET0_TX_AMP_ADJ_MASK |
+         HPIPE_GX_SET0_TX_EMPH1_MASK |
+         HPIPE_GX_SET0_TX_EMPH1_EN_MASK |
+         HPIPE_GX_SET0_TX_SLEW_RATE_SEL_MASK |
+         HPIPE_GX_SET0_TX_SLEW_CTRL_EN_MASK;
+  Data = (0xe << HPIPE_GX_SET0_TX_AMP_OFFSET) |
+         (0x1 << HPIPE_GX_SET0_TX_AMP_ADJ_OFFSET) |
+         (0x6 << HPIPE_GX_SET0_TX_EMPH1_OFFSET) |
+         (0x1 << HPIPE_GX_SET0_TX_EMPH1_EN_OFFSET) |
+         (0x4 << HPIPE_GX_SET0_TX_SLEW_RATE_SEL_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G3_SET0_REG, ~Mask, Data);
+
+  /* SERDES External Configuration 2 register - enable spread spectrum clock */
+  MmioOr32 (SdIpAddr + SD_EXTERNAL_CONFIG2_REG, SD_EXTERNAL_CONFIG2_SSC_ENABLE_MASK);
+
   /* DFE reset sequence */
-  RegSet (HpipeAddr + HPIPE_PWR_CTR_REG,
-    0x1 << HPIPE_PWR_CTR_RST_DFE_OFFSET, HPIPE_PWR_CTR_RST_DFE_MASK);
-  RegSet (HpipeAddr + HPIPE_PWR_CTR_REG,
-    0x0 << HPIPE_PWR_CTR_RST_DFE_OFFSET, HPIPE_PWR_CTR_RST_DFE_MASK);
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_PWR_CTR_REG,
+          ~HPIPE_PWR_CTR_RST_DFE_MASK,
+          0x1
+          );
+  MmioAnd32 (
+          HpipeAddr + HPIPE_PWR_CTR_REG,
+          ~HPIPE_PWR_CTR_RST_DFE_MASK
+          );
 
   /* SW reset for interupt logic */
-  RegSet (HpipeAddr + HPIPE_PWR_CTR_REG,
-    0x1 << HPIPE_PWR_CTR_SFT_RST_OFFSET, HPIPE_PWR_CTR_SFT_RST_MASK);
-  RegSet (HpipeAddr + HPIPE_PWR_CTR_REG,
-    0x0 << HPIPE_PWR_CTR_SFT_RST_OFFSET, HPIPE_PWR_CTR_SFT_RST_MASK);
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_PWR_CTR_REG,
+          ~HPIPE_PWR_CTR_SFT_RST_MASK,
+          0x1 << HPIPE_PWR_CTR_SFT_RST_OFFSET
+          );
+  MmioAnd32 (
+          HpipeAddr + HPIPE_PWR_CTR_REG,
+          ~HPIPE_PWR_CTR_SFT_RST_MASK
+          );
 }
 
 STATIC
@@ -738,7 +921,7 @@ ComPhySataPowerUp (
 
   DEBUG((DEBUG_INFO, "ComPhy: stage: Analog paramters from ETP(HW)\n"));
 
-  ComPhySataSetAnalogParameters (HpipeAddr);
+  ComPhySataSetAnalogParameters (HpipeAddr, SdIpAddr);
 
   DEBUG((DEBUG_INFO, "ComPhy: stage: ComPhy power up\n"));
 
@@ -930,8 +1113,8 @@ ComPhySgmiiPowerUp (
   /* Set analog paramters from ETP(HW) - for now use the default data */
   DEBUG((DEBUG_INFO, "ComPhy: stage: Analog paramters from ETP(HW)\n"));
 
-  RegSet (HpipeAddr + HPIPE_G1_SET_0_REG,
-    0x1 << HPIPE_G1_SET_0_G1_TX_EMPH1_OFFSET, HPIPE_G1_SET_0_G1_TX_EMPH1_MASK);
+  RegSet (HpipeAddr + HPIPE_G1_SET0_REG,
+    0x1 << HPIPE_GX_SET0_TX_EMPH1_OFFSET, HPIPE_GX_SET0_TX_EMPH1_MASK);
 
   DEBUG((DEBUG_INFO, "ComPhy: stage: RFU configurations - Power Up PLL,Tx,Rx\n"));
 
