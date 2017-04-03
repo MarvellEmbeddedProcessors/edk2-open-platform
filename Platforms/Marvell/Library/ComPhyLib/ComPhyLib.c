@@ -33,6 +33,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "ComPhyLib.h"
+#include <Library/MvComPhyLib.h>
+#include <Library/MvHwDescLib.h>
+
+DECLARE_A7K8K_COMPHY_TEMPLATE;
 
 CHAR16 * TypeStringTable [] = {L"unconnected", L"PCIE0", L"PCIE1", L"PCIE2",
                            L"PCIE3", L"SATA0", L"SATA1", L"SATA2", L"SATA3",
@@ -46,14 +50,10 @@ CHAR16 * SpeedStringTable [] = {L"-", L"1.25 Gbps", L"1.5 Gbps", L"2.5 Gbps",
                                 L"6 Gbps", L"6.25 Gbps", L"10.31 Gbps"};
 
 CHIP_COMPHY_CONFIG ChipCfgTbl[] = {
-  { /* CP master */
-    .ChipType = L"Cp110m",
+  {
+    .ChipType = MvComPhyTypeCp110,
     .Init = ComPhyCp110Init
   },
-  { /* CP slave */
-    .ChipType = L"Cp110s",
-    .Init = ComPhyCp110Init
-  }
 };
 
 VOID
@@ -208,13 +208,12 @@ GetChipComPhyInit (
   TblSize = sizeof(ChipCfgTbl) / sizeof(ChipCfgTbl[0]);
 
   for (i = 0; i < TblSize ; i++) {
-    if (StrCmp (PtrChipCfg->ChipType, ChipCfgTbl[i].ChipType) == 0) {
+    if (PtrChipCfg->ChipType == ChipCfgTbl[i].ChipType) {
       PtrChipCfg->Init = ChipCfgTbl[i].Init;
       return EFI_SUCCESS;
     }
   }
 
-  DEBUG((DEBUG_ERROR, "ComPhy: Empty ChipType string\n"));
   return EFI_D_ERROR;
 }
 
@@ -222,18 +221,35 @@ STATIC
 VOID
 InitComPhyConfig (
   IN  OUT  CHIP_COMPHY_CONFIG *ChipConfig,
-  IN  OUT  PCD_LANE_MAP       *LaneData
+  IN  OUT  PCD_LANE_MAP       *LaneData,
+  IN       UINT8               Id
   )
 {
+  MVHW_COMPHY_DESC *Desc = &mA7k8kComPhyDescTemplate;
+
+  ChipConfig->ChipType = Desc->ComPhyChipType[Id];
+  ChipConfig->ComPhyBaseAddr = Desc->ComPhyBaseAddresses[Id];
+  ChipConfig->Hpipe3BaseAddr = Desc->ComPhyHpipe3BaseAddresses[Id];
+  ChipConfig->LanesCount = Desc->ComPhyLaneCount[Id];
+  ChipConfig->MuxBitCount = Desc->ComPhyMuxBitCount[Id];
+
   /*
-   * Below macro contains variable name concatenation (used to form PCD's name)
-   * and that's why invoking it cannot be automated, e.g. using for loop.
-   * Currently up to 4 ComPhys might be configured.
+   * Below macro contains variable name concatenation (used to form PCD's name).
    */
-  GetComPhyPcd(ChipConfig, LaneData, 0);
-  GetComPhyPcd(ChipConfig, LaneData, 1);
-  GetComPhyPcd(ChipConfig, LaneData, 2);
-  GetComPhyPcd(ChipConfig, LaneData, 3);
+  switch (Id) {
+  case 0:
+    GetComPhyPcd (ChipConfig, LaneData, 0);
+    break;
+  case 1:
+    GetComPhyPcd (ChipConfig, LaneData, 1);
+    break;
+  case 2:
+    GetComPhyPcd (ChipConfig, LaneData, 2);
+    break;
+  case 3:
+    GetComPhyPcd (ChipConfig, LaneData, 3);
+    break;
+  }
 }
 
 EFI_STATUS
@@ -242,29 +258,42 @@ MvComPhyInit (
   )
 {
   EFI_STATUS Status;
-  CHIP_COMPHY_CONFIG ChipConfig[MAX_CHIPS], *PtrChipCfg;
-  PCD_LANE_MAP LaneData[MAX_CHIPS];
-  UINT32 Lane, ChipCount, i, MaxComphyCount;
+  CHIP_COMPHY_CONFIG ChipConfig[MVHW_MAX_COMPHY_DEVS], *PtrChipCfg;
+  PCD_LANE_MAP LaneData[MVHW_MAX_COMPHY_DEVS];
+  UINT32 Lane, MaxComphyCount;
+  UINT8 *ComPhyDeviceTable, Index;
 
-  ChipCount = PcdGet32 (PcdComPhyChipCount);
-
-  InitComPhyConfig(ChipConfig, LaneData);
-
-  if (ChipCount <= 0 || ChipCount > MAX_CHIPS)
+  /* Obtain table with enabled ComPhy devices */
+  ComPhyDeviceTable = (UINT8 *)PcdGetPtr (PcdComPhyDevices);
+  if (ComPhyDeviceTable == NULL) {
+    DEBUG ((DEBUG_ERROR, "Missing PcdComPhyDevices\n"));
     return EFI_INVALID_PARAMETER;
+  }
 
-  for (i = 0; i < ChipCount ; i++) {
-    PtrChipCfg = &ChipConfig[i];
+  if (PcdGetSize (PcdComPhyDevices) > MVHW_MAX_COMPHY_DEVS) {
+    DEBUG ((DEBUG_ERROR, "Wrong PcdComPhyDevices format\n"));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  /* Initialize enabled chips */
+  for (Index = 0; Index < PcdGetSize (PcdComPhyDevices); Index++) {
+    if (!MVHW_DEV_ENABLED (ComPhy, Index)) {
+      DEBUG ((DEBUG_ERROR, "Skip ComPhy chip %d\n", Index));
+      continue;
+    }
+
+    PtrChipCfg = &ChipConfig[Index];
+    InitComPhyConfig(PtrChipCfg, LaneData, Index);
 
     /* Get the count of the SerDes of the specific chip */
     MaxComphyCount = PtrChipCfg->LanesCount;
     for (Lane = 0; Lane < MaxComphyCount; Lane++) {
       /* Parse PCD with string indicating SerDes Type */
       PtrChipCfg->MapData[Lane].Type =
-        ParseSerdesTypeString (LaneData[i].TypeStr[Lane]);
+        ParseSerdesTypeString (LaneData[Index].TypeStr[Lane]);
       PtrChipCfg->MapData[Lane].Speed =
-        ParseSerdesSpeed (LaneData[i].SpeedValue[Lane]);
-      PtrChipCfg->MapData[Lane].Invert = (UINT32) LaneData[i].InvFlag[Lane];
+        ParseSerdesSpeed (LaneData[Index].SpeedValue[Lane]);
+      PtrChipCfg->MapData[Lane].Invert = (UINT32)LaneData[Index].InvFlag[Lane];
 
       if ((PtrChipCfg->MapData[Lane].Speed == PHY_SPEED_INVALID) ||
           (PtrChipCfg->MapData[Lane].Speed == PHY_SPEED_ERROR) ||
@@ -278,7 +307,7 @@ MvComPhyInit (
 
     Status = GetChipComPhyInit (PtrChipCfg);
     if (EFI_ERROR(Status)) {
-     DEBUG((DEBUG_ERROR, "ComPhy: Invalid Chip%dType name\n", i));
+     DEBUG ((DEBUG_ERROR, "ComPhy: Invalid Chip%d type\n", Index));
      return Status;
     }
 
