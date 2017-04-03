@@ -35,6 +35,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __MVCOMPHYLIB_H__
 #define __MVCOMPHYLIB_H__
 
+typedef enum {
+  MvComPhyTypeCp110,
+  MvComPhyTypeMax,
+} MV_COMPHY_CHIP_TYPE;
+
 EFI_STATUS
 MvComPhyInit (
   VOID
