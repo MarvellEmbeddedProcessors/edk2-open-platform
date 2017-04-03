@@ -846,11 +846,11 @@ ComPhySataSetAnalogParameters (
   RegSet (HpipeAddr + HPIPE_PWR_CTR_DTL_REG, Data, Mask);
 
   /* Trigger sampler enable pulse (by toggleing the bit) */
-  Mask = HPIPE_SMAPLER_MASK;
-  Data = 0x1 << HPIPE_SMAPLER_OFFSET;
+  Mask = HPIPE_SAMPLER_MASK;
+  Data = 0x1 << HPIPE_SAMPLER_OFFSET;
   RegSet (HpipeAddr + HPIPE_SAMPLER_N_PROC_CALIB_CTRL_REG, Data, Mask);
-  Mask = HPIPE_SMAPLER_MASK;
-  Data = 0x0 << HPIPE_SMAPLER_OFFSET;
+  Mask = HPIPE_SAMPLER_MASK;
+  Data = 0x0 << HPIPE_SAMPLER_OFFSET;
   RegSet (HpipeAddr + HPIPE_SAMPLER_N_PROC_CALIB_CTRL_REG, Data, Mask);
 
   /* VDD Calibration Control 3 */
