@@ -40,22 +40,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/DebugLib.h>
 #include <Library/PcdLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/MvComPhyLib.h>
 #include <Library/IoLib.h>
 #include <Library/TimerLib.h>
 #include <Library/ParsePcdLib.h>
 
 #define MAX_LANE_OPTIONS          10
-#define MAX_CHIPS                 4
 
 /***** Parsing PCD *****/
-#define GET_TYPE_STRING(id)       PcdGetPtr(PcdChip##id##Compatible)
 #define GET_LANE_TYPE(id)         PcdGetPtr(PcdChip##id##ComPhyTypes)
 #define GET_LANE_SPEED(id)        PcdGetPtr(PcdChip##id##ComPhySpeeds)
 #define GET_LANE_INV(id)          PcdGetPtr(PcdChip##id##ComPhyInvFlags)
-#define GET_COMPHY_BASE_ADDR(id)  PcdGet64(PcdChip##id##ComPhyBaseAddress)
-#define GET_HPIPE3_BASE_ADDR(id)  PcdGet64(PcdChip##id##Hpipe3BaseAddress)
-#define GET_MUX_BIT_COUNT(id)     PcdGet32(PcdChip##id##ComPhyMuxBitCount)
-#define GET_MAX_LANES(id)         PcdGet32(PcdChip##id##ComPhyMaxLanes)
 
 #define FillLaneMap(chip_struct, lane_struct, id) { \
   ParsePcdString((CHAR16 *) GET_LANE_TYPE(id), chip_struct[id].LanesCount, NULL, lane_struct[id].TypeStr);     \
@@ -64,11 +59,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 
 #define GetComPhyPcd(chip_struct, lane_struct, id) {               \
-  chip_struct[id].ChipType = (CHAR16 *) GET_TYPE_STRING(id);       \
-  chip_struct[id].ComPhyBaseAddr = GET_COMPHY_BASE_ADDR(id);       \
-  chip_struct[id].Hpipe3BaseAddr = GET_HPIPE3_BASE_ADDR(id);       \
-  chip_struct[id].MuxBitCount = GET_MUX_BIT_COUNT(id);             \
-  chip_struct[id].LanesCount = GET_MAX_LANES(id);                  \
   FillLaneMap(chip_struct, lane_struct, id);                       \
 }
 
@@ -601,7 +591,7 @@ VOID
   );
 
 struct _CHIP_COMPHY_CONFIG {
-  CHAR16* ChipType;
+  MV_COMPHY_CHIP_TYPE ChipType;
   COMPHY_MAP MapData[MAX_LANE_OPTIONS];
   COMPHY_MUX_DATA *MuxData;
   EFI_PHYSICAL_ADDRESS ComPhyBaseAddr;

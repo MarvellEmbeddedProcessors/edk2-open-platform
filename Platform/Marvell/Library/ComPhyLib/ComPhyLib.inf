@@ -59,48 +59,24 @@
   ComPhyMux.c
 
 [FixedPcd]
-  gMarvellTokenSpaceGuid.PcdComPhyChipCount
+  gMarvellTokenSpaceGuid.PcdComPhyDevices
 
   #Chip0
-  gMarvellTokenSpaceGuid.PcdChip0Compatible
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyBaseAddress
-  gMarvellTokenSpaceGuid.PcdChip0Hpipe3BaseAddress
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyMuxBitCount
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyMaxLanes
-
   gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes
   gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds
   gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlags
 
   #Chip1
-  gMarvellTokenSpaceGuid.PcdChip1Compatible
-  gMarvellTokenSpaceGuid.PcdChip1ComPhyBaseAddress
-  gMarvellTokenSpaceGuid.PcdChip1Hpipe3BaseAddress
-  gMarvellTokenSpaceGuid.PcdChip1ComPhyMuxBitCount
-  gMarvellTokenSpaceGuid.PcdChip1ComPhyMaxLanes
-
   gMarvellTokenSpaceGuid.PcdChip1ComPhyTypes
   gMarvellTokenSpaceGuid.PcdChip1ComPhySpeeds
   gMarvellTokenSpaceGuid.PcdChip1ComPhyInvFlags
 
   #Chip2
-  gMarvellTokenSpaceGuid.PcdChip2Compatible
-  gMarvellTokenSpaceGuid.PcdChip2ComPhyBaseAddress
-  gMarvellTokenSpaceGuid.PcdChip2Hpipe3BaseAddress
-  gMarvellTokenSpaceGuid.PcdChip2ComPhyMuxBitCount
-  gMarvellTokenSpaceGuid.PcdChip2ComPhyMaxLanes
-
   gMarvellTokenSpaceGuid.PcdChip2ComPhyTypes
   gMarvellTokenSpaceGuid.PcdChip2ComPhySpeeds
   gMarvellTokenSpaceGuid.PcdChip2ComPhyInvFlags
 
   #Chip3
-  gMarvellTokenSpaceGuid.PcdChip3Compatible
-  gMarvellTokenSpaceGuid.PcdChip3ComPhyBaseAddress
-  gMarvellTokenSpaceGuid.PcdChip3Hpipe3BaseAddress
-  gMarvellTokenSpaceGuid.PcdChip3ComPhyMuxBitCount
-  gMarvellTokenSpaceGuid.PcdChip3ComPhyMaxLanes
-
   gMarvellTokenSpaceGuid.PcdChip3ComPhyTypes
   gMarvellTokenSpaceGuid.PcdChip3ComPhySpeeds
   gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlags
