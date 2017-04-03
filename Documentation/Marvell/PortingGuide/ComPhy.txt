@@ -2,44 +2,18 @@ COMPHY configuration
 ---------------------------
 In order to configure ComPhy library, following PCDs are available:
 
-  gMarvellTokenSpaceGuid.PcdComPhyChipCount
+  gMarvellTokenSpaceGuid.PcdComPhyDevices
 
-Indicates how many different chips are placed on board. So far, up to 4 chips
-are supported.
+This array indicates, which ones of the ComPhy chips defined in
+MVHW_COMPHY_DESC template will be configured.
 
 Every ComPhy PCD has <Num> part where <Num> stands for chip ID (order is not
 important, but configuration will be set for first PcdComPhyChipCount chips).
 
-Every chip has 8 ComPhy PCDs and three of them concern lanes settings for this
-chip. Below is example for the first chip (Chip0).
-
-General PCDs:
-
-  gMarvellTokenSpaceGuid.PcdChip0Compatible
-
-Unicode string indicating type of chip - currently supported is
-{ L"Cp110" }
-
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyBaseAddress
-
-Indicates COMPHY unit base address.
-
-  gMarvellTokenSpaceGuid.PcdChip0Hpipe3BaseAddress
-
-Indicates Hpipe3 unit base address.
-
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyMuxBitCount
-
-Indicates number of bits that are allocated for every MUX in the
-COMPHY-selector register.
-
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyMaxLanes
-
-Indicates maximum ComPhy lanes number.
-
-Next three PCDs are in unicode string format containing settings for up to 10
-lanes. Setting for each one is separated with semicolon. These PCDs form
-structure describing outputs of PHY integrated in simple cihp.
+Every chip has 3 ComPhy PCDs and three of them comprise per-board lanes
+settings for this chip. Their format is unicode string, containing settings
+for up to 10 lanes. Setting for each one is separated with semicolon.
+These PCDs together describe outputs of PHY integrated in simple cihp.
 Below is example for the first chip (Chip0).
 
   gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes
@@ -48,16 +22,9 @@ Unicode string indicating PHY types. Currently supported are:
 
 { L"unconnected", L"PCIE0", L"PCIE1", L"PCIE2", L"PCIE3",
 L"SATA0", L"SATA1", L"SATA2", L"SATA3", L"SGMII0",
-L"SGMII1", L"SGMII2", L"SGMII3", L"QSGMII",
+L"SGMII1", L"SGMII2", L"SGMII3",
 L"USB3_HOST0", L"USB3_HOST1", L"USB3_DEVICE",
-L"XAUI0", L"XAUI1", L"XAUI2", L"XAUI3", L"RXAUI0",
-L"RXAUI1", L"KR" }
-
-Below documents describes some of above interfaces' types:
-
-SGMII, QSGMII, XAUI - IEEE 802.3
-KR - IEEE 802.3a
-RXAUI - RXAUI Interface and RXAUI Adapter Specification, Marvell
+L"RXAUI0", L"RXAUI1", L"SFI" }
 
   gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds
 
@@ -72,14 +39,7 @@ Indicates lane polarity invert.
 Example
 -------
   #ComPhy
-  gMarvellTokenSpaceGuid.PcdComPhyChipCount|1
-
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyMaxLanes|6
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyBaseAddress|0xF2441000
-  gMarvellTokenSpaceGuid.PcdChip0Hpipe3BaseAddress|0xF2120000
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyMuxBitCount|4
-  gMarvellTokenSpaceGuid.PcdChip0Compatible|L"Cp110"
-
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|L"SGMII2;USB3_HOST0;SGMII0;SATA1;USB3_HOST1;PCIE2"
-  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|L"1250;5000;1250;5000;5000;5000"
+  gMarvellTokenSpaceGuid.PcdComPhyDevices|{ 0x1 }
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|L"SGMII1;USB3_HOST0;SFI;SATA1;USB3_HOST1;PCIE2"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|L"1250;5000;10310;5000;5000;5000"
 
