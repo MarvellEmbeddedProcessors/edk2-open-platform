@@ -606,11 +606,10 @@ DEFINE DO_KCS       = 1
   #
   # FDT support
   #
-  OpenPlatformPkg/Platforms/AMD/Styx/Drivers/FdtDxe/FdtDxe.inf {
+  EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf {
     <LibraryClasses>
-      # deprecated BdsLib from the ARM BDS
-      BdsLib|ArmPkg/Library/BdsLib/BdsLib.inf
       FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
+      DtPlatformDtbLoaderLib|OpenPlatformPkg/Platforms/AMD/Styx/Library/StyxDtbLoaderLib/StyxDtbLoaderLib.inf
   }
 
   #
@@ -684,7 +683,11 @@ DEFINE DO_KCS       = 1
   #
   # ACPI Support
   #
-  MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
+  MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf {
+    <LibraryClasses>
+      NULL|EmbeddedPkg/Library/PlatformHasAcpiLib/PlatformHasAcpiLib.inf
+  }
+
   OpenPlatformPkg/Platforms/AMD/Styx/AcpiTables/AcpiAml.inf
   OpenPlatformPkg/Platforms/AMD/Styx/Drivers/AcpiPlatformDxe/AcpiPlatformDxe.inf
   MdeModulePkg/Universal/Acpi/BootGraphicsResourceTableDxe/BootGraphicsResourceTableDxe.inf
