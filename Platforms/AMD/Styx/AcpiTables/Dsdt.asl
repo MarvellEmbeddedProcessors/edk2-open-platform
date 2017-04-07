@@ -508,40 +508,45 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "AMDINC", "SEATTLE ", 3)
             Name (_SEG, 0x00)  // _SEG: PCI Segment
             Name (_BBN, 0x00)  // _BBN: BIOS Bus Number
             Name (_CCA, 0x01)  // _CCA: Cache Coherency Attribute
-            Name (_PRT, Package (0x04)  // _PRT: PCI Routing Table
+            Name (_PRT, Package ()  // _PRT: PCI Routing Table
             {
-                Package (0x04)
-                {
-                    0xFFFF,
-                    0x00,
-                    0x00,
-                    0x0140
-                },
+                // INTA of the bridge device itself
+                Package () { 0x2FFFF, 0x0, 0x0, 0x140 }
+            })
 
-                Package (0x04)
+            Device (EXP1)
+            {
+                Name (_ADR, 0x20001)  // _ADR: Address
+                Name (_PRT, Package ()  // _PRT: PCI Routing Table
                 {
-                    0xFFFF,
-                    0x01,
-                    0x00,
-                    0x0141
-                },
-
-                Package (0x04)
+                    Package () { 0xFFFF, 0x0, 0x0, 0x140 },
+                    Package () { 0xFFFF, 0x1, 0x0, 0x141 },
+                    Package () { 0xFFFF, 0x2, 0x0, 0x142 },
+                    Package () { 0xFFFF, 0x3, 0x0, 0x143 }
+                }) // _PRT
+            }
+            Device (EXP2)
+            {
+                Name (_ADR, 0x20002)  // _ADR: Address
+                Name (_PRT, Package ()  // _PRT: PCI Routing Table
                 {
-                    0xFFFF,
-                    0x02,
-                    0x00,
-                    0x0142
-                },
-
-                Package (0x04)
+                    Package () { 0xFFFF, 0x0, 0x0, 0x144 },
+                    Package () { 0xFFFF, 0x1, 0x0, 0x145 },
+                    Package () { 0xFFFF, 0x2, 0x0, 0x146 },
+                    Package () { 0xFFFF, 0x3, 0x0, 0x147 }
+                }) // _PRT
+            }
+            Device (EXP3)
+            {
+                Name (_ADR, 0x20003)  // _ADR: Address
+                Name (_PRT, Package ()  // _PRT: PCI Routing Table
                 {
-                    0xFFFF,
-                    0x03,
-                    0x00,
-                    0x0143
-                }
-            }) // _PRT
+                    Package () { 0xFFFF, 0x0, 0x0, 0x148 },
+                    Package () { 0xFFFF, 0x1, 0x0, 0x149 },
+                    Package () { 0xFFFF, 0x2, 0x0, 0x14A },
+                    Package () { 0xFFFF, 0x3, 0x0, 0x14B }
+                }) // _PRT
+            }
 
             Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
             {
