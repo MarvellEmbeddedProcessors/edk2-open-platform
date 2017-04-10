@@ -4821,6 +4821,39 @@ MvGop110PortEventsMask (
   return 0;
 }
 
+/*
+ * Sets "Force Link Pass" and "Do Not Force Link Fail" bits.
+ * This function should only be called when the port is disabled.
+ */
+INT32
+MvGop110GmacForceLinkModeSet(
+  IN PP2DXE_PORT *Port,
+  IN BOOLEAN ForceLinkUp,
+  IN BOOLEAN ForceLinkDown)
+{
+  UINT32 RegVal;
+
+  /* Can't force link pass and link fail at the same time */
+  if ((ForceLinkUp) && (ForceLinkDown))
+    return MVPP2_EINVAL;
+
+  RegVal = MvGop110GmacRead(Port, MVPP2_PORT_AUTO_NEG_CFG_REG);
+
+  if (ForceLinkUp)
+    RegVal |= MVPP2_PORT_AUTO_NEG_CFG_FORCE_LINK_UP_MASK;
+  else
+    RegVal &= ~MVPP2_PORT_AUTO_NEG_CFG_FORCE_LINK_UP_MASK;
+
+  if (ForceLinkDown)
+    RegVal |= MVPP2_PORT_AUTO_NEG_CFG_FORCE_LINK_DOWN_MASK;
+  else
+    RegVal &= ~MVPP2_PORT_AUTO_NEG_CFG_FORCE_LINK_DOWN_MASK;
+
+  MvGop110GmacWrite(Port, MVPP2_PORT_AUTO_NEG_CFG_REG, RegVal);
+
+  return 0;
+}
+
 INT32
 MvGop110FlCfg (
   IN PP2DXE_PORT *Port
