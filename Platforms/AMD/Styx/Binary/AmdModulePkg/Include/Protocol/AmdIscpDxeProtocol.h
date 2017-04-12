@@ -279,7 +279,6 @@ EFI_STATUS
  *----------------------------------------------------------------------------------------
  */
 /// ISCP DXE Protocol Structure
-typedef
 struct _AMD_ISCP_DXE_PROTOCOL {
   AMD_EXECUTE_CPU_CORE_RESET          AmdExecuteCpuCoreReset;         ///< Execute CPU Core Reset
   AMD_EXECUTE_CPU_RETRIEVE_ID         AmdExecuteCpuRetrieveId;        ///< Execute CPU Retrieve ID
@@ -304,6 +303,6 @@ struct _AMD_ISCP_DXE_PROTOCOL {
   AMD_EXECUTE_BMC_PRESENT             AmdExecuteBmcPresent;           ///< Execute BMC presence check
   AMD_EXECUTE_RETRIEVE_BERT_RECORD    AmdExecuteRetrieveBertRecord;   ///< Execute Retrieve Boot Error Record
   AMD_EXECUTE_REGISTER_ERROR_SOURCE   AmdExecuteRegisterErrorSource;  ///< Execute Register Generic Hardware Error Source
-} AMD_ISCP_DXE_PROTOCOL;
+};
 
 #endif //_AMD_ISCP_DXE_PROTOCOL_H_
