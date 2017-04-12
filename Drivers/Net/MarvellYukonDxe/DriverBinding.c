@@ -127,7 +127,6 @@ MarvellYukonDriverStart (
 
   if (EFI_ERROR (Status)) {
     DEBUG ((EFI_D_ERROR, "Marvell Yukon: OpenProtocol: EFI_PCI_IO_PROTOCOL ERROR Status = %r\n", Status));
-    gBS->FreePool (YukonDriver);
     return Status;
   }
 
@@ -146,6 +145,10 @@ MarvellYukonDriverStart (
   }
 
   for (Port = 0; Port < ScData->msk_num_port; Port++) {
+    if (ScData->msk_if[Port] == NULL) {
+      DEBUG ((DEBUG_ERROR, "Marvell Yukon: invalid buffer size\n"));
+      return EFI_BAD_BUFFER_SIZE;
+    }
 
     Status = gBS->AllocatePool (EfiBootServicesData,
                                 sizeof (YUKON_DRIVER),
@@ -153,11 +156,6 @@ MarvellYukonDriverStart (
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "Marvell Yukon: AllocatePool() failed with Status = %r\n", Status));
       return Status;
-    }
-
-    if (ScData->msk_if[Port] == NULL) {
-      DEBUG ((DEBUG_ERROR, "Marvell Yukon: AllocatePool() failed with Status = %r\n", EFI_BAD_BUFFER_SIZE));
-      return EFI_BAD_BUFFER_SIZE;
     }
 
     gBS->SetMem (YukonDriver, sizeof (YUKON_DRIVER), 0);
