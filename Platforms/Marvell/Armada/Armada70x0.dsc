@@ -112,7 +112,7 @@
   gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiUnit|L"0xF2580000;0xF2581000"
   gMarvellTokenSpaceGuid.PcdUtmiPhyUtmiPort|L"0x0;0x1"
 
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|L"SGMII2;USB3_HOST0;SGMII0;SATA1;USB3_HOST1;PCIE2"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|L"SGMII1;USB3_HOST0;SGMII0;SATA1;USB3_HOST1;PCIE2"
   gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|L"3125;5000;1250;5000;5000;5000"
 
   #MDIO
