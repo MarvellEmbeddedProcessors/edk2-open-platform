@@ -49,32 +49,26 @@ DECLARE_A7K8K_NONDISCOVERABLE_TEMPLATE;
  * and " PIPE Selectors".
  * PIPE selector include USB and PCIe options.
  * PHY selector include the Ethernet and SATA options, every Ethernet option
- * has different options, for example: serdes Lane2 had option Eth_port_0
- * that include (SGMII0, XAUI0, RXAUI0, KR)
+ * has different options, for example: serdes Lane2 have option Eth_port_0
+ * that include (SGMII0, RXAUI0, KR)
  */
 COMPHY_MUX_DATA Cp110ComPhyMuxData[] = {
   /* Lane 0 */
-  {4, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII2, 0x1},
-    {PHY_TYPE_XAUI2, 0x1}, {PHY_TYPE_SATA1, 0x4} } },
+  {4, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII1, 0x1}, {PHY_TYPE_SATA1, 0x4}}},
   /* Lane 1 */
-  {4, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII3, 0x1},
-    {PHY_TYPE_XAUI3, 0x1}, {PHY_TYPE_SATA1, 0x4} } },
+  {4, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII2, 0x1}, {PHY_TYPE_SATA0, 0x4}}},
   /* Lane 2 */
-  {6, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII0, 0x1},
-    {PHY_TYPE_XAUI0, 0x1}, {PHY_TYPE_RXAUI0, 0x1}, {PHY_TYPE_KR, 0x1},
-    {PHY_TYPE_SATA0, 0x4} } },
+  {6, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII0, 0x1}, {PHY_TYPE_RXAUI0, 0x1},
+    {PHY_TYPE_KR, 0x1}, {PHY_TYPE_SATA0, 0x4}}},
   /* Lane 3 */
-  {8, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII0, 0x1},
-    {PHY_TYPE_XAUI0, 0x1}, {PHY_TYPE_RXAUI0, 0x1}, {PHY_TYPE_KR, 0x1},
-    {PHY_TYPE_XAUI1, 0x1}, {PHY_TYPE_RXAUI1, 0x1}, {PHY_TYPE_SATA1, 0x4} } },
+  {8, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_RXAUI1, 0x1}, {PHY_TYPE_SGMII1, 0x2},
+    {PHY_TYPE_SATA1, 0x4}}},
   /* Lane 4 */
-  {7, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII0, 0x2},
-    {PHY_TYPE_XAUI0, 0x1}, {PHY_TYPE_RXAUI0, 0x1}, {PHY_TYPE_KR, 0x1},
-    {PHY_TYPE_SGMII2, 0x1}, {PHY_TYPE_XAUI2, 0x1} } },
+  {7, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII0, 0x2}, {PHY_TYPE_RXAUI0, 0x2},
+    {PHY_TYPE_KR, 0x2}, {PHY_TYPE_SGMII1, 0x1}}},
   /* Lane 5 */
-  {6, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_XAUI1, 0x1},
-    {PHY_TYPE_RXAUI1, 0x1}, {PHY_TYPE_SGMII3, 0x1}, {PHY_TYPE_XAUI3, 0x1},
-    {PHY_TYPE_SATA1, 0x4} } },
+  {6, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII2, 0x1}, {PHY_TYPE_RXAUI1, 0x2},
+    {PHY_TYPE_SATA1, 0x4}}},
 };
 
 COMPHY_MUX_DATA Cp110ComPhyPipeMuxData[] = {
