@@ -187,6 +187,10 @@ ComPhyPciePhyConfiguration (
     Mask |= HPIPE_MISC_REFCLK_SEL_MASK;
     Data |= 0x1 << HPIPE_MISC_REFCLK_SEL_OFFSET;
   }
+
+  /* Force ICP */
+  Mask |= HPIPE_MISC_ICP_FORCE_MASK;
+  Data |= 0x1 << HPIPE_MISC_ICP_FORCE_OFFSET;
   RegSet (HpipeAddr + HPIPE_MISC_REG, Data, Mask);
 
   if (PcieClk) {
@@ -216,7 +220,9 @@ ComPhyPciePhyConfiguration (
   /* Set Maximal PHY Generation Setting (8Gbps) */
   Mask = HPIPE_INTERFACE_GEN_MAX_MASK;
   Data = 0x2 << HPIPE_INTERFACE_GEN_MAX_OFFSET;
-
+  /* Bypass frame detection and sync detection for RX DATA */
+  Mask |= HPIPE_INTERFACE_DET_BYPASS_MASK;
+  Data |= 0x1 << HPIPE_INTERFACE_DET_BYPASS_OFFSET;
   /* Set Link Train Mode (Tx training control pins are used) */
   Mask |= HPIPE_INTERFACE_LINK_TRAIN_MASK;
   Data |= 0x1 << HPIPE_INTERFACE_LINK_TRAIN_OFFSET;
@@ -252,6 +258,143 @@ ComPhyPciePhyConfiguration (
   Mask |= HPIPE_TX_TRAIN_COE_FM_PIN_PCIE3_MASK;
   Data |= 0x1 << HPIPE_TX_TRAIN_COE_FM_PIN_PCIE3_OFFSET;
   RegSet (HpipeAddr + HPIPE_TX_TRAIN_REG, Data, Mask);
+}
+
+STATIC
+VOID
+ComPhyPcieSetAnalogParameters (
+  IN EFI_PHYSICAL_ADDRESS HpipeAddr
+)
+{
+  UINT32 Data, Mask;
+
+  /* Set preset sweep configurations */
+  Mask = HPIPE_TX_TX_STATUS_CHECK_MODE_MASK |
+         HPIPE_TX_NUM_OF_PRESET_MASK |
+         HPIPE_TX_SWEEP_PRESET_EN_MASK;
+  Data = (0x1 << HPIPE_TX_STATUS_CHECK_MODE_OFFSET) |
+         (0x7 << HPIPE_TX_NUM_OF_PRESET_OFFSET) |
+         (0x1 << HPIPE_TX_SWEEP_PRESET_EN_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_TX_TRAIN_CTRL_11_REG, ~Mask, Data);
+
+  /* Tx train start configuration */
+  Mask = HPIPE_TX_TRAIN_START_SQ_EN_MASK |
+         HPIPE_TX_TRAIN_START_FRM_DET_EN_MASK |
+         HPIPE_TX_TRAIN_START_FRM_LOCK_EN_MASK |
+         HPIPE_TX_TRAIN_WAIT_TIME_EN_MASK;
+  Data = (0x1 << HPIPE_TX_TRAIN_START_SQ_EN_OFFSET) |
+         (0x1 << HPIPE_TX_TRAIN_WAIT_TIME_EN_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_TX_TRAIN_CTRL_5_REG, ~Mask, Data);
+
+  /* Enable Tx train P2P */
+  MmioOr32 (HpipeAddr + HPIPE_TX_TRAIN_CTRL_0_REG, HPIPE_TX_TRAIN_P2P_HOLD_MASK);
+
+  /* Configure Tx train timeout */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_TX_TRAIN_CTRL_4_REG,
+          ~HPIPE_TRX_TRAIN_TIMER_MASK,
+          0x17 << HPIPE_TRX_TRAIN_TIMER_OFFSET
+          );
+
+  /* Disable G0/G1/GN1 adaptation */
+  MmioAnd32 (
+          HpipeAddr + HPIPE_TX_TRAIN_CTRL_REG,
+          ~(HPIPE_TX_TRAIN_CTRL_G1_MASK | HPIPE_TX_TRAIN_CTRL_GN1_MASK | HPIPE_TX_TRAIN_CTRL_G0_OFFSET)
+          );
+
+  /* Disable DTL frequency loop */
+  MmioAnd32 (HpipeAddr + HPIPE_PWR_CTR_DTL_REG, ~HPIPE_PWR_CTR_DTL_FLOOP_EN_MASK);
+
+  /* Configure Generation 3 DFE */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_G3_SET4_REG,
+          ~HPIPE_GX_SET4_DFE_RES_MASK,
+          0x3 << HPIPE_GX_SET4_DFE_RES_OFFSET
+          );
+
+  /* Use TX/RX training result for DFE */
+  MmioAnd32 (HpipeAddr + HPIPE_DFE_REG0, ~HPIPE_DFE_RES_FORCE_MASK);
+
+  /* Configure initial and final coefficient value for receiver */
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G3_SET1_REG,  ~Mask, Data);
+  Mask = HPIPE_GX_SET1_RX_SELMUPI_MASK |
+         HPIPE_GX_SET1_RX_SELMUPP_MASK |
+         HPIPE_GX_SET1_SAMPLER_INPAIRX2_EN_MASK;
+  Data = 0x1 | (0x1 << HPIPE_GX_SET1_RX_SELMUPP_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G3_SET1_REG, ~Mask, Data);
+
+  /* Trigger sampler 5us enable pulse */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_SAMPLER_N_PROC_CALIB_CTRL_REG,
+          ~HPIPE_SAMPLER_MASK,
+          0x1 << HPIPE_SAMPLER_OFFSET
+          );
+  MicroSecondDelay (5);
+  MmioAnd32 (
+          HpipeAddr + HPIPE_SAMPLER_N_PROC_CALIB_CTRL_REG,
+          ~HPIPE_SAMPLER_MASK
+          );
+
+  /* FFE resistor tuning for different bandwidth  */
+  Mask = HPIPE_GX_SET3_FFE_DEG_RES_LEVEL_MASK |
+         HPIPE_GX_SET3_FFE_LOAD_RES_LEVEL_MASK;
+  Data = (0x1 << HPIPE_GX_SET3_FFE_DEG_RES_LEVEL_OFFSET) |
+         (0x3 << HPIPE_GX_SET3_FFE_LOAD_RES_LEVEL_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G3_SET3_REG, ~Mask, Data);
+
+  /* Pattern lock lost timeout disable */
+  MmioAnd32 (HpipeAddr + HPIPE_FRAME_DETECT_CTRL_3_REG, ~HPIPE_PATTERN_LOCK_LOST_TIMEOUT_EN_MASK);
+
+  /* Configure DFE adaptations */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_CDR_CONTROL_REG,
+          ~(HPIPE_CDR_MAX_DFE_ADAPT_1_MASK | HPIPE_CDR_MAX_DFE_ADAPT_0_MASK | HPIPE_CDR_RX_MAX_DFE_ADAPT_1_MASK),
+          0x1 << HPIPE_CDR_MAX_DFE_ADAPT_1_OFFSET
+          );
+  MmioAnd32 (HpipeAddr + HPIPE_DFE_CONTROL_REG, ~HPIPE_DFE_TX_MAX_DFE_ADAPT_MASK);
+
+  /* Hpipe Generation 2 setting 1*/
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_G2_SET1_REG,
+          ~(HPIPE_GX_SET1_RX_SELMUPI_MASK | HPIPE_GX_SET1_RX_SELMUPP_MASK | HPIPE_GX_SET1_RX_SELMUFI_MASK),
+          0x1 << HPIPE_GX_SET1_RX_SELMUPP_OFFSET
+          );
+
+  /* DFE enable */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_G2_SET4_REG,
+          ~HPIPE_GX_SET4_DFE_RES_MASK,
+          0x3 << HPIPE_GX_SET4_DFE_RES_OFFSET
+          );
+
+  /* Configure DFE Resolution */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_LANE_CFG4_REG,
+          ~HPIPE_LANE_CFG4_DFE_EN_SEL_MASK,
+          0x1 << HPIPE_LANE_CFG4_DFE_EN_SEL_OFFSET
+          );
+
+  /* VDD calibration control */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_VDD_CAL_CTRL_REG,
+          ~HPIPE_EXT_SELLV_RXSAMPL_MASK,
+          0x16 << HPIPE_EXT_SELLV_RXSAMPL_OFFSET
+          );
+
+  /* Set PLL Charge-pump Current Control */
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G3_SET5_REG, ~HPIPE_GX_SET5_ICP_MASK, 0x4);
+
+  /* Set lane rqualization remote setting */
+  Mask = HPIPE_LANE_CFG_FOM_DIRN_OVERRIDE_MASK |
+         HPIPE_LANE_CFG_FOM_ONLY_MODE_MASK |
+         HPIPE_LANE_CFG_FOM_PRESET_VECTOR_MASK;
+  Data = (0x1 << HPIPE_LANE_CFG_FOM_DIRN_OVERRIDE_OFFSET) |
+         (0x1 << HPIPE_LANE_CFG_FOM_ONLY_MODE_OFFFSET) |
+         (0x2 << HPIPE_LANE_CFG_FOM_PRESET_VECTOR_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_LANE_EQ_REMOTE_SETTING_REG, ~Mask, Data);
+
+  /* Set phy in root complex mode */
+  MmioOr32 (HpipeAddr + HPIPE_LANE_EQU_CONFIG_0_REG, HPIPE_CFG_PHY_RC_EP_MASK);
 }
 
 STATIC
@@ -311,6 +454,10 @@ ComPhyPciePowerUp (
   DEBUG((DEBUG_INFO, "ComPhy: stage: ComPhy configuration\n"));
 
   ComPhyPciePhyConfiguration (ComPhyAddr, HpipeAddr);
+
+  DEBUG((DEBUG_INFO, "ComPhy: stage: Set analog paramters\n"));
+
+  ComPhyPcieSetAnalogParameters (HpipeAddr);
 
   DEBUG((DEBUG_INFO, "ComPhy: stage: ComPhy power up\n"));
 
