@@ -4116,6 +4116,20 @@ MvGop110PortInit (
     /* MAC unreset */
     MvGop110GmacReset (Port, UNRESET);
   break;
+  case MV_MODE_SFI:
+    /* Configure PCS */
+    MvGopXpcsModeCfg (Port, MVPP2_SFI_LANE_COUNT);
+    MvGopMpcsModeCfg (Port);
+
+    /* Configure MAC */
+    MvGopXlgMacModeCfg (Port, MVPP2_SFI_LANE_COUNT);
+
+    /* PCS unreset */
+    MvGopXpcsReset (Port, UNRESET);
+
+    /* MAC unreset */
+    MvGopXlgMacReset (Port, UNRESET);
+    break;
   default:
     return -1;
   }
@@ -4512,6 +4526,134 @@ Mvpp2SmiPhyAddrCfg (
   return 0;
 }
 
+/* Set the internal mux's to the required PCS */
+VOID
+MvGopXpcsModeCfg (
+  IN PP2DXE_PORT *Port,
+  IN INT32 NumOfLanes
+  )
+{
+  UINT32 RegVal;
+
+  /* Configure XG MAC mode */
+  RegVal = MmioRead32 (Port->Priv->XpcsBase + MVPP22_XPCS_GLOBAL_CFG_0_REG);
+  RegVal &= ~MVPP22_XPCS_PCSMODE_MASK;
+  RegVal &= ~MVPP22_XPCS_LANEACTIVE_MASK;
+  RegVal |= (2 * NumOfLanes) << MVPP22_XPCS_LANEACTIVE_OFFS;
+  MmioWrite32 (Port->Priv->XpcsBase + MVPP22_XPCS_GLOBAL_CFG_0_REG, RegVal);
+}
+
+VOID
+MvGopMpcsModeCfg (
+  IN PP2DXE_PORT *Port
+  )
+{
+  UINT32 RegVal;
+
+  /* Configure MPCS40G COMMON CONTROL */
+  RegVal = MmioRead32 (Port->Priv->MpcsBase + MVPP22_MPCS40G_COMMON_CONTROL);
+  RegVal &= ~MVPP22_MPCS_FORWARD_ERROR_CORRECTION_MASK;
+  MmioWrite32 (Port->Priv->MpcsBase + MVPP22_MPCS40G_COMMON_CONTROL, RegVal);
+
+  /* Configure MPCS CLOCK RESET */
+  RegVal = MmioRead32 (Port->Priv->MpcsBase + MVPP22_MPCS_CLOCK_RESET);
+  RegVal &= ~MVPP22_MPCS_CLK_DIVISION_RATIO_MASK;
+  RegVal |= 1 << MVPP22_MPCS_CLK_DIVISION_RATIO_OFFS;
+  MmioWrite32 (Port->Priv->MpcsBase + MVPP22_MPCS_CLOCK_RESET, RegVal);
+
+  RegVal &= ~MVPP22_MPCS_CLK_DIV_PHASE_SET_MASK;
+  RegVal |= MVPP22_MPCS_MAC_CLK_RESET_MASK;
+  RegVal |= MVPP22_MPCS_RX_SD_CLK_RESET_MASK;
+  RegVal |= MVPP22_MPCS_TX_SD_CLK_RESET_MASK;
+  MmioWrite32 (Port->Priv->MpcsBase + MVPP22_MPCS_CLOCK_RESET, RegVal);
+}
+
+/* Set the internal mux's to the required MAC in the GOP */
+VOID
+MvGopXlgMacModeCfg (
+  IN PP2DXE_PORT *Port,
+  IN INT32 NumOfLanes
+  )
+{
+  UINT32 RegVal;
+
+  /* configure 10G MAC mode */
+  RegVal = MmioRead32 (Port->XlgBase + MV_XLG_PORT_MAC_CTRL0_REG);
+  RegVal |= MV_XLG_MAC_CTRL0_RXFCEN_MASK;
+  MmioWrite32 (Port->XlgBase + MV_XLG_PORT_MAC_CTRL0_REG, RegVal);
+
+  RegVal = MmioRead32 (Port->XlgBase + MV_XLG_PORT_MAC_CTRL3_REG);
+  RegVal &= ~MV_XLG_MAC_CTRL3_MACMODESELECT_MASK;
+  RegVal |= MV_XLG_MAC_CTRL3_MACMODESELECT_10G;
+  MmioWrite32 (Port->XlgBase + MV_XLG_PORT_MAC_CTRL3_REG, RegVal);
+
+  RegVal = MmioRead32 (Port->XlgBase + MV_XLG_PORT_MAC_CTRL4_REG);
+  RegVal &= ~MV_XLG_MAC_CTRL4_MAC_MODE_DMA_1G_MASK;
+  RegVal |= MV_XLG_MAC_CTRL4_FORWARD_PFC_EN_MASK;
+  RegVal |= MV_XLG_MAC_CTRL4_FORWARD_802_3X_FC_EN_MASK;
+  RegVal &= ~MV_XLG_MAC_CTRL4_EN_IDLE_CHECK_FOR_LINK_MASK;
+  MmioWrite32 (Port->XlgBase + MV_XLG_PORT_MAC_CTRL4_REG, RegVal);
+
+  /* Jumbo frame support: 0x1400 * 2 = 0x2800 bytes */
+  RegVal = MmioRead32 (Port->XlgBase + MV_XLG_PORT_MAC_CTRL1_REG);
+  RegVal &= ~MV_XLG_MAC_CTRL1_FRAMESIZELIMIT_MASK;
+  RegVal |= 0x1400;
+  MmioWrite32 (Port->XlgBase + MV_XLG_PORT_MAC_CTRL1_REG, RegVal);
+
+  /* Mask all port's external interrupts */
+  MvGop110XlgPortLinkEventMask (Port);
+
+  /* Unmask link change interrupt */
+  RegVal = MmioRead32 (Port->XlgBase + MV_XLG_INTERRUPT_MASK_REG);
+  RegVal |= MV_XLG_LINK_INTERRUPT_MASK;
+  RegVal |= MV_XLG_SUMMARY_INTERRUPT_MASK;
+  MmioWrite32 (Port->XlgBase + MV_XLG_INTERRUPT_MASK_REG, RegVal);
+}
+
+/* Set PCS to reset or exit from reset */
+VOID
+MvGopXpcsReset (
+  IN PP2DXE_PORT *Port,
+  IN enum MvReset ResetCmd
+  )
+{
+  UINT32 RegVal;
+
+  RegVal = MmioRead32 (Port->Priv->XpcsBase + MVPP22_XPCS_GLOBAL_CFG_0_REG);
+  if (ResetCmd == RESET) {
+    RegVal &= ~MVPP22_XPCS_PCSRESET;
+  } else {
+    RegVal |= MVPP22_XPCS_PCSRESET;
+  }
+  MmioWrite32 (Port->Priv->XpcsBase + MVPP22_XPCS_GLOBAL_CFG_0_REG, RegVal);
+}
+
+/* Set the MAC to reset or exit from reset */
+VOID
+MvGopXlgMacReset (
+  IN PP2DXE_PORT *Port,
+  IN enum MvReset ResetCmd
+  )
+{
+  UINT32 RegVal;
+
+  RegVal = MmioRead32 (Port->XlgBase + MV_XLG_PORT_MAC_CTRL0_REG);
+  if (ResetCmd == RESET) {
+    RegVal &= ~MV_XLG_MAC_CTRL0_MACRESETN_MASK;
+  } else {
+    RegVal |= MV_XLG_MAC_CTRL0_MACRESETN_MASK;
+  }
+  MmioWrite32 (Port->XlgBase + MV_XLG_PORT_MAC_CTRL0_REG, RegVal);
+}
+
+BOOLEAN
+MvGop110XlgLinkStatusGet (
+  IN PP2DXE_PORT *Port
+  )
+{
+  return MmioRead32 (Port->XlgBase + MV_XLG_MAC_PORT_STATUS_REG) & MV_XLG_MAC_PORT_STATUS_LINKSTATUS_MASK;
+}
+
 BOOLEAN
 MvGop110PortIsLinkUp (
   IN PP2DXE_PORT *Port
@@ -4522,6 +4664,8 @@ MvGop110PortIsLinkUp (
   case MV_MODE_SGMII:
   case MV_MODE_QSGMII:
     return MvGop110GmacLinkStatusGet (Port);
+  case MV_MODE_SFI:
+    return MvGop110XlgLinkStatusGet (Port);
   case MV_MODE_XAUI:
   case MV_MODE_RXAUI:
     return FALSE;
@@ -4546,6 +4690,32 @@ MvGop110GmacLinkStatusGet (
   return (Val & 1) ? TRUE : FALSE;
 }
 
+STATIC
+VOID
+MvGop110XlgPortEnable (
+  IN PP2DXE_PORT *Port
+  )
+{
+  /* Enable port and MIB counters update */
+  MmioAndThenOr32 (
+          Port->XlgBase + MV_XLG_PORT_MAC_CTRL0_REG,
+          ~MV_XLG_MAC_CTRL0_MIBCNTDIS_MASK,
+          MV_XLG_MAC_CTRL0_PORTEN_MASK
+          );
+}
+
+STATIC
+VOID
+MvGop110XlgPortDisable (
+  IN PP2DXE_PORT *Port
+  )
+{
+  /* Mask all port's external interrupts */
+  MvGop110XlgPortLinkEventMask (Port);
+
+  MmioAnd32 (Port->XlgBase + MV_XLG_PORT_MAC_CTRL0_REG, ~MV_XLG_MAC_CTRL0_PORTEN_MASK);
+}
+
 VOID
 MvGop110PortDisable (
   IN PP2DXE_PORT *Port
@@ -4556,6 +4726,11 @@ MvGop110PortDisable (
   case MV_MODE_SGMII:
   case MV_MODE_QSGMII:
     MvGop110GmacPortDisable (Port);
+    break;
+  case MV_MODE_XAUI:
+  case MV_MODE_RXAUI:
+  case MV_MODE_SFI:
+    MvGop110XlgPortDisable (Port);
     break;
   default:
     return;
@@ -4572,6 +4747,11 @@ MvGop110PortEnable (
   case MV_MODE_SGMII:
   case MV_MODE_QSGMII:
     MvGop110GmacPortEnable (Port);
+    break;
+  case MV_MODE_XAUI:
+  case MV_MODE_RXAUI:
+  case MV_MODE_SFI:
+    MvGop110XlgPortEnable (Port);
     break;
   default:
     return;
@@ -4622,6 +4802,17 @@ MvGop110GmacPortLinkEventMask (
   MvGop110GmacWrite (Port, MV_GMAC_INTERRUPT_SUM_MASK_REG, RegVal);
 }
 
+VOID
+MvGop110XlgPortLinkEventMask (
+  IN PP2DXE_PORT *Port
+  )
+{
+  MmioAnd32 (
+          Port->XlgBase + MV_XLG_EXTERNAL_INTERRUPT_MASK_REG,
+          ~MV_XLG_EXTERNAL_INTERRUPT_LINK_CHANGE_MASK
+          );
+}
+
 INT32
 MvGop110PortEventsMask (
   IN PP2DXE_PORT *Port
@@ -4633,6 +4824,11 @@ MvGop110PortEventsMask (
   case MV_MODE_SGMII:
   case MV_MODE_QSGMII:
     MvGop110GmacPortLinkEventMask (Port);
+    break;
+  case MV_MODE_XAUI:
+  case MV_MODE_RXAUI:
+  case MV_MODE_SFI:
+    MvGop110XlgPortLinkEventMask (Port);
     break;
   default:
     return -1;
@@ -4655,6 +4851,7 @@ MvGop110FlCfg (
     break;
   case MV_MODE_XAUI:
   case MV_MODE_RXAUI:
+  case MV_MODE_SFI:
     return 0;
   default:
     return -1;
@@ -4679,6 +4876,7 @@ MvGop110SpeedDuplexSet (
     break;
   case MV_MODE_XAUI:
   case MV_MODE_RXAUI:
+  case MV_MODE_SFI:
     break;
   default:
     return -1;

@@ -433,6 +433,36 @@ Mvpp2SmiPhyAddrCfg (
   IN INT32 Addr
   );
 
+
+VOID
+MvGopXpcsModeCfg (
+  IN PP2DXE_PORT *Port,
+  IN INT32 NumOfLanes
+  );
+
+VOID
+MvGopMpcsModeCfg (
+  IN PP2DXE_PORT *Port
+  );
+
+VOID
+MvGopXlgMacModeCfg (
+  IN PP2DXE_PORT *Port,
+  IN INT32 NumOfLanes
+  );
+
+VOID
+MvGopXpcsReset (
+  IN PP2DXE_PORT *Port,
+  IN enum MvReset ResetCmd
+  );
+
+VOID
+MvGopXlgMacReset (
+  IN PP2DXE_PORT *Port,
+  IN enum MvReset ResetCmd
+  );
+
 BOOLEAN
 MvGop110PortIsLinkUp (
   IN PP2DXE_PORT *Port
@@ -470,6 +500,11 @@ MvGop110GmacPortLinkEventMask (
 
 INT32
 MvGop110PortEventsMask (
+  IN PP2DXE_PORT *Port
+  );
+
+VOID
+MvGop110XlgPortLinkEventMask (
   IN PP2DXE_PORT *Port
   );
 

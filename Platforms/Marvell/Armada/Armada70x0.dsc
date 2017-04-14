@@ -98,8 +98,8 @@
 
   #ComPhy
   gMarvellTokenSpaceGuid.PcdComPhyDevices|{ 0x1 }
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|L"SGMII1;USB3_HOST0;SGMII0;SATA1;USB3_HOST1;PCIE2"
-  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|L"3125;5000;1250;5000;5000;5000"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|L"SGMII1;USB3_HOST0;SFI;SATA1;USB3_HOST1;PCIE2"
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|L"1250;5000;10310;5000;5000;5000"
 
   #UtmiPhy
   gMarvellTokenSpaceGuid.PcdUtmiPhyCount|2
@@ -112,25 +112,19 @@
   gMarvellTokenSpaceGuid.PcdMdioBaseAddress|0xF212A200
 
   #PHY
-  gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0x4, 0x4, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0x8, 0x4, 0x0 }
   gMarvellTokenSpaceGuid.PcdPhyDeviceIds|{ 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdPhyStartupAutoneg|FALSE
 
   #NET
   gMarvellTokenSpaceGuid.PcdPhySmiAddresses|{ 0xff, 0x0, 0x1 }
   gMarvellTokenSpaceGuid.PcdPp2ClockFrequency|333333333
-  gMarvellTokenSpaceGuid.PcdPp2GmacBaseAddress|0xf2130e00
-  gMarvellTokenSpaceGuid.PcdPp2GmacDevSize|0x1000
   gMarvellTokenSpaceGuid.PcdPp2GopIndexes|{ 0x0, 0x2, 0x3 }
-  gMarvellTokenSpaceGuid.PcdPp2InterfaceAlwaysUp|{ 0x1, 0x1, 0x0 }
-  gMarvellTokenSpaceGuid.PcdPp2InterfaceSpeed|{ 0x3, 0x4, 0x3 }
+  gMarvellTokenSpaceGuid.PcdPp2InterfaceAlwaysUp|{ 0x0, 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPp2InterfaceSpeed|{ 0x5, 0x3, 0x3 }
   gMarvellTokenSpaceGuid.PcdPp2NumPorts|3
   gMarvellTokenSpaceGuid.PcdPp2PortIds|{ 0x0, 0x1, 0x2 }
-  gMarvellTokenSpaceGuid.PcdPp2Rfu1BaseAddress|0xf2441000
   gMarvellTokenSpaceGuid.PcdPp2SharedAddress|0xf2000000
-  gMarvellTokenSpaceGuid.PcdPp2SmiBaseAddress|0xf212A200
-  gMarvellTokenSpaceGuid.PcdPp2XlgBaseAddress|0xf2130f00
-  gMarvellTokenSpaceGuid.PcdPp2XlgDevSize|0x1000
 
   #PciEmulation
   gMarvellTokenSpaceGuid.PcdPciEXhci|{ 0x1, 0x1, 0x0, 0x0 }
