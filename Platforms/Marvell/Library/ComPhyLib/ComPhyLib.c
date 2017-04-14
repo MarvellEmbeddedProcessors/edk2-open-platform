@@ -42,7 +42,7 @@ CHAR16 * TypeStringTable [] = {L"unconnected", L"PCIE0", L"PCIE1", L"PCIE2",
                            L"XAUI3", L"RXAUI0", L"RXAUI1", L"SFI"};
 
 CHAR16 * SpeedStringTable [] = {L"-", L"1.25 Gbps", L"1.5 Gbps", L"2.5 Gbps",
-                                L"3.0 Gbps", L"3.125 Gbps", L"5 Gbps",
+                                L"3.0 Gbps", L"3.125 Gbps", L"5 Gbps", L"5.156 Gbps",
                                 L"6 Gbps", L"6.25 Gbps", L"10.31 Gbps"};
 
 CHIP_COMPHY_CONFIG ChipCfgTbl[] = {
@@ -142,9 +142,9 @@ ParseSerdesSpeed (
 {
   UINT32 i;
   UINT32 ValueTable [] = {0, 1250, 1500, 2500, 3000, 3125,
-                          5000, 6000, 6250, 10310};
+                          5000, 5156, 6000, 6250, 10310};
 
-  for (i = 0; i < 10; i++) {
+  for (i = 0; i < PHY_SPEED_MAX; i++) {
     if (Value == ValueTable[i]) {
       return i;
     }

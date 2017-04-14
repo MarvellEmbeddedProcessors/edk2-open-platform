@@ -1179,7 +1179,7 @@ ComPhySgmiiPhyConfiguration (
 
 STATIC
 EFI_STATUS
-ComPhySgmiiRFUPowerUp (
+ComPhyEthCommonRFUPowerUp (
   IN EFI_PHYSICAL_ADDRESS SdIpAddr
 )
 {
@@ -1265,7 +1265,460 @@ ComPhySgmiiPowerUp (
 
   DEBUG((DEBUG_INFO, "ComPhy: stage: RFU configurations - Power Up PLL,Tx,Rx\n"));
 
-  Status = ComPhySgmiiRFUPowerUp (SdIpAddr);
+  Status = ComPhyEthCommonRFUPowerUp (SdIpAddr);
+
+  return Status;
+}
+
+STATIC
+VOID
+ComPhySfiRFUConfiguration (
+  IN EFI_PHYSICAL_ADDRESS ComPhyAddr,
+  IN EFI_PHYSICAL_ADDRESS SdIpAddr
+)
+{
+  UINT32 Mask, Data;
+
+  MmioAndThenOr32 (
+          ComPhyAddr + COMMON_PHY_CFG1_REG,
+          ~(COMMON_PHY_CFG1_PWR_UP_MASK | COMMON_PHY_CFG1_PIPE_SELECT_MASK),
+          COMMON_PHY_CFG1_PWR_UP_MASK
+          );
+
+  /* Select Baud Rate of Comphy And PD_PLL/Tx/Rx */
+  Mask = SD_EXTERNAL_CONFIG0_SD_PU_PLL_MASK |
+         SD_EXTERNAL_CONFIG0_SD_PHY_GEN_RX_MASK |
+         SD_EXTERNAL_CONFIG0_SD_PHY_GEN_TX_MASK |
+         SD_EXTERNAL_CONFIG0_SD_PU_RX_MASK |
+         SD_EXTERNAL_CONFIG0_SD_PU_TX_MASK |
+         SD_EXTERNAL_CONFIG0_HALF_BUS_MODE_MASK;
+  Data = (0xe << SD_EXTERNAL_CONFIG0_SD_PHY_GEN_RX_OFFSET) |
+         (0xe << SD_EXTERNAL_CONFIG0_SD_PHY_GEN_TX_OFFSET);
+  MmioAndThenOr32 (SdIpAddr + SD_EXTERNAL_CONFIG0_REG, ~Mask, Data);
+
+  /* Release from hard reset */
+  Mask = SD_EXTERNAL_CONFIG1_RESET_IN_MASK |
+         SD_EXTERNAL_CONFIG1_RESET_CORE_MASK |
+         SD_EXTERNAL_CONFIG1_RF_RESET_IN_MASK;
+  Data = SD_EXTERNAL_CONFIG1_RESET_IN_MASK |
+         SD_EXTERNAL_CONFIG1_RESET_CORE_MASK;
+  MmioAndThenOr32 (SdIpAddr + SD_EXTERNAL_CONFIG1_REG, ~Mask, Data);
+
+  /* Wait 1ms - until band gap and ref clock are ready */
+  MicroSecondDelay (1000);
+  MemoryFence ();
+}
+
+STATIC
+VOID
+ComPhySfiPhyConfiguration (
+  IN EFI_PHYSICAL_ADDRESS HpipeAddr,
+  IN UINT32 SfiSpeed
+)
+{
+  UINT32 Mask, Data;
+
+  /* Set reference clock */
+  Mask = HPIPE_MISC_ICP_FORCE_MASK | HPIPE_MISC_REFCLK_SEL_MASK;
+  Data = (SfiSpeed == PHY_SPEED_5_15625G) ?
+    (0x0 << HPIPE_MISC_ICP_FORCE_OFFSET) : (0x1 << HPIPE_MISC_ICP_FORCE_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_MISC_REG, ~Mask, Data);
+
+  /* Power and PLL Control */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_PWR_PLL_REG,
+          ~(HPIPE_PWR_PLL_REF_FREQ_MASK | HPIPE_PWR_PLL_PHY_MODE_MASK),
+          0x1 | (0x4 << HPIPE_PWR_PLL_PHY_MODE_OFFSET)
+          );
+
+  /* Loopback register */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_LOOPBACK_REG,
+          ~HPIPE_LOOPBACK_SEL_MASK,
+          0x1 << HPIPE_LOOPBACK_SEL_OFFSET
+          );
+
+  /* Rx control 1 */
+  MmioOr32 (
+          HpipeAddr + HPIPE_RX_CONTROL_1_REG,
+          HPIPE_RX_CONTROL_1_RXCLK2X_SEL_MASK | HPIPE_RX_CONTROL_1_CLK8T_EN_MASK
+          );
+
+  /* DTL Control */
+  MmioOr32 (HpipeAddr + HPIPE_PWR_CTR_DTL_REG, HPIPE_PWR_CTR_DTL_FLOOP_EN_MASK);
+
+  /* Transmitter/Receiver Speed Divider Force */
+  if (SfiSpeed == PHY_SPEED_5_15625G) {
+    Mask = HPIPE_SPD_DIV_FORCE_RX_SPD_DIV_MASK |
+           HPIPE_SPD_DIV_FORCE_RX_SPD_DIV_FORCE_MASK |
+           HPIPE_SPD_DIV_FORCE_TX_SPD_DIV_MASK |
+           HPIPE_SPD_DIV_FORCE_TX_SPD_DIV_FORCE_MASK;
+    Data = (1 << HPIPE_SPD_DIV_FORCE_RX_SPD_DIV_OFFSET) |
+           (1 << HPIPE_SPD_DIV_FORCE_RX_SPD_DIV_FORCE_OFFSET) |
+           (1 << HPIPE_SPD_DIV_FORCE_TX_SPD_DIV_OFFSET) |
+           (1 << HPIPE_SPD_DIV_FORCE_TX_SPD_DIV_FORCE_OFFSET);
+    MmioAndThenOr32 (HpipeAddr + HPIPE_SPD_DIV_FORCE_REG, ~Mask, Data);
+  } else {
+    MmioOr32 (HpipeAddr + HPIPE_SPD_DIV_FORCE_REG, HPIPE_TXDIGCK_DIV_FORCE_MASK);
+  }
+}
+
+STATIC
+VOID
+ComPhySfiSetAnalogParameters (
+  IN EFI_PHYSICAL_ADDRESS HpipeAddr,
+  IN EFI_PHYSICAL_ADDRESS SdIpAddr,
+  IN UINT32 SfiSpeed
+)
+{
+  UINT32 Mask, Data;
+
+  /* SERDES External Configuration 2 */
+  MmioOr32 (SdIpAddr + SD_EXTERNAL_CONFIG2_REG, SD_EXTERNAL_CONFIG2_PIN_DFE_EN_MASK);
+
+  /* DFE Resolution control */
+  MmioOr32 (HpipeAddr + HPIPE_DFE_REG0, HPIPE_DFE_RES_FORCE_MASK);
+
+  /* Generation 1 setting_0 */
+  if (SfiSpeed == PHY_SPEED_5_15625G) {
+    Mask = HPIPE_GX_SET0_TX_EMPH1_MASK;
+    Data = 0x6 << HPIPE_GX_SET0_TX_EMPH1_OFFSET;
+  } else {
+    Mask = HPIPE_GX_SET0_TX_AMP_MASK | HPIPE_GX_SET0_TX_EMPH1_MASK;
+    Data = (0x1c << HPIPE_GX_SET0_TX_AMP_OFFSET) | (0xe << HPIPE_GX_SET0_TX_EMPH1_OFFSET);
+  }
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G1_SET0_REG, ~Mask, Data);
+
+  /* Generation 1 setting 2 */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_GX_SET2_REG,
+          ~HPIPE_GX_SET2_TX_EMPH0_MASK,
+          HPIPE_GX_SET2_TX_EMPH0_EN_MASK
+          );
+
+  /* Transmitter Slew Rate Control register */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_TX_REG1_REG,
+          ~(HPIPE_TX_REG1_TX_EMPH_RES_MASK | HPIPE_TX_REG1_SLC_EN_MASK),
+          (0x3 << HPIPE_TX_REG1_TX_EMPH_RES_OFFSET) | (0x3f << HPIPE_TX_REG1_SLC_EN_OFFSET)
+          );
+
+  /* Impedance Calibration Control register */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_CAL_REG1_REG,
+          ~(HPIPE_CAL_REG_1_EXT_TXIMP_MASK | HPIPE_CAL_REG_1_EXT_TXIMP_EN_MASK),
+          (0xe << HPIPE_CAL_REG_1_EXT_TXIMP_OFFSET) | HPIPE_CAL_REG_1_EXT_TXIMP_EN_MASK
+          );
+
+  /* Generation 1 setting 5 */
+  MmioAnd32 (HpipeAddr + HPIPE_G1_SET5_REG, ~HPIPE_GX_SET5_ICP_MASK);
+
+  /* Generation 1 setting 1 */
+  if (SfiSpeed == PHY_SPEED_5_15625G) {
+    Mask = HPIPE_GX_SET1_RX_SELMUPI_MASK | HPIPE_GX_SET1_RX_SELMUPP_MASK;
+    Data = 0x1 | (0x1 << HPIPE_GX_SET1_RX_SELMUPP_OFFSET);
+  } else {
+    Mask = HPIPE_GX_SET1_RX_SELMUPI_MASK |
+           HPIPE_GX_SET1_RX_SELMUPP_MASK |
+           HPIPE_GX_SET1_RX_SELMUFI_MASK |
+           HPIPE_GX_SET1_RX_SELMUFF_MASK |
+           HPIPE_GX_SET1_RX_DIGCK_DIV_MASK;
+    Data = 0x2 |
+           (0x2 << HPIPE_GX_SET1_RX_SELMUPP_OFFSET) |
+           (0x1 << HPIPE_GX_SET1_RX_SELMUFF_OFFSET) |
+           (0x3 << HPIPE_GX_SET1_RX_DIGCK_DIV_OFFSET);
+  }
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G1_SET1_REG, ~Mask, Data);
+  MmioOr32 (HpipeAddr + HPIPE_G1_SET1_REG, HPIPE_GX_SET1_RX_DFE_EN_MASK);
+
+  /* DFE F3-F5 Coefficient Control */
+  MmioAnd32 (
+          HpipeAddr + HPIPE_DFE_F3_F5_REG,
+          ~(HPIPE_DFE_F3_F5_DFE_EN_MASK | HPIPE_DFE_F3_F5_DFE_CTRL_MASK)
+          );
+
+  /* Configure Generation 1 setting 4 (DFE) */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_G1_SET4_REG,
+          ~HPIPE_GX_SET4_DFE_RES_MASK,
+          0x1 << HPIPE_GX_SET4_DFE_RES_OFFSET
+          );
+
+  /* Generation 1 setting 3 */
+  MmioOr32 (HpipeAddr + HPIPE_G1_SET3_REG, HPIPE_GX_SET3_FBCK_SEL_MASK);
+
+  if (SfiSpeed == PHY_SPEED_5_15625G) {
+    /* Force FFE (Feed Forward Equalization) to 5G */
+    Mask = HPIPE_GX_SET3_FFE_CAP_SEL_MASK |
+           HPIPE_GX_SET3_FFE_RES_SEL_MASK |
+           HPIPE_GX_SET3_FFE_SETTING_FORCE_MASK;
+    Data = 0xf | (0x4 << HPIPE_GX_SET3_FFE_RES_SEL_OFFSET) | HPIPE_GX_SET3_FFE_SETTING_FORCE_MASK;
+    MmioAndThenOr32 (HpipeAddr + HPIPE_G1_SET3_REG, ~Mask, Data);
+  }
+
+  /* Configure RX training timer */
+  MmioAndThenOr32 (HpipeAddr + HPIPE_TX_TRAIN_CTRL_5_REG, ~HPIPE_RX_TRAIN_TIMER_MASK, 0x13);
+
+  /* Enable TX train peak to peak hold */
+  MmioOr32 (HpipeAddr + HPIPE_TX_TRAIN_CTRL_0_REG, HPIPE_TX_TRAIN_P2P_HOLD_MASK);
+
+  /* Configure TX preset index */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_TX_PRESET_INDEX_REG,
+          ~HPIPE_TX_PRESET_INDEX_MASK,
+          0x2 << HPIPE_TX_PRESET_INDEX_OFFSET
+          );
+
+  /* Disable pattern lock lost timeout */
+  MmioAnd32 (HpipeAddr + HPIPE_FRAME_DETECT_CTRL_3_REG, ~HPIPE_PATTERN_LOCK_LOST_TIMEOUT_EN_MASK);
+
+  /* Configure TX training pattern and TX training 16bit auto */
+  MmioOr32 (
+          HpipeAddr + HPIPE_TX_TRAIN_REG,
+          HPIPE_TX_TRAIN_16BIT_AUTO_EN_MASK | HPIPE_TX_TRAIN_PAT_SEL_MASK
+          );
+
+  /* Configure training pattern number */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_FRAME_DETECT_CTRL_0_REG,
+          ~HPIPE_TRAIN_PAT_NUM_MASK,
+          0x88 << HPIPE_TRAIN_PAT_NUM_OFFSET
+          );
+
+  /* Configure differential manchester encoder to ethernet mode */
+  MmioOr32 (HpipeAddr + HPIPE_DME_REG, HPIPE_DME_ETHERNET_MODE_MASK);
+
+  /* Configure VDD Continuous Calibration */
+  MmioOr32 (HpipeAddr + HPIPE_VDD_CAL_0_REG, HPIPE_CAL_VDD_CONT_MODE_MASK);
+
+  /* Configure sampler gain */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_SAMPLER_N_PROC_CALIB_CTRL_REG,
+          ~HPIPE_RX_SAMPLER_OS_GAIN_MASK,
+          0x3 << HPIPE_RX_SAMPLER_OS_GAIN_OFFSET
+          );
+
+  /* Trigger sampler enable pulse (by toggling the bit) */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_SAMPLER_N_PROC_CALIB_CTRL_REG,
+          ~HPIPE_SAMPLER_MASK,
+          0x1 << HPIPE_SAMPLER_OFFSET
+          );
+  MmioAnd32 (
+          HpipeAddr + HPIPE_SAMPLER_N_PROC_CALIB_CTRL_REG,
+          ~HPIPE_SAMPLER_MASK
+          );
+
+  /* VDD calibration control */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_VDD_CAL_CTRL_REG,
+          ~HPIPE_EXT_SELLV_RXSAMPL_MASK,
+          0x1a << HPIPE_EXT_SELLV_RXSAMPL_OFFSET
+          );
+}
+
+STATIC
+EFI_STATUS
+ComPhySfiPowerUp (
+  IN UINT32 Lane,
+  IN EFI_PHYSICAL_ADDRESS HpipeBase,
+  IN EFI_PHYSICAL_ADDRESS ComPhyBase,
+  IN UINT32 SfiSpeed
+  )
+{
+  EFI_STATUS Status;
+  EFI_PHYSICAL_ADDRESS HpipeAddr = HPIPE_ADDR(HpipeBase, Lane);
+  EFI_PHYSICAL_ADDRESS SdIpAddr = SD_ADDR(HpipeBase, Lane);
+  EFI_PHYSICAL_ADDRESS ComPhyAddr = COMPHY_ADDR(ComPhyBase, Lane);
+
+  DEBUG ((DEBUG_INFO, "ComPhy: stage: RFU configurations - hard reset ComPhy\n"));
+
+  ComPhySfiRFUConfiguration (ComPhyAddr, SdIpAddr);
+
+  DEBUG ((DEBUG_INFO, "ComPhy: stage: ComPhy configuration\n"));
+
+  ComPhySfiPhyConfiguration (HpipeAddr, SfiSpeed);
+
+  DEBUG ((DEBUG_INFO, "ComPhy: stage: Set analog paramters\n"));
+
+  ComPhySfiSetAnalogParameters (HpipeAddr, SdIpAddr, SfiSpeed);
+
+  DEBUG ((DEBUG_INFO, "ComPhy: stage: RFU configurations - Power Up PLL,Tx,Rx\n"));
+
+  Status = ComPhyEthCommonRFUPowerUp (SdIpAddr);
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
+ComPhyRxauiRFUConfiguration (
+  IN UINT32 Lane,
+  IN EFI_PHYSICAL_ADDRESS ComPhyAddr,
+  IN EFI_PHYSICAL_ADDRESS SdIpAddr
+)
+{
+  UINT32 Mask, Data;
+
+  MmioAndThenOr32 (
+          ComPhyAddr + COMMON_PHY_CFG1_REG,
+          ~(COMMON_PHY_CFG1_PWR_UP_MASK | COMMON_PHY_CFG1_PIPE_SELECT_MASK),
+          COMMON_PHY_CFG1_PWR_UP_MASK
+          );
+
+  switch (Lane) {
+  case 2:
+  case 4:
+    MmioOr32 (ComPhyAddr + COMMON_PHY_SD_CTRL1, COMMON_PHY_SD_CTRL1_RXAUI0_MASK);
+  case 3:
+  case 5:
+    MmioOr32 (ComPhyAddr + COMMON_PHY_SD_CTRL1, COMMON_PHY_SD_CTRL1_RXAUI1_MASK);
+    break;
+  default:
+    DEBUG ((DEBUG_ERROR, "RXAUI used on invalid lane %d\n", Lane));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  /* Select Baud Rate of Comphy And PD_PLL/Tx/Rx */
+  Mask = SD_EXTERNAL_CONFIG0_SD_PU_PLL_MASK |
+         SD_EXTERNAL_CONFIG0_SD_PHY_GEN_RX_MASK |
+         SD_EXTERNAL_CONFIG0_SD_PHY_GEN_TX_MASK |
+         SD_EXTERNAL_CONFIG0_SD_PU_RX_MASK |
+         SD_EXTERNAL_CONFIG0_SD_PU_TX_MASK |
+         SD_EXTERNAL_CONFIG0_HALF_BUS_MODE_MASK |
+         SD_EXTERNAL_CONFIG0_MEDIA_MODE_MASK;
+  Data = (0xb << SD_EXTERNAL_CONFIG0_SD_PHY_GEN_RX_OFFSET) |
+         (0xb << SD_EXTERNAL_CONFIG0_SD_PHY_GEN_TX_OFFSET) |
+         (0x1 << SD_EXTERNAL_CONFIG0_MEDIA_MODE_OFFSET);
+  MmioAndThenOr32 (SdIpAddr + SD_EXTERNAL_CONFIG0_REG, ~Mask, Data);
+
+  /* Release from hard reset */
+  Mask = SD_EXTERNAL_CONFIG1_RESET_IN_MASK |
+         SD_EXTERNAL_CONFIG1_RESET_CORE_MASK |
+         SD_EXTERNAL_CONFIG1_RF_RESET_IN_MASK;
+  Data = SD_EXTERNAL_CONFIG1_RESET_IN_MASK |
+         SD_EXTERNAL_CONFIG1_RESET_CORE_MASK;
+  MmioAndThenOr32 (SdIpAddr + SD_EXTERNAL_CONFIG1_REG, ~Mask, Data);
+
+  /* Wait 1ms - until band gap and ref clock are ready */
+  MicroSecondDelay (1000);
+  MemoryFence ();
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+VOID
+ComPhyRxauiPhyConfiguration (
+  IN EFI_PHYSICAL_ADDRESS HpipeAddr
+)
+{
+  /* Set reference clock */
+  MmioAnd32 (HpipeAddr + HPIPE_MISC_REG, ~HPIPE_MISC_REFCLK_SEL_MASK);
+
+  /* Power and PLL Control */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_PWR_PLL_REG,
+          ~(HPIPE_PWR_PLL_REF_FREQ_MASK | HPIPE_PWR_PLL_PHY_MODE_MASK),
+          0x1 | (0x4 << HPIPE_PWR_PLL_PHY_MODE_OFFSET)
+          );
+
+  /* Loopback register */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_LOOPBACK_REG,
+          ~HPIPE_LOOPBACK_SEL_MASK,
+          0x1 << HPIPE_LOOPBACK_SEL_OFFSET
+          );
+
+  /* Rx control 1 */
+  MmioOr32 (
+          HpipeAddr + HPIPE_RX_CONTROL_1_REG,
+          HPIPE_RX_CONTROL_1_RXCLK2X_SEL_MASK | HPIPE_RX_CONTROL_1_CLK8T_EN_MASK
+          );
+
+  /* DTL Control */
+  MmioAnd32 (HpipeAddr + HPIPE_PWR_CTR_DTL_REG, ~HPIPE_PWR_CTR_DTL_FLOOP_EN_MASK);
+}
+
+STATIC
+VOID
+ComPhyRxauiSetAnalogParameters (
+  IN EFI_PHYSICAL_ADDRESS HpipeAddr,
+  IN EFI_PHYSICAL_ADDRESS SdIpAddr
+)
+{
+  UINT32 Mask, Data;
+
+  /* SERDES External Configuration 2 */
+  MmioOr32 (SdIpAddr + SD_EXTERNAL_CONFIG2_REG, SD_EXTERNAL_CONFIG2_PIN_DFE_EN_MASK);
+
+  /* DFE Resolution control */
+  MmioOr32 (HpipeAddr + HPIPE_DFE_REG0, HPIPE_DFE_RES_FORCE_MASK);
+
+  /* Generation 1 setting_0 */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_G1_SET0_REG,
+          ~HPIPE_GX_SET0_TX_EMPH1_MASK,
+          0xe << HPIPE_GX_SET0_TX_EMPH1_OFFSET
+          );
+
+  /* Generation 1 setting 1 */
+  Mask = HPIPE_GX_SET1_RX_SELMUPI_MASK |
+         HPIPE_GX_SET1_RX_SELMUPP_MASK |
+         HPIPE_GX_SET1_RX_DFE_EN_MASK;
+  Data = 0x1 |
+         (0x1 << HPIPE_GX_SET1_RX_SELMUPP_OFFSET) |
+         (0x1 << HPIPE_GX_SET1_RX_DFE_EN_OFFSET);
+  MmioAndThenOr32 (HpipeAddr + HPIPE_G1_SET1_REG, ~Mask, Data);
+
+  /* DFE F3-F5 Coefficient Control */
+  MmioAnd32 (
+          HpipeAddr + HPIPE_DFE_F3_F5_REG,
+          ~(HPIPE_DFE_F3_F5_DFE_EN_MASK | HPIPE_DFE_F3_F5_DFE_CTRL_MASK)
+          );
+
+  /* Configure Generation 1 setting 4 (DFE) */
+  MmioAndThenOr32 (
+          HpipeAddr + HPIPE_G1_SET4_REG,
+          ~HPIPE_GX_SET4_DFE_RES_MASK,
+          0x1 << HPIPE_GX_SET4_DFE_RES_OFFSET
+          );
+
+  /* Generation 1 setting 3 */
+  MmioOr32 (HpipeAddr + HPIPE_G1_SET3_REG, HPIPE_GX_SET3_FBCK_SEL_MASK);
+}
+
+STATIC
+EFI_STATUS
+ComPhyRxauiPowerUp (
+  IN UINT32 Lane,
+  IN EFI_PHYSICAL_ADDRESS HpipeBase,
+  IN EFI_PHYSICAL_ADDRESS ComPhyBase
+  )
+{
+  EFI_STATUS Status;
+  EFI_PHYSICAL_ADDRESS HpipeAddr = HPIPE_ADDR(HpipeBase, Lane);
+  EFI_PHYSICAL_ADDRESS SdIpAddr = SD_ADDR(HpipeBase, Lane);
+  EFI_PHYSICAL_ADDRESS ComPhyAddr = COMPHY_ADDR(ComPhyBase, Lane);
+
+  DEBUG ((DEBUG_INFO, "ComPhy: stage: RFU configurations - hard reset ComPhy\n"));
+
+  Status = ComPhyRxauiRFUConfiguration (Lane, ComPhyAddr, SdIpAddr);
+  if (EFI_ERROR(Status)) {
+    return Status;
+  }
+
+  DEBUG ((DEBUG_INFO, "ComPhy: stage: ComPhy configuration\n"));
+
+  ComPhyRxauiPhyConfiguration (HpipeAddr);
+
+  DEBUG ((DEBUG_INFO, "ComPhy: stage: Set analog paramters\n"));
+
+  ComPhyRxauiSetAnalogParameters (HpipeAddr, SdIpAddr);
+
+  DEBUG ((DEBUG_INFO, "ComPhy: stage: RFU configurations - Power Up PLL,Tx,Rx\n"));
+
+  Status = ComPhyEthCommonRFUPowerUp (SdIpAddr);
 
   return Status;
 }
@@ -1371,6 +1824,13 @@ ComPhyCp110Init (
     case PHY_TYPE_SGMII3:
       Status = ComPhySgmiiPowerUp(Lane, PtrComPhyMap->Speed, HpipeBaseAddr,
         ComPhyBaseAddr);
+      break;
+    case PHY_TYPE_SFI:
+      Status = ComPhySfiPowerUp(Lane, HpipeBaseAddr, ComPhyBaseAddr, PtrComPhyMap->Speed);
+      break;
+    case PHY_TYPE_RXAUI0:
+    case PHY_TYPE_RXAUI1:
+      Status = ComPhyRxauiPowerUp(Lane, HpipeBaseAddr, ComPhyBaseAddr);
       break;
     default:
       DEBUG((DEBUG_ERROR, "Unknown SerDes Type, skip initialize SerDes %d\n",
