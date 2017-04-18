@@ -29,9 +29,9 @@
 #define GIC_MSI_FRAME3            0xF02B0000
 
 #define GIC_MSI_BASE0             0xA0
-#define GIC_MSI_BASE1             0xB0
-#define GIC_MSI_BASE2             0xC0
-#define GIC_MSI_BASE3             0xD0
+#define GIC_MSI_BASE1             0xC0
+#define GIC_MSI_BASE2             0xE0
+#define GIC_MSI_BASE3             0x100
 
 #pragma pack(push, 1)
 typedef struct {
