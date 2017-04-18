@@ -121,7 +121,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MARVEL", "ARMADA7K", 3)
             Name (_DSD, Package () {
                 ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
                 Package () {
-                      Package () { "clock-frequency", 200000000 },
+                      Package () { "clock-frequency", FixedPcdGet32 (PcdSerialClockRate) },
                       Package () { "reg-io-width", 1 },
                       Package () { "reg-shift", 2 },
                 }
