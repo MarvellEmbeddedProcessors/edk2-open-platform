@@ -45,5 +45,9 @@
   gArmTokenSpaceGuid.PcdArmArchTimerHypIntrNum
   gArmTokenSpaceGuid.PcdArmArchTimerVirtIntrNum
 
+  gArmTokenSpaceGuid.PcdGenericWatchdogControlBase
+  gArmTokenSpaceGuid.PcdGenericWatchdogRefreshBase
+  gArmTokenSpaceGuid.PcdGenericWatchdogEl2IntrNum
+
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialClockRate
