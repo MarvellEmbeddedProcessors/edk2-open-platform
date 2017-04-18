@@ -500,4 +500,8 @@
   MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf {
     <LibraryClasses>
       #PlatformHasAcpiLib|EmbeddedPkg/Library/PlatformHasAcpiLib/PlatformHasAcpiLib.inf
+
+     <PcdsFixedAtBuild>
+      # don't bother with ACPI versions older than 5.0
+      gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiExposedTableVersions|0x20
   }
