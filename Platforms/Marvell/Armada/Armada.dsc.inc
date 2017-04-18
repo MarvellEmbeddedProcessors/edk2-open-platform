@@ -492,3 +492,12 @@
       gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
       gEfiMdePkgTokenSpaceGuid.PcdUefiLibMaxPrintBufferSize|8000
   }
+
+  #
+  # Generic ACPI modules
+  #
+  MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
+  MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf {
+    <LibraryClasses>
+      #PlatformHasAcpiLib|EmbeddedPkg/Library/PlatformHasAcpiLib/PlatformHasAcpiLib.inf
+  }

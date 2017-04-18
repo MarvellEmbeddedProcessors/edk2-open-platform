@@ -137,3 +137,6 @@
 
   #RTC
   gMarvellTokenSpaceGuid.PcdRtcEnabled|{ 0x1 }
+
+[Components]
+  OpenPlatformPkg/Platforms/Marvell/Armada/AcpiTables/Armada70x0/AcpiTables.inf
