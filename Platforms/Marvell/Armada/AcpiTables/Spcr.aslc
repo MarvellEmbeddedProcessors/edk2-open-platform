@@ -15,9 +15,10 @@
 *
 **/
 
-#include <Common/Acpi.h>
 #include <IndustryStandard/SerialPortConsoleRedirectionTable.h>
 #include <Library/AcpiLib.h>
+
+#include "AcpiHeader.h"
 
 EFI_ACPI_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE Spcr = {
   __ACPI_HEADER(EFI_ACPI_6_1_SERIAL_PORT_CONSOLE_REDIRECTION_TABLE_SIGNATURE,
