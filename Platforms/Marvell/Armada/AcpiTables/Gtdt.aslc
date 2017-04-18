@@ -14,8 +14,9 @@
 
 **/
 
-#include <Common/Acpi.h>
 #include <Library/AcpiLib.h>
+
+#include "AcpiHeader.h"
 
 // active low, level triggered
 #define GTDT_GTIMER_FLAGS  EFI_ACPI_6_0_GTDT_TIMER_FLAG_TIMER_INTERRUPT_POLARITY

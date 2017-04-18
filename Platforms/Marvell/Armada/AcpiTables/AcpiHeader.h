@@ -17,10 +17,15 @@
 #include <IndustryStandard/Acpi.h>
 
 #define ACPI_OEM_ID_ARRAY        {'M','A','R','V','E','L'}
-#define ACPI_OEM_TABLE_ID        SIGNATURE_64('A','R','M','A','D','A','7','K')
 #define ACPI_OEM_REVISION        0
 #define ACPI_CREATOR_ID          SIGNATURE_32('L','N','R','O')
 #define ACPI_CREATOR_REVISION    0
+
+#if defined(ARMADA7K)
+#define ACPI_OEM_TABLE_ID        SIGNATURE_64('A','R','M','A','D','A','7','K')
+#elif defined (ARMADA8K)
+#define ACPI_OEM_TABLE_ID        SIGNATURE_64('A','R','M','A','D','A','8','K')
+#endif
 
 /**
  * A macro to initialize the common header part of EFI ACPI tables

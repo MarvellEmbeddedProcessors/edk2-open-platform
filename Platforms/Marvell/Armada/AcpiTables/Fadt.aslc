@@ -14,8 +14,9 @@
 
 **/
 
-#include <Common/Acpi.h>
 #include <Library/AcpiLib.h>
+
+#include "AcpiHeader.h"
 
 #define FADT_FLAGS    EFI_ACPI_6_0_HW_REDUCED_ACPI |           \
                       EFI_ACPI_6_0_LOW_POWER_S0_IDLE_CAPABLE | \

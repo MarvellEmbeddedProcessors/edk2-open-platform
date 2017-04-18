@@ -24,10 +24,10 @@
 
 [Sources]
   Dsdt.asl
-  Fadt.aslc
-  Gtdt.aslc
-  Madt.aslc
-  Spcr.aslc
+  ../Fadt.aslc
+  ../Gtdt.aslc
+  ../Madt.aslc
+  ../Spcr.aslc
 
 [Packages]
   ArmPkg/ArmPkg.dec
@@ -51,3 +51,6 @@
 
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialClockRate
+
+[BuildOptions]
+  *_*_*_ASLCC_FLAGS = -DARMADA7K

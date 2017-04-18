@@ -14,8 +14,9 @@
 
 **/
 
-#include <Common/Acpi.h>
 #include <Library/AcpiLib.h>
+
+#include "AcpiHeader.h"
 
 #define GICC_BASE                 FixedPcdGet64 (PcdGicInterruptInterfaceBase)
 #define GICD_BASE                 FixedPcdGet64 (PcdGicDistributorBase)
