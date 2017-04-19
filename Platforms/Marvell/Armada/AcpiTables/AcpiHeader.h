@@ -16,7 +16,7 @@
 
 #include <IndustryStandard/Acpi.h>
 
-#define ACPI_OEM_ID_ARRAY        {'M','A','R','V','E','L'}
+#define ACPI_OEM_ID_ARRAY        {'M','V','E','B','U',' '}
 #define ACPI_OEM_REVISION        0
 #define ACPI_CREATOR_ID          SIGNATURE_32('L','N','R','O')
 #define ACPI_CREATOR_REVISION    0

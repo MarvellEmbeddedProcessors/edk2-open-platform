@@ -14,7 +14,7 @@
 
 **/
 
-DefinitionBlock ("DSDT.aml", "DSDT", 2, "MARVEL", "ARMADA7K", 3)
+DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA7K", 3)
 {
     Scope (_SB)
     {
