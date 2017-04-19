@@ -363,7 +363,7 @@
 
   # ARM Pcds
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0
-  gArmTokenSpaceGuid.PcdSystemMemorySize|0x40000000
+  gArmTokenSpaceGuid.PcdSystemMemorySize|0xF0000000
   gArmTokenSpaceGuid.PcdArmScr|0x531
 
 ################################################################################
