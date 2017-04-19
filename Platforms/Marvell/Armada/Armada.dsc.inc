@@ -212,11 +212,6 @@
 ################################################################################
 
 [PcdsFeatureFlag.common]
-  gEfiMdePkgTokenSpaceGuid.PcdComponentNameDisable|TRUE
-  gEfiMdePkgTokenSpaceGuid.PcdDriverDiagnosticsDisable|TRUE
-  gEfiMdePkgTokenSpaceGuid.PcdComponentName2Disable|TRUE
-  gEfiMdePkgTokenSpaceGuid.PcdDriverDiagnostics2Disable|TRUE
-
   #
   # Control what commands are supported from the UI
   # Turn these on and off to add features or save size
