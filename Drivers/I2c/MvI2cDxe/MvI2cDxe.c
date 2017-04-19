@@ -176,19 +176,28 @@ MvI2cInitialise (
   UINT32 BusCount;
   EFI_PHYSICAL_ADDRESS I2cBaseAddresses[PcdGet32 (PcdI2cBusCount)];
   INTN i;
+  CHAR16 *PcdCopy;
 
   BusCount = PcdGet32 (PcdI2cBusCount);
   if (BusCount == 0)
     return EFI_SUCCESS;
 
+  PcdCopy = AllocateCopyPool (
+              StrLen((CHAR16 *) PcdGetPtr (PcdI2cBaseAddresses)),
+              PcdGetPtr (PcdI2cBaseAddresses));
+  if (!PcdCopy) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
   Status = ParsePcdString (
-      (CHAR16 *) PcdGetPtr (PcdI2cBaseAddresses),
+      PcdCopy,
       BusCount,
       I2cBaseAddresses,
       NULL
       );
-  if (EFI_ERROR(Status))
-    return Status;
+  if (EFI_ERROR(Status)) {
+    goto FreePcdCopy;
+  }
 
   for (i = 0; i < BusCount; i++) {
     Status = MvI2cInitialiseController(
@@ -196,9 +205,13 @@ MvI2cInitialise (
         SystemTable,
         I2cBaseAddresses[i]
         );
-    if (EFI_ERROR(Status))
-      return Status;
+    if (EFI_ERROR(Status)) {
+      goto FreePcdCopy;
+    }
   }
+
+FreePcdCopy:
+  FreePool (PcdCopy);
 
   return Status;
 }
