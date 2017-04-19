@@ -415,7 +415,7 @@
 
 !ifdef EDK2_ENABLE_SMSC_91X
   # Ethernet (SMSC 91C111)
-  gLan91xDxeTokenSpaceGuid.PcdLan91xDxeBaseAddress|0x1A000000
+  gEmbeddedTokenSpaceGuid.PcdLan91xDxeBaseAddress|0x1A000000
 !endif
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
@@ -471,7 +471,7 @@
   MdeModulePkg/Universal/Network/IScsiDxe/IScsiDxe.inf
 !ifdef EDK2_ENABLE_SMSC_91X
   # SMSC LAN 91C111
-  OpenPlatformPkg/Drivers/Net/Lan91xDxe/Lan91xDxe.inf
+  EmbeddedPkg/Drivers/Lan91xDxe/Lan91xDxe.inf
 !endif
 
   # ISP1761 USB OTG Controller
