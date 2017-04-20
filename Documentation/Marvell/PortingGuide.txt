@@ -208,6 +208,10 @@ Pp2Dxe configuration
 Pp2Dxe is driver supporting PP2 NIC on Marvell platforms. Following PCDs
 are required to operate:
 
+  - gMarvellTokenSpaceGuid.PcdPp2Controllers
+	(Array with used controllers
+	 Set to 0x1 for enabled, 0x0 for disabled)
+
   - gMarvellTokenSpaceGuid.PcdPp2PortNumber
 	(Number of ports/network interfaces)
 
@@ -235,33 +239,6 @@ are required to operate:
 			  4  SPEED_2500,
 			  5  SPEED_10000
 		  } PHY_SPEED;
-
-  - gMarvellTokenSpaceGuid.PcdPp2SharedAddress
-	(Base address of shared register space of PP2)
-
-  - gMarvellTokenSpaceGuid.PcdPp2GmacObjSize
-	(Spacing between consecutive GMAC register spaces)
-
-  - gMarvellTokenSpaceGuid.PcdPp2GmacBaseAddress
-	(Base address of GMAC)
-
-  - gMarvellTokenSpaceGuid.PcdPp2XlgObjSize
-	(Spacing between consecutive XLG register spaces)
-
-  - gMarvellTokenSpaceGuid.PcdPp2XlgBaseAddress
-	(Base address of XLG)
-
-  - gMarvellTokenSpaceGuid.PcdPp2Rfu1BaseAddress
-	(Base address of RFU1)
-
-  - gMarvellTokenSpaceGuid.PcdPp2SmiBaseAddress
-	(Base address of SMI)
-
-  - gMarvellTokenSpaceGuid.PcdPp2ClockFrequency
-	(TCLK frequency)
-
-GMAC and XLG addresses are computed as follows:
-  address = base_address + obj_size * gop_index
 
 
 UTMI PHY configuration
