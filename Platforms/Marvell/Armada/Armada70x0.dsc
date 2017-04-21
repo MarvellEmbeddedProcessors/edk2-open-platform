@@ -103,8 +103,15 @@
 
   #ComPhy
   gMarvellTokenSpaceGuid.PcdComPhyDevices|{ 0x1 }
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|L"SGMII1;USB3_HOST0;SFI;SATA1;USB3_HOST1;PCIE2"
-  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|L"1250;5000;10310;5000;5000;5000"
+  # ComPhy0
+  # 0: SGMII1        1.25 Gbps
+  # 1: USB3_HOST0    5 Gbps
+  # 2: SFI           10.31 Gbps
+  # 3: SATA1         5 Gbps
+  # 4: USB3_HOST1    5 Gbps
+  # 5: PCIE2         5 Gbps
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|{ 0xA, 0xE, 0x17, 0x6, 0xF, 0x3 }
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|{ 0x1, 0x6, 0xA, 0x6, 0x6, 0x6 }
 
   #UtmiPhy
   gMarvellTokenSpaceGuid.PcdUtmiPhyCount|2
