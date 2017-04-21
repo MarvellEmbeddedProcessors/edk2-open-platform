@@ -322,7 +322,7 @@
 !if $(TARGET) == RELEASE
   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x80000000
 !else
-  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x8000000F
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x8000004F
 !endif
   gEfiMdePkgTokenSpaceGuid.PcdReportStatusCodePropertyMask|0x07
 
@@ -383,6 +383,8 @@
   MdeModulePkg/Core/Dxe/DxeMain.inf {
     <LibraryClasses>
       NULL|MdeModulePkg/Library/DxeCrc32GuidedSectionExtractLib/DxeCrc32GuidedSectionExtractLib.inf
+    <PcdsFixedAtBuild>
+      gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x8000000F
   }
 
   MdeModulePkg/Universal/PCD/Dxe/Pcd.inf {
@@ -397,7 +399,11 @@
   ArmPkg/Drivers/GenericWatchdogDxe/GenericWatchdogDxe.inf
 
   # Platform Initialization
-  OpenPlatformPkg/Platforms/Marvell/Armada/Drivers/PlatInitDxe/PlatInitDxe.inf
+  OpenPlatformPkg/Platforms/Marvell/Armada/Drivers/PlatInitDxe/PlatInitDxe.inf {
+    <PcdsFixedAtBuild>
+      # turn down the noise a bit
+      gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x8000000F
+  }
 
   # Platform drivers
   OpenPlatformPkg/Drivers/I2c/MvI2cDxe/MvI2cDxe.inf

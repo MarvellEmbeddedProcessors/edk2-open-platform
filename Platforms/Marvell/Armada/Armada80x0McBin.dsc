@@ -35,10 +35,10 @@
 #
 ################################################################################
 [Defines]
-  PLATFORM_NAME                  = Armada80x0
-  PLATFORM_GUID                  = fa14da3e-0ebe-4d77-8be8-e577bc28aba4
+  PLATFORM_NAME                  = Armada80x0McBin
+  PLATFORM_GUID                  = f837e231-cfc7-4f56-9a0f-5b218d746ae3
   PLATFORM_VERSION               = 0.1
-  DSC_SPECIFICATION              = 0x00010005
+  DSC_SPECIFICATION              = 0x00010019
   OUTPUT_DIRECTORY               = Build/$(PLATFORM_NAME)
   SUPPORTED_ARCHITECTURES        = AARCH64
   BUILD_TARGETS                  = DEBUG|RELEASE
@@ -54,7 +54,7 @@
 ################################################################################
 [PcdsFixedAtBuild.common]
   #MPP
-  gMarvellTokenSpaceGuid.PcdMppChipCount|2
+  gMarvellTokenSpaceGuid.PcdMppChipCount|3
 
   # APN806-A0 MPP SET
   gMarvellTokenSpaceGuid.PcdChip0MppReverseFlag|FALSE
@@ -63,79 +63,89 @@
   gMarvellTokenSpaceGuid.PcdChip0MppSel0|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 }
   gMarvellTokenSpaceGuid.PcdChip0MppSel1|{ 0x1, 0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x3 }
 
-  # CP110 MPP SET - Router configuration
+  # CP110 MPP SET - master
   gMarvellTokenSpaceGuid.PcdChip1MppReverseFlag|FALSE
   gMarvellTokenSpaceGuid.PcdChip1MppBaseAddress|0xF2440000
   gMarvellTokenSpaceGuid.PcdChip1MppPinCount|64
-  gMarvellTokenSpaceGuid.PcdChip1MppSel0|{ 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4 }
-  gMarvellTokenSpaceGuid.PcdChip1MppSel1|{ 0x4, 0x4, 0x0, 0x3, 0x3, 0x3, 0x3, 0x0, 0x0, 0x0 }
-  gMarvellTokenSpaceGuid.PcdChip1MppSel2|{ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x9, 0xA }
-  gMarvellTokenSpaceGuid.PcdChip1MppSel3|{ 0xA, 0x0, 0x7, 0x0, 0x7, 0x7, 0x7, 0x2, 0x2, 0x0 }
-  gMarvellTokenSpaceGuid.PcdChip1MppSel4|{ 0x0, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1 }
-  gMarvellTokenSpaceGuid.PcdChip1MppSel5|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0xE, 0xE, 0xE, 0xE }
-  gMarvellTokenSpaceGuid.PcdChip1MppSel6|{ 0xE, 0xE, 0xE, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel0|{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel1|{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel2|{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel3|{ 0xFF, 0x0, 0x7, 0xA, 0x7, 0x2, 0x2, 0x2, 0x2, 0xA }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel4|{ 0x7, 0x7, 0x8, 0x8, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel5|{ 0x0, 0x0, 0x9, 0x0, 0x0, 0x0, 0xE, 0xE, 0xE, 0xE }
+  gMarvellTokenSpaceGuid.PcdChip1MppSel6|{ 0xE, 0xE, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
 
-  # I2C
-  gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0x50, 0x57, 0x60 }
-  gMarvellTokenSpaceGuid.PcdI2cSlaveBuses|{ 0x0, 0x0, 0x0 }
-  gMarvellTokenSpaceGuid.PcdI2cBaseAddresses|L"0xF2701000;0xF2701100"
-  gMarvellTokenSpaceGuid.PcdEepromI2cAddresses|{ 0x50, 0x57 }
-  gMarvellTokenSpaceGuid.PcdEepromI2cBuses|{ 0x0, 0x0 }
-  gMarvellTokenSpaceGuid.PcdI2cClockFrequency|250000000
-  gMarvellTokenSpaceGuid.PcdI2cBaudRate|100000
-  gMarvellTokenSpaceGuid.PcdI2cBusCount|2
+  # CP110 MPP SET - slave
+  gMarvellTokenSpaceGuid.PcdChip2MppReverseFlag|FALSE
+  gMarvellTokenSpaceGuid.PcdChip2MppBaseAddress|0xF4440000
+  gMarvellTokenSpaceGuid.PcdChip2MppPinCount|64
+  gMarvellTokenSpaceGuid.PcdChip2MppSel0|{ 0x4, 0x4, 0x4, 0x4, 0x4, 0x4, 0x8, 0x8, 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdChip2MppSel1|{ 0x0, 0x0, 0x3, 0x3, 0x3, 0x3, 0x3, 0xFF, 0xFF, 0xFF }
+  gMarvellTokenSpaceGuid.PcdChip2MppSel2|{ 0xFF, 0xFF, 0xFF, 0xFF, 0x0, 0xFF, 0x0, 0x0, 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdChip2MppSel3|{ 0x0, 0x0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }
+  gMarvellTokenSpaceGuid.PcdChip2MppSel4|{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }
+  gMarvellTokenSpaceGuid.PcdChip2MppSel5|{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }
+  gMarvellTokenSpaceGuid.PcdChip2MppSel6|{ 0xFF, 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
 
   #SPI
-  gMarvellTokenSpaceGuid.PcdSpiRegBase|0xF2700680
+  gMarvellTokenSpaceGuid.PcdSpiRegBase|0xF4700680
   gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|10000000
   gMarvellTokenSpaceGuid.PcdSpiClockFrequency|200000000
 
   gMarvellTokenSpaceGuid.PcdSpiFlashPollCmd|0x70
   gMarvellTokenSpaceGuid.PcdSpiFlashAddressCycles|3
   gMarvellTokenSpaceGuid.PcdSpiFlashEraseSize|65536
-  gMarvellTokenSpaceGuid.PcdSpiFlashPageSize|256
-  gMarvellTokenSpaceGuid.PcdSpiFlashId|0x20BA18
+  gMarvellTokenSpaceGuid.PcdSpiFlashPageSize|64
+  gMarvellTokenSpaceGuid.PcdSpiFlashId|0xEF4016
+  gMarvellTokenSpaceGuid.PcdSpiFlashMode|3
+  gMarvellTokenSpaceGuid.PcdSpiFlashCs|0
 
   #ComPhy
-  gMarvellTokenSpaceGuid.PcdComPhyDevices|{ 0x1 }
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|L"SGMII1;USB3_HOST0;SGMII0;SATA1;USB3_HOST1;PCIE2"
-  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|L"3125;5000;1250;5000;5000;5000"
+  gMarvellTokenSpaceGuid.PcdComPhyDevices|{ 0x1, 0x1 }
+  # ComPhy0
+  # 0: PCIE0         5 Gbps
+  # 1: PCIE0         5 Gbps
+  # 2: PCIE0         5 Gbps
+  # 3: PCIE0         5 Gbps
+  # 4: SFI           10.31 Gbps
+  # 5: SATA1         5 Gbps
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|{ 0x1, 0x1, 0x1, 0x1, 0x17, 0x6 }
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|{ 0x6, 0x6, 0x6, 0x6, 0xA, 0x6 }
+  # ComPhy1
+  # 0: SGMII1        1.25 Gbps
+  # 1: SATA0         5 Gbps
+  # 2: USB3_HOST0    5 Gbps
+  # 3: SATA1         5 Gbps
+  # 4: SFI           10.31 Gbps
+  # 5: SGMII2        3.125 Gbps
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyTypes|{ 0xA, 0x7, 0xE, 0x8, 0x17, 0xB }
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeeds|{ 0x1, 0x6, 0x6, 0x6, 0xA, 0x5 }
 
   #UtmiPhy
-  gMarvellTokenSpaceGuid.PcdUtmiPhyCount|2
-  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUsbCfg|L"0xF2440420;0xF2440420"
-  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiCfg|L"0xF2440440;0xF2440444"
-  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiUnit|L"0xF2580000;0xF2581000"
-  gMarvellTokenSpaceGuid.PcdUtmiPhyUtmiPort|L"0x0;0x1"
+  gMarvellTokenSpaceGuid.PcdUtmiControllers|{ 0x0, 0x0, 0x1, 0x0 }
+  gMarvellTokenSpaceGuid.PcdUtmiPortType|{ 0x0, 0x0, 0x0, 0x0 }
 
   #MDIO
   gMarvellTokenSpaceGuid.PcdMdioBaseAddress|0xF212A200
 
   #PHY
-  gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0x4, 0x4, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0x8, 0x4, 0x0 }
   gMarvellTokenSpaceGuid.PcdPhyDeviceIds|{ 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdPhyStartupAutoneg|FALSE
 
   #NET
   gMarvellTokenSpaceGuid.PcdPhySmiAddresses|{ 0xff, 0x0, 0x1 }
-  gMarvellTokenSpaceGuid.PcdPp2ClockFrequency|333333333
-  gMarvellTokenSpaceGuid.PcdPp2GmacBaseAddress|0xf2130e00
-  gMarvellTokenSpaceGuid.PcdPp2GmacDevSize|0x1000
   gMarvellTokenSpaceGuid.PcdPp2GopIndexes|{ 0x0, 0x2, 0x3 }
-  gMarvellTokenSpaceGuid.PcdPp2InterfaceAlwaysUp|{ 0x1, 0x1, 0x0 }
-  gMarvellTokenSpaceGuid.PcdPp2InterfaceSpeed|{ 0x3, 0x4, 0x3 }
-  gMarvellTokenSpaceGuid.PcdPp2NumPorts|3
+  gMarvellTokenSpaceGuid.PcdPp2InterfaceAlwaysUp|{ 0x0, 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPp2InterfaceSpeed|{ 0x5, 0x3, 0x3 }
+  gMarvellTokenSpaceGuid.PcdPp2Port2Controller|{ 0x0, 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdPp2PortIds|{ 0x0, 0x1, 0x2 }
-  gMarvellTokenSpaceGuid.PcdPp2Rfu1BaseAddress|0xf2441000
-  gMarvellTokenSpaceGuid.PcdPp2SharedAddress|0xf2000000
-  gMarvellTokenSpaceGuid.PcdPp2SmiBaseAddress|0xf212A200
-  gMarvellTokenSpaceGuid.PcdPp2XlgBaseAddress|0xf2130f00
-  gMarvellTokenSpaceGuid.PcdPp2XlgDevSize|0x1000
+  gMarvellTokenSpaceGuid.PcdPp2Controllers|{ 0x1 }
 
   #PciEmulation
-  gMarvellTokenSpaceGuid.PcdPciEXhci|{ 0x1, 0x1, 0x0, 0x0 }
-  gMarvellTokenSpaceGuid.PcdPciEAhci|{ 0x1, 0x0 }
-  gMarvellTokenSpaceGuid.PcdPciESdhci|{ 0x1, 0x1 }
+  gMarvellTokenSpaceGuid.PcdPciEXhci|{ 0x0, 0x0, 0x1, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPciEAhci|{ 0x1, 0x1 }
+  gMarvellTokenSpaceGuid.PcdPciESdhci|{ 0x0, 0x0 }
 
   #ResetLib
   gMarvellTokenSpaceGuid.PcdResetRegAddress|0xf06f0084
@@ -143,6 +153,11 @@
 
   #RTC
   gMarvellTokenSpaceGuid.PcdRtcEnabled|{ 0x1 }
+
+  #SdMmc
+  gMarvellTokenSpaceGuid.PcdXenon1v8Enable|{ 0x1, 0x0 }
+  gMarvellTokenSpaceGuid.PcdXenon8BitBusEnable|{ 0x1, 0x0 }
+  gMarvellTokenSpaceGuid.PcdXenonSlowModeEnable|{ 0x1, 0x0 }
 
 [Components]
   OpenPlatformPkg/Platforms/Marvell/Armada/AcpiTables/Armada80x0/AcpiTables.inf
