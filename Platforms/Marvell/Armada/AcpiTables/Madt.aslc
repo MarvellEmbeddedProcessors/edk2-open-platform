@@ -29,6 +29,8 @@
 #define GIC_MSI_FRAME2            0xF02A0000
 #define GIC_MSI_FRAME3            0xF02B0000
 
+#define PMU_INTERRUPT             50
+
 #pragma pack(push, 1)
 typedef struct {
   EFI_ACPI_6_0_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER Header;
@@ -52,7 +54,7 @@ ACPI_6_0_MADT_STRUCTURE Madt = {
                                      0x000,                     // AcpiCpuUid
                                      0x000,                     // Mpidr
                                      EFI_ACPI_6_0_GIC_ENABLED,  // Flags
-                                     0,                         // PmuIrq
+                                     PMU_INTERRUPT,             // PmuIrq
                                      GICC_BASE,                 // GicBase
                                      GICV_BASE,                 // GicVBase
                                      GICH_BASE,                 // GicHBase
@@ -64,7 +66,7 @@ ACPI_6_0_MADT_STRUCTURE Madt = {
                                      0x001,                     // AcpiCpuUid
                                      0x001,                     // Mpidr
                                      EFI_ACPI_6_0_GIC_ENABLED,  // Flags
-                                     0,                         // PmuIrq
+                                     PMU_INTERRUPT,             // PmuIrq
                                      GICC_BASE,                 // GicBase
                                      GICV_BASE,                 // GicVBase
                                      GICH_BASE,                 // GicHBase
@@ -76,7 +78,7 @@ ACPI_6_0_MADT_STRUCTURE Madt = {
                                      0x100,                     // AcpiCpuUid
                                      0x100,                     // Mpidr
                                      EFI_ACPI_6_0_GIC_ENABLED,  // Flags
-                                     0,                         // PmuIrq
+                                     PMU_INTERRUPT,             // PmuIrq
                                      GICC_BASE,                 // GicBase
                                      GICV_BASE,                 // GicVBase
                                      GICH_BASE,                 // GicHBase
@@ -88,7 +90,7 @@ ACPI_6_0_MADT_STRUCTURE Madt = {
                                      0x101,                     // AcpiCpuUid
                                      0x101,                     // Mpidr
                                      EFI_ACPI_6_0_GIC_ENABLED,  // Flags
-                                     0,                         // PmuIrq
+                                     PMU_INTERRUPT,             // PmuIrq
                                      GICC_BASE,                 // GicBase
                                      GICV_BASE,                 // GicVBase
                                      GICH_BASE,                 // GicHBase
