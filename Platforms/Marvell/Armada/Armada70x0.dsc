@@ -114,11 +114,8 @@
   gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|{ 0x1, 0x6, 0xA, 0x6, 0x6, 0x6 }
 
   #UtmiPhy
-  gMarvellTokenSpaceGuid.PcdUtmiPhyCount|2
-  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUsbCfg|L"0xF2440420;0xF2440420"
-  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiCfg|L"0xF2440440;0xF2440444"
-  gMarvellTokenSpaceGuid.PcdUtmiPhyRegUtmiUnit|L"0xF2580000;0xF2581000"
-  gMarvellTokenSpaceGuid.PcdUtmiPhyUtmiPort|L"0x0;0x1"
+  gMarvellTokenSpaceGuid.PcdUtmiControllers|{ 0x1, 0x1 }
+  gMarvellTokenSpaceGuid.PcdUtmiPortType|{ 0x0, 0x1 }
 
   #MDIO
   gMarvellTokenSpaceGuid.PcdMdioBaseAddress|0xF212A200
