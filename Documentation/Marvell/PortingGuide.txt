@@ -56,27 +56,59 @@ Every ComPhy PCD has <Num> part where <Num> stands for chip ID (order is not
 important, but configuration will be set for first PcdComPhyChipCount chips).
 
 Every chip has 3 ComPhy PCDs and three of them comprise per-board lanes
-settings for this chip. Their format is unicode string, containing settings
-for up to 10 lanes. Setting for each one is separated with semicolon.
-These PCDs together describe outputs of PHY integrated in simple cihp.
-Below is example for the first chip (Chip0).
+settings for this chip. Their format is array of up to 10 values reflecting
+defined numbers for SPEED/TYPE/INVERT, whose description can be found in:
+
+  OpenPlatformPkg/Platforms/Marvell/Library/ComPhyLib/ComPhyLib.h
 
   - gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes
-	(Unicode string indicating PHY types. Currently supported are:
+	(Array of types - currently supported are:
 
-		{ L"unconnected", L"PCIE0", L"PCIE1", L"PCIE2", L"PCIE3",
-		  L"SATA0", L"SATA1", L"SATA2", L"SATA3", L"SGMII0",
-		  L"SGMII1", L"SGMII2", L"SGMII3", L"QSGMII",
-		  L"USB3_HOST0", L"USB3_HOST1", L"USB3_DEVICE",
-		  L"XAUI0", L"XAUI1", L"XAUI2", L"XAUI3", L"RXAUI0",
-		  L"RXAUI1", L"KR" } )
+	COMPHY_TYPE_PCIE0                            1
+	COMPHY_TYPE_PCIE1                            2
+	COMPHY_TYPE_PCIE2                            3
+	COMPHY_TYPE_PCIE3                            4
+	COMPHY_TYPE_SATA0                            5
+	COMPHY_TYPE_SATA1                            6
+	COMPHY_TYPE_SATA2                            7
+	COMPHY_TYPE_SATA3                            8
+	COMPHY_TYPE_SGMII0                           9
+	COMPHY_TYPE_SGMII1                           10
+	COMPHY_TYPE_SGMII2                           11
+	COMPHY_TYPE_SGMII3                           12
+	COMPHY_TYPE_QSGMII                           13
+	COMPHY_TYPE_USB3_HOST0                       14
+	COMPHY_TYPE_USB3_HOST1                       15
+	COMPHY_TYPE_USB3_DEVICE                      16
+	COMPHY_TYPE_XAUI0                            17
+	COMPHY_TYPE_XAUI1                            18
+	COMPHY_TYPE_XAUI2                            19
+	COMPHY_TYPE_XAUI3                            20
+	COMPHY_TYPE_RXAUI0                           21
+	COMPHY_TYPE_RXAUI1                           22
+	COMPHY_TYPE_SFI                              23 )
 
   - gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds
-	(Indicates PHY speeds in MHz. Currently supported are:
-		{ 1250, 1500, 2500, 3000, 3125, 5000, 6000, 6250, 1031 }  )
+	(Array of speeds - currently supported are:
+
+	COMPHY_SPEED_1_25G                           1
+	COMPHY_SPEED_1_5G                            2
+	COMPHY_SPEED_2_5G                            3
+	COMPHY_SPEED_3G                              4
+	COMPHY_SPEED_3_125G                          5
+	COMPHY_SPEED_5G                              6
+	COMPHY_SPEED_5_15625G                        7
+	COMPHY_SPEED_6G                              8
+	COMPHY_SPEED_6_25G                           9
+	COMPHY_SPEED_10_3125G                        10 )
 
   - gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlags
-	(Indicates lane polarity invert)
+	(Array of lane inversion types - currently supported are:
+
+	COMPHY_POLARITY_NO_INVERT                    0
+	COMPHY_POLARITY_TXD_INVERT                   1
+	COMPHY_POLARITY_RXD_INVERT                   2
+	COMPHY_POLARITY_ALL_INVERT                   3 )
 
 Example
 -------
