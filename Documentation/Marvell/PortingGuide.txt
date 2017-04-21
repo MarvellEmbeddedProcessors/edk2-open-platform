@@ -212,8 +212,8 @@ are required to operate:
 	(Array with used controllers
 	 Set to 0x1 for enabled, 0x0 for disabled)
 
-  - gMarvellTokenSpaceGuid.PcdPp2PortNumber
-	(Number of ports/network interfaces)
+  - gMarvellTokenSpaceGuid.PcdPp2Port2Controller
+	(Array specifying, to which controller the port belongs to)
 
   - gMarvellTokenSpaceGuid.PcdPhySmiAddresses
 	(Addresses of PHY devices)
