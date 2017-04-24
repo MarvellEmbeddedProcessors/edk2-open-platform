@@ -67,5 +67,8 @@
   gArmTokenSpaceGuid.PcdArmPrimaryCoreMask
   gArmTokenSpaceGuid.PcdArmPrimaryCore
 
+  gMarvellTokenSpaceGuid.PcdDramRemapSize
+  gMarvellTokenSpaceGuid.PcdDramRemapTarget
+
 [Ppis]
   gArmMpCoreInfoPpiGuid
