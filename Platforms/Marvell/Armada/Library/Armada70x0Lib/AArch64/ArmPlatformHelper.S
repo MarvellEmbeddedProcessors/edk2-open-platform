@@ -18,6 +18,20 @@
 ASM_FUNC(ArmPlatformPeiBootAction)
   mov   x29, xzr
 
+  .if   FixedPcdGet64 (PcdSystemMemoryBase) != 0
+  .err  PcdSystemMemoryBase should be 0x0 on this platform!
+  .endif
+
+  .if   FixedPcdGet64 (PcdSystemMemorySize) > FixedPcdGet32 (PcdDramRemapTarget)
+    //
+    // Use the low range for UEFI itself. The remaining memory will be mapped
+    // and added to the GCD map later.
+    //
+    adr   x0, mSystemMemoryEnd
+    MOV64 (x1, FixedPcdGet32 (PcdDramRemapTarget) - 1)
+    str   x1, [x0]
+  .endif
+
   MOV32 (x0, FixedPcdGet64 (PcdFvBaseAddress))
   MOV32 (x3, FixedPcdGet32 (PcdFvSize))
   add   x3, x3, x0

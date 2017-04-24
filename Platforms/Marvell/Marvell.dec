@@ -205,6 +205,19 @@
   gMarvellTokenSpaceGuid.PcdXenon8BitBusEnable|{ 0x0 }|VOID*|0x3000037
   gMarvellTokenSpaceGuid.PcdXenonSlowModeEnable|{ 0x0 }|VOID*|0x3000038
 
+  #
+  # DRAM remapping controls.
+  # On the 70x0/80x0 SOCs, the DRAM is mapped at 0x0, and could be up to
+  # 16 GB in size. To allow for 32-bit addressable MMIO peripherals or PCI
+  # windows, a single window of up to 4 GB in size can be remapped elsewhere.
+  # So let's define a 1 GB window at 0xC000000 by default: this is the minimum
+  # alignment that Linux can map optimally (i.e., it's section shift is 30 bits)
+  # and gives us an additional 768 MB (on top of the 256 MB platform MMIO window
+  # at 0xF0000000) for the PCI MMIO32 and CONFIG spaces.
+  #
+  gMarvellTokenSpaceGuid.PcdDramRemapTarget|0xC0000000|UINT32|0x50000003
+  gMarvellTokenSpaceGuid.PcdDramRemapSize|0x40000000|UINT32|0x50000004
+
 [Protocols]
   gMarvellEepromProtocolGuid               = { 0x71954bda, 0x60d3, 0x4ef8, { 0x8e, 0x3c, 0x0e, 0x33, 0x9f, 0x3b, 0xc2, 0x2b }}
   gMarvellMdioProtocolGuid                 = { 0x40010b03, 0x5f08, 0x496a, { 0xa2, 0x64, 0x10, 0x5e, 0x72, 0xd3, 0x71, 0xaa }}

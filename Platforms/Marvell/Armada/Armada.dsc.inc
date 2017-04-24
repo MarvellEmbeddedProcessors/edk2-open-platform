@@ -371,7 +371,7 @@
 
   # ARM Pcds
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0
-  gArmTokenSpaceGuid.PcdSystemMemorySize|0xF0000000
+  gArmTokenSpaceGuid.PcdSystemMemorySize|0x100000000
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuMemorySize|36
 
   # SMBIOS/DMI
