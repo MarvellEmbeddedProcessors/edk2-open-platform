@@ -370,7 +370,7 @@
 
   # ARM Pcds
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0
-  gArmTokenSpaceGuid.PcdSystemMemorySize|0xF0000000
+  gArmTokenSpaceGuid.PcdSystemMemorySize|0x100000000
   gArmTokenSpaceGuid.PcdArmScr|0x531
 
   gMarvellTokenSpaceGuid.PcdSecureRegionBase|0x4000000
