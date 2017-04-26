@@ -183,6 +183,11 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   INF MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
   INF MdeModulePkg/Application/UiApp/UiApp.inf
 
+  # DTB
+  INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+  FILE FREEFORM = 25462CDA-221F-47DF-AC1D-259CFAA4E326 {
+    SECTION RAW = OpenPlatformPkg/Platforms/Marvell/Armada/armada-7040-db.dtb
+  }
 
 # PEI phase firmware volume
 [FV.FVMAIN_COMPACT]
