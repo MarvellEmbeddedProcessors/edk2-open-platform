@@ -421,6 +421,7 @@
   MdeModulePkg/Universal/Network/Mtftp4Dxe/Mtftp4Dxe.inf
   MdeModulePkg/Universal/Network/Udp4Dxe/Udp4Dxe.inf
   MdeModulePkg/Universal/Network/Tcp4Dxe/Tcp4Dxe.inf
+  MdeModulePkg/Universal/Network/UefiPxeBcDxe/UefiPxeBcDxe.inf
   OpenPlatformPkg/Drivers/Net/MvMdioDxe/MvMdioDxe.inf
   OpenPlatformPkg/Drivers/Net/Phy/MvPhyDxe/MvPhyDxe.inf
   OpenPlatformPkg/Drivers/Net/Pp2Dxe/Pp2Dxe.inf
