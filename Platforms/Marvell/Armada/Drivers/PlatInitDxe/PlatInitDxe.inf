@@ -37,5 +37,8 @@
   PcdLib
   UefiDriverEntryPoint
 
+[Protocols]
+  gMarvellPlatformInitCompleteProtocolGuid    ## PRODUCES
+
 [Depex]
   TRUE

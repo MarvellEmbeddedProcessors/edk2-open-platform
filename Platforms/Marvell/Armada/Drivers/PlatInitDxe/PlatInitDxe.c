@@ -16,6 +16,7 @@
 #include <Library/MvComPhyLib.h>
 #include <Library/PcdLib.h>
 #include <Library/UefiDriverEntryPoint.h>
+#include <Library/UefiBootServicesTableLib.h>
 #include <Library/UtmiPhyLib.h>
 
 EFI_STATUS
@@ -25,7 +26,15 @@ ArmadaPlatInitDxeEntryPoint (
   IN EFI_SYSTEM_TABLE   *SystemTable
   )
 {
+  EFI_STATUS    Status;
+
   DEBUG ((DEBUG_ERROR, "\nArmada Platform Init\n\n"));
+
+  Status = gBS->InstallProtocolInterface (&ImageHandle,
+                  &gMarvellPlatformInitCompleteProtocolGuid,
+                  EFI_NATIVE_INTERFACE,
+                  NULL);
+  ASSERT_EFI_ERROR (Status);
 
   MvComPhyInit ();
   UtmiPhyInit ();
