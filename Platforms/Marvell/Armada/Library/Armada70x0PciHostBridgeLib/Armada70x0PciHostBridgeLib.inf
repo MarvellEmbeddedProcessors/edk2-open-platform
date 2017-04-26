@@ -1,0 +1,66 @@
+## @file
+#  PCI Host Bridge Library instance for Marvell Armada 7k/8k SOC
+#
+#  Copyright (c) 2017, Linaro Ltd. All rights reserved.<BR>
+#
+#  This program and the accompanying materials are licensed and made available
+#  under the terms and conditions of the BSD License which accompanies this
+#  distribution. The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR
+#  IMPLIED.
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010019
+  BASE_NAME                      = Armada70x0PciHostBridgeLib
+  FILE_GUID                      = 79a611a0-41e4-4024-a930-deca02894b6e
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = PciHostBridgeLib|DXE_DRIVER
+  CONSTRUCTOR                    = Armada70x0PciHostBridgeLibConstructor
+
+#
+# The following information is for reference only and not required by the build
+# tools.
+#
+#  VALID_ARCHITECTURES           = AARCH64
+#
+
+[Sources]
+  Armada70x0PciHostBridgeLib.c
+  Armada70x0PciHostBridgeLibConstructor.c
+
+[Packages]
+  ArmPkg/ArmPkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  OpenPlatformPkg/Platforms/Marvell/Marvell.dec
+
+[LibraryClasses]
+  ArmLib
+  DebugLib
+  DevicePathLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+
+[FixedPcd]
+  gArmTokenSpaceGuid.PcdPciBusMin
+  gArmTokenSpaceGuid.PcdPciBusMax
+  gArmTokenSpaceGuid.PcdPciIoBase
+  gArmTokenSpaceGuid.PcdPciIoSize
+  gArmTokenSpaceGuid.PcdPciIoTranslation
+  gArmTokenSpaceGuid.PcdPciMmio32Base
+  gArmTokenSpaceGuid.PcdPciMmio32Size
+  gArmTokenSpaceGuid.PcdPciMmio32Translation
+  gArmTokenSpaceGuid.PcdPciMmio64Base
+  gArmTokenSpaceGuid.PcdPciMmio64Size
+  gArmTokenSpaceGuid.PcdPciMmio64Translation
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
+  gMarvellTokenSpaceGuid.PcdChip1MppBaseAddress
+
+[Depex]
+  gMarvellPlatformInitCompleteProtocolGuid
