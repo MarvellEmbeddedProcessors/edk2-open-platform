@@ -47,6 +47,9 @@
 
 !include Armada.dsc.inc
 
+[LibraryClasses]
+  PciEmulationInitLib|OpenPlatformPkg/Platforms/Marvell/Armada/Library/McBinPciEmuInitLib/McBinPciEmuInitLib.inf
+
 ################################################################################
 #
 # Pcd Section - list of all EDK II PCD Entries defined by this Platform
