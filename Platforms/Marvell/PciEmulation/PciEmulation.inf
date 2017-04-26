@@ -49,6 +49,7 @@
   OpenPlatformPkg/Platforms/Marvell/Marvell.dec
 
 [LibraryClasses]
+  PciEmulationInitLib
   NonDiscoverableDeviceRegistrationLib
   UefiDriverEntryPoint
 
