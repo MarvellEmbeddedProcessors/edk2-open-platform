@@ -17,6 +17,21 @@
 
 ASM_FUNC(ArmPlatformPeiBootAction)
   mov   x29, xzr
+
+  MOV32 (x0, FixedPcdGet64 (PcdFvBaseAddress))
+  MOV32 (x3, FixedPcdGet32 (PcdFvSize))
+  add   x3, x3, x0
+
+  mrs   x1, ctr_el0
+  and   x1, x1, #0xf      // Dminline
+  mov   x2, #4
+  lsl   x1, x2, x1        // by-VA stride for D-cache maintenance
+
+0:dc    civac, x0
+  add   x0, x0, x1
+  cmp   x0, x3
+  b.lt  0b
+
   ret
 
 //UINTN
