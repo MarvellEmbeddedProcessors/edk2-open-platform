@@ -49,8 +49,10 @@
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
   UefiDecompressLib|MdePkg/Library/BaseUefiDecompressLib/BaseUefiDecompressLib.inf
   CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
-  PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
-  PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
+  PciLib|MdePkg/Library/BasePciLibPciExpress/BasePciLibPciExpress.inf
+  PciHostBridgeLib|OpenPlatformPkg/Platforms/Marvell/Armada/Library/Armada70x0PciHostBridgeLib/Armada70x0PciHostBridgeLib.inf
+  PciSegmentLib|MdePkg/Library/BasePciSegmentLibPci/BasePciSegmentLibPci.inf
+  PciExpressLib|OpenPlatformPkg/Platforms/Marvell/Armada/Library/Armada70x0PciExpressLib/Armada70x0PciExpressLib.inf
 
 # Basic UEFI services libraries
   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
@@ -376,6 +378,24 @@
   gMarvellTokenSpaceGuid.PcdSecureRegionBase|0x4000000
   gMarvellTokenSpaceGuid.PcdSecureRegionSize|0x0100000
 
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0xE0000000
+
+  gArmTokenSpaceGuid.PcdPciBusMin|0x0
+  gArmTokenSpaceGuid.PcdPciBusMax|0xfe
+
+  gArmTokenSpaceGuid.PcdPciIoBase|0x0
+  gArmTokenSpaceGuid.PcdPciIoSize|0x10000
+  gArmTokenSpaceGuid.PcdPciIoTranslation|0xEFF00000
+  gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize|16
+
+  gArmTokenSpaceGuid.PcdPciMmio32Base|0xC0000000
+  gArmTokenSpaceGuid.PcdPciMmio32Size|0x20000000
+  gArmTokenSpaceGuid.PcdPciMmio32Translation|0x0
+
+  gArmTokenSpaceGuid.PcdPciMmio64Base|0x800000000
+  gArmTokenSpaceGuid.PcdPciMmio64Size|0x100000000
+  gArmTokenSpaceGuid.PcdPciMmio64Translation|0x0
+
 ################################################################################
 #
 # Components Section - list of all EDK II Modules needed by this Platform
@@ -466,6 +486,11 @@
   MdeModulePkg/Bus/Sd/EmmcDxe/EmmcDxe.inf
   MdeModulePkg/Bus/Sd/SdDxe/SdDxe.inf
   OpenPlatformPkg/Drivers/SdMmc/XenonDxe/SdMmcPciHcDxe.inf
+
+  # PCI
+  ArmPkg/Drivers/ArmPciCpuIo2Dxe/ArmPciCpuIo2Dxe.inf
+  MdeModulePkg/Bus/Pci/PciHostBridgeDxe/PciHostBridgeDxe.inf
+  MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf
 
   # Console packages
   MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
