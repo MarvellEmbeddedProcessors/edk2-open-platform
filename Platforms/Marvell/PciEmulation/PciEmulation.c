@@ -37,6 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/DebugLib.h>
 #include <Library/MvHwDescLib.h>
 #include <Library/NonDiscoverableDeviceRegistrationLib.h>
+#include <Library/PciEmulationInitLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 #include <Protocol/EmbeddedExternalDevice.h>
@@ -75,7 +76,7 @@ PciEmulationInitXhci (
     Status = RegisterNonDiscoverableMmioDevice (
                      NonDiscoverableDeviceTypeXhci,
                      Desc->XhciDmaType[i],
-                     NULL,
+                     GetInitializerForType (NonDiscoverableDeviceTypeXhci, i),
                      NULL,
                      1,
                      Desc->XhciBaseAddresses[i], Desc->XhciMemSize[i]
@@ -112,7 +113,7 @@ PciEmulationInitAhci (
     Status = RegisterNonDiscoverableMmioDevice (
                      NonDiscoverableDeviceTypeAhci,
                      Desc->AhciDmaType[i],
-                     NULL,
+                     GetInitializerForType (NonDiscoverableDeviceTypeAhci, i),
                      NULL,
                      1,
                      Desc->AhciBaseAddresses[i], Desc->AhciMemSize[i]
@@ -149,7 +150,7 @@ PciEmulationInitSdhci (
     Status = RegisterNonDiscoverableMmioDevice (
                      NonDiscoverableDeviceTypeSdhci,
                      Desc->SdhciDmaType[i],
-                     NULL,
+                     GetInitializerForType (NonDiscoverableDeviceTypeSdhci, i),
                      NULL,
                      1,
                      Desc->SdhciBaseAddresses[i], Desc->SdhciMemSize[i]
