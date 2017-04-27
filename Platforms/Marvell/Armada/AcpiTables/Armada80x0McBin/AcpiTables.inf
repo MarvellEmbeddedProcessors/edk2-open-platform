@@ -24,6 +24,7 @@
 
 [Sources]
   Dsdt.asl
+  Mcfg.aslc
   ../Fadt.aslc
   ../Gtdt.aslc
   ../Madt.aslc
@@ -51,6 +52,8 @@
 
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialClockRate
+
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
 
 [BuildOptions]
   *_*_*_ASLCC_FLAGS = -DARMADA8K
