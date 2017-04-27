@@ -54,21 +54,23 @@ DECLARE_A7K8K_NONDISCOVERABLE_TEMPLATE;
  */
 COMPHY_MUX_DATA Cp110ComPhyMuxData[] = {
   /* Lane 0 */
-  {4, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII1, 0x1}, {PHY_TYPE_SATA1, 0x4}}},
+  {4, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII1, 0x1}, {PHY_TYPE_SATA1, 0x4},
+    {PHY_TYPE_SATA3, 0x4}}},
   /* Lane 1 */
-  {4, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII2, 0x1}, {PHY_TYPE_SATA0, 0x4}}},
+  {4, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII2, 0x1}, {PHY_TYPE_SATA0, 0x4},
+    {PHY_TYPE_SATA2, 0x4}}},
   /* Lane 2 */
   {6, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII0, 0x1}, {PHY_TYPE_RXAUI0, 0x1},
-    {PHY_TYPE_SFI, 0x1}, {PHY_TYPE_SATA0, 0x4}}},
+    {PHY_TYPE_SFI, 0x1}, {PHY_TYPE_SATA0, 0x4}, {PHY_TYPE_SATA2, 0x4}}},
   /* Lane 3 */
-  {8, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_RXAUI1, 0x1}, {PHY_TYPE_SGMII1, 0x2},
-    {PHY_TYPE_SATA1, 0x4}}},
+  {5, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_RXAUI1, 0x1}, {PHY_TYPE_SGMII1, 0x2},
+    {PHY_TYPE_SATA1, 0x4}, {PHY_TYPE_SATA3, 0x4}}},
   /* Lane 4 */
-  {7, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII0, 0x2}, {PHY_TYPE_RXAUI0, 0x2},
+  {5, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII0, 0x2}, {PHY_TYPE_RXAUI0, 0x2},
     {PHY_TYPE_SFI, 0x2}, {PHY_TYPE_SGMII1, 0x1}}},
   /* Lane 5 */
-  {6, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII2, 0x1}, {PHY_TYPE_RXAUI1, 0x2},
-    {PHY_TYPE_SATA1, 0x4}}},
+  {5, {{PHY_TYPE_UNCONNECTED, 0x0}, {PHY_TYPE_SGMII2, 0x1}, {PHY_TYPE_RXAUI1, 0x2},
+    {PHY_TYPE_SATA1, 0x4}, {PHY_TYPE_SATA3, 0x4}}},
 };
 
 COMPHY_MUX_DATA Cp110ComPhyPipeMuxData[] = {
@@ -1840,7 +1842,7 @@ ComPhyCp110Init (
       break;
     }
     if (EFI_ERROR(Status)) {
-      DEBUG ((DEBUG_ERROR, "Failed to initialize Lane %d\n with Status = 0x%x", Lane, Status));
+      DEBUG ((DEBUG_ERROR, "Failed to initialize Lane %d\n with Status = 0x%x\n", Lane, Status));
       PtrComPhyMap->Type = PHY_TYPE_UNCONNECTED;
     }
   }
