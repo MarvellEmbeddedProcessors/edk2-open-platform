@@ -154,7 +154,7 @@
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
 
 [LibraryClasses.common.SEC, LibraryClasses.common.PEIM]
-  MemoryInitPeiLib|ArmPlatformPkg/MemoryInitPei/MemoryInitPeiLib.inf
+  MemoryInitPeiLib|OpenPlatformPkg/Platforms/Marvell/Armada/Library/Armada70x0MemoryInitPeiLib/Armada70x0MemoryInitPeiLib.inf
   BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
 
 [LibraryClasses.common.DXE_CORE]
@@ -365,6 +365,9 @@
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0
   gArmTokenSpaceGuid.PcdSystemMemorySize|0xF0000000
   gArmTokenSpaceGuid.PcdArmScr|0x531
+
+  gMarvellTokenSpaceGuid.PcdSecureRegionBase|0x4000000
+  gMarvellTokenSpaceGuid.PcdSecureRegionSize|0x0100000
 
 ################################################################################
 #
