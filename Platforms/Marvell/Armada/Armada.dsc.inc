@@ -154,7 +154,7 @@
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
 
 [LibraryClasses.common.SEC, LibraryClasses.common.PEIM]
-  MemoryInitPeiLib|ArmPlatformPkg/MemoryInitPei/MemoryInitPeiLib.inf
+  MemoryInitPeiLib|OpenPlatformPkg/Platforms/Marvell/Armada/Library/Armada70x0MemoryInitPeiLib/Armada70x0MemoryInitPeiLib.inf
   BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
 
 [LibraryClasses.common.DXE_CORE]
@@ -373,6 +373,10 @@
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0
   gArmTokenSpaceGuid.PcdSystemMemorySize|0x100000000
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuMemorySize|36
+
+  # Secure region reservation
+  gMarvellTokenSpaceGuid.PcdSecureRegionBase|0x4000000
+  gMarvellTokenSpaceGuid.PcdSecureRegionSize|0x0200000
 
   # SMBIOS/DMI
   gEfiMdeModulePkgTokenSpaceGuid.PcdSmbiosDocRev|0x0
