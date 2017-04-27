@@ -27,6 +27,7 @@
   ../Fadt.aslc
   ../Gtdt.aslc
   ../Madt.aslc
+  ../Mcfg.aslc
   ../Spcr.aslc
 
 [Packages]
@@ -51,6 +52,19 @@
 
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialClockRate
+
+  gArmTokenSpaceGuid.PcdPciBusMin
+  gArmTokenSpaceGuid.PcdPciBusMax
+  gArmTokenSpaceGuid.PcdPciIoBase
+  gArmTokenSpaceGuid.PcdPciIoSize
+  gArmTokenSpaceGuid.PcdPciIoTranslation
+  gArmTokenSpaceGuid.PcdPciMmio32Base
+  gArmTokenSpaceGuid.PcdPciMmio32Size
+  gArmTokenSpaceGuid.PcdPciMmio32Translation
+  gArmTokenSpaceGuid.PcdPciMmio64Base
+  gArmTokenSpaceGuid.PcdPciMmio64Size
+  gArmTokenSpaceGuid.PcdPciMmio64Translation
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
 
 [BuildOptions]
   *_*_*_ASLCC_FLAGS = -DARMADA8K
