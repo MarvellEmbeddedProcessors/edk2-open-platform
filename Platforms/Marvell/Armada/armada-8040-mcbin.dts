@@ -172,10 +172,20 @@
 				status = "disabled";
 			};
 
+			sdhci@6e0000 {
+				compatible = "marvell,armada-ap806-sdhci";
+				reg = <0x6e0000 0x300>;
+				interrupts = <0x0 0x10 0x4>;
+				clock-names = "core";
+				clocks = <0x4 0x4>;
+				dma-coherent;
+				marvell,xenon-phy-slow-mode;
+			};
+
 			system-controller@6f4000 {
 				compatible = "marvell,ap806-system-controller", "syscon";
 				#clock-cells = <0x1>;
-				clock-output-names = "ap-cpu-cluster-0", "ap-cpu-cluster-1", "ap-fixed", "ap-mss";
+				clock-output-names = "ap-cpu-cluster-0", "ap-cpu-cluster-1", "ap-fixed", "ap-mss", "ap-emmc";
 				reg = <0x6f4000 0x1000>;
 				linux,phandle = <0x4>;
 				phandle = <0x4>;
@@ -229,6 +239,18 @@
 			compatible = "simple-bus";
 			interrupt-parent = <0x1>;
 			ranges = <0x0 0x0 0xf2000000 0x2000000>;
+
+			mdio@12a200 {
+				#address-cells = <0x1>;
+				#size-cells = <0x0>;
+				compatible = "marvell,orion-mdio";
+				reg = <0x12a200 0x10>;
+
+				ge_phy: ethernet-phy@0 {
+					/* should use in-band negotiation */
+					reg = <0>;
+				};
+			};
 
 			system-controller@440000 {
 				compatible = "marvell,cp110-system-controller0", "syscon";
@@ -328,6 +350,15 @@
 				clocks = <0x5 0x1 0x19>;
 				status = "okay";
 			};
+
+			sdhci@780000 {
+				compatible = "marvell,armada-cp110-sdhci";
+				reg = <0x780000 0x300>;
+				interrupts = <0x0 0x45 0x4>;
+				clock-names = "core";
+				clocks = <0x5 0x1 0x4>;
+				dma-coherent;
+			};
 		};
 
 		pcie@f2600000 {
@@ -367,6 +398,22 @@
 			compatible = "simple-bus";
 			interrupt-parent = <0x1>;
 			ranges = <0x0 0x0 0xf4000000 0x2000000>;
+
+			ethernet@0 {
+				compatible = "marvell,armada-7k-pp22";
+				reg = <0x0 0x100000 0x129000 0xb000>;
+				clocks = <0x6 0x1 0x3 0x6 0x1 0x9 0x6 0x1 0x5>;
+				clock-names = "pp_clk", "gop_clk", "mg_clk";
+				dma-coherent;
+
+				eth0 {
+					interrupts = <0x0 0x106 0x4>;
+					port-id = <0x1>;
+					gop-port-id = <0x2>;
+					phy-mode = "sgmii";
+					phy = <&ge_phy>;
+				};
+			};
 
 			system-controller@440000 {
 				compatible = "marvell,cp110-system-controller0", "syscon";
