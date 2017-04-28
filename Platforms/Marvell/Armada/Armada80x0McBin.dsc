@@ -132,18 +132,18 @@
   gMarvellTokenSpaceGuid.PcdMdioBaseAddress|0xF212A200
 
   #PHY
-  gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0x8, 0x4, 0x0 }
-  gMarvellTokenSpaceGuid.PcdPhyDeviceIds|{ 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0x8, 0x8, 0x4, 0x4 }
+  gMarvellTokenSpaceGuid.PcdPhyDeviceIds|{ 0x0, 0x0, 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdPhyStartupAutoneg|FALSE
 
   #NET
-  gMarvellTokenSpaceGuid.PcdPhySmiAddresses|{ 0xff, 0x0, 0x1 }
-  gMarvellTokenSpaceGuid.PcdPp2GopIndexes|{ 0x0, 0x2, 0x3 }
-  gMarvellTokenSpaceGuid.PcdPp2InterfaceAlwaysUp|{ 0x0, 0x0, 0x0 }
-  gMarvellTokenSpaceGuid.PcdPp2InterfaceSpeed|{ 0x5, 0x3, 0x3 }
-  gMarvellTokenSpaceGuid.PcdPp2Port2Controller|{ 0x0, 0x0, 0x0 }
-  gMarvellTokenSpaceGuid.PcdPp2PortIds|{ 0x0, 0x1, 0x2 }
-  gMarvellTokenSpaceGuid.PcdPp2Controllers|{ 0x1 }
+  gMarvellTokenSpaceGuid.PcdPhySmiAddresses|{ 0xff, 0xff, 0x0, 0x1 }
+  gMarvellTokenSpaceGuid.PcdPp2GopIndexes|{ 0x0, 0x0, 0x2, 0x3 }
+  gMarvellTokenSpaceGuid.PcdPp2InterfaceAlwaysUp|{ 0x0, 0x0, 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPp2InterfaceSpeed|{ 0x5, 0x5, 0x3, 0x4 }
+  gMarvellTokenSpaceGuid.PcdPp2Port2Controller|{ 0x0, 0x1, 0x1, 0x1 }
+  gMarvellTokenSpaceGuid.PcdPp2PortIds|{ 0x0, 0x0, 0x1, 0x2 }
+  gMarvellTokenSpaceGuid.PcdPp2Controllers|{ 0x1, 0x1 }
 
   #PciEmulation
   gMarvellTokenSpaceGuid.PcdPciEXhci|{ 0x0, 0x0, 0x1, 0x0 }
