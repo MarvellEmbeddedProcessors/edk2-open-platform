@@ -197,6 +197,9 @@
 #RTC
   gMarvellTokenSpaceGuid.PcdRtcEnabled|{ 0x0 }|VOID*|0x40000052
 
+#TRNG
+  gMarvellTokenSpaceGuid.PcdEip76TrngBaseAddress|0x0|UINT64|0x50000053
+
 #SdMmc
   gMarvellTokenSpaceGuid.PcdXenon1v8Enable|{ 0x0 }|VOID*|0x3000036
   gMarvellTokenSpaceGuid.PcdXenon8BitBusEnable|{ 0x0 }|VOID*|0x3000037
