@@ -155,7 +155,7 @@
   gMarvellTokenSpaceGuid.PcdResetRegMask|0x1
 
   #RTC
-  gMarvellTokenSpaceGuid.PcdRtcEnabled|{ 0x1 }
+  gMarvellTokenSpaceGuid.PcdRtcEnabled|{ 0x0, 0x1 }
 
   #SdMmc
   gMarvellTokenSpaceGuid.PcdXenon1v8Enable|{ 0x1, 0x0 }
