@@ -39,8 +39,8 @@
   PLATFORM_GUID                  = f837e231-cfc7-4f56-9a0f-5b218d746ae3
   PLATFORM_VERSION               = 0.1
   DSC_SPECIFICATION              = 0x00010019
-  OUTPUT_DIRECTORY               = Build/$(PLATFORM_NAME)
-  SUPPORTED_ARCHITECTURES        = AARCH64
+  OUTPUT_DIRECTORY               = Build/$(PLATFORM_NAME)-$(ARCH)
+  SUPPORTED_ARCHITECTURES        = AARCH64|ARM
   BUILD_TARGETS                  = DEBUG|RELEASE
   SKUID_IDENTIFIER               = DEFAULT
   FLASH_DEFINITION               = OpenPlatformPkg/Platforms/Marvell/Armada/Armada80x0.fdf
@@ -162,5 +162,5 @@
   gMarvellTokenSpaceGuid.PcdXenon8BitBusEnable|{ 0x1, 0x0 }
   gMarvellTokenSpaceGuid.PcdXenonSlowModeEnable|{ 0x1, 0x0 }
 
-[Components]
+[Components.AARCH64]
   OpenPlatformPkg/Platforms/Marvell/Armada/AcpiTables/Armada80x0/AcpiTables.inf

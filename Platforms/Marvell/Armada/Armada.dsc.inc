@@ -135,7 +135,6 @@
   CustomizedDisplayLib|MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf
   FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
 
-[LibraryClasses.AARCH64]
   ArmLib|ArmPkg/Library/ArmLib/ArmBaseLib.inf
   ArmMmuLib|ArmPkg/Library/ArmMmuLib/ArmMmuBaseLib.inf
   ArmGenericTimerCounterLib|ArmPkg/Library/ArmGenericTimerPhyCounterLib/ArmGenericTimerPhyCounterLib.inf
@@ -373,7 +372,7 @@
   # ARM Pcds
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0
   gArmTokenSpaceGuid.PcdSystemMemorySize|0x100000000
-  gArmTokenSpaceGuid.PcdArmScr|0x531
+  gEmbeddedTokenSpaceGuid.PcdPrePiCpuMemorySize|36
 
   gMarvellTokenSpaceGuid.PcdSecureRegionBase|0x4000000
   gMarvellTokenSpaceGuid.PcdSecureRegionSize|0x0100000
@@ -550,6 +549,9 @@
       gEfiMdePkgTokenSpaceGuid.PcdUefiLibMaxPrintBufferSize|8000
   }
 
+  EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+
+[Components.AARCH64]
   #
   # Generic ACPI modules
   #
@@ -562,8 +564,6 @@
       # don't bother with ACPI versions older than 5.0
       gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiExposedTableVersions|0x20
   }
-
-  EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
 
 [BuildOptions.common.EDKII.DXE_CORE,BuildOptions.common.EDKII.DXE_DRIVER,BuildOptions.common.EDKII.UEFI_DRIVER,BuildOptions.common.EDKII.UEFI_APPLICATION]
   GCC:*_*_*_DLINK_FLAGS = -z common-page-size=0x1000
