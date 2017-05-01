@@ -134,7 +134,6 @@
   CustomizedDisplayLib|MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf
   FdtLib|EmbeddedPkg/Library/FdtLib/FdtLib.inf
 
-[LibraryClasses.AARCH64]
   ArmLib|ArmPkg/Library/ArmLib/ArmBaseLib.inf
   ArmMmuLib|ArmPkg/Library/ArmMmuLib/ArmMmuBaseLib.inf
   ArmGenericTimerCounterLib|ArmPkg/Library/ArmGenericTimerPhyCounterLib/ArmGenericTimerPhyCounterLib.inf
@@ -373,7 +372,7 @@
   # ARM Pcds
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0
   gArmTokenSpaceGuid.PcdSystemMemorySize|0xF0000000
-  gArmTokenSpaceGuid.PcdArmScr|0x531
+  gEmbeddedTokenSpaceGuid.PcdPrePiCpuMemorySize|36
 
   # TRNG
   gMarvellTokenSpaceGuid.PcdEip76TrngBaseAddress|0xF2760000
