@@ -418,7 +418,7 @@ EFI_STATUS              Status;
     }
   }
 
-  Buffer = (UINT8 *) Address;
+  Buffer = (UINT8 *)(UINTN)Address;
   if (FileFlag) {
     Buffer = FileBuffer;
   }
