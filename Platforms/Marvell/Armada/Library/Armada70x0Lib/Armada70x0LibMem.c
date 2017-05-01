@@ -110,10 +110,13 @@ ArmPlatformGetVirtualMemoryMap (
     // If we have more than MemLowSize worth of DRAM, the remainder will be
     // mapped at the top of the remapped window.
     //
-    VirtualMemoryTable[++Index].PhysicalBase  = MemHighStart;
-    VirtualMemoryTable[Index].VirtualBase     = MemHighStart;
-    VirtualMemoryTable[Index].Length          = MemHighSize;
-    VirtualMemoryTable[Index].Attributes      = DDR_ATTRIBUTES_CACHED;
+    if (MemHighStart < MAX_UINTN) {
+      VirtualMemoryTable[++Index].PhysicalBase  = MemHighStart;
+      VirtualMemoryTable[Index].VirtualBase     = MemHighStart;
+      VirtualMemoryTable[Index].Length          = MIN (MemHighSize,
+                                                       MAX_UINTN - MemHighStart + 1);
+      VirtualMemoryTable[Index].Attributes      = DDR_ATTRIBUTES_CACHED;
+    }
 
     BuildResourceDescriptorHob (
       EFI_RESOURCE_SYSTEM_MEMORY,
