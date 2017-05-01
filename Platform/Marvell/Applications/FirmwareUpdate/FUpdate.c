@@ -172,6 +172,7 @@ PrepareFirmwareImage (
   EFI_STATUS           Status;
   UINT64               OpenMode;
   UINTN                *Buffer;
+  UINT64               Size;
 
   // Parse string from commandline
   FileStr = ShellCommandLineGetRawValue (CheckPackage, 1);
@@ -195,10 +196,12 @@ PrepareFirmwareImage (
       return EFI_DEVICE_ERROR;
     }
 
-  Status = FileHandleGetSize (*FileHandle, FileSize);
+  Status = FileHandleGetSize (*FileHandle, &Size);
     if (EFI_ERROR (Status)) {
       Print (L"%s: Cannot get Image file size\n", CMD_NAME_STRING);
     }
+
+  *FileSize = (UINTN)Size;
 
   // Read Image header into buffer
   Buffer = AllocateZeroPool (*FileSize);
