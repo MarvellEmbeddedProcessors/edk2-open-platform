@@ -84,8 +84,7 @@ PciHostBridgeGetRootBridges (
 
   RootBridge->DmaAbove4G  = FALSE;
 
-  RootBridge->AllocationAttributes  = EFI_PCI_HOST_BRIDGE_COMBINE_MEM_PMEM |
-                                      EFI_PCI_HOST_BRIDGE_MEM64_DECODE;
+  RootBridge->AllocationAttributes  = EFI_PCI_HOST_BRIDGE_COMBINE_MEM_PMEM;
 
   RootBridge->Bus.Base              = FixedPcdGet32 (PcdPciBusMin);
   RootBridge->Bus.Limit             = FixedPcdGet32 (PcdPciBusMax);
@@ -95,9 +94,17 @@ PciHostBridgeGetRootBridges (
   RootBridge->Mem.Base              = FixedPcdGet32 (PcdPciMmio32Base);
   RootBridge->Mem.Limit             = FixedPcdGet32 (PcdPciMmio32Base) +
                                       FixedPcdGet32 (PcdPciMmio32Size) - 1;
-  RootBridge->MemAbove4G.Base       = FixedPcdGet64 (PcdPciMmio64Base);
-  RootBridge->MemAbove4G.Limit      = FixedPcdGet64 (PcdPciMmio64Base) +
-                                      FixedPcdGet64 (PcdPciMmio64Size) - 1;
+
+  if (MAX_UINTN == MAX_UINT64) {
+    RootBridge->AllocationAttributes |= EFI_PCI_HOST_BRIDGE_MEM64_DECODE;
+
+    RootBridge->MemAbove4G.Base       = FixedPcdGet64 (PcdPciMmio64Base);
+    RootBridge->MemAbove4G.Limit      = FixedPcdGet64 (PcdPciMmio64Base) +
+                                        FixedPcdGet64 (PcdPciMmio64Size) - 1;
+  } else {
+    RootBridge->MemAbove4G.Base       = MAX_UINT64;
+    RootBridge->MemAbove4G.Limit      = 0;
+  }
 
   //
   // No separate ranges for prefetchable and non-prefetchable BARs
