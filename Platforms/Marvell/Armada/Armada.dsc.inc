@@ -94,7 +94,7 @@
   # Reset and Time libraries
   EfiTimeBaseLib|OpenPlatformPkg/Library/EfiTimeBaseLib/EfiTimeBaseLib.inf
   RealTimeClockLib|OpenPlatformPkg/Platforms/Marvell/Armada/Library/RealTimeClockLib/RealTimeClockLib.inf
-  EfiResetSystemLib|OpenPlatformPkg/Platforms/Marvell/Library/ResetSystemLib/MvResetSystemLib.inf
+  EfiResetSystemLib|ArmPkg/Library/ArmPsciResetSystemLib/ArmPsciResetSystemLib.inf
 
   # Network support
   NetLib|MdeModulePkg/Library/DxeNetLib/DxeNetLib.inf
