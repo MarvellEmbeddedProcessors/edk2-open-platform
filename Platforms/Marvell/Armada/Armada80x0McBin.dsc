@@ -125,7 +125,7 @@
   gMarvellTokenSpaceGuid.PcdChip1ComPhySpeeds|{ 0x1, 0x6, 0x6, 0x6, 0xA, 0x5 }
 
   #UtmiPhy
-  gMarvellTokenSpaceGuid.PcdUtmiControllers|{ 0x0, 0x0, 0x1, 0x0 }
+  gMarvellTokenSpaceGuid.PcdUtmiControllers|{ 0x1, 0x1, 0x1, 0x0 }
   gMarvellTokenSpaceGuid.PcdUtmiPortType|{ 0x0, 0x0, 0x0, 0x0 }
 
   #MDIO
@@ -146,7 +146,7 @@
   gMarvellTokenSpaceGuid.PcdPp2Controllers|{ 0x1, 0x1 }
 
   #PciEmulation
-  gMarvellTokenSpaceGuid.PcdPciEXhci|{ 0x0, 0x0, 0x1, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPciEXhci|{ 0x1, 0x1, 0x1, 0x0 }
   gMarvellTokenSpaceGuid.PcdPciEAhci|{ 0x1, 0x1 }
   gMarvellTokenSpaceGuid.PcdPciESdhci|{ 0x0, 0x0 }
 
