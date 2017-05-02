@@ -199,7 +199,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
                         FixedPcdGet32 (PcdPciBusMin),       // Range Minimum
                         FixedPcdGet32 (PcdPciBusMax),       // Range Minimum
                         0x0000,                             // Translation Offset
-                        0xFF                                // Length
+                        0x100                               // Length
                         )
                     DWordMemory (ResourceProducer, PosDecode, MinFixed, MaxFixed, NonCacheable, ReadWrite,
                         0x00000000,                         // Granularity

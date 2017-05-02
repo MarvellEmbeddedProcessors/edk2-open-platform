@@ -380,11 +380,11 @@
   gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress|0xE0000000
 
   gArmTokenSpaceGuid.PcdPciBusMin|0x0
-  gArmTokenSpaceGuid.PcdPciBusMax|0xfe
+  gArmTokenSpaceGuid.PcdPciBusMax|0xff
 
   gArmTokenSpaceGuid.PcdPciIoBase|0x0
   gArmTokenSpaceGuid.PcdPciIoSize|0x10000
-  gArmTokenSpaceGuid.PcdPciIoTranslation|0xEFF00000
+  gArmTokenSpaceGuid.PcdPciIoTranslation|0xF6000000
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize|16
 
   gArmTokenSpaceGuid.PcdPciMmio32Base|0xC0000000
