@@ -63,51 +63,51 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 
 /***** ComPhy *****/
-#define PHY_SPEED_ERROR                           0
-#define PHY_SPEED_1_25G                           1
-#define PHY_SPEED_1_5G                            2
-#define PHY_SPEED_2_5G                            3
-#define PHY_SPEED_3G                              4
-#define PHY_SPEED_3_125G                          5
-#define PHY_SPEED_5G                              6
-#define PHY_SPEED_5_15625G                        7
-#define PHY_SPEED_6G                              8
-#define PHY_SPEED_6_25G                           9
-#define PHY_SPEED_10_3125G                        10
-#define PHY_SPEED_MAX                             11
-#define PHY_SPEED_INVALID                         0xff
+#define COMPHY_SPEED_ERROR                           0
+#define COMPHY_SPEED_1_25G                           1
+#define COMPHY_SPEED_1_5G                            2
+#define COMPHY_SPEED_2_5G                            3
+#define COMPHY_SPEED_3G                              4
+#define COMPHY_SPEED_3_125G                          5
+#define COMPHY_SPEED_5G                              6
+#define COMPHY_SPEED_5_15625G                        7
+#define COMPHY_SPEED_6G                              8
+#define COMPHY_SPEED_6_25G                           9
+#define COMPHY_SPEED_10_3125G                        10
+#define COMPHY_SPEED_MAX                             11
+#define COMPHY_SPEED_INVALID                         0xff
 
-#define PHY_TYPE_UNCONNECTED                      0
-#define PHY_TYPE_PCIE0                            1
-#define PHY_TYPE_PCIE1                            2
-#define PHY_TYPE_PCIE2                            3
-#define PHY_TYPE_PCIE3                            4
-#define PHY_TYPE_SATA0                            5
-#define PHY_TYPE_SATA1                            6
-#define PHY_TYPE_SATA2                            7
-#define PHY_TYPE_SATA3                            8
-#define PHY_TYPE_SGMII0                           9
-#define PHY_TYPE_SGMII1                           10
-#define PHY_TYPE_SGMII2                           11
-#define PHY_TYPE_SGMII3                           12
-#define PHY_TYPE_QSGMII                           13
-#define PHY_TYPE_USB3_HOST0                       14
-#define PHY_TYPE_USB3_HOST1                       15
-#define PHY_TYPE_USB3_DEVICE                      16
-#define PHY_TYPE_XAUI0                            17
-#define PHY_TYPE_XAUI1                            18
-#define PHY_TYPE_XAUI2                            19
-#define PHY_TYPE_XAUI3                            20
-#define PHY_TYPE_RXAUI0                           21
-#define PHY_TYPE_RXAUI1                           22
-#define PHY_TYPE_SFI                              23
-#define PHY_TYPE_MAX                              24
-#define PHY_TYPE_INVALID                          0xff
+#define COMPHY_TYPE_UNCONNECTED                      0
+#define COMPHY_TYPE_PCIE0                            1
+#define COMPHY_TYPE_PCIE1                            2
+#define COMPHY_TYPE_PCIE2                            3
+#define COMPHY_TYPE_PCIE3                            4
+#define COMPHY_TYPE_SATA0                            5
+#define COMPHY_TYPE_SATA1                            6
+#define COMPHY_TYPE_SATA2                            7
+#define COMPHY_TYPE_SATA3                            8
+#define COMPHY_TYPE_SGMII0                           9
+#define COMPHY_TYPE_SGMII1                           10
+#define COMPHY_TYPE_SGMII2                           11
+#define COMPHY_TYPE_SGMII3                           12
+#define COMPHY_TYPE_QSGMII                           13
+#define COMPHY_TYPE_USB3_HOST0                       14
+#define COMPHY_TYPE_USB3_HOST1                       15
+#define COMPHY_TYPE_USB3_DEVICE                      16
+#define COMPHY_TYPE_XAUI0                            17
+#define COMPHY_TYPE_XAUI1                            18
+#define COMPHY_TYPE_XAUI2                            19
+#define COMPHY_TYPE_XAUI3                            20
+#define COMPHY_TYPE_RXAUI0                           21
+#define COMPHY_TYPE_RXAUI1                           22
+#define COMPHY_TYPE_SFI                              23
+#define COMPHY_TYPE_MAX                              24
+#define COMPHY_TYPE_INVALID                          0xff
 
-#define PHY_POLARITY_NO_INVERT                    0
-#define PHY_POLARITY_TXD_INVERT                   1
-#define PHY_POLARITY_RXD_INVERT                   2
-#define PHY_POLARITY_ALL_INVERT                   (PHY_POLARITY_TXD_INVERT | PHY_POLARITY_RXD_INVERT)
+#define COMPHY_POLARITY_NO_INVERT                    0
+#define COMPHY_POLARITY_TXD_INVERT                   1
+#define COMPHY_POLARITY_RXD_INVERT                   2
+#define COMPHY_POLARITY_ALL_INVERT                   (COMPHY_POLARITY_TXD_INVERT | COMPHY_POLARITY_RXD_INVERT)
 
 /***** SerDes IP registers *****/
 #define SD_EXTERNAL_CONFIG0_REG                   0

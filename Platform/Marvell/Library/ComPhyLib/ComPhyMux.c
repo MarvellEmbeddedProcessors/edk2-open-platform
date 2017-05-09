@@ -57,8 +57,8 @@ ComPhyMuxCheckConfig (
       DEBUG((DEBUG_INFO, "Lane number %d, had invalid Type %d\n", Lane,
         ComPhyMapData->Type));
       DEBUG((DEBUG_INFO, "Set Lane %d as Type %d\n", Lane,
-        PHY_TYPE_UNCONNECTED));
-      ComPhyMapData->Type = PHY_TYPE_UNCONNECTED;
+        COMPHY_TYPE_UNCONNECTED));
+      ComPhyMapData->Type = COMPHY_TYPE_UNCONNECTED;
     } else {
       DEBUG((DEBUG_INFO, "Lane number %d, has Type %d\n", Lane,
         ComPhyMapData->Type));
