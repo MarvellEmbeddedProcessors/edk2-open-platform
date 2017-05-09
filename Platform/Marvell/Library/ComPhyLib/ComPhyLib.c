@@ -122,16 +122,16 @@ ParseSerdesTypeString (
   UINT32 i;
 
   if (String == NULL)
-    return PHY_TYPE_INVALID;
+    return COMPHY_TYPE_INVALID;
 
-  for (i = 0; i < PHY_TYPE_MAX; i++) {
+  for (i = 0; i < COMPHY_TYPE_MAX; i++) {
     if (StrCmp (String, TypeStringTable[i]) == 0) {
       return i;
     }
   }
 
   /* PCD string doesn't match any supported SerDes Type */
-  return PHY_TYPE_INVALID;
+  return COMPHY_TYPE_INVALID;
 }
 
 /* This function converts SerDes speed in MHz to enum with SerDesSpeed */
@@ -144,14 +144,14 @@ ParseSerdesSpeed (
   UINT32 ValueTable [] = {0, 1250, 1500, 2500, 3000, 3125,
                           5000, 5156, 6000, 6250, 10310};
 
-  for (i = 0; i < PHY_SPEED_MAX; i++) {
+  for (i = 0; i < COMPHY_SPEED_MAX; i++) {
     if (Value == ValueTable[i]) {
       return i;
     }
   }
 
   /* PCD SerDes speed value doesn't match any supported SerDes speed */
-  return PHY_SPEED_INVALID;
+  return COMPHY_SPEED_INVALID;
 }
 
 CHAR16 *
@@ -160,7 +160,7 @@ GetTypeString (
   )
 {
 
-  if (Type < 0 || Type > PHY_TYPE_MAX) {
+  if (Type < 0 || Type > COMPHY_TYPE_MAX) {
     return L"invalid";
   }
 
@@ -295,13 +295,13 @@ MvComPhyInit (
         ParseSerdesSpeed (LaneData[Index].SpeedValue[Lane]);
       PtrChipCfg->MapData[Lane].Invert = (UINT32)LaneData[Index].InvFlag[Lane];
 
-      if ((PtrChipCfg->MapData[Lane].Speed == PHY_SPEED_INVALID) ||
-          (PtrChipCfg->MapData[Lane].Speed == PHY_SPEED_ERROR) ||
-          (PtrChipCfg->MapData[Lane].Type == PHY_TYPE_INVALID)) {
+      if ((PtrChipCfg->MapData[Lane].Speed == COMPHY_SPEED_INVALID) ||
+          (PtrChipCfg->MapData[Lane].Speed == COMPHY_SPEED_ERROR) ||
+          (PtrChipCfg->MapData[Lane].Type == COMPHY_TYPE_INVALID)) {
         DEBUG((DEBUG_ERROR, "ComPhy: No valid phy speed or type for lane %d, "
           "setting lane as unconnected\n", Lane + 1));
-        PtrChipCfg->MapData[Lane].Type = PHY_TYPE_UNCONNECTED;
-        PtrChipCfg->MapData[Lane].Speed = PHY_SPEED_INVALID;
+        PtrChipCfg->MapData[Lane].Type = COMPHY_TYPE_UNCONNECTED;
+        PtrChipCfg->MapData[Lane].Speed = COMPHY_SPEED_INVALID;
       }
     };
 
