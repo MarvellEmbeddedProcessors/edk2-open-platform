@@ -118,18 +118,20 @@
   gMarvellTokenSpaceGuid.PcdUtmiPortType|{ 0x0, 0x1 }
 
   #MDIO
-  gMarvellTokenSpaceGuid.PcdMdioBaseAddress|0xF212A200
+  gMarvellTokenSpaceGuid.PcdMdioControllers|{ 0x1, 0x0 }
 
   #PHY
-  gMarvellTokenSpaceGuid.PcdPhyConnectionTypes|{ 0x8, 0x4, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPhy2MdioController|{ 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdPhyDeviceIds|{ 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPhySmiAddresses|{ 0x0, 0x1 }
   gMarvellTokenSpaceGuid.PcdPhyStartupAutoneg|FALSE
 
   #NET
-  gMarvellTokenSpaceGuid.PcdPhySmiAddresses|{ 0xff, 0x0, 0x1 }
   gMarvellTokenSpaceGuid.PcdPp2GopIndexes|{ 0x0, 0x2, 0x3 }
   gMarvellTokenSpaceGuid.PcdPp2InterfaceAlwaysUp|{ 0x0, 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdPp2InterfaceSpeed|{ 0x5, 0x3, 0x3 }
+  gMarvellTokenSpaceGuid.PcdPp2PhyConnectionTypes|{ 0x8, 0x4, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPp2PhyIndexes|{ 0xFF, 0x0, 0x1 }
   gMarvellTokenSpaceGuid.PcdPp2Port2Controller|{ 0x0, 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdPp2PortIds|{ 0x0, 0x1, 0x2 }
   gMarvellTokenSpaceGuid.PcdPp2Controllers|{ 0x1 }
