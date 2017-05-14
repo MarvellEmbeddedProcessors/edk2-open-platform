@@ -68,6 +68,27 @@ board. For the sake of simplicity new Marvell board will be called "new_board".
    assign according DtbInstance in DtPlatformLoadDtb () function in
    PathToYourOpp/Platforms/Marvell/Armada/Library/DxeDtPlatformDtbLoaderLib/DxeDtPlatformDtbLoaderLib.c
 
+5. ACPI support (optional)
+ - Two default set of tables can be enabled for A70x0:
+
+     PathToYourOpp/Platforms/Marvell/Armada/AcpiTables/Armada70x0/
+
+   and A80x0:
+
+     PathToYourOpp/Platforms/Marvell/Armada/AcpiTables/Armada80x0/
+
+ - In order to add custom tables, similar folder has to be added.
+ - Enable compilation of the tables in .fdf file. See example section in Armada70x0.fdf:
+
+			!if $(ARCH) == AARCH64
+			  # ACPI support
+			  INF MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
+			  INF MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
+			!if ( gMarvellTokenSpaceGuid.PcdBoardId == 0x0 )
+			  INF RuleOverride = ACPITABLE OpenPlatformPkg/Platforms/Marvell/Armada/AcpiTables/Armada70x0/AcpiTables.inf
+			!endif
+			!endif
+
 
 COMPHY configuration
 ====================

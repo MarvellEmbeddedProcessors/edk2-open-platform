@@ -151,3 +151,6 @@
   gMarvellTokenSpaceGuid.PcdXenon1v8Enable|{ 0x0, 0x1 }
   gMarvellTokenSpaceGuid.PcdXenon8BitBusEnable|{ 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdXenonSlowModeEnable|{ 0x1, 0x0 }
+
+[Components.AARCH64]
+  OpenPlatformPkg/Platforms/Marvell/Armada/AcpiTables/Armada70x0/AcpiTables.inf
