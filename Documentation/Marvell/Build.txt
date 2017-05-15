@@ -14,6 +14,8 @@ Fully supported are gcc4.5 - gcc4.9, so possible {toolchain_name} are:
 
 Supported {platform} are:
 	- Armada70x0
+	- Armada80x0Db
+	- Armada80x0McBin
 
 Supported {target} are
 	- DEBUG
@@ -56,3 +58,7 @@ Build procedure
 	Example for building edk2 for Armada70x0 platform with GCC5 for DEBUG:
 
 			# build -a AARCH64 -t GCC5 -b DEBUG -p OpenPlatformPkg/Platforms/Marvell/Armada/Armada70x0.dsc
+
+	The output binary can be found in:
+
+			# PathToYourEdk2/Build/${platform}-AARCH64/${target}_${toolchain_name}/FV/ARMADA_EFI.fd
