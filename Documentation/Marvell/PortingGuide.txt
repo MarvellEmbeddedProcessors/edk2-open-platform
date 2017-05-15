@@ -7,10 +7,10 @@ board. For the sake of simplicity new Marvell board will be called "new_board".
 1. Create configuration files for new target
 	1.1 Create FDF file for new board
 
-	 - Copy and rename PathToYourOpp/Platforms/Marvell/Armada/Armada70x0.fdf to
+	 - Copy and rename PathToYourOpp/Platforms/Marvell/Armada/Armada.fdf to
 	   PathToYourOpp/Platforms/Marvell/Armada/new_board.fdf
 	 - Change the first no-comment line:
-	   [FD.Armada70x0_EFI] to [FD.{new_board}_EFI]
+	   [FD.Armada_EFI] to [FD.{new_board}_EFI]
 
 	1.2 Create DSC file for new board
 
@@ -78,7 +78,7 @@ board. For the sake of simplicity new Marvell board will be called "new_board".
      PathToYourOpp/Platforms/Marvell/Armada/AcpiTables/Armada80x0/
 
  - In order to add custom tables, similar folder has to be added.
- - Enable compilation of the tables in .fdf file. See example section in Armada70x0.fdf:
+ - Enable compilation of the tables in .fdf file. See example section in Armada.fdf:
 
 			!if $(ARCH) == AARCH64
 			  # ACPI support

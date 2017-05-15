@@ -43,7 +43,7 @@
   SUPPORTED_ARCHITECTURES        = AARCH64|ARM
   BUILD_TARGETS                  = DEBUG|RELEASE
   SKUID_IDENTIFIER               = DEFAULT
-  FLASH_DEFINITION               = OpenPlatformPkg/Platforms/Marvell/Armada/Armada70x0.fdf
+  FLASH_DEFINITION               = OpenPlatformPkg/Platforms/Marvell/Armada/Armada.fdf
 
 !include Armada.dsc.inc
 
