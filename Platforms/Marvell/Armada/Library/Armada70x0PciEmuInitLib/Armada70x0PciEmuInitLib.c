@@ -16,6 +16,7 @@
 
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
+#include <Library/MvBoardDescLib.h>
 #include <Library/NonDiscoverableDeviceRegistrationLib.h>
 
 #include <Protocol/NonDiscoverableDevice.h>
@@ -39,9 +40,16 @@ GetInitializerForType (
   IN  UINTN                         Index
   )
 {
-  if (Type == NonDiscoverableDeviceTypeXhci) {
-        return Armada70x0InitXhciVbus;
-  }
+  UINT8    BoardId;
 
-  return NULL;
+  MVBOARD_ID_GET (BoardId);
+
+  switch (BoardId) {
+  case MVBOARD_ID_ARMADA7040_DB:
+    if (Type == NonDiscoverableDeviceTypeXhci) {
+          return Armada70x0InitXhciVbus;
+    }
+  default:
+    return NULL;
+  }
 }

@@ -40,5 +40,8 @@
   DebugLib
   IoLib
 
+[Pcd]
+  gMarvellTokenSpaceGuid.PcdBoardId
+
 [Depex]
   gMarvellPlatformInitCompleteProtocolGuid
