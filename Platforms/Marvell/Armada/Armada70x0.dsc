@@ -53,6 +53,9 @@
 #
 ################################################################################
 [PcdsFixedAtBuild.common]
+  #BoardId: Armada-7040-db
+  gMarvellTokenSpaceGuid.PcdBoardId|0x0
+
   #Timer
   gEmbeddedTokenSpaceGuid.PcdTimerPeriod|10000
 

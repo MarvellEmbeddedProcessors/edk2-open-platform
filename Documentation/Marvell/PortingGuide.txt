@@ -30,6 +30,17 @@ board. For the sake of simplicity new Marvell board will be called "new_board".
 
 	 - Add "!include Armada.dsc.inc" entry to new_board.dsc
 
+	 - Add unique Board ID to MVBOARD_ID list in
+	   PathToYourOpp/Platforms/Marvell/Include/Library/MvBoardDescLib.h:
+
+			typedef enum {
+			  MVBOARD_ID_ARMADA7040_DB,
+			  MVBOARD_ID_MAX,
+			  MVBOARD_ID_DEFAULT = 0xFF,
+			} MVBOARD_ID;
+
+	   and assign according value to gMarvellTokenSpaceGuid.PcdBoardId PCD.
+
 2. Driver support
  - According to content of files from PathToYourOpp/Documentation/Marvell/PortingGuide
    insert PCD entries into new_board.dsc for every needed interface (as listed below).
