@@ -21,6 +21,8 @@
 
 #include <Protocol/NonDiscoverableDevice.h>
 
+#include "Armada70x0PciEmuInitLib.h"
+
 STATIC
 EFI_STATUS
 EFIAPI
@@ -45,6 +47,25 @@ Armada80x0InitXhciVbus (
   return EFI_SUCCESS;
 }
 
+STATIC
+EFI_STATUS
+EFIAPI
+Armada8040McBinInitXhciVbus (
+  IN  NON_DISCOVERABLE_DEVICE       *This
+  )
+{
+  MmioOr32 (
+      GPIO_BASE + GPIO_DIR_OFFSET (ARMADA_8040_MCBIN_VBUS_GPIO),
+      GPIO_PIN_MASK (ARMADA_8040_MCBIN_VBUS_GPIO)
+      );
+  MmioAnd32 (
+      GPIO_BASE + GPIO_ENABLE_OFFSET (ARMADA_8040_MCBIN_VBUS_GPIO),
+      ~GPIO_PIN_MASK (ARMADA_8040_MCBIN_VBUS_GPIO)
+      );
+
+  return EFI_SUCCESS;
+}
+
 NON_DISCOVERABLE_DEVICE_INIT
 EFIAPI
 GetInitializerForType (
@@ -64,6 +85,10 @@ GetInitializerForType (
   case MVBOARD_ID_ARMADA8040_DB:
     if (Type == NonDiscoverableDeviceTypeXhci) {
           return Armada80x0InitXhciVbus;
+    }
+  case MVBOARD_ID_ARMADA8040_MCBIN:
+    if (Type == NonDiscoverableDeviceTypeXhci && Index == 0x2) {
+          return Armada8040McBinInitXhciVbus;
     }
   default:
     return NULL;

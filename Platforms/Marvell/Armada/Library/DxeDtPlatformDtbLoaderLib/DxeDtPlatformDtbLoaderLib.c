@@ -52,6 +52,7 @@ DtPlatformLoadDtb (
   switch (BoardId) {
   case MVBOARD_ID_ARMADA7040_DB:
   case MVBOARD_ID_ARMADA8040_DB:
+  case MVBOARD_ID_ARMADA8040_MCBIN:
     DtbInstance = BoardId;
     break;
   default:

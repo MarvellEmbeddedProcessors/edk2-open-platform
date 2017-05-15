@@ -43,5 +43,8 @@
 [Pcd]
   gMarvellTokenSpaceGuid.PcdBoardId
 
+[FixedPcd]
+  gMarvellTokenSpaceGuid.PcdChip1MppBaseAddress
+
 [Depex]
   gMarvellPlatformInitCompleteProtocolGuid

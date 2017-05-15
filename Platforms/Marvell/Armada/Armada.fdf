@@ -186,6 +186,7 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   FILE FREEFORM = 25462CDA-221F-47DF-AC1D-259CFAA4E326 {
     SECTION RAW = OpenPlatformPkg/Platforms/Marvell/Armada/armada-7040-db.dtb
     SECTION RAW = OpenPlatformPkg/Platforms/Marvell/Armada/armada-8040-db.dtb
+    SECTION RAW = OpenPlatformPkg/Platforms/Marvell/Armada/armada-8040-mcbin.dtb
   }
 
 !if $(ARCH) == AARCH64
@@ -194,7 +195,7 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   INF MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
 !if ( gMarvellTokenSpaceGuid.PcdBoardId == 0x0 )
   INF RuleOverride = ACPITABLE OpenPlatformPkg/Platforms/Marvell/Armada/AcpiTables/Armada70x0/AcpiTables.inf
-!elseif ( gMarvellTokenSpaceGuid.PcdBoardId == 0x1 )
+!elseif ( gMarvellTokenSpaceGuid.PcdBoardId == 0x1 ) || ( gMarvellTokenSpaceGuid.PcdBoardId == 0x2 )
   INF RuleOverride = ACPITABLE OpenPlatformPkg/Platforms/Marvell/Armada/AcpiTables/Armada80x0/AcpiTables.inf
 !endif
 !endif
