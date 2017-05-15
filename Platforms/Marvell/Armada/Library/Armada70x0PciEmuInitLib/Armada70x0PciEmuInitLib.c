@@ -33,6 +33,18 @@ Armada70x0InitXhciVbus (
   return EFI_SUCCESS;
 }
 
+STATIC
+EFI_STATUS
+EFIAPI
+Armada80x0InitXhciVbus (
+  IN  NON_DISCOVERABLE_DEVICE       *This
+  )
+{
+  /* I2C IO-expander GPIO pins modification should be added here */
+
+  return EFI_SUCCESS;
+}
+
 NON_DISCOVERABLE_DEVICE_INIT
 EFIAPI
 GetInitializerForType (
@@ -48,6 +60,10 @@ GetInitializerForType (
   case MVBOARD_ID_ARMADA7040_DB:
     if (Type == NonDiscoverableDeviceTypeXhci) {
           return Armada70x0InitXhciVbus;
+    }
+  case MVBOARD_ID_ARMADA8040_DB:
+    if (Type == NonDiscoverableDeviceTypeXhci) {
+          return Armada80x0InitXhciVbus;
     }
   default:
     return NULL;
