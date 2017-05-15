@@ -53,6 +53,21 @@ board. For the sake of simplicity new Marvell board will be called "new_board".
  - Output files (and among others FD file, which may be used by ATF) are
    generated under directory pointed by "OUTPUT_DIRECTORY" entry (see point 1.2).
 
+5. Embedded DTB support (optional)
+ - Add DTB blob for a new board in PathToYourOpp/Platforms/Marvell/Armada,
+   preferably with its decompiled sources.
+ - Add the file to a DTB FV entry in the .fdf file. Example entry with new-board.dtb:
+
+			INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+			FILE FREEFORM = 25462CDA-221F-47DF-AC1D-259CFAA4E326 {
+			  SECTION RAW = OpenPlatformPkg/Platforms/Marvell/Armada/armada-7040-db.dtb
+			  SECTION RAW = OpenPlatformPkg/Platforms/Marvell/Armada/new-board.dtb
+			}
+
+ - Allow for picking desired DTB file during boot - basing on the BoardId,
+   assign according DtbInstance in DtPlatformLoadDtb () function in
+   PathToYourOpp/Platforms/Marvell/Armada/Library/DxeDtPlatformDtbLoaderLib/DxeDtPlatformDtbLoaderLib.c
+
 
 COMPHY configuration
 ====================
