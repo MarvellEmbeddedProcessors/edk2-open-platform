@@ -57,6 +57,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CMD_READ_ARRAY_FAST             0x0b
 #define CMD_PAGE_PROGRAM                0x02
 #define CMD_BANK_WRITE                  0xc5
+#define CMD_ERASE_4K                    0x20
+#define CMD_ERASE_32K                   0x52
 #define CMD_ERASE_64K                   0xd8
 #define CMD_4B_ADDR_ENABLE              0xb7
 
@@ -65,6 +67,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define SPI_TRANSFER_BEGIN              0x01  // Assert CS before transfer
 #define SPI_TRANSFER_END                0x02  // Deassert CS after transfers
+
+#define SPI_ERASE_SIZE_4K               4096
+#define SPI_ERASE_SIZE_32K              32768
+#define SPI_ERASE_SIZE_64K              65536
 
 #define SPI_FLASH_16MB_BOUN             0x1000000
 
