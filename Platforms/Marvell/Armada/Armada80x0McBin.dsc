@@ -111,19 +111,19 @@
   # 1: PCIE0         5 Gbps
   # 2: PCIE0         5 Gbps
   # 3: PCIE0         5 Gbps
-  # 4: SFI           10.31 Gbps
+  # 4: SGMII0        1.25 Gbps
   # 5: SATA1         5 Gbps
-  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|{ 0x1, 0x1, 0x1, 0x1, 0x17, 0x6 }
-  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|{ 0x6, 0x6, 0x6, 0x6, 0xA, 0x6 }
+  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|{ 0x1, 0x1, 0x1, 0x1, 0x9, 0x6 }
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|{ 0x6, 0x6, 0x6, 0x6, 0x1, 0x6 }
   # ComPhy1
   # 0: SGMII1        1.25 Gbps
   # 1: SATA0         5 Gbps
   # 2: USB3_HOST0    5 Gbps
   # 3: SATA1         5 Gbps
-  # 4: SFI           10.31 Gbps
+  # 4: SGMII0        1.25 Gbps
   # 5: SGMII2        3.125 Gbps
-  gMarvellTokenSpaceGuid.PcdChip1ComPhyTypes|{ 0xA, 0x7, 0xE, 0x8, 0x17, 0xB }
-  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeeds|{ 0x1, 0x6, 0x6, 0x6, 0xA, 0x5 }
+  gMarvellTokenSpaceGuid.PcdChip1ComPhyTypes|{ 0xA, 0x7, 0xE, 0x8, 0x9, 0xB }
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeeds|{ 0x1, 0x6, 0x6, 0x6, 0x1, 0x5 }
 
   #UtmiPhy
   gMarvellTokenSpaceGuid.PcdUtmiControllers|{ 0x1, 0x1, 0x1, 0x0 }
@@ -141,8 +141,8 @@
   #NET
   gMarvellTokenSpaceGuid.PcdPp2GopIndexes|{ 0x0, 0x0, 0x2, 0x3 }
   gMarvellTokenSpaceGuid.PcdPp2InterfaceAlwaysUp|{ 0x0, 0x0, 0x0, 0x0 }
-  gMarvellTokenSpaceGuid.PcdPp2InterfaceSpeed|{ 0x5, 0x5, 0x3, 0x4 }
-  gMarvellTokenSpaceGuid.PcdPp2PhyConnectionTypes|{ 0x8, 0x8, 0x4, 0x4 }
+  gMarvellTokenSpaceGuid.PcdPp2InterfaceSpeed|{ 0x3, 0x3, 0x3, 0x4 }
+  gMarvellTokenSpaceGuid.PcdPp2PhyConnectionTypes|{ 0x4, 0x4, 0x4, 0x4 }
   gMarvellTokenSpaceGuid.PcdPp2PhyIndexes|{ 0xFF, 0xFF, 0x0, 0xFF }
   gMarvellTokenSpaceGuid.PcdPp2Port2Controller|{ 0x0, 0x1, 0x1, 0x1 }
   gMarvellTokenSpaceGuid.PcdPp2PortIds|{ 0x0, 0x0, 0x1, 0x2 }

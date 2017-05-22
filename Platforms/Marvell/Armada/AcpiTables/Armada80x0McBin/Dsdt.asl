@@ -228,7 +228,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
                   Package () {
                     Package () { "port-id", 0 },
                     Package () { "gop-port-id", 0 },
-                    Package () { "phy-mode", "10gbase-kr"},
+                    Package () { "phy-mode", "sgmii"},
                   }
               })
             }
@@ -264,7 +264,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
                   Package () {
                     Package () { "port-id", 0 },
                     Package () { "gop-port-id", 0 },
-                    Package () { "phy-mode", "10gbase-kr"},
+                    Package () { "phy-mode", "sgmii"},
                   }
               })
             }
