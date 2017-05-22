@@ -253,14 +253,20 @@
 				reg = <0x0 0x100000 0x129000 0xb000>;
 				clocks = <0x5 0x1 0x3 0x5 0x1 0x9 0x5 0x1 0x5>;
 				clock-names = "pp_clk", "gop_clk", "mg_clk";
-				status = "disabled";
+				status = "okay";
 				dma-coherent;
 
 				eth0 {
 					interrupts = <0x0 0x25 0x4>;
 					port-id = <0x0>;
 					gop-port-id = <0x0>;
-					status = "disabled";
+					status = "okay";
+					phy-mode = "sgmii";
+
+					fixed-link {
+						speed = <0x3e8>;
+						full-duplex;
+					};
 				};
 
 				eth1 {
@@ -517,7 +523,13 @@
 					interrupts = <0x0 0x105 0x4>;
 					port-id = <0x0>;
 					gop-port-id = <0x0>;
-					status = "disabled";
+					status = "okay";
+					phy-mode = "sgmii";
+
+					fixed-link {
+						speed = <0x3e8>;
+						full-duplex;
+					};
 				};
 
 				eth1 {
