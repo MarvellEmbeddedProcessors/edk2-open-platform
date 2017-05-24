@@ -80,6 +80,12 @@
   gMarvellTokenSpaceGuid.PcdPp2PhyIndexes
   gMarvellTokenSpaceGuid.PcdPp2Port2Controller
   gMarvellTokenSpaceGuid.PcdPp2PortIds
+  gMarvellTokenSpaceGuid.PcdPp2MacAddressEth0
+  gMarvellTokenSpaceGuid.PcdPp2MacAddressEth1
+  gMarvellTokenSpaceGuid.PcdPp2MacAddressEth2
+  gMarvellTokenSpaceGuid.PcdPp2MacAddressEth3
+  gMarvellTokenSpaceGuid.PcdPp2MacAddressEth4
+  gMarvellTokenSpaceGuid.PcdPp2MacAddressEth5
 
 [Depex]
   TRUE

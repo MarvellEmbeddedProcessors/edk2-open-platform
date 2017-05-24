@@ -1087,6 +1087,43 @@ drop:
   ReturnUnlock(SavedTpl, Status);
 }
 
+STATIC
+VOID
+Pp2DxeConfigureMacAddress (
+  IN PP2DXE_CONTEXT *Pp2Context,
+  IN PP2_DEVICE_PATH *Pp2DevicePath
+  )
+{
+  UINT8 *MacAddressPtr;
+
+  switch (Pp2Context->Instance) {
+    case 0:
+      MacAddressPtr = PcdGetPtr (PcdPp2MacAddressEth0);
+      break;
+    case 1:
+      MacAddressPtr = PcdGetPtr (PcdPp2MacAddressEth1);
+      break;
+    case 2:
+      MacAddressPtr = PcdGetPtr (PcdPp2MacAddressEth2);
+      break;
+    case 3:
+      MacAddressPtr = PcdGetPtr (PcdPp2MacAddressEth3);
+      break;
+    case 4:
+      MacAddressPtr = PcdGetPtr (PcdPp2MacAddressEth4);
+      break;
+    case 5:
+      MacAddressPtr = PcdGetPtr (PcdPp2MacAddressEth5);
+      break;
+    default:
+      Pp2DevicePath->Pp2Mac.MacAddress.Addr[3] += PcdGet8 (PcdBoardId);
+      Pp2DevicePath->Pp2Mac.MacAddress.Addr[5] += Pp2Context->Instance;
+    return;
+  }
+
+  CopyMem (Pp2DevicePath->Pp2Mac.MacAddress.Addr, MacAddressPtr, NET_ETHER_ADDR_LEN);
+}
+
 EFI_STATUS
 Pp2DxeSnpInstall (
   IN PP2DXE_CONTEXT *Pp2Context
@@ -1112,8 +1149,7 @@ Pp2DxeSnpInstall (
   CopyMem (SnpMode, &Pp2SnpModeTemplate, sizeof (EFI_SIMPLE_NETWORK_MODE));
 
   /* Handle device path of the controller */
-  Pp2DevicePath->Pp2Mac.MacAddress.Addr[3] += PcdGet8 (PcdBoardId);
-  Pp2DevicePath->Pp2Mac.MacAddress.Addr[5] += Pp2Context->Instance;
+  Pp2DxeConfigureMacAddress (Pp2Context, Pp2DevicePath);
   Pp2Context->Signature = PP2DXE_SIGNATURE;
   Pp2Context->DevicePath = Pp2DevicePath;
   Pp2DevicePath->Pp2Mac.IfType = SnpMode->IfType;
