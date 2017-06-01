@@ -374,6 +374,11 @@
   gArmTokenSpaceGuid.PcdSystemMemorySize|0xF0000000
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuMemorySize|36
 
+  # SMBIOS/DMI
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSmbiosDocRev|0x0
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSmbiosEntryPointProvideMethod|0x2
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSmbiosVersion|0x0300
+
   # TRNG
   gMarvellTokenSpaceGuid.PcdEip76TrngBaseAddress|0xF2760000
 
@@ -519,6 +524,10 @@
 
   # DTB
   EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+
+  # SMBIOS/DMI
+  MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
+  OpenPlatformPkg/Platforms/Marvell/Armada/Drivers/SmbiosPlatformDxe/SmbiosPlatformDxe.inf
 
 [Components.AARCH64]
   #

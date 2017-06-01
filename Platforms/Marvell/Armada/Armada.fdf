@@ -189,6 +189,10 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
     SECTION RAW = OpenPlatformPkg/Platforms/Marvell/Armada/armada-8040-mcbin.dtb
   }
 
+  # SMBIOS/DMI
+  INF MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
+  INF OpenPlatformPkg/Platforms/Marvell/Armada/Drivers/SmbiosPlatformDxe/SmbiosPlatformDxe.inf
+
 !if $(ARCH) == AARCH64
   # ACPI support
   INF MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
