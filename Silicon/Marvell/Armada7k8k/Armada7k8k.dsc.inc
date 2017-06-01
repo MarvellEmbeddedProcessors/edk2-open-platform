@@ -384,6 +384,11 @@
   gMarvellTokenSpaceGuid.PcdSecureRegionBase|0x4000000
   gMarvellTokenSpaceGuid.PcdSecureRegionSize|0x0200000
 
+  # SMBIOS/DMI
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSmbiosDocRev|0x0
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSmbiosEntryPointProvideMethod|0x2
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSmbiosVersion|0x0300
+
   # TRNG
   gMarvellTokenSpaceGuid.PcdEip76TrngBaseAddress|0xF2760000
 
@@ -592,6 +597,10 @@
 !ifdef $(INCLUDE_TFTP_COMMAND)
   ShellPkg/DynamicCommand/TftpDynamicCommand/TftpDynamicCommand.inf
 !endif #$(INCLUDE_TFTP_COMMAND)
+
+  # SMBIOS/DMI
+  MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
+  Silicon/Marvell/Drivers/SmbiosPlatformDxe/SmbiosPlatformDxe.inf
 
 [Components.AARCH64]
   #
