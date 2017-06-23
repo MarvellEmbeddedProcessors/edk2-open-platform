@@ -65,7 +65,6 @@
  FileHandleLib
 
 [Pcd]
- gMarvellTokenSpaceGuid.PcdSpiFlashId
  gMarvellTokenSpaceGuid.PcdSpiFlashCs
  gMarvellTokenSpaceGuid.PcdSpiFlashMode
 

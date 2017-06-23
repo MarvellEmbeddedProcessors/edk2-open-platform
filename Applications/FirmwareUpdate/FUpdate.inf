@@ -64,9 +64,6 @@
   UefiLib
   UefiRuntimeServicesTableLib
 
-[Pcd]
- gMarvellTokenSpaceGuid.PcdSpiFlashId
-
 [Protocols]
  gMarvellSpiFlashProtocolGuid
  gMarvellSpiMasterProtocolGuid

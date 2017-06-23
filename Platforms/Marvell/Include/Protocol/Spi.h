@@ -38,6 +38,42 @@ extern EFI_GUID gMarvellSpiMasterProtocolGuid;
 
 typedef struct _MARVELL_SPI_MASTER_PROTOCOL MARVELL_SPI_MASTER_PROTOCOL;
 
+#define SPI_FLASH_MAX_ID_LEN    6
+
+typedef struct {
+  /* Device name ([MANUFLETTER][DEVTYPE][DENSITY][EXTRAINFO]) */
+  UINT16 *Name;
+
+  /*
+   * This array stores the ID bytes.
+   * The first three bytes are the JEDIC ID.
+   * JEDEC ID zero means "no ID" (mostly older chips).
+   */
+  UINT8 Id[SPI_FLASH_MAX_ID_LEN];
+  UINT8 IdLen;
+
+  /*
+   * The size listed here is what works with SPINOR_OP_SE, which isn't
+   * necessarily called a "sector" by the vendor.
+   */
+  UINT32 SectorSize;
+  UINT32 SectorCount;
+
+  UINT16 PageSize;
+
+  UINT16 Flags;
+#define SECT_4K      1 << 0  /* CMD_ERASE_4K works uniformly */
+#define E_FSR        1 << 1  /* use flag status register for */
+#define SST_WR       1 << 2  /* use SST byte/word programming */
+#define WR_QPP       1 << 3  /* use Quad Page Program */
+#define RD_QUAD      1 << 4  /* use Quad Read */
+#define RD_DUAL      1 << 5  /* use Dual Read */
+#define RD_QUADIO    1 << 6  /* use Quad IO Read */
+#define RD_DUALIO    1 << 7  /* use Dual IO Read */
+#define RD_FULL      (RD_QUAD | RD_DUAL | RD_QUADIO | RD_DUALIO)
+#define ADDR_CYC_4   1 << 8  /* use 4 byte addressing format */
+} SPI_FLASH_INFO;
+
 typedef enum {
   SPI_MODE0, // CPOL = 0 & CPHA = 0
   SPI_MODE1, // CPOL = 0 & CPHA = 1
@@ -49,6 +85,7 @@ typedef struct {
   INTN Cs;
   INTN MaxFreq;
   SPI_MODE Mode;
+  SPI_FLASH_INFO *Info;
 } SPI_DEVICE;
 
 typedef
