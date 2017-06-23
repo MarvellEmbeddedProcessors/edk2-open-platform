@@ -61,9 +61,7 @@ EFI_STATUS
 typedef
 EFI_STATUS
 (EFIAPI *MV_SPI_FLASH_READ_ID) (
-  IN     SPI_DEVICE *SpiDev,
-  IN     UINT32     DataByteCount,
-  IN OUT UINT8      *Buffer
+  IN     SPI_DEVICE *SpiDev
   );
 
 typedef

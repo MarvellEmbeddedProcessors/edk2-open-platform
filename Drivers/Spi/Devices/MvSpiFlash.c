@@ -36,6 +36,136 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 MARVELL_SPI_MASTER_PROTOCOL *SpiMasterProtocol;
 SPI_FLASH_INSTANCE  *mSpiFlashInstance;
 
+#define INFO(JedecId, ExtId, SecSize, NSectors, FlashFlags)  \
+  .Id = {                       \
+    ((JedecId) >> 16) & 0xff,   \
+    ((JedecId) >> 8) & 0xff,    \
+    (JedecId) & 0xff,           \
+    ((ExtId) >> 8) & 0xff,      \
+    (ExtId) & 0xff,             \
+    },                          \
+  .IdLen = (!(JedecId) ? 0 : (3 + ((ExtId) ? 2 : 0))),  \
+  .SectorSize = (SecSize),      \
+  .SectorCount = (NSectors),    \
+  .PageSize = 256,              \
+  .Flags = (FlashFlags),
+
+static SPI_FLASH_INFO SpiFlashIds[] = {
+  /* ATMEL */
+  {L"at45db011d",        INFO(0x1f2200, 0x0, 64 * 1024,     4, SECT_4K) },
+  {L"at45db021d",        INFO(0x1f2300, 0x0, 64 * 1024,     8, SECT_4K) },
+  {L"at45db041d",        INFO(0x1f2400, 0x0, 64 * 1024,     8, SECT_4K) },
+  {L"at45db081d",        INFO(0x1f2500, 0x0, 64 * 1024,    16, SECT_4K) },
+  {L"at45db161d",        INFO(0x1f2600, 0x0, 64 * 1024,    32, SECT_4K) },
+  {L"at45db321d",        INFO(0x1f2700, 0x0, 64 * 1024,    64, SECT_4K) },
+  {L"at45db641d",        INFO(0x1f2800, 0x0, 64 * 1024,   128, SECT_4K) },
+  {L"at25df321a",        INFO(0x1f4701, 0x0, 64 * 1024,    64, SECT_4K) },
+  {L"at25df321",         INFO(0x1f4700, 0x0, 64 * 1024,    64, SECT_4K) },
+  {L"at26df081a",        INFO(0x1f4501, 0x0, 64 * 1024,    16, SECT_4K) },
+  /* EON */
+  {L"en25q32b",          INFO(0x1c3016, 0x0, 64 * 1024,    64, 0) },
+  {L"en25q64",           INFO(0x1c3017, 0x0, 64 * 1024,   128, SECT_4K) },
+  {L"en25q128b",         INFO(0x1c3018, 0x0, 64 * 1024,   256, 0) },
+  {L"en25s64",           INFO(0x1c3817, 0x0, 64 * 1024,   128, 0) },
+  /* GIGADEVICE */
+  {L"gd25q64b",          INFO(0xc84017, 0x0, 64 * 1024,   128, SECT_4K) },
+  {L"gd25lq32",          INFO(0xc86016, 0x0, 64 * 1024,    64, SECT_4K) },
+  /* ISSI */
+  {L"is25lp032",         INFO(0x9d6016, 0x0, 64 * 1024,    64, 0) },
+  {L"is25lp064",         INFO(0x9d6017, 0x0, 64 * 1024,   128, 0) },
+  {L"is25lp128",         INFO(0x9d6018, 0x0, 64 * 1024,   256, 0) },
+  /* MACRONIX */
+  {L"mx25l2006e",        INFO(0xc22012, 0x0, 64 * 1024,     4, 0) },
+  {L"mx25l4005",         INFO(0xc22013, 0x0, 64 * 1024,     8, 0) },
+  {L"mx25l8005",         INFO(0xc22014, 0x0, 64 * 1024,    16, 0) },
+  {L"mx25l1605d",        INFO(0xc22015, 0x0, 64 * 1024,    32, 0) },
+  {L"mx25l3205d",        INFO(0xc22016, 0x0, 64 * 1024,    64, 0) },
+  {L"mx25l6405d",        INFO(0xc22017, 0x0, 64 * 1024,   128, 0) },
+  {L"mx25l12805",        INFO(0xc22018, 0x0, 64 * 1024,   256, RD_FULL | WR_QPP) },
+  {L"mx25l25635f",       INFO(0xc22019, 0x0, 64 * 1024,   512, RD_FULL | WR_QPP | ADDR_CYC_4) },
+  {L"mx25l51235f",       INFO(0xc2201a, 0x0, 64 * 1024,  1024, RD_FULL | WR_QPP) },
+  {L"mx25l12855e",       INFO(0xc22618, 0x0, 64 * 1024,   256, RD_FULL | WR_QPP) },
+  {L"mx66u51235f",       INFO(0xc2253a, 0x0, 64 * 1024,  1024, RD_FULL | WR_QPP) },
+  {L"mx66l1g45g",        INFO(0xc2201b, 0x0, 64 * 1024,  2048, RD_FULL | WR_QPP) },
+  /* SPANSION */
+  {L"s25fl008a",         INFO(0x010213, 0x0, 64 * 1024,    16, 0) },
+  {L"s25fl016a",         INFO(0x010214, 0x0, 64 * 1024,    32, 0) },
+  {L"s25fl032a",         INFO(0x010215, 0x0, 64 * 1024,    64, 0) },
+  {L"s25fl064a",         INFO(0x010216, 0x0, 64 * 1024,   128, 0) },
+  {L"s25fl116k",         INFO(0x014015, 0x0, 64 * 1024,   128, 0) },
+  {L"s25fl164k",         INFO(0x014017, 0x0140,  64 * 1024,   128, 0) },
+  {L"s25fl128p_256k",    INFO(0x012018, 0x0300, 256 * 1024,    64, RD_FULL | WR_QPP) },
+  {L"s25fl128p_64k",     INFO(0x012018, 0x0301,  64 * 1024,   256, RD_FULL | WR_QPP) },
+  {L"s25fl032p",         INFO(0x010215, 0x4d00,  64 * 1024,    64, RD_FULL | WR_QPP) },
+  {L"s25fl064p",         INFO(0x010216, 0x4d00,  64 * 1024,   128, RD_FULL | WR_QPP) },
+  {L"s25fl128s_256k",    INFO(0x012018, 0x4d00, 256 * 1024,    64, RD_FULL | WR_QPP) },
+  {L"s25fl128s_64k",     INFO(0x012018, 0x4d01,  64 * 1024,   256, RD_FULL | WR_QPP) },
+  {L"s25fl256s_256k",    INFO(0x010219, 0x4d00, 256 * 1024,   128, RD_FULL | WR_QPP) },
+  {L"s25fl256s_64k",     INFO(0x010219, 0x4d01,  64 * 1024,   512, RD_FULL | WR_QPP) },
+  {L"s25fl512s_256k",    INFO(0x010220, 0x4d00, 256 * 1024,   256, RD_FULL | WR_QPP) },
+  {L"s25fl512s_64k",     INFO(0x010220, 0x4d01,  64 * 1024,  1024, RD_FULL | WR_QPP) },
+  {L"s25fl512s_512k",    INFO(0x010220, 0x4f00, 256 * 1024,   256, RD_FULL | WR_QPP) },
+  /* STMICRO */
+  {L"m25p10",            INFO(0x202011, 0x0, 32 * 1024,     4, 0) },
+  {L"m25p20",            INFO(0x202012, 0x0, 64 * 1024,     4, 0) },
+  {L"m25p40",            INFO(0x202013, 0x0, 64 * 1024,     8, 0) },
+  {L"m25p80",            INFO(0x202014, 0x0, 64 * 1024,    16, 0) },
+  {L"m25p16",            INFO(0x202015, 0x0, 64 * 1024,    32, 0) },
+  {L"m25pE16",           INFO(0x208015, 0x1000, 64 * 1024, 32, 0) },
+  {L"m25pX16",           INFO(0x207115, 0x1000, 64 * 1024, 32, RD_QUAD | RD_DUAL) },
+  {L"m25p32",            INFO(0x202016, 0x0,  64 * 1024,    64, 0) },
+  {L"m25p64",            INFO(0x202017, 0x0,  64 * 1024,   128, 0) },
+  {L"m25p128",           INFO(0x202018, 0x0, 256 * 1024,    64, 0) },
+  {L"m25pX64",           INFO(0x207117, 0x0,  64 * 1024,   128, SECT_4K) },
+  {L"n25q016a",          INFO(0x20bb15, 0x0,  64 * 1024,    32, SECT_4K) },
+  {L"n25q32",            INFO(0x20ba16, 0x0,  64 * 1024,    64, RD_FULL | WR_QPP | SECT_4K) },
+  {L"n25q32a",           INFO(0x20bb16, 0x0,  64 * 1024,    64, RD_FULL | WR_QPP | SECT_4K) },
+  {L"n25q64",            INFO(0x20ba17, 0x0,  64 * 1024,   128, RD_FULL | WR_QPP | SECT_4K) },
+  {L"n25q64a",           INFO(0x20bb17, 0x0,  64 * 1024,   128, RD_FULL | WR_QPP | SECT_4K) },
+  {L"n25q128",           INFO(0x20ba18, 0x0,  64 * 1024,   256, RD_FULL | WR_QPP) },
+  {L"n25q128a",          INFO(0x20bb18, 0x0,  64 * 1024,   256, RD_FULL | WR_QPP) },
+  {L"n25q256",           INFO(0x20ba19, 0x0,  64 * 1024,   512, RD_FULL | WR_QPP | SECT_4K) },
+  {L"n25q256a",          INFO(0x20bb19, 0x0,  64 * 1024,   512, RD_FULL | WR_QPP | SECT_4K) },
+  {L"n25q512",           INFO(0x20ba20, 0x0,  64 * 1024,  1024, RD_FULL | WR_QPP | E_FSR | SECT_4K) },
+  {L"n25q512a",          INFO(0x20bb20, 0x0,  64 * 1024,  1024, RD_FULL | WR_QPP | E_FSR | SECT_4K) },
+  {L"n25q1024",          INFO(0x20ba21, 0x0,  64 * 1024,  2048, RD_FULL | WR_QPP | E_FSR | SECT_4K | ADDR_CYC_4) },
+  {L"n25q1024a",         INFO(0x20bb21, 0x0,  64 * 1024,  2048, RD_FULL | WR_QPP | E_FSR | SECT_4K) },
+  {L"mt25qu02g",         INFO(0x20bb22, 0x0,  64 * 1024,  4096, RD_FULL | WR_QPP | E_FSR | SECT_4K) },
+  {L"mt25ql02g",         INFO(0x20ba22, 0x0,  64 * 1024,  4096, RD_FULL | WR_QPP | E_FSR | SECT_4K) },
+  /* SST */
+  {L"sst25vf040b",       INFO(0xbf258d, 0x0,  64 * 1024,     8, SECT_4K | SST_WR) },
+  {L"sst25vf080b",       INFO(0xbf258e, 0x0,  64 * 1024,    16, SECT_4K | SST_WR) },
+  {L"sst25vf016b",       INFO(0xbf2541, 0x0,  64 * 1024,    32, SECT_4K | SST_WR) },
+  {L"sst25vf032b",       INFO(0xbf254a, 0x0,  64 * 1024,    64, SECT_4K | SST_WR) },
+  {L"sst25vf064c",       INFO(0xbf254b, 0x0,  64 * 1024,   128, SECT_4K) },
+  {L"sst25wf512",        INFO(0xbf2501, 0x0,  64 * 1024,     1, SECT_4K | SST_WR) },
+  {L"sst25wf010",        INFO(0xbf2502, 0x0,  64 * 1024,     2, SECT_4K | SST_WR) },
+  {L"sst25wf020",        INFO(0xbf2503, 0x0,  64 * 1024,     4, SECT_4K | SST_WR) },
+  {L"sst25wf040",        INFO(0xbf2504, 0x0,  64 * 1024,     8, SECT_4K | SST_WR) },
+  {L"sst25wf040b",       INFO(0x621613, 0x0,  64 * 1024,     8, SECT_4K) },
+  {L"sst25wf080",        INFO(0xbf2505, 0x0,  64 * 1024,    16, SECT_4K | SST_WR) },
+  /* WINBOND */
+  {L"w25p80",            INFO(0xef2014, 0x0,  64 * 1024,    16, 0) },
+  {L"w25p16",            INFO(0xef2015, 0x0,  64 * 1024,    32, 0) },
+  {L"w25p32",            INFO(0xef2016, 0x0,  64 * 1024,    64, 0) },
+  {L"w25x40",            INFO(0xef3013, 0x0,  64 * 1024,     8, SECT_4K) },
+  {L"w25x16",            INFO(0xef3015, 0x0,  64 * 1024,    32, SECT_4K) },
+  {L"w25x32",            INFO(0xef3016, 0x0,  64 * 1024,    64, SECT_4K) },
+  {L"w25x64",            INFO(0xef3017, 0x0,  64 * 1024,   128, SECT_4K) },
+  {L"w25q80bl",          INFO(0xef4014, 0x0,  64 * 1024,    16, RD_FULL | WR_QPP | SECT_4K) },
+  {L"w25q16cl",          INFO(0xef4015, 0x0,  64 * 1024,    32, RD_FULL | WR_QPP | SECT_4K) },
+  {L"w25q32bv",          INFO(0xef4016, 0x0,  64 * 1024,    64, RD_FULL | WR_QPP | SECT_4K) },
+  {L"w25q64cv",          INFO(0xef4017, 0x0,  64 * 1024,   128, RD_FULL | WR_QPP | SECT_4K) },
+  {L"w25q128bv",         INFO(0xef4018, 0x0,  64 * 1024,   256, RD_FULL | WR_QPP | SECT_4K) },
+  {L"w25q256",           INFO(0xef4019, 0x0,  64 * 1024,   512, RD_FULL | WR_QPP | SECT_4K) },
+  {L"w25q80bw",          INFO(0xef5014, 0x0,  64 * 1024,    16, RD_FULL | WR_QPP | SECT_4K) },
+  {L"w25q16dw",          INFO(0xef6015, 0x0,  64 * 1024,    32, RD_FULL | WR_QPP | SECT_4K) },
+  {L"w25q32dw",          INFO(0xef6016, 0x0,  64 * 1024,    64, RD_FULL | WR_QPP | SECT_4K) },
+  {L"w25q64dw",          INFO(0xef6017, 0x0,  64 * 1024,   128, RD_FULL | WR_QPP | SECT_4K) },
+  {L"w25q128fw",         INFO(0xef6018, 0x0,  64 * 1024,   256, RD_FULL | WR_QPP | SECT_4K) },
+  {},  /* Empty entry to terminate the list */
+};
+
 STATIC
 VOID
 SpiFlashFormatAddress (
@@ -104,13 +234,13 @@ MvSpiFlashWriteCommon (
   UINT8 CmdStatus = CMD_READ_STATUS;
   UINT8 State;
   UINT32 Counter = 0xFFFFF;
-  UINT8 poll_bit = STATUS_REG_POLL_WIP;
-  UINT8 check_status = 0x0;
+  UINT8 PollBit = STATUS_REG_POLL_WIP;
+  UINT8 CheckStatus = 0x0;
 
-  CmdStatus = (UINT8)PcdGet32 (PcdSpiFlashPollCmd);
-  if (CmdStatus == CMD_FLAG_STATUS) {
-    poll_bit = STATUS_REG_POLL_PEC;
-    check_status = poll_bit;
+  if (Slave->Info->Flags & E_FSR) {
+    CmdStatus = CMD_FLAG_STATUS;
+    PollBit = STATUS_REG_POLL_PEC;
+    CheckStatus = STATUS_REG_POLL_PEC;
   }
 
   // Send command
@@ -127,7 +257,7 @@ MvSpiFlashWriteCommon (
     SpiMasterProtocol->Transfer (SpiMasterProtocol, Slave, 1, NULL, &State,
       0);
     Counter--;
-    if ((State & poll_bit) == check_status)
+    if ((State & PollBit) == CheckStatus)
       break;
   } while (Counter > 0);
   if (Counter == 0) {
@@ -181,29 +311,25 @@ MvSpiFlashErase (
   UINTN EraseSize;
   UINT8 Cmd[5];
 
-  AddrSize  = PcdGet32 (PcdSpiFlashAddressCycles);
-  EraseSize = PcdGet64 (PcdSpiFlashEraseSize);
+  if (Slave->Info->Flags & ADDR_CYC_4) {
+    AddrSize = 4;
+  } else {
+    AddrSize = 3;
+  }
+
+  if (Slave->Info->Flags & SECT_4K) {
+    Cmd[0] = CMD_ERASE_4K;
+    EraseSize = SPI_ERASE_SIZE_4K;
+  } else {
+    Cmd[0] = CMD_ERASE_64K;
+    EraseSize = Slave->Info->SectorSize;
+  }
 
   // Check input parameters
   if (Offset % EraseSize || Length % EraseSize) {
     DEBUG((DEBUG_ERROR, "SpiFlash: Either erase offset or length "
       "is not multiple of erase size\n"));
     return EFI_DEVICE_ERROR;
-  }
-
-  switch (EraseSize) {
-  case SPI_ERASE_SIZE_4K:
-    Cmd[0] = CMD_ERASE_4K;
-    break;
-  case SPI_ERASE_SIZE_32K:
-    Cmd[0] = CMD_ERASE_32K;
-    break;
-  case SPI_ERASE_SIZE_64K:
-    Cmd[0] = CMD_ERASE_64K;
-    break;
-  default:
-    DEBUG ((DEBUG_ERROR, "MvSpiFlash: Invalid EraseSize parameter\n"));
-    return EFI_INVALID_PARAMETER;
   }
 
   while (Length) {
@@ -239,7 +365,11 @@ MvSpiFlashRead (
   UINT32 AddrSize, ReadAddr, ReadLength, RemainLength;
   UINTN BankSel = 0;
 
-  AddrSize = PcdGet32 (PcdSpiFlashAddressCycles);
+  if (Slave->Info->Flags & ADDR_CYC_4) {
+    AddrSize = 4;
+  } else {
+    AddrSize = 3;
+  }
 
   Cmd[0] = CMD_READ_ARRAY_FAST;
 
@@ -282,8 +412,13 @@ MvSpiFlashWrite (
   UINT32 WriteAddr;
   UINT8 Cmd[5], AddrSize;
 
-  AddrSize = PcdGet32 (PcdSpiFlashAddressCycles);
-  PageSize = PcdGet32 (PcdSpiFlashPageSize);
+  if (Slave->Info->Flags & ADDR_CYC_4) {
+    AddrSize = 4;
+  } else {
+    AddrSize = 3;
+  }
+
+  PageSize = Slave->Info->PageSize;
 
   Cmd[0] = CMD_PAGE_PROGRAM;
 
@@ -370,7 +505,7 @@ MvSpiFlashUpdate (
   UINT64 SectorSize, ToUpdate, Scale = 1;
   UINT8 *TmpBuf, *End;
 
-  SectorSize = PcdGet64 (PcdSpiFlashSectorSize);
+  SectorSize = Slave->Info->SectorSize;
 
   End = Buf + ByteCount;
 
@@ -400,38 +535,70 @@ MvSpiFlashUpdate (
   return EFI_SUCCESS;
 }
 
+STATIC
+VOID
+MvPrintFlashInfo (
+  IN     SPI_FLASH_INFO *Info
+  )
+{
+  UINTN EraseSize;
+
+  if (Info->Flags & SECT_4K) {
+    EraseSize = SPI_ERASE_SIZE_4K;
+  } else {
+    EraseSize = Info->SectorSize;
+  }
+
+  DEBUG ((
+    DEBUG_ERROR,
+    "Detected %s SPI flash with page size %d B, erase size %d KB, total %d MB\n",
+    Info->Name,
+    Info->PageSize,
+    EraseSize / 1024,
+    (Info->SectorSize * Info->SectorCount) / 1024 / 1024
+    ));
+}
+
 EFI_STATUS
 EFIAPI
 MvSpiFlashReadId (
-  IN     SPI_DEVICE *SpiDev,
-  IN     UINT32     DataByteCount,
-  IN OUT UINT8      *Buffer
+  IN     SPI_DEVICE *SpiDev
   )
 {
+  SPI_FLASH_INFO *Info;
   EFI_STATUS Status;
-  UINT8 *DataOut;
+  UINT8 Id[SPI_FLASH_MAX_ID_LEN];
+  UINT8 Cmd;
 
-  DataOut = (UINT8 *) AllocateZeroPool (DataByteCount);
-  if (DataOut == NULL) {
-    DEBUG((DEBUG_ERROR, "SpiFlash: Cannot allocate memory\n"));
-    return EFI_OUT_OF_RESOURCES;
-  }
-  Status = SpiMasterProtocol->Transfer (SpiMasterProtocol, SpiDev,
-    DataByteCount, Buffer, DataOut, SPI_TRANSFER_BEGIN | SPI_TRANSFER_END);
-  if (EFI_ERROR(Status)) {
-    FreePool (DataOut);
-    DEBUG((DEBUG_ERROR, "SpiFlash: Spi transfer error\n"));
+  Cmd = CMD_READ_ID;
+  Status = SpiMasterProtocol->ReadWrite (
+                    SpiMasterProtocol,
+                    SpiDev,
+                    &Cmd,
+                    SPI_CMD_LEN,
+                    NULL,
+                    Id,
+                    SPI_FLASH_MAX_ID_LEN
+                    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "ReadId: Spi transfer error\n"));
     return Status;
   }
 
-  // Bytes 1,2 and 3 contain SPI flash ID
-  Buffer[0] = DataOut[1];
-  Buffer[1] = DataOut[2];
-  Buffer[2] = DataOut[3];
+  Info = SpiFlashIds;
+  for (; Info->Name != NULL; Info++) {
+    if (Info->IdLen != 0) {
+      if (CompareMem (Info->Id, Id, Info->IdLen) == 0) {
+        SpiDev->Info = Info;
+        MvPrintFlashInfo (Info);
+        return EFI_SUCCESS;
+      }
+    }
+  }
 
-  FreePool (DataOut);
+  DEBUG ((DEBUG_ERROR, "ReadId: Unrecognized JEDEC Id bytes: 0x%02x%02x%02x\n", Id[0], Id[1], Id[2]));
 
-  return EFI_SUCCESS;
+  return EFI_NOT_FOUND;
 }
 
 EFI_STATUS
@@ -445,7 +612,11 @@ MvSpiFlashInit (
   UINT8 Cmd, StatusRegister;
   UINT32 AddrSize;
 
-  AddrSize = PcdGet32 (PcdSpiFlashAddressCycles);
+  if (Slave->Info->Flags & ADDR_CYC_4) {
+    AddrSize = 4;
+  } else {
+    AddrSize = 3;
+  }
 
   if (AddrSize == 4) {
     // Set 4 byte address mode
