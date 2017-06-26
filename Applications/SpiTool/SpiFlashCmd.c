@@ -191,7 +191,7 @@ ShellCommandRunSpiFlash (
   )
 {
 EFI_STATUS              Status;
-  SPI_DEVICE            *Slave;
+  STATIC SPI_DEVICE     *Slave;
   LIST_ENTRY            *CheckPackage;
   EFI_PHYSICAL_ADDRESS  Address = 0, Offset = 0;
   SHELL_FILE_HANDLE     FileHandle = NULL;
@@ -272,7 +272,7 @@ EFI_STATUS              Status;
   Cs = PcdGet32 (PcdSpiFlashCs);
 
   // Setup new spi device
-  Slave = SpiMasterProtocol->SetupDevice (SpiMasterProtocol, Cs, Mode);
+  Slave = SpiMasterProtocol->SetupDevice (SpiMasterProtocol, Slave, Cs, Mode);
     if (Slave == NULL) {
       Print(L"sf: Cannot allocate SPI device!\n");
       return SHELL_ABORTED;
@@ -284,6 +284,8 @@ EFI_STATUS              Status;
     Status = FlashProbe (Slave);
     if (EFI_ERROR(Status)) {
       // No supported spi flash detected
+      SpiMasterProtocol->FreeDevice(Slave);
+      Slave = NULL;
       return SHELL_ABORTED;
     } else {
       return Status;
@@ -424,8 +426,6 @@ EFI_STATUS              Status;
     Status = SpiFlashProtocol->Update (Slave, Offset, ByteCount, Buffer);
     break;
   }
-
-  SpiMasterProtocol->FreeDevice(Slave);
 
   if (EFI_ERROR (Status)) {
     Print (L"sf: Error while performing spi transfer\n");

@@ -243,7 +243,7 @@ ShellCommandRunFUpdate (
   )
 {
   IN SHELL_FILE_HANDLE    FileHandle;
-  SPI_DEVICE              *Slave;
+  SPI_DEVICE              *Slave = NULL;
   UINTN                   FileSize;
   UINTN                   *FileBuffer = NULL;
   CHAR16                  *ProblemParam;
@@ -305,7 +305,7 @@ ShellCommandRunFUpdate (
   }
 
   // Setup and probe SPI flash
-  Slave = SpiMasterProtocol->SetupDevice (SpiMasterProtocol, 0, 0);
+  Slave = SpiMasterProtocol->SetupDevice (SpiMasterProtocol, Slave, 0, 0);
   if (Slave == NULL) {
     Print(L"%s: Cannot allocate SPI device!\n", CMD_NAME_STRING);
     goto HeaderError;
