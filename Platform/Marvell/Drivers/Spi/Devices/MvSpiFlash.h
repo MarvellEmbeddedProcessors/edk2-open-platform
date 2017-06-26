@@ -57,6 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CMD_READ_ARRAY_FAST             0x0b
 #define CMD_PAGE_PROGRAM                0x02
 #define CMD_BANK_WRITE                  0xc5
+#define CMD_BANKADDR_BRWR               0x17
 #define CMD_ERASE_4K                    0x20
 #define CMD_ERASE_32K                   0x52
 #define CMD_ERASE_64K                   0xd8
@@ -71,6 +72,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SPI_TRANSFER_END                0x02  // Deassert CS after transfers
 
 #define SPI_FLASH_16MB_BOUN             0x1000000
+
+/* Manufacturer ID's */
+#define SPI_FLASH_MFR_SPANSION          0x01
 
 typedef enum {
   SPI_FLASH_READ_ID,
