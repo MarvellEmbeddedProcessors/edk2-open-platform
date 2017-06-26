@@ -280,6 +280,11 @@ SpiFlashCmdBankaddrWrite (
 {
   UINT8 Cmd = CMD_BANK_WRITE;
 
+  /* Update bank selection command for Spansion */
+  if (Slave->Info->Id[0] == 0x01) {
+    Cmd = CMD_BANKADDR_BRWR;
+  }
+
   MvSpiFlashWriteCommon (Slave, &Cmd, 1, &BankSel, 1);
 }
 
