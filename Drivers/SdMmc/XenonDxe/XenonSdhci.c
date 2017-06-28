@@ -96,6 +96,9 @@ XenonSetSlot (
     Var &= ~((0x1 << Slot) << SLOT_ENABLE_SHIFT);
   }
 
+  // Enable SDCLK off while idle
+  Var |= SDCLK_IDLEOFF_ENABLE_MASK;
+
   SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SDHC_SYS_OP_CTRL, FALSE, SDHC_REG_SIZE_4B, &Var);
 }
 
@@ -165,6 +168,7 @@ XenonSetPower (
 
   // Set VCCQ
   SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SDHC_SLOT_eMMC_CTRL, TRUE, SDHC_REG_SIZE_4B, &Ctrl);
+  Ctrl &= ~eMMC_VCCQ_MASK;
   Ctrl |= Vccq;
   SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SDHC_SLOT_eMMC_CTRL, FALSE, SDHC_REG_SIZE_4B, &Ctrl);
 }
@@ -245,49 +249,6 @@ XenonPhyInit (
 {
   UINT32 Var, Wait, Time;
   UINT32 Clock = XENON_MMC_MAX_CLK;
-  UINT16 ClkCtrl;
-
-  // Need to disable the clock to set EMMC_PHY_TIMING_ADJUST register
-  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SD_MMC_HC_CLOCK_CTRL, TRUE, SDHC_REG_SIZE_2B, &ClkCtrl);
-  ClkCtrl &= ~(SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_INT_EN);
-  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SD_MMC_HC_CLOCK_CTRL, FALSE, SDHC_REG_SIZE_2B, &ClkCtrl);
-
-  // Enable QSP PHASE SELECT
-  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, TRUE, SDHC_REG_SIZE_4B, &Var);
-  Var |= SAMPL_INV_QSP_PHASE_SELECT;
-  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, FALSE, SDHC_REG_SIZE_4B, &Var);
-
-  // Enable internal clock
-  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SD_MMC_HC_CLOCK_CTRL, TRUE, SDHC_REG_SIZE_2B, &ClkCtrl);
-  ClkCtrl |= SDHCI_CLOCK_INT_EN;
-  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SD_MMC_HC_CLOCK_CTRL, FALSE, SDHC_REG_SIZE_2B, &ClkCtrl);
-
-  //
-  // Poll for host MMC PHY clock init to be stable
-  // Wait up to 100us
-  //
-  Time = 100;
-  while (Time--) {
-    SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, TRUE, SDHC_REG_SIZE_4B, &Var);
-    if (Var & SDHCI_CLOCK_INT_STABLE) {
-      break;
-    }
-
-    // Poll interval for MMC PHY clock to be stable is 1us
-    gBS->Stall (1);
-  }
-  if (Time <= 0) {
-    DEBUG((DEBUG_ERROR, "SD/MMC: Failed to enable MMC internal clock in Time\n"));
-    return;
-  }
-
-  // Enable bus clock
-  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SD_MMC_HC_CLOCK_CTRL, TRUE, SDHC_REG_SIZE_2B, &ClkCtrl);
-  ClkCtrl |= SDHCI_CLOCK_CARD_EN;
-  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SD_MMC_HC_CLOCK_CTRL, FALSE, SDHC_REG_SIZE_2B, &ClkCtrl);
-
-  // Delay 200us to wait for the completion of bus clock
-  gBS->Stall (200);
 
   // Init PHY
   SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, TRUE, SDHC_REG_SIZE_4B, &Var);
@@ -340,9 +301,100 @@ XenonPhyInit (
   return;
 }
 
+//
+// Enable eMMC PHY HW DLL
+// DLL should be enabled and stable before HS200/SDR104 tuning,
+// and before HS400 data strobe setting.
+//
 STATIC
-VOID
-XenonSetPhy (
+EFI_STATUS
+EmmcPhyEnableDll (
+  IN EFI_PCI_IO_PROTOCOL   *PciIo
+  )
+{
+  UINT32 Var;
+  UINT16 SlotState;
+  UINT8 Retry;
+
+  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_DLL_CONTROL, TRUE, SDHC_REG_SIZE_4B, &Var);
+  if (Var & DLL_ENABLE) {
+    return EFI_SUCCESS;
+  }
+
+  // Enable DLL
+  Var |= (DLL_ENABLE | DLL_FAST_LOCK);
+
+  //
+  // Set Phase as 90 degree, which is most common value.
+  //
+  Var &= ~((DLL_PHASE_MASK << DLL_PHSEL0_SHIFT) |
+           (DLL_PHASE_MASK << DLL_PHSEL1_SHIFT));
+  Var |= ((DLL_PHASE_90_DEGREE << DLL_PHSEL0_SHIFT) |
+          (DLL_PHASE_90_DEGREE << DLL_PHSEL1_SHIFT));
+
+  Var &= ~(DLL_BYPASS_EN | DLL_REFCLK_SEL);
+  Var |= DLL_UPDATE;
+  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_DLL_CONTROL, FALSE, SDHC_REG_SIZE_4B, &Var);
+
+  // Wait max 32 ms for the DLL to lock
+  Retry = 32;
+  do {
+    SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, XENON_SLOT_EXT_PRESENT_STATE, TRUE, SDHC_REG_SIZE_2B, &SlotState);
+
+    if (Retry == 0) {
+      DEBUG ((DEBUG_ERROR, "SD/MMC: Fail to lock DLL\n"));
+      return EFI_TIMEOUT;
+    }
+
+    gBS->Stall (1000);
+    Retry--;
+
+  } while (!(SlotState & DLL_LOCK_STATE));
+
+  return EFI_SUCCESS;
+}
+
+//
+// Config to eMMC PHY to prepare for tuning.
+// Enable HW DLL and set the TUNING_STEP
+//
+STATIC
+EFI_STATUS
+EmmcPhyConfigTuning (
+  IN EFI_PCI_IO_PROTOCOL   *PciIo,
+  IN UINT8 TuningStepDivisor
+  )
+{
+  UINT32 Var, TuningStep;
+  EFI_STATUS Status;
+
+  Status = EmmcPhyEnableDll (PciIo);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  // Achieve TUNING_STEP with HW DLL help
+  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, XENON_SLOT_DLL_CUR_DLY_VAL, TRUE, SDHC_REG_SIZE_4B, &Var);
+  TuningStep = Var / TuningStepDivisor;
+  if (TuningStep > TUNING_STEP_MASK) {
+      DEBUG ((DEBUG_ERROR, "HS200 TUNING_STEP %d is larger than MAX value\n", TuningStep));
+    TuningStep = TUNING_STEP_MASK;
+  }
+
+  // Set TUNING_STEP for later tuning
+  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, XENON_SLOT_OP_STATUS_CTRL, TRUE, SDHC_REG_SIZE_4B, &Var);
+  Var &= ~(TUN_CONSECUTIVE_TIMES_MASK << TUN_CONSECUTIVE_TIMES_SHIFT);
+  Var |= (TUN_CONSECUTIVE_TIMES << TUN_CONSECUTIVE_TIMES_SHIFT);
+  Var &= ~(TUNING_STEP_MASK << TUNING_STEP_SHIFT);
+  Var |= (TuningStep << TUNING_STEP_SHIFT);
+  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, XENON_SLOT_OP_STATUS_CTRL, FALSE, SDHC_REG_SIZE_4B, &Var);
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+BOOLEAN
+XenonPhySlowMode (
   IN EFI_PCI_IO_PROTOCOL   *PciIo,
   IN UINT8 Timing,
   IN BOOLEAN SlowMode
@@ -350,49 +402,125 @@ XenonSetPhy (
 {
   UINT32 Var = 0;
 
-  // Setup pad, set bit[30], bit[28] and bits[26:24]
-  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_PAD_CONTROL, TRUE, SDHC_REG_SIZE_4B, &Var);
-  Var |= (AUTO_RECEN_CTRL | OEN_QSN | FC_QSP_RECEN | FC_CMD_RECEN | FC_DQ_RECEN);
-  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_PAD_CONTROL, FALSE, SDHC_REG_SIZE_4B, &Var);
+  // Check if Slow Mode is required in lower speed mode in SDR mode
+  if (((Timing == MMC_TIMING_UHS_SDR25) ||
+       (Timing == MMC_TIMING_UHS_SDR12) ||
+       (Timing == MMC_TIMING_SD_HS) ||
+       (Timing == MMC_TIMING_MMC_HS)) && SlowMode) {
+    Var = QSN_PHASE_SLOW_MODE_BIT;
+    SdMmcHcOrMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, SDHC_REG_SIZE_4B, &Var);
+    return TRUE;
+  }
+
+  Var = ~QSN_PHASE_SLOW_MODE_BIT;
+  SdMmcHcAndMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, SDHC_REG_SIZE_4B, &Var);
+  return FALSE;
+}
+
+EFI_STATUS
+XenonSetPhy (
+  IN EFI_PCI_IO_PROTOCOL   *PciIo,
+  IN SD_MMC_HC_PRIVATE_DATA *Private,
+  IN UINT8 Timing
+  )
+{
+  UINT32 Var = 0;
+  UINT16 ClkCtrl;
+
+  // Setup pad, bit[28] and bits[26:24]
+  Var = OEN_QSN | FC_QSP_RECEN | FC_CMD_RECEN | FC_DQ_RECEN;
+  // All FC_XX_RECEIVCE should be set as CMOS Type
+  Var |= FC_ALL_CMOS_RECEIVER;
+  SdMmcHcOrMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_PAD_CONTROL, SDHC_REG_SIZE_4B, &Var);
+
+  // Set CMD and DQ Pull Up
+  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_PAD_CONTROL1, TRUE, SDHC_REG_SIZE_4B, &Var);
+  Var |= (EMMC5_1_FC_CMD_PU | EMMC5_1_FC_DQ_PU);
+  Var &= ~(EMMC5_1_FC_CMD_PD | EMMC5_1_FC_DQ_PD);
+  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_PAD_CONTROL1, FALSE, SDHC_REG_SIZE_4B, &Var);
+
+  if (Timing == MMC_TIMING_LEGACY) {
+    if (Private->SlowMode) {
+      SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, TRUE, SDHC_REG_SIZE_4B, &Var);
+      Var |= QSN_PHASE_SLOW_MODE_BIT;
+      SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, FALSE, SDHC_REG_SIZE_4B, &Var);
+    }
+
+    goto PhyInit;
+  }
 
   //
-  // If Timing belongs to high speed, set bit[17] of
+  // If Timing belongs to high speed, clear bit[17] of
   // EMMC_PHY_TIMING_ADJUST register
   //
   if ((Timing == MMC_TIMING_MMC_HS400) ||
       (Timing == MMC_TIMING_MMC_HS200) ||
+      (Timing == MMC_TIMING_MMC_DDR52) ||
       (Timing == MMC_TIMING_UHS_SDR50) ||
       (Timing == MMC_TIMING_UHS_SDR104) ||
       (Timing == MMC_TIMING_UHS_DDR50) ||
       (Timing == MMC_TIMING_UHS_SDR25)) {
-
-    SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, TRUE, SDHC_REG_SIZE_4B, &Var);
-
-    // Set SLOW_MODE for PHY
-    if (SlowMode) {
-      Var |= QSN_PHASE_SLOW_MODE_BIT;
-    }
-
-    // Set output clock polarity
-    Var |= OUTPUT_QSN_PHASE_SELECT;
-
-    SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, FALSE, SDHC_REG_SIZE_4B, &Var);
+    Var = ~OUTPUT_QSN_PHASE_SELECT;
+    SdMmcHcAndMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_TIMING_ADJUST, SDHC_REG_SIZE_4B, &Var);
   }
 
-  SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, EMMC_PHY_FUNC_CONTROL, TRUE, SDHC_REG_SIZE_4B, &Var);
-  Var |= (DQ_DDR_MODE_MASK << DQ_DDR_MODE_SHIFT) | CMD_DDR_MODE;
-  SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, EMMC_PHY_FUNC_CONTROL, FALSE, SDHC_REG_SIZE_4B, &Var);
+  if (XenonPhySlowMode (PciIo, Timing, Private->SlowMode)) {
+    goto PhyInit;
+  }
+
+  // Set default ZNR and ZPR value
+  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_PAD_CONTROL2, TRUE, SDHC_REG_SIZE_4B, &Var);
+  Var &= ~((ZNR_MASK << ZNR_SHIFT) | ZPR_MASK);
+  Var |= ((ZNR_DEF_VALUE << ZNR_SHIFT) | ZPR_DEF_VALUE);
+  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_PAD_CONTROL2, FALSE, SDHC_REG_SIZE_4B, &Var);
+
+  // Need to disable the clock to set EMMC_PHY_FUNC_CONTROL register
+  ClkCtrl = ~SDHCI_CLOCK_CARD_EN;
+  SdMmcHcAndMmio (PciIo, SD_BAR_INDEX, SD_MMC_HC_CLOCK_CTRL, SDHC_REG_SIZE_2B, &ClkCtrl);
+
+  if ((Timing == MMC_TIMING_MMC_HS400) ||
+      (Timing == MMC_TIMING_MMC_DDR52) ||
+      (Timing == MMC_TIMING_UHS_DDR50)) {
+    Var = (DQ_DDR_MODE_MASK << DQ_DDR_MODE_SHIFT) | CMD_DDR_MODE;
+    SdMmcHcOrMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_FUNC_CONTROL, SDHC_REG_SIZE_4B, &Var);
+  } else {
+    Var = ~((DQ_DDR_MODE_MASK << DQ_DDR_MODE_SHIFT) | CMD_DDR_MODE);
+    SdMmcHcAndMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_FUNC_CONTROL, SDHC_REG_SIZE_4B, &Var);
+  }
 
   if (Timing == MMC_TIMING_MMC_HS400) {
-    SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, EMMC_PHY_FUNC_CONTROL, TRUE, SDHC_REG_SIZE_4B, &Var);
-    Var &= ~DQ_ASYNC_MODE;
-    SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, EMMC_PHY_FUNC_CONTROL, FALSE, SDHC_REG_SIZE_4B, &Var);
-
-    Var = LOGIC_TIMING_VALUE;
-    SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, EMMC_LOGIC_TIMING_ADJUST, FALSE, SDHC_REG_SIZE_4B, &Var);
+    Var = ~DQ_ASYNC_MODE;
+    SdMmcHcAndMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_FUNC_CONTROL, SDHC_REG_SIZE_4B, &Var);
+  } else {
+    Var = DQ_ASYNC_MODE;
+    SdMmcHcOrMmio (PciIo, SD_BAR_INDEX, EMMC_PHY_FUNC_CONTROL, SDHC_REG_SIZE_4B, &Var);
   }
 
+  // Enable bus clock
+  ClkCtrl = SDHCI_CLOCK_CARD_EN;
+  SdMmcHcOrMmio (PciIo, SD_BAR_INDEX, SD_MMC_HC_CLOCK_CTRL, SDHC_REG_SIZE_2B, &ClkCtrl);
+
+  // Delay 200us to wait for the completion of bus clock
+  gBS->Stall (200);
+
+  if (Timing == MMC_TIMING_MMC_HS400) {
+    Var = LOGIC_TIMING_VALUE;
+    SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, EMMC_LOGIC_TIMING_ADJUST, FALSE, SDHC_REG_SIZE_4B, &Var);
+  } else {
+    // Disable data strobe
+    Var = ~ENABLE_DATA_STROBE;
+    SdMmcHcAndMmio (PciIo, SD_BAR_INDEX, XENON_SLOT_EMMC_CTRL, SDHC_REG_SIZE_4B, &Var);
+  }
+
+PhyInit:
   XenonPhyInit (PciIo);
+
+  if ((Timing == MMC_TIMING_MMC_HS200) ||
+      (Timing == MMC_TIMING_UHS_SDR104)) {
+    return EmmcPhyConfigTuning (PciIo, Private->TuningStepDivisor);
+  }
+
+  return EFI_SUCCESS;
 }
 
 STATIC
@@ -435,6 +563,9 @@ XenonSetParallelTransfer (
   } else {
     Var &= ~(0x1 << Slot);
   }
+
+  // Mask command conflict error
+  Var |= MASK_CMD_CONFLICT_ERR;
 
   SdMmcHcRwMmio(PciIo, SD_BAR_INDEX, SDHC_SYS_EXT_OP_CTRL, FALSE, SDHC_REG_SIZE_4B, &Var);
 }
@@ -634,10 +765,11 @@ XenonTransferData (
 EFI_STATUS
 XenonInit (
   IN SD_MMC_HC_PRIVATE_DATA *Private,
-  IN BOOLEAN SlowMode
+  IN BOOLEAN Support1v8
   )
 {
   EFI_PCI_IO_PROTOCOL *PciIo = Private->PciIo;
+  EFI_STATUS Status;
 
   // Read XENON version
   XenonReadVersion (PciIo, &Private->ControllerVersion);
@@ -650,11 +782,11 @@ XenonInit (
   // XENON has only one port
   XenonSetSlot (PciIo, XENON_MMC_SLOT_ID, TRUE);
 
-  XenonSetPower (PciIo, MMC_VDD_165_195, eMMC_VCCQ_1_8V, XENON_MMC_MODE_SD_SDIO);
-
-  // Set MAX_CLOCK for configuring PHY
-  XenonSetClk (PciIo, Private, XENON_MMC_MAX_CLK);
-  XenonSetPhy (PciIo, MMC_TIMING_UHS_SDR50, SlowMode);
+  if (Support1v8) {
+    XenonSetPower (PciIo, MMC_VDD_165_195, eMMC_VCCQ_1_8V, XENON_MMC_MODE_SD_SDIO);
+  } else {
+    XenonSetPower (PciIo, MMC_VDD_32_33, eMMC_VCCQ_3_3V, XENON_MMC_MODE_SD_SDIO);
+  }
 
   XenonConfigureInterrupts (PciIo);
 
@@ -665,9 +797,12 @@ XenonInit (
   // Enable auto clock generator
   XenonSetAcg (PciIo, TRUE);
 
-  // Set proper clock for PHY configuration
+  // Set lowest clock and the PHY for the initialization phase
   XenonSetClk (PciIo, Private, XENON_MMC_BASE_CLK);
-  XenonPhyInit (PciIo);
+  Status = XenonSetPhy (PciIo, Private, MMC_TIMING_LEGACY);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   return EFI_SUCCESS;
 }

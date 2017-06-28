@@ -13,6 +13,7 @@
 **/
 
 #include "SdMmcPciHcDxe.h"
+#include "XenonSdhci.h"
 
 /**
   Send command GO_IDLE_STATE (CMD0 with argument of 0x00000000) to the device to
@@ -744,6 +745,9 @@ EmmcSwitchToHighSpeed (
   UINT8               HsTiming;
   UINT8               HostCtrl1;
   UINT8               HostCtrl2;
+  SD_MMC_HC_PRIVATE_DATA        *Private;
+
+  Private = SD_MMC_HC_PRIVATE_FROM_THIS (PassThru);
 
   Status = EmmcSwitchBusWidth (PciIo, PassThru, Slot, Rca, IsDdr, BusWidth);
   if (EFI_ERROR (Status)) {
@@ -787,6 +791,8 @@ EmmcSwitchToHighSpeed (
     return Status;
   }
 
+  Status = XenonSetPhy (PciIo, Private, MMC_TIMING_MMC_HS);
+
   return Status;
 }
 
@@ -821,6 +827,9 @@ EmmcSwitchToHS200 (
   UINT8               HsTiming;
   UINT8               HostCtrl1;
   UINT8               HostCtrl2;
+  SD_MMC_HC_PRIVATE_DATA        *Private;
+
+  Private = SD_MMC_HC_PRIVATE_FROM_THIS (PassThru);
 
   if ((BusWidth != 4) && (BusWidth != 8)) {
     return EFI_INVALID_PARAMETER;
@@ -861,6 +870,11 @@ EmmcSwitchToHS200 (
     return Status;
   }
 
+  Status = XenonSetPhy (PciIo, Private, MMC_TIMING_MMC_HS200);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
   Status = EmmcTuningClkForHs200 (PciIo, PassThru, Slot, BusWidth);
 
   return Status;
@@ -894,6 +908,9 @@ EmmcSwitchToHS400 (
   EFI_STATUS          Status;
   UINT8               HsTiming;
   UINT8               HostCtrl2;
+  SD_MMC_HC_PRIVATE_DATA        *Private;
+
+  Private = SD_MMC_HC_PRIVATE_FROM_THIS (PassThru);
 
   Status = EmmcSwitchToHS200 (PciIo, PassThru, Slot, Rca, ClockFreq, 8);
   if (EFI_ERROR (Status)) {
@@ -933,6 +950,11 @@ EmmcSwitchToHS400 (
 
   HsTiming = 3;
   Status = EmmcSwitchClockFreq (PciIo, PassThru, Slot, Rca, HsTiming, ClockFreq);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = XenonSetPhy (PciIo, Private, MMC_TIMING_MMC_HS400);
 
   return Status;
 }

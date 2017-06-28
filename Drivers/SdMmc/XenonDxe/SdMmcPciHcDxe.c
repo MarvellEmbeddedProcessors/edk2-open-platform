@@ -102,6 +102,7 @@ STATIC UINT8 * CONST XenonDevEnabled = FixedPcdGetPtr (PcdPciESdhci);
 STATIC UINT8 * CONST Xenon1v8Enabled = FixedPcdGetPtr (PcdXenon1v8Enable);
 STATIC UINT8 * CONST Xenon8BitBusEnabled = FixedPcdGetPtr (PcdXenon8BitBusEnable);
 STATIC UINT8 * CONST XenonSlowModeEnabled = FixedPcdGetPtr (PcdXenonSlowModeEnable);
+STATIC UINT8 * CONST XenonTuningStepDivisor = FixedPcdGetPtr (PcdXenonTuningStepDivisor);
 
 //
 // Prioritized function list to detect card type.
@@ -538,6 +539,7 @@ SdMmcPciHcDriverBindingStart (
   UINT64                          PciAttributes;
   UINT8                           Slot;
   UINT8                           Index;
+  UINT8                           TuningStepDivisor;
   CARD_TYPE_DETECT_ROUTINE        *Routine;
   UINT32                          RoutineNum;
   BOOLEAN                         Support64BitDma;
@@ -560,6 +562,7 @@ SdMmcPciHcDriverBindingStart (
   Support1v8 = Xenon1v8Enabled[XenonIdx];
   Support8Bit = Xenon8BitBusEnabled[XenonIdx];
   SlowMode = XenonSlowModeEnabled[XenonIdx];
+  TuningStepDivisor = XenonTuningStepDivisor[XenonIdx];
   XenonIdx++;
 
   //
@@ -655,6 +658,9 @@ SdMmcPciHcDriverBindingStart (
     Private->Capability[Slot].BusWidth8 = 0;
   }
 
+  Private->SlowMode = SlowMode;
+  Private->TuningStepDivisor = TuningStepDivisor;
+
   if (Private->Capability[Slot].BaseClkFreq == 0) {
     Private->Capability[Slot].BaseClkFreq = 0xff;
   }
@@ -675,7 +681,11 @@ SdMmcPciHcDriverBindingStart (
   //
   // Perform Xenon-specific init sequence
   //
-  XenonInit (Private, SlowMode);
+  Status = XenonInit (Private, Support1v8);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "XenonInit failed for device %d\n", XenonIdx));
+    return Status;
+  }
 
   //
   // Initialize HC timeout control

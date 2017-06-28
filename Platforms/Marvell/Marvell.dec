@@ -198,6 +198,7 @@
   gMarvellTokenSpaceGuid.PcdXenon1v8Enable|{ 0x0 }|VOID*|0x3000036
   gMarvellTokenSpaceGuid.PcdXenon8BitBusEnable|{ 0x0 }|VOID*|0x3000037
   gMarvellTokenSpaceGuid.PcdXenonSlowModeEnable|{ 0x0 }|VOID*|0x3000038
+  gMarvellTokenSpaceGuid.PcdXenonTuningStepDivisor|{ 0x40, 0x19 }|VOID*|0x3000039
 
   #
   # DRAM remapping controls.

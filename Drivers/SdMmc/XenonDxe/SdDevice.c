@@ -13,6 +13,7 @@
 **/
 
 #include "SdMmcPciHcDxe.h"
+#include "XenonSdhci.h"
 
 /**
   Send command GO_IDLE_STATE to the device to make it go to Idle State.
@@ -890,6 +891,7 @@ SdCardSetBusMode (
   UINT32                       ClockFreq;
   UINT8                        BusWidth;
   UINT8                        AccessMode;
+  UINT8                        Timing;
   UINT8                        HostCtrl1;
   UINT8                        HostCtrl2;
   UINT8                        SwitchResp[64];
@@ -924,18 +926,23 @@ SdCardSetBusMode (
   if (S18A && (Capability->Sdr104 != 0) && ((SwitchResp[13] & BIT3) != 0)) {
     ClockFreq = 208;
     AccessMode = 3;
+    Timing = MMC_TIMING_UHS_SDR104;
   } else if (S18A && (Capability->Sdr50 != 0) && ((SwitchResp[13] & BIT2) != 0)) {
     ClockFreq = 100;
     AccessMode = 2;
+    Timing = MMC_TIMING_UHS_SDR50;
   } else if (S18A && (Capability->Ddr50 != 0) && ((SwitchResp[13] & BIT4) != 0)) {
     ClockFreq = 50;
     AccessMode = 4;
+    Timing = MMC_TIMING_UHS_DDR50;
   } else if ((SwitchResp[13] & BIT1) != 0) {
     ClockFreq = 50;
     AccessMode = 1;
+    Timing = MMC_TIMING_SD_HS;
   } else {
     ClockFreq = 25;
     AccessMode = 0;
+    Timing = MMC_TIMING_LEGACY;
   }
 
   Status = SdCardSwitch (PassThru, Slot, AccessMode, 0xF, 0xF, 0xF, TRUE, SwitchResp);
@@ -973,6 +980,11 @@ SdCardSetBusMode (
   }
 
   Status = SdMmcHcClockSupply (PciIo, Slot, ClockFreq * 1000, *Capability);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = XenonSetPhy (PciIo, Private, Timing);
   if (EFI_ERROR (Status)) {
     return Status;
   }

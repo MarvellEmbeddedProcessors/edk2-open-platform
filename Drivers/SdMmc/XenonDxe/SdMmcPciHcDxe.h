@@ -115,6 +115,9 @@ typedef struct {
   UINT64                              MaxCurrent[SD_MMC_HC_MAX_SLOT];
 
   UINT32                              ControllerVersion;
+
+  BOOLEAN                             SlowMode;
+  UINT8                               TuningStepDivisor;
 } SD_MMC_HC_PRIVATE_DATA;
 
 #define SD_MMC_HC_TRB_SIG             SIGNATURE_32 ('T', 'R', 'B', 'T')
