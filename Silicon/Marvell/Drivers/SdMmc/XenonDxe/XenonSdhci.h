@@ -52,10 +52,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define SDHC_SYS_OP_CTRL              0x0108
 #define AUTO_CLKGATE_DISABLE_MASK     (0x1<<20)
-#define SDCLK_IDLEOFF_ENABLE_SHIFT    8
+#define SDCLK_IDLEOFF_ENABLE_MASK     (1 << 8)
 #define SLOT_ENABLE_SHIFT             0
 
 #define SDHC_SYS_EXT_OP_CTRL          0x010c
+#define MASK_CMD_CONFLICT_ERR         (1 << 8)
+
 #define SDHC_TEST_OUT                 0x0110
 #define SDHC_TESTOUT_MUXSEL           0x0114
 
@@ -169,11 +171,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TMR_RETUN_NO_PRESENT          0xf
 #define XENON_MAX_TUN_COUNT           0xb
 
+#define XENON_SLOT_OP_STATUS_CTRL     0x0128
+#define TUN_CONSECUTIVE_TIMES_SHIFT   16
+#define TUN_CONSECUTIVE_TIMES_MASK    0x7
+#define TUN_CONSECUTIVE_TIMES         0x4
+#define TUNING_STEP_SHIFT             12
+#define TUNING_STEP_MASK              0xF
+
+#define XENON_SLOT_EMMC_CTRL          0x130
+#define ENABLE_DATA_STROBE            (1 << 24)
+
+#define XENON_SLOT_EXT_PRESENT_STATE  0x014C
+#define DLL_LOCK_STATE                0x1
+
+#define XENON_SLOT_DLL_CUR_DLY_VAL    0x0150
+
 #define EMMC_PHY_REG_BASE                 0x170
 #define EMMC_PHY_TIMING_ADJUST            EMMC_PHY_REG_BASE
 #define OUTPUT_QSN_PHASE_SELECT           (1 << 17)
 #define SAMPL_INV_QSP_PHASE_SELECT        (1 << 18)
 #define SAMPL_INV_QSP_PHASE_SELECT_SHIFT  18
+#define QSN_PHASE_SLOW_MODE_BIT           (1 << 29)
 #define PHY_INITIALIZAION                 (1 << 31)
 #define WAIT_CYCLE_BEFORE_USING_MASK      0xf
 #define WAIT_CYCLE_BEFORE_USING_SHIFT     12
@@ -199,20 +217,42 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define FC_QSN_RECEN              (1 << 27)
 #define OEN_QSN                   (1 << 28)
 #define AUTO_RECEN_CTRL           (1 << 30)
+#define FC_ALL_CMOS_RECEIVER      0xF000
 
 #define EMMC_PHY_PAD_CONTROL1        (EMMC_PHY_REG_BASE + 0xc)
+#define EMMC5_1_FC_QSP_PD            (1 << 9)
+#define EMMC5_1_FC_QSP_PU            (1 << 25)
+#define EMMC5_1_FC_CMD_PD            (1 << 8)
+#define EMMC5_1_FC_CMD_PU            (1 << 24)
+#define EMMC5_1_FC_DQ_PD             0xFF
+#define EMMC5_1_FC_DQ_PU             (0xFF << 16)
+
 #define EMMC_PHY_PAD_CONTROL2        (EMMC_PHY_REG_BASE + 0x10)
+#define ZNR_MASK                     0x1F
+#define ZNR_SHIFT                    8
+#define ZPR_MASK                     0x1F
+#define ZNR_DEF_VALUE                0xF
+#define ZPR_DEF_VALUE                0xF
+
 #define EMMC_PHY_DLL_CONTROL         (EMMC_PHY_REG_BASE + 0x14)
-#define DLL_DELAY_TEST_LOWER_SHIFT   8
-#define DLL_DELAY_TEST_LOWER_MASK    0xff
-#define DLL_BYPASS_EN                0x1
+#define DLL_ENABLE                   (1 << 31)
+#define DLL_UPDATE_STROBE_5_0        (1 << 30)
+#define DLL_REFCLK_SEL               (1 << 30)
+#define DLL_UPDATE                   (1 << 23)
+#define DLL_PHSEL1_SHIFT             24
+#define DLL_PHSEL0_SHIFT             16
+#define DLL_PHASE_MASK               0x3F
+#define DLL_PHASE_90_DEGREE          0x1F
+#define DLL_FAST_LOCK                (1 << 5)
+#define DLL_GAIN2X                   (1 << 3)
+#define DLL_BYPASS_EN                (1 << 0)
 
 #define EMMC_LOGIC_TIMING_ADJUST       (EMMC_PHY_REG_BASE + 0x18)
 #define EMMC_LOGIC_TIMING_ADJUST_LOW   (EMMC_PHY_REG_BASE + 0x1c)
 
 #define LOGIC_TIMING_VALUE             0x5a54 /* Recommend by HW team */
 
-#define QSN_PHASE_SLOW_MODE_BIT        (1 << 29)
+#define TUNING_STEP_DIVIDER_SHIFT      6
 
 /* XENON only have one slot 0 */
 #define XENON_MMC_SLOT_ID              (0)
@@ -227,6 +267,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MMC_TIMING_UHS_DDR50  7
 #define MMC_TIMING_MMC_HS200  8
 #define MMC_TIMING_MMC_HS400  10
+#define MMC_TIMING_MMC_DDR52  11
 
 /* Data time out default value 0xE: TMCLK x 227 */
 #define DATA_TIMEOUT_DEF_VAL          0xE
@@ -335,7 +376,14 @@ XenonTransferData (
 EFI_STATUS
 XenonInit (
   IN SD_MMC_HC_PRIVATE_DATA *Private,
-  IN BOOLEAN SlowMode
+  IN BOOLEAN Support1v8
+  );
+
+EFI_STATUS
+XenonSetPhy (
+  IN EFI_PCI_IO_PROTOCOL   *PciIo,
+  IN SD_MMC_HC_PRIVATE_DATA *Private,
+  IN UINT8 Timing
   );
 
 EFI_STATUS

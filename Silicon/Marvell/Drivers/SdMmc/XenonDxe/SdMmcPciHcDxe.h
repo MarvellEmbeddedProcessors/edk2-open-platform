@@ -121,6 +121,8 @@ typedef struct {
   // value stored in Capabilities Register 1.
   //
   UINT32                              BaseClkFreq[SD_MMC_HC_MAX_SLOT];
+  BOOLEAN                             SlowMode;
+  UINT8                               TuningStepDivisor;
 } SD_MMC_HC_PRIVATE_DATA;
 
 #define SD_MMC_HC_TRB_SIG             SIGNATURE_32 ('T', 'R', 'B', 'T')

@@ -216,6 +216,7 @@
   gMarvellTokenSpaceGuid.PcdXenon1v8Enable|{ 0x0 }|VOID*|0x3000036
   gMarvellTokenSpaceGuid.PcdXenon8BitBusEnable|{ 0x0 }|VOID*|0x3000037
   gMarvellTokenSpaceGuid.PcdXenonSlowModeEnable|{ 0x0 }|VOID*|0x3000038
+  gMarvellTokenSpaceGuid.PcdXenonTuningStepDivisor|{ 0x40, 0x19 }|VOID*|0x3000039
 
 [Protocols]
   gMarvellBoardDescProtocolGuid            = { 0xebed8738, 0xd4a6, 0x4001, { 0xa9, 0xc9, 0x52, 0xb0, 0xcb, 0x7d, 0xdb, 0xf9 }}
