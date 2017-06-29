@@ -654,6 +654,11 @@ SdMmcPciHcDriverBindingStart (
     Private->Capability[Slot].Sdr50 = 0;
   }
 
+  // Disable HS200 for AP Xenon controller
+  if (XenonIdx == 0) {
+    Private->Capability[Slot].Sdr104 = 0;
+  }
+
   if (!Support8Bit) {
     Private->Capability[Slot].BusWidth8 = 0;
   }
