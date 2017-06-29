@@ -657,6 +657,11 @@ SdMmcPciHcDriverBindingStart (
     Private->Capability[Slot].Sdr50 = 0;
   }
 
+  if (SlowMode) {
+    Private->Capability[Slot].Sdr104 = 0;
+    Private->Capability[Slot].Ddr50 = 0;
+  }
+
   if (!Support8Bit) {
     Private->Capability[Slot].BusWidth8 = 0;
   }
