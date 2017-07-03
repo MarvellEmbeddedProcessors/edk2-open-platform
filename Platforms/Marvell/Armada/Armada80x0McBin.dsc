@@ -148,7 +148,7 @@
   #PciEmulation
   gMarvellTokenSpaceGuid.PcdPciEXhci|{ 0x1, 0x1, 0x1, 0x0 }
   gMarvellTokenSpaceGuid.PcdPciEAhci|{ 0x1, 0x1 }
-  gMarvellTokenSpaceGuid.PcdPciESdhci|{ 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdPciESdhci|{ 0x1, 0x1 }
 
   #RTC
   gMarvellTokenSpaceGuid.PcdRtcEnabled|{ 0x0, 0x1 }
