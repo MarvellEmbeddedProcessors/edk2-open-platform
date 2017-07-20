@@ -13,10 +13,4 @@
 *
 **/
 
-#define GPIO_BASE                      FixedPcdGet64 (PcdChip1MppBaseAddress) + 0x100
-#define GPIO_DIR_OFFSET(n)             (((n) >> 5) * 0x40)
-#define GPIO_ENABLE_OFFSET(n)          (((n) >> 5) * 0x40 + 0x4)
-
-#define GPIO_PIN_MASK(n)               (1 << ((n) & 0x1f))
-
-#define ARMADA_8040_MCBIN_VBUS_GPIO    47
+#define ARMADA_8040_MCBIN_VBUS_GPIO    15
