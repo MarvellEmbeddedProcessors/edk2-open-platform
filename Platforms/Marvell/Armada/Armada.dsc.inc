@@ -417,6 +417,7 @@
   MdeModulePkg/Bus/I2c/I2cDxe/I2cDxe.inf
   OpenPlatformPkg/Drivers/I2c/Devices/MvEeprom/MvEeprom.inf
   OpenPlatformPkg/Drivers/Spi/MvSpiDxe.inf
+  OpenPlatformPkg/Drivers/Gpio/MvGpioDxe.inf
   OpenPlatformPkg/Drivers/Spi/Devices/MvSpiFlash.inf
   OpenPlatformPkg/Platforms/Marvell/Armada/Drivers/Armada70x0RngDxe/Armada70x0RngDxe.inf
 

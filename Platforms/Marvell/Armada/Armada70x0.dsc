@@ -56,6 +56,9 @@
   #BoardId: Armada-7040-db
   gMarvellTokenSpaceGuid.PcdBoardId|0x0
 
+  # GPIO
+  gMarvellTokenSpaceGuid.PcdGpioControllers|{ 0x1, 0x1, 0x1, 0x0, 0x0 }
+
   #Timer
   gEmbeddedTokenSpaceGuid.PcdTimerPeriod|10000
 
