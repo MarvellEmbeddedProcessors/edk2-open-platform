@@ -583,6 +583,7 @@
       NULL|Silicon/Marvell/Applications/EepromCmd/EepromCmd.inf
       NULL|Silicon/Marvell/Applications/SpiTool/SpiFlashCmd.inf
       NULL|Silicon/Marvell/Applications/FirmwareUpdate/FUpdate.inf
+      NULL|Silicon/Marvell/Applications/MdioCmd/MdioCmd.inf
       HandleParsingLib|ShellPkg/Library/UefiHandleParsingLib/UefiHandleParsingLib.inf
       PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
       BcfgCommandLib|ShellPkg/Library/UefiShellBcfgCommandLib/UefiShellBcfgCommandLib.inf
