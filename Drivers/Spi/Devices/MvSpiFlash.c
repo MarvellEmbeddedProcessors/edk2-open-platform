@@ -82,7 +82,7 @@ static SPI_FLASH_INFO SpiFlashIds[] = {
   {L"mx25l3205d",        INFO(0xc22016, 0x0, 64 * 1024,    64, 0) },
   {L"mx25l6405d",        INFO(0xc22017, 0x0, 64 * 1024,   128, 0) },
   {L"mx25l12805",        INFO(0xc22018, 0x0, 64 * 1024,   256, RD_FULL | WR_QPP) },
-  {L"mx25l25635f",       INFO(0xc22019, 0x0, 64 * 1024,   512, RD_FULL | WR_QPP | ADDR_CYC_4) },
+  {L"mx25l25635f",       INFO(0xc22019, 0x0, 64 * 1024,   512, RD_FULL | WR_QPP) },
   {L"mx25l51235f",       INFO(0xc2201a, 0x0, 64 * 1024,  1024, RD_FULL | WR_QPP) },
   {L"mx25l12855e",       INFO(0xc22618, 0x0, 64 * 1024,   256, RD_FULL | WR_QPP) },
   {L"mx66u51235f",       INFO(0xc2253a, 0x0, 64 * 1024,  1024, RD_FULL | WR_QPP) },
