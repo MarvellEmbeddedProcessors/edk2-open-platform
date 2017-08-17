@@ -371,7 +371,7 @@
 
   # ARM Pcds
   gArmTokenSpaceGuid.PcdSystemMemoryBase|0
-  gArmTokenSpaceGuid.PcdSystemMemorySize|0x100000000
+  gArmTokenSpaceGuid.PcdSystemMemorySize|0x40000000
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuMemorySize|36
 
   # Secure region reservation
