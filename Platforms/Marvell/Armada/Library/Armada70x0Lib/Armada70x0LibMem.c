@@ -36,7 +36,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/ArmPlatformLib.h>
 #include <Library/DebugLib.h>
 #include <Library/HobLib.h>
+#include <Library/IoLib.h>
 #include <Library/MemoryAllocationLib.h>
+
+#include "Armada70x0LibMem.h"
 
 // The total number of descriptors, including the final "end-of-table" descriptor.
 #define MAX_VIRTUAL_MEMORY_MAP_DESCRIPTORS 16
@@ -46,6 +49,107 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DDR_ATTRIBUTES_UNCACHED         ARM_MEMORY_REGION_ATTRIBUTE_UNCACHED_UNBUFFERED
 
 STATIC ARM_MEMORY_REGION_DESCRIPTOR VirtualMemoryTable[MAX_VIRTUAL_MEMORY_MAP_DESCRIPTORS];
+
+// Obtain DRAM size basing on register values filled by early firmware.
+STATIC
+UINT64
+DramSizeGet (
+  UINT64 *MemSize
+  )
+{
+  UINT32 BaseAddr;
+  UINT32 RegVal;
+  UINT8 AreaLengthMap;
+  UINT8 Cs;
+
+  *MemSize = 0;
+
+  for (Cs = 0; Cs < DRAM_MAX_CS_NUM; Cs++) {
+
+    RegVal = MmioRead32 (DRAM_CH0_MMAP_LOW_REG (Cs));
+
+    /* Exit loop on first disabled DRAM CS */
+    if (!(RegVal & DRAM_CS_VALID_ENABLED_MASK)) {
+      break;
+    }
+
+    /*
+     * Sanity check for base address of next DRAM block.
+     * Only continuous space will be used.
+     */
+    BaseAddr = ((UINT64)MmioRead32 (DRAM_CH0_MMAP_HIGH_REG (Cs)) << DRAM_START_ADDR_HTOL_OFFS) |
+               (RegVal & DRAM_START_ADDRESS_L_MASK);
+    if (BaseAddr != *MemSize) {
+      DEBUG ((
+          DEBUG_ERROR,
+          "DramSizeGet: DRAM blocks are not contiguous, limit size to 0x%x\n",
+          MemSize
+          ));
+      return EFI_SUCCESS;
+    }
+
+    /* Decode area length for current CS from register value */
+    AreaLengthMap = ((RegVal & DRAM_AREA_LENGTH_MASK) >> DRAM_AREA_LENGTH_OFFS);
+    switch (AreaLengthMap) {
+    case 0x0:
+      *MemSize += 0x18000000;
+      break;
+    case 0x1:
+      *MemSize += 0x30000000;
+      break;
+    case 0x2:
+      *MemSize += 0x60000000;
+      break;
+    case 0x3:
+      *MemSize += 0xC0000000;
+      break;
+    case 0x7:
+      *MemSize += 0x00800000;
+      break;
+    case 0x8:
+      *MemSize += 0x01000000;
+      break;
+    case 0x9:
+      *MemSize += 0x02000000;
+      break;
+    case 0xA:
+      *MemSize += 0x04000000;
+      break;
+    case 0xB:
+      *MemSize += 0x08000000;
+      break;
+    case 0xC:
+      *MemSize += 0x10000000;
+      break;
+    case 0xD:
+      *MemSize += 0x20000000;
+      break;
+    case 0xE:
+      *MemSize += 0x40000000;
+      break;
+    case 0xF:
+      *MemSize += 0x80000000;
+      break;
+    case 0x10:
+      *MemSize += 0x100000000;
+      break;
+    case 0x11:
+      *MemSize += 0x200000000;
+      break;
+    case 0x12:
+      *MemSize += 0x400000000;
+      break;
+    case 0x13:
+      *MemSize += 0x800000000;
+      break;
+    default:
+      DEBUG ((DEBUG_ERROR, "Invalid area length (0x%x) for CS#%d\n", AreaLengthMap, Cs));
+      return EFI_INVALID_PARAMETER;
+    }
+  }
+
+  return EFI_SUCCESS;
+}
 
 /**
   Return the Virtual Memory Map of your platform
@@ -68,10 +172,17 @@ ArmPlatformGetVirtualMemoryMap (
   UINT64                        MemHighStart;
   UINT64                        MemHighSize;
   EFI_RESOURCE_ATTRIBUTE_TYPE   ResourceAttributes;
+  EFI_STATUS                    Status;
 
   ASSERT (VirtualMemoryMap != NULL);
 
-  MemSize = FixedPcdGet64 (PcdSystemMemorySize);
+  // Obtain total memory size from the hardware.
+  Status = DramSizeGet (&MemSize);
+  if (EFI_ERROR (Status)) {
+    MemSize = FixedPcdGet64 (PcdSystemMemorySize);
+    DEBUG ((DEBUG_ERROR, "Limit total memory size to %d MB\n", MemSize / 1024 / 1024));
+  }
+
   MemLowSize = MIN (FixedPcdGet64 (PcdDramRemapTarget), MemSize);
   MemHighStart = (UINT64)FixedPcdGet64 (PcdDramRemapTarget) +
                  FixedPcdGet32 (PcdDramRemapSize);
