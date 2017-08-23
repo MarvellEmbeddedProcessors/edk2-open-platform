@@ -210,10 +210,10 @@ ArmPlatformGetVirtualMemoryMap (
   VirtualMemoryTable[Index].Length          = MemLowSize;
   VirtualMemoryTable[Index].Attributes      = DDR_ATTRIBUTES_CACHED;
 
-  // Configuration space 0xF000_0000 - 0xFFFF_FFFF
-  VirtualMemoryTable[++Index].PhysicalBase  = 0xF0000000;
-  VirtualMemoryTable[Index].VirtualBase     = 0xF0000000;
-  VirtualMemoryTable[Index].Length          = 0x10000000;
+  // Configuration space 0xE000_0000 - 0xFFFF_FFFF
+  VirtualMemoryTable[++Index].PhysicalBase  = 0xE0000000;
+  VirtualMemoryTable[Index].VirtualBase     = 0xE0000000;
+  VirtualMemoryTable[Index].Length          = 0x20000000;
   VirtualMemoryTable[Index].Attributes      = ARM_MEMORY_REGION_ATTRIBUTE_DEVICE;
 
   if (MemSize > MemLowSize) {
