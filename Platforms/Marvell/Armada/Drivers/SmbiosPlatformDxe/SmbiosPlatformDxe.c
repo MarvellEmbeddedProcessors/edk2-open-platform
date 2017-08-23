@@ -17,6 +17,7 @@
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/HobLib.h>
 #include <Library/IoLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/MvBoardDescLib.h>
@@ -432,7 +433,7 @@ STATIC SMBIOS_TABLE_TYPE17 mArmadaDefaultType17 = {
   0xFFFE,               //no errors
   64, //single DIMM, no ECC is 64bits (for ecc this would be 72)
   32, //data width of this device (32-bits)
-  FixedPcdGet64 (PcdSystemMemorySize) >> 20, //Memory size
+  0,  //Memory size obtained dynamically
   MemoryFormFactorRowOfChips,      //Memory factor
   0,                               //Not part of a set
   1,                               //Right side of board
@@ -756,6 +757,48 @@ Armada8040McBinSmbiosFixup (
   mArmadaDefaultType9_0.SlotDataBusWidth = SlotDataBusWidth4X;
 }
 
+STATIC
+EFI_STATUS
+ArmadaMemoryInstall (
+  IN EFI_SMBIOS_PROTOCOL       *Smbios
+  )
+{
+  EFI_PEI_HOB_POINTERS    Hob;
+  UINT64 MemorySize = 0;
+  EFI_STATUS Status;
+
+  //
+  // Get the HOB list for processing
+  //
+  Hob.Raw = GetHobList ();
+
+  //
+  // Collect memory ranges
+  //
+  while (!END_OF_HOB_LIST (Hob)) {
+    if (Hob.Header->HobType == EFI_HOB_TYPE_RESOURCE_DESCRIPTOR) {
+      if (Hob.ResourceDescriptor->ResourceType == EFI_RESOURCE_SYSTEM_MEMORY) {
+          MemorySize += (UINT64)(Hob.ResourceDescriptor->ResourceLength);
+
+          Status = InstallMemoryStructure (
+                           Smbios,
+                           Hob.ResourceDescriptor->PhysicalStart,
+                           Hob.ResourceDescriptor->ResourceLength
+                           );
+          if (EFI_ERROR(Status)) {
+            return Status;
+          }
+      }
+    }
+    Hob.Raw = GET_NEXT_HOB (Hob);
+  }
+
+  // TYPE17 fixup
+  mArmadaDefaultType17.Size = (UINT16)(MemorySize >> 20);
+
+  return EFI_SUCCESS;
+}
+
 /**
    Install all structures from the DefaultTables structure
 
@@ -792,16 +835,15 @@ InstallAllStructures (
   }
 
   //
-  // Add all Armada table entries
+  // Generate memory descriptors.
   //
-  Status = InstallStructures (Smbios, DefaultCommonTables);
+  Status = ArmadaMemoryInstall (Smbios);
   ASSERT_EFI_ERROR (Status);
 
   //
-  // Generate memory descriptors.
+  // Add all Armada table entries
   //
-  // XXX fixup to use real memory ranges
-  Status = InstallMemoryStructure (Smbios, PcdGet64 (PcdSystemMemoryBase), PcdGet64 (PcdSystemMemorySize));
+  Status = InstallStructures (Smbios, DefaultCommonTables);
   ASSERT_EFI_ERROR (Status);
 
   return Status;
