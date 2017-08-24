@@ -420,6 +420,7 @@
   OpenPlatformPkg/Drivers/I2c/MvI2cDxe/MvI2cDxe.inf
   MdeModulePkg/Bus/I2c/I2cDxe/I2cDxe.inf
   OpenPlatformPkg/Drivers/I2c/Devices/MvEeprom/MvEeprom.inf
+  OpenPlatformPkg/Drivers/I2c/Devices/MvPca95xx/MvPca95xxDxe.inf
   OpenPlatformPkg/Drivers/Spi/MvSpiDxe.inf
   OpenPlatformPkg/Drivers/Gpio/MvGpioDxe.inf
   OpenPlatformPkg/Drivers/Spi/Devices/MvSpiFlash.inf

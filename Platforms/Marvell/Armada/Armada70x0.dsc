@@ -85,14 +85,19 @@
   gMarvellTokenSpaceGuid.PcdChip1MppSel6|{ 0xE, 0xE, 0xE, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
 
   # I2C
-  gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0x50, 0x57, 0x60 }
-  gMarvellTokenSpaceGuid.PcdI2cSlaveBuses|{ 0x0, 0x0, 0x0 }
+  gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0x50, 0x57, 0x60, 0x21 }
+  gMarvellTokenSpaceGuid.PcdI2cSlaveBuses|{ 0x0, 0x0, 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdI2cControllers|{ 0x1, 0x1 }
   gMarvellTokenSpaceGuid.PcdEepromI2cAddresses|{ 0x50, 0x57 }
   gMarvellTokenSpaceGuid.PcdEepromI2cBuses|{ 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdI2cClockFrequency|250000000
   gMarvellTokenSpaceGuid.PcdI2cBaudRate|100000
   gMarvellTokenSpaceGuid.PcdI2cBusCount|2
+
+  # IOExpander
+  gMarvellTokenSpaceGuid.PcdIoExpanderId|{ 0x08 }
+  gMarvellTokenSpaceGuid.PcdIoExpanderI2cAddress|{ 0x21 }
+  gMarvellTokenSpaceGuid.PcdIOExpanderI2cBuses|{ 0x0 }
 
   #SPI
   gMarvellTokenSpaceGuid.PcdSpiRegBase|0xF2700680
