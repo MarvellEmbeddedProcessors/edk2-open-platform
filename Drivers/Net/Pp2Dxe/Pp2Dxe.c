@@ -176,9 +176,10 @@ Pp2DxeBmPoolInit (
   MVPP2_SHARED *Mvpp2Shared
   )
 {
-  INTN Index;
-  UINT8 *PoolAddr;
-  UINT32 PoolSize = (sizeof(VOID *) * MVPP2_BM_SIZE) * 2 + MVPP2_BM_POOL_PTR_ALIGN;
+  INTN          Index;
+  UINT8         *PoolAddr;
+  UINT32        PoolSize;
+  EFI_STATUS    Status;
 
   ASSERT(MVPP2_BM_POOL_PTR_ALIGN >= sizeof(UINTN));
 
@@ -190,25 +191,43 @@ Pp2DxeBmPoolInit (
   }
 
   for (Index = 0; Index < MVPP2_MAX_PORT; Index++) {
-     Mvpp2Shared->BmPools[Index] = AllocateZeroPool (sizeof(MVPP2_BMS_POOL));
+    Mvpp2Shared->BmPools[Index] = AllocateZeroPool (sizeof(MVPP2_BMS_POOL));
 
-     if (Mvpp2Shared->BmPools[Index] == NULL) {
-       return EFI_OUT_OF_RESOURCES;
-     }
+    if (Mvpp2Shared->BmPools[Index] == NULL) {
+      Status = EFI_OUT_OF_RESOURCES;
+      goto FreePools;
+    }
 
-     PoolAddr = UncachedAllocateAlignedZeroPool (PoolSize, MVPP2_BM_POOL_PTR_ALIGN);
-     if (PoolAddr == NULL) {
-       return EFI_OUT_OF_RESOURCES;
-     }
+    Status = DmaAllocateAlignedBuffer (EfiBootServicesData,
+                                       EFI_SIZE_TO_PAGES (PoolSize),
+                                       MVPP2_BM_POOL_PTR_ALIGN,
+                                       (VOID **)&PoolAddr);
+    if (EFI_ERROR (Status)) {
+      goto FreeBmPools;
+    }
 
-     Mvpp2Shared->BmPools[Index]->Id = Index;
-     Mvpp2Shared->BmPools[Index]->VirtAddr = (UINT32 *)PoolAddr;
-     Mvpp2Shared->BmPools[Index]->PhysAddr = (UINTN)PoolAddr;
+    ZeroMem (PoolAddr, PoolSize);
 
-     Mvpp2BmPoolHwCreate(Mvpp2Shared, Mvpp2Shared->BmPools[Index], MVPP2_BM_SIZE);
+    Mvpp2Shared->BmPools[Index]->Id = Index;
+    Mvpp2Shared->BmPools[Index]->VirtAddr = (UINT32 *)PoolAddr;
+    Mvpp2Shared->BmPools[Index]->PhysAddr = (UINTN)PoolAddr;
+
+    Mvpp2BmPoolHwCreate(Mvpp2Shared, Mvpp2Shared->BmPools[Index], MVPP2_BM_SIZE);
   }
 
   return EFI_SUCCESS;
+
+FreeBmPools:
+  FreePool (Mvpp2Shared->BmPools[Index]);
+FreePools:
+  while (Index-- >= 0) {
+    FreePool (Mvpp2Shared->BmPools[Index]);
+    DmaFreeBuffer (
+        EFI_SIZE_TO_PAGES (PoolSize),
+        Mvpp2Shared->BmPools[Index]->VirtAddr
+        );
+  }
+  return Status;
 }
 
 /* Enable and fill BM pool */
@@ -1177,11 +1196,16 @@ Pp2DxeInitialiseController (
   Mvpp2Shared->Tclk = ClockFrequency;
 
   /* Prepare buffers */
-  BufferSpace = UncachedAllocateAlignedZeroPool (BD_SPACE, MVPP2_BUFFER_ALIGN_SIZE);
-  if (BufferSpace == NULL) {
-    DEBUG((DEBUG_ERROR, "Failed to allocate buffer space\n"));
-    return EFI_OUT_OF_RESOURCES;
+  Status = DmaAllocateAlignedBuffer (EfiBootServicesData,
+                                     EFI_SIZE_TO_PAGES (BD_SPACE),
+                                     MVPP2_BUFFER_ALIGN_SIZE,
+                                     &BufferSpace);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Failed to allocate buffer space\n"));
+    return Status;
   }
+
+  ZeroMem (BufferSpace, BD_SPACE);
 
   for (Index = 0; Index < MVPP2_MAX_PORT; Index++) {
     Mvpp2Shared->BufferLocation.TxDescs[Index] = (MVPP2_TX_DESC *)
@@ -1192,16 +1216,16 @@ Pp2DxeInitialiseController (
     ((UINTN)BufferSpace + MVPP2_MAX_TXD * MVPP2_MAX_PORT * sizeof(MVPP2_TX_DESC));
 
   for (Index = 0; Index < MVPP2_MAX_PORT; Index++) {
-      Mvpp2Shared->BufferLocation.RxDescs[Index] = (MVPP2_RX_DESC *)
-        ((UINTN)BufferSpace + (MVPP2_MAX_TXD * MVPP2_MAX_PORT + MVPP2_AGGR_TXQ_SIZE) *
-        sizeof(MVPP2_TX_DESC) + Index * MVPP2_MAX_RXD * sizeof(MVPP2_RX_DESC));
+    Mvpp2Shared->BufferLocation.RxDescs[Index] = (MVPP2_RX_DESC *)
+      ((UINTN)BufferSpace + (MVPP2_MAX_TXD * MVPP2_MAX_PORT + MVPP2_AGGR_TXQ_SIZE) *
+      sizeof(MVPP2_TX_DESC) + Index * MVPP2_MAX_RXD * sizeof(MVPP2_RX_DESC));
   }
 
   for (Index = 0; Index < MVPP2_MAX_PORT; Index++) {
-      Mvpp2Shared->BufferLocation.RxBuffers[Index] = (DmaAddrT)
-        (BufferSpace + (MVPP2_MAX_TXD * MVPP2_MAX_PORT + MVPP2_AGGR_TXQ_SIZE) *
-        sizeof(MVPP2_TX_DESC) + MVPP2_MAX_RXD * MVPP2_MAX_PORT * sizeof(MVPP2_RX_DESC) +
-        Index * MVPP2_BM_SIZE * RX_BUFFER_SIZE);
+    Mvpp2Shared->BufferLocation.RxBuffers[Index] = (DmaAddrT)
+      (BufferSpace + (MVPP2_MAX_TXD * MVPP2_MAX_PORT + MVPP2_AGGR_TXQ_SIZE) *
+      sizeof(MVPP2_TX_DESC) + MVPP2_MAX_RXD * MVPP2_MAX_PORT * sizeof(MVPP2_RX_DESC) +
+      Index * MVPP2_BM_SIZE * RX_BUFFER_SIZE);
   }
 
   /* Initialize HW */
