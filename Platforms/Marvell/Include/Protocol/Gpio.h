@@ -56,6 +56,11 @@ typedef enum {
   MV_GPIO_CP1_CONTROLLER1         = 0x04
 } MARVELL_GPIO_CONTROLLER;
 
+typedef enum {
+  MV_GPIO_IOEXPANDER0             = 0x00,
+  MV_GPIO_IOEXPANDER1             = 0x01
+} MARVELL_IOEXPANDER;
+
 typedef
 EFI_STATUS
 (EFIAPI *MV_GPIO_DIRECTION_OUTPUT) (

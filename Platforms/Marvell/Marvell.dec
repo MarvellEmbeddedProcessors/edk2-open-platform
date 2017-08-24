@@ -133,6 +133,11 @@
   gMarvellTokenSpaceGuid.PcdI2cBaudRate|0|UINT32|0x3000049
   gMarvellTokenSpaceGuid.PcdI2cBusCount|0|UINT32|0x3000183
 
+#IOExpander
+  gMarvellTokenSpaceGuid.PcdIoExpanderId|{ 0x0 }|VOID*|0x30000047
+  gMarvellTokenSpaceGuid.PcdIoExpanderI2cAddress|{ 0x0 }|VOID*|0x30000048
+  gMarvellTokenSpaceGuid.PcdIOExpanderI2cBuses|{ 0x0 }|VOID*|0x30000049
+
 #SPI
   gMarvellTokenSpaceGuid.PcdSpiRegBase|0|UINT32|0x3000051
   gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|0|UINT32|0x30000052
