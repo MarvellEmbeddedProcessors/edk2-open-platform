@@ -35,8 +35,50 @@ Armada70x0InitXhciVbus (
   )
 {
   /* I2C IO-expander GPIO pins modification should be added here */
+  EFI_STATUS              Status = EFI_SUCCESS;
+  MARVELL_GPIO_PROTOCOL   *GpioProtocol;
+  EFI_HANDLE              *ProtHandle = NULL;
+  GPIO_PIN_DESC           DBVbus0En = {MV_GPIO_IOEXPANDER0, ARMADA_70x0_DB_VBUS0_IOEXPANDER, TRUE};
+  GPIO_PIN_DESC           DBVbus1En = {MV_GPIO_IOEXPANDER0, ARMADA_70x0_DB_VBUS1_IOEXPANDER, TRUE};
 
-  return EFI_SUCCESS;
+  Status = MarvellGpioGetHandle (GPIO_DRIVER_TYPE_IO_EXPANDER, &ProtHandle);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Failed to find GPIO for IO-Expander protocol, Status: 0x%x\n", Status));
+    return Status;
+  }
+
+  Status = gBS->OpenProtocol (
+                  ProtHandle,
+                  &gMarvellGpioProtocolGuid,
+                  (void **)&GpioProtocol,
+                  gImageHandle,
+                  NULL,
+                  EFI_OPEN_PROTOCOL_GET_PROTOCOL
+                  );
+  if(EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Failed to open GPIO for IO-Expander protocol, Status: 0x%x\n", Status));
+    return Status;
+  }
+
+  GpioProtocol->DirectionOutput(
+                  GpioProtocol,
+                  DBVbus0En.ControllerId,
+                  DBVbus0En.PinNumber,
+                  DBVbus0En.ActiveHigh
+                  );
+  GpioProtocol->DirectionOutput(
+                  GpioProtocol,
+                  DBVbus1En.ControllerId,
+                  DBVbus1En.PinNumber,
+                  DBVbus1En.ActiveHigh
+                  );
+  Status = gBS->CloseProtocol (
+                  ProtHandle,
+                  &gMarvellGpioProtocolGuid,
+                  gImageHandle,
+                  ProtHandle
+                  );
+  return Status;
 }
 
 STATIC
@@ -47,8 +89,58 @@ Armada80x0InitXhciVbus (
   )
 {
   /* I2C IO-expander GPIO pins modification should be added here */
+  EFI_STATUS              Status = EFI_SUCCESS;
+  MARVELL_GPIO_PROTOCOL   *GpioProtocol;
+  EFI_HANDLE              *ProtHandle = NULL;
+  GPIO_PIN_DESC           DBVbus0En = {MV_GPIO_IOEXPANDER0, ARMADA_80x0_DB_VBUS0_IOEXPANDER, TRUE};
+  GPIO_PIN_DESC           DBVbus1En = {MV_GPIO_IOEXPANDER0, ARMADA_80x0_DB_VBUS1_IOEXPANDER, TRUE};
+  GPIO_PIN_DESC           DBVbus2En = {MV_GPIO_IOEXPANDER1, ARMADA_80x0_DB_VBUS2_IOEXPANDER, TRUE};
 
-  return EFI_SUCCESS;
+  Status = MarvellGpioGetHandle (GPIO_DRIVER_TYPE_IO_EXPANDER, &ProtHandle);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Failed to find GPIO for IO-Expander protocol, Status: 0x%x\n", Status));
+    return Status;
+  }
+
+  Status = gBS->OpenProtocol (
+                  ProtHandle,
+                  &gMarvellGpioProtocolGuid,
+                  (void **)&GpioProtocol,
+                  gImageHandle,
+                  NULL,
+                  EFI_OPEN_PROTOCOL_GET_PROTOCOL
+                  );
+  if(EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Failed to open GPIO for IO-Expander protocol, Status: 0x%x\n", Status));
+    return Status;
+  }
+
+  GpioProtocol->DirectionOutput(
+                  GpioProtocol,
+                  DBVbus0En.ControllerId,
+                  DBVbus0En.PinNumber,
+                  DBVbus0En.ActiveHigh
+                  );
+  GpioProtocol->DirectionOutput(
+                  GpioProtocol,
+                  DBVbus1En.ControllerId,
+                  DBVbus1En.PinNumber,
+                  DBVbus1En.ActiveHigh
+                  );
+  GpioProtocol->DirectionOutput(
+                  GpioProtocol,
+                  DBVbus2En.ControllerId,
+                  DBVbus2En.PinNumber,
+                  DBVbus2En.ActiveHigh
+                  );
+
+  Status = gBS->CloseProtocol (
+                  ProtHandle,
+                  &gMarvellGpioProtocolGuid,
+                  gImageHandle,
+                  ProtHandle
+                  );
+  return Status;
 }
 
 STATIC
