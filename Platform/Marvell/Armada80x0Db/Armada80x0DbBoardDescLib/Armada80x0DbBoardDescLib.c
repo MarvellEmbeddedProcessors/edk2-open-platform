@@ -28,12 +28,12 @@
 //
 STATIC MV_GPIO_EXPANDER mGpioExpanders[] = {
   {
-    8, /* PCA9555 */
+    PCA9555_ID,
     0x21,
     0x0,
   },
   {
-    8, /* PCA9555 */
+    PCA9555_ID,
     0x25,
     0x0,
   },
