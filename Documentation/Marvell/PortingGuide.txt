@@ -5,71 +5,78 @@ This document provides instructions for adding support for new Marvell Armada
 board. For the sake of simplicity new Marvell board will be called "new_board".
 
 1. Create configuration files for new target
-	1.1 Create FDF file for new board
 
-	 - Copy and rename PathToYourOpp/Platforms/Marvell/Armada/Armada.fdf to
-	   PathToYourOpp/Platforms/Marvell/Armada/new_board.fdf
-	 - Change the first no-comment line:
-	   [FD.Armada_EFI] to [FD.{new_board}_EFI]
+	a) Create FDF file for new board:
 
-	1.2 Create DSC file for new board
+	   - Copy and rename PathToYourOpp/Platforms/Marvell/Armada/Armada.fdf to
+	     PathToYourOpp/Platforms/Marvell/Armada/new_board.fdf
+	   - Change the first no-comment line:
+	     [FD.Armada_EFI] to [FD.{new_board}_EFI]
 
-	 - Add new_board.dsc file to PathToYourOpp/Platforms/Marvell/Armada directory
-	 - Insert following [Defines] section to new_board.dsc:
+	b) Create DSC file for new board:
 
-			[Defines]
-			  PLATFORM_NAME                  = {new_board}
-			  PLATFORM_GUID                  = {newly_generated_GUID}
-			  PLATFORM_VERSION               = 0.1
-			  DSC_SPECIFICATION              = 0x00010019
-			  OUTPUT_DIRECTORY               = {output_directory}
-			  SUPPORTED_ARCHITECTURES        = AARCH64
-			  BUILD_TARGETS                  = DEBUG|RELEASE
-			  SKUID_IDENTIFIER               = DEFAULT
-			  FLASH_DEFINITION               = {path_to_fdf_file}
+	   - Add new_board.dsc file to PathToYourOpp/Platforms/Marvell/Armada directory
+	   - Insert following [Defines] section to new_board.dsc::
 
-	 - Add "!include Armada.dsc.inc" entry to new_board.dsc
+		[Defines]
+		  PLATFORM_NAME                  = {new_board}
+		  PLATFORM_GUID                  = {newly_generated_GUID}
+		  PLATFORM_VERSION               = 0.1
+		  DSC_SPECIFICATION              = 0x00010019
+		  OUTPUT_DIRECTORY               = {output_directory}
+		  SUPPORTED_ARCHITECTURES        = AARCH64
+		  BUILD_TARGETS                  = DEBUG|RELEASE
+		  SKUID_IDENTIFIER               = DEFAULT
+		  FLASH_DEFINITION               = {path_to_fdf_file}
 
-	 - Add unique Board ID to MVBOARD_ID list in
-	   PathToYourOpp/Platforms/Marvell/Include/Library/MvBoardDescLib.h:
+	   - Add "!include Armada.dsc.inc" entry to new_board.dsc
 
-			typedef enum {
-			  MVBOARD_ID_ARMADA7040_DB,
-			  MVBOARD_ID_MAX,
-			  MVBOARD_ID_DEFAULT = 0xFF,
-			} MVBOARD_ID;
+	   - Add unique Board ID to MVBOARD_ID list in
+	     PathToYourOpp/Platforms/Marvell/Include/Library/MvBoardDescLib.h::
 
-	   and assign according value to gMarvellTokenSpaceGuid.PcdBoardId PCD.
+		typedef enum {
+		  MVBOARD_ID_ARMADA7040_DB,
+		  MVBOARD_ID_MAX,
+		  MVBOARD_ID_DEFAULT = 0xFF,
+		} MVBOARD_ID;
+
+	     and assign according value to gMarvellTokenSpaceGuid.PcdBoardId PCD.
 
 2. Driver support
- - According to content of files from PathToYourOpp/Documentation/Marvell/PortingGuide
+
+   According to content of files from PathToYourOpp/Documentation/Marvell/PortingGuide
    insert PCD entries into new_board.dsc for every needed interface (as listed below).
 
 3. Compilation
- - Refer to PathToYourOpp/Documentation/Marvell/Build.txt. Remember to change
+
+   Refer to PathToYourOpp/Documentation/Marvell/Build.txt. Remember to change
    {platform} to new_board in order to point build system to newly created DSC file.
 
 4. Output file
- - Output files (and among others FD file, which may be used by ATF) are
+
+   Output files (and among others FD file, which may be used by ATF) are
    generated under directory pointed by "OUTPUT_DIRECTORY" entry (see point 1.2).
 
 5. Embedded DTB support (optional)
- - Add DTB blob for a new board in PathToYourOpp/Platforms/Marvell/Armada,
+
+   Add DTB blob for a new board in PathToYourOpp/Platforms/Marvell/Armada,
    preferably with its decompiled sources.
- - Add the file to a DTB FV entry in the .fdf file. Example entry with new-board.dtb:
 
-			INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
-			FILE FREEFORM = 25462CDA-221F-47DF-AC1D-259CFAA4E326 {
-			  SECTION RAW = OpenPlatformPkg/Platforms/Marvell/Armada/armada-7040-db.dtb
-			  SECTION RAW = OpenPlatformPkg/Platforms/Marvell/Armada/new-board.dtb
-			}
+   - Add the file to a DTB FV entry in the .fdf file. Example entry with new-board.dtb::
 
- - Allow for picking desired DTB file during boot - basing on the BoardId,
-   assign according DtbInstance in DtPlatformLoadDtb () function in
-   PathToYourOpp/Platforms/Marvell/Armada/Library/DxeDtPlatformDtbLoaderLib/DxeDtPlatformDtbLoaderLib.c
+	INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+	FILE FREEFORM = 25462CDA-221F-47DF-AC1D-259CFAA4E326 {
+	  SECTION RAW = OpenPlatformPkg/Platforms/Marvell/Armada/armada-7040-db.dtb
+	  SECTION RAW = OpenPlatformPkg/Platforms/Marvell/Armada/new-board.dtb
+	}
+
+   - Allow for picking desired DTB file during boot - basing on the BoardId,
+     assign according DtbInstance in DtPlatformLoadDtb () function in
+     PathToYourOpp/Platforms/Marvell/Armada/Library/DxeDtPlatformDtbLoaderLib/DxeDtPlatformDtbLoaderLib.c
 
 5. ACPI support (optional)
- - Two default set of tables can be enabled for A70x0:
+
+   Two default set of tables can be enabled for A70x0:
 
      PathToYourOpp/Platforms/Marvell/Armada/AcpiTables/Armada70x0/
 
@@ -77,21 +84,21 @@ board. For the sake of simplicity new Marvell board will be called "new_board".
 
      PathToYourOpp/Platforms/Marvell/Armada/AcpiTables/Armada80x0/
 
- - In order to add custom tables, similar folder has to be added.
- - Enable compilation of the tables in .fdf file. See example section in Armada.fdf:
+   - In order to add custom tables, similar folder has to be added.
+   - Enable compilation of the tables in .fdf file. See example section in Armada.fdf::
 
-			!if $(ARCH) == AARCH64
-			  # ACPI support
-			  INF MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
-			  INF MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
-			!if ( gMarvellTokenSpaceGuid.PcdBoardId == 0x0 )
-			  INF RuleOverride = ACPITABLE OpenPlatformPkg/Platforms/Marvell/Armada/AcpiTables/Armada70x0/AcpiTables.inf
-			!endif
-			!endif
+	!if $(ARCH) == AARCH64
+	  # ACPI support
+	  INF MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
+	  INF MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
+	!if ( gMarvellTokenSpaceGuid.PcdBoardId == 0x0 )
+	  INF RuleOverride = ACPITABLE OpenPlatformPkg/Platforms/Marvell/Armada/AcpiTables/Armada70x0/AcpiTables.inf
+	!endif
+	!endif
 
 
 COMPHY configuration
-====================
+--------------------
 In order to configure ComPhy library, following PCDs are available:
 
   - gMarvellTokenSpaceGuid.PcdComPhyDevices
@@ -105,69 +112,67 @@ important, but configuration will be set for first PcdComPhyChipCount chips).
 Every chip has 3 ComPhy PCDs and three of them comprise per-board lanes
 settings for this chip. Their format is array of up to 10 values reflecting
 defined numbers for SPEED/TYPE/INVERT, whose description can be found in:
-
-  OpenPlatformPkg/Platforms/Marvell/Library/ComPhyLib/ComPhyLib.h
+OpenPlatformPkg/Platforms/Marvell/Library/ComPhyLib/ComPhyLib.h
 
   - gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes
-	(Array of types - currently supported are:
+	(Array of types - currently supported are::
 
-	COMPHY_TYPE_PCIE0                            1
-	COMPHY_TYPE_PCIE1                            2
-	COMPHY_TYPE_PCIE2                            3
-	COMPHY_TYPE_PCIE3                            4
-	COMPHY_TYPE_SATA0                            5
-	COMPHY_TYPE_SATA1                            6
-	COMPHY_TYPE_SATA2                            7
-	COMPHY_TYPE_SATA3                            8
-	COMPHY_TYPE_SGMII0                           9
-	COMPHY_TYPE_SGMII1                           10
-	COMPHY_TYPE_SGMII2                           11
-	COMPHY_TYPE_SGMII3                           12
-	COMPHY_TYPE_QSGMII                           13
-	COMPHY_TYPE_USB3_HOST0                       14
-	COMPHY_TYPE_USB3_HOST1                       15
-	COMPHY_TYPE_USB3_DEVICE                      16
-	COMPHY_TYPE_XAUI0                            17
-	COMPHY_TYPE_XAUI1                            18
-	COMPHY_TYPE_XAUI2                            19
-	COMPHY_TYPE_XAUI3                            20
-	COMPHY_TYPE_RXAUI0                           21
-	COMPHY_TYPE_RXAUI1                           22
-	COMPHY_TYPE_SFI                              23 )
+		COMPHY_TYPE_PCIE0                            1
+		COMPHY_TYPE_PCIE1                            2
+		COMPHY_TYPE_PCIE2                            3
+		COMPHY_TYPE_PCIE3                            4
+		COMPHY_TYPE_SATA0                            5
+		COMPHY_TYPE_SATA1                            6
+		COMPHY_TYPE_SATA2                            7
+		COMPHY_TYPE_SATA3                            8
+		COMPHY_TYPE_SGMII0                           9
+		COMPHY_TYPE_SGMII1                           10
+		COMPHY_TYPE_SGMII2                           11
+		COMPHY_TYPE_SGMII3                           12
+		COMPHY_TYPE_QSGMII                           13
+		COMPHY_TYPE_USB3_HOST0                       14
+		COMPHY_TYPE_USB3_HOST1                       15
+		COMPHY_TYPE_USB3_DEVICE                      16
+		COMPHY_TYPE_XAUI0                            17
+		COMPHY_TYPE_XAUI1                            18
+		COMPHY_TYPE_XAUI2                            19
+		COMPHY_TYPE_XAUI3                            20
+		COMPHY_TYPE_RXAUI0                           21
+		COMPHY_TYPE_RXAUI1                           22
+		COMPHY_TYPE_SFI                              23 )
 
   - gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds
-	(Array of speeds - currently supported are:
+	(Array of speeds - currently supported are::
 
-	COMPHY_SPEED_1_25G                           1
-	COMPHY_SPEED_1_5G                            2
-	COMPHY_SPEED_2_5G                            3
-	COMPHY_SPEED_3G                              4
-	COMPHY_SPEED_3_125G                          5
-	COMPHY_SPEED_5G                              6
-	COMPHY_SPEED_5_15625G                        7
-	COMPHY_SPEED_6G                              8
-	COMPHY_SPEED_6_25G                           9
-	COMPHY_SPEED_10_3125G                        10 )
+		COMPHY_SPEED_1_25G                           1
+		COMPHY_SPEED_1_5G                            2
+		COMPHY_SPEED_2_5G                            3
+		COMPHY_SPEED_3G                              4
+		COMPHY_SPEED_3_125G                          5
+		COMPHY_SPEED_5G                              6
+		COMPHY_SPEED_5_15625G                        7
+		COMPHY_SPEED_6G                              8
+		COMPHY_SPEED_6_25G                           9
+		COMPHY_SPEED_10_3125G                        10 )
 
   - gMarvellTokenSpaceGuid.PcdChip0ComPhyInvFlags
-	(Array of lane inversion types - currently supported are:
+	(Array of lane inversion types - currently supported are::
 
-	COMPHY_POLARITY_NO_INVERT                    0
-	COMPHY_POLARITY_TXD_INVERT                   1
-	COMPHY_POLARITY_RXD_INVERT                   2
-	COMPHY_POLARITY_ALL_INVERT                   3 )
+		COMPHY_POLARITY_NO_INVERT                    0
+		COMPHY_POLARITY_TXD_INVERT                   1
+		COMPHY_POLARITY_RXD_INVERT                   2
+		COMPHY_POLARITY_ALL_INVERT                   3 )
 
-Example
--------
+Example::
 
-		  #ComPhy
-		  gMarvellTokenSpaceGuid.PcdComPhyDevices|{ 0x1 }
-		  gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|L"SGMII1;USB3_HOST0;SFI;SATA1;USB3_HOST1;PCIE2"
-		  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|L"1250;5000;10310;5000;5000;5000"
+	#ComPhy
+	gMarvellTokenSpaceGuid.PcdComPhyDevices|{ 0x1 }
+	gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|L"SGMII1;USB3_HOST0;SFI;SATA1;USB3_HOST1;PCIE2"
+	gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|L"1250;5000;10310;5000;5000;5000"
 
 
 PHY Driver configuration
-========================
+------------------------
 MvPhyDxe provides basic initialization and status routines for Marvell PHYs.
 Currently only 1518 series PHYs are supported. Following PCDs are required:
 
@@ -181,25 +186,25 @@ Currently only 1518 series PHYs are supported. Following PCDs are required:
 	(Array specifying, which Mdio controller the PHY is attached to)
 
 
-MV_PHY_DEVICE_ID:
+MV_PHY_DEVICE_ID::
 
-		typedef enum {
-			0    MV_PHY_DEVICE_1512,
-		} MV_PHY_DEVICE_ID;
+	typedef enum {
+		0    MV_PHY_DEVICE_1512,
+	} MV_PHY_DEVICE_ID;
 
 It should be extended when adding support for other PHY models.
 
-Disable autonegotiation:
+Disable autonegotiation::
 
- gMarvellTokenSpaceGuid.PcdPhyStartupAutoneg|FALSE
+	gMarvellTokenSpaceGuid.PcdPhyStartupAutoneg|FALSE
 
-assuming, that PHY models are 1512:
+assuming, that PHY models are 1512::
 
- gMarvellTokenSpaceGuid.PcdPhyDeviceIds|{ 0x0, 0x0 }
+	gMarvellTokenSpaceGuid.PcdPhyDeviceIds|{ 0x0, 0x0 }
 
 
 MDIO configuration
-==================
+------------------
 MDIO driver provides access to network PHYs' registers via EFI_MDIO_READ and
 EFI_MDIO_WRITE functions (EFI_MDIO_PROTOCOL). Following PCD is required:
 
@@ -209,13 +214,17 @@ EFI_MDIO_WRITE functions (EFI_MDIO_PROTOCOL). Following PCD is required:
 
 
 I2C configuration
-=================
+-----------------
 In order to enable driver on a new platform, following steps need to be taken:
+
  - add following line to .dsc file:
    OpenPlatformPkg/Drivers/I2c/MvI2cDxe/MvI2cDxe.inf
+
  - add following line to .fdf file:
    INF OpenPlatformPkg/Drivers/I2c/MvI2cDxe/MvI2cDxe.inf
+
  - add PCDs with relevant values to .dsc file:
+
 	- gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0x50, 0x57 }
 		(addresses of I2C slave devices on bus)
 	- gMarvellTokenSpaceGuid.PcdI2cSlaveBuses|{ 0x0, 0x0 }
@@ -231,7 +240,7 @@ In order to enable driver on a new platform, following steps need to be taken:
 
 
 PciEmulation configuration
-==========================
+--------------------------
 Installation of various NonDiscoverable devices via PciEmulation driver is performed
 via set of PCDs. Following are available:
 
@@ -251,18 +260,17 @@ STATIC PCI_E_PLATFORM_DESC A70x0PlatDescTemplate
 in Platforms/Marvell/PciEmulation/PciEmulation.c file. It comprises device
 count, base addresses, register region size and DMA-coherency type.
 
-Example
--------
+Example:
 
-Assuming we want to enable second XHCI port and one SDHCI port on Armada
-70x0 board, following needs to be declared:
+   Assuming we want to enable second XHCI port and one SDHCI port on Armada
+   70x0 board, following needs to be declared::
 
-		gMarvellTokenSpaceGuid.PcdPciEXhci|{ 0x0 0x1 }
-		gMarvellTokenSpaceGuid.PcdPciESdhci|{ 0x1 }
+	gMarvellTokenSpaceGuid.PcdPciEXhci|{ 0x0 0x1 }
+	gMarvellTokenSpaceGuid.PcdPciESdhci|{ 0x1 }
 
 
 SATA configuration
-==================
+------------------
 There is one additional PCD for AHCI:
 
   - gMarvellTokenSpaceGuid.PcdSataBaseAddress
@@ -271,7 +279,7 @@ There is one additional PCD for AHCI:
 
 
 Pp2Dxe configuration
-====================
+--------------------
 Pp2Dxe is driver supporting PP2 NIC on Marvell platforms. Following PCDs
 are required to operate:
 
@@ -284,7 +292,7 @@ are required to operate:
 
   - gMarvellTokenSpaceGuid.PcdPp2PhyConnectionTypes
 	(List of values corresponding to PHY_CONNECTION enum, which
-	 is defined as follows:
+	 is defined as follows::
 
 		typedef enum {
 			0    PHY_CONNECTION_RGMII,
@@ -314,20 +322,20 @@ are required to operate:
 
   - gMarvellTokenSpaceGuid.PcdPp2InterfaceSpeed
 	(Values corresponding to PHY_SPEED enum.
-	 PHY_SPEED is defined as follows:
+	 PHY_SPEED is defined as follows::
 
-		  typedef enum {
-			  0  NO_SPEED,
-			  1  SPEED_10,
-			  2  SPEED_100,
-			  3  SPEED_1000,
-			  4  SPEED_2500,
-			  5  SPEED_10000
-		  } PHY_SPEED;
+	  typedef enum {
+		  0  NO_SPEED,
+		  1  SPEED_10,
+		  2  SPEED_100,
+		  3  SPEED_1000,
+		  4  SPEED_2500,
+		  5  SPEED_10000
+	  } PHY_SPEED;
 
 
 UTMI PHY configuration
-======================
+----------------------
 In order to configure UTMI, following PCDs are available:
 
   - gMarvellTokenSpaceGuid.PcdUtmiControllers
@@ -335,22 +343,21 @@ In order to configure UTMI, following PCDs are available:
 	 Set to 0x1 for enabled, 0x0 for disabled)
 
   - gMarvellTokenSpaceGuid.PcdUtmiPortType
-	(Indicates type of the connected USB port:
+	(Indicates type of the connected USB port::
 
-	UTMI_PHY_TO_USB_HOST0                     0
-	UTMI_PHY_TO_USB_HOST1                     1
-	UTMI_PHY_TO_USB_DEVICE0                   2 )
+		UTMI_PHY_TO_USB_HOST0                     0
+		UTMI_PHY_TO_USB_HOST1                     1
+		UTMI_PHY_TO_USB_DEVICE0                   2 )
 
-Example
--------
+Example::
 
-		# UtmiPhy
-		  gMarvellTokenSpaceGuid.PcdUtmiControllers|{ 0x1, 0x1 }
-		  gMarvellTokenSpaceGuid.PcdUtmiPortType|{ 0x0, 0x1 }
+	# UtmiPhy
+	  gMarvellTokenSpaceGuid.PcdUtmiControllers|{ 0x1, 0x1 }
+	  gMarvellTokenSpaceGuid.PcdUtmiPortType|{ 0x0, 0x1 }
 
 
 SPI driver configuration
-========================
+------------------------
 Following PCDs are available for configuration of spi driver:
 
   - gMarvellTokenSpaceGuid.PcdSpiClockFrequency
@@ -360,7 +367,7 @@ Following PCDs are available for configuration of spi driver:
 	(Max SCLK line frequency (in Hz) (max transfer frequency) )
 
 SpiFlash configuration
-======================
+----------------------
 Folowing PCDs for spi flash driver configuration must be set properly:
 
   - gMarvellTokenSpaceGuid.PcdSpiFlashMode
@@ -370,7 +377,7 @@ Folowing PCDs for spi flash driver configuration must be set properly:
 	(Chip select used for communication with the Flash)
 
 MPP configuration
-=================
+-----------------
 Multi-Purpose Ports (MPP) are configurable through platform PCDs.
 In order to set desired pin multiplexing, .dsc file needs to be modified.
 (OpenPlatformPkg/Platforms/Marvell/Armada/{platform_name}.dsc - please refer to
@@ -381,11 +388,10 @@ Following PCDs are available:
 	(Indicates how many different chips are placed on board. So far up to 4 chips
 	 are supported)
 
-Every MPP PCD has <Num> part where
- <Num> stands for chip ID (order is not important, but configuration will be
- set for first PcdMppChipCount chips).
+Every MPP PCD has <Num> part where <Num> stands for chip ID (order is not
+important, but configuration will be set for first PcdMppChipCount chips).
 
-Below is example for the first chip (Chip0).
+Below is example for the first chip (Chip0):
 
   - gMarvellTokenSpaceGuid.PcdChip0MppReverseFlag
 	(Indicates that register order is reversed. (Needs to be used only for AP806-Z1) )
@@ -401,22 +407,22 @@ Below is example for the first chip (Chip0).
   - gMarvellTokenSpaceGuid.PcdChip0MppSel2
 	(This registers defines functions of 10 pins in ascending order)
 
-Examples
---------
 
-		# APN806-A0 MPP SET
-		 gMarvellTokenSpaceGuid.PcdChip0MppReverseFlag|FALSE
-		 gMarvellTokenSpaceGuid.PcdChip0MppBaseAddress|0xF06F4000
-		 gMarvellTokenSpaceGuid.PcdChip0MppRegCount|3
-		 gMarvellTokenSpaceGuid.PcdChip0MppSel0|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x0 }
-		 gMarvellTokenSpaceGuid.PcdChip0MppSel1|{ 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
+Examples::
 
-Set pin 6 and 7 to 0xa function:
-		 gMarvellTokenSpaceGuid.PcdChip0MppSel0|{ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xa, 0xa, 0x0, 0x0 }
+	# APN806-A0 MPP SET
+	 gMarvellTokenSpaceGuid.PcdChip0MppReverseFlag|FALSE
+	 gMarvellTokenSpaceGuid.PcdChip0MppBaseAddress|0xF06F4000
+	 gMarvellTokenSpaceGuid.PcdChip0MppRegCount|3
+	 gMarvellTokenSpaceGuid.PcdChip0MppSel0|{ 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x0 }
+	 gMarvellTokenSpaceGuid.PcdChip0MppSel1|{ 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
+
+	Set pin 6 and 7 to 0xa function:
+	 gMarvellTokenSpaceGuid.PcdChip0MppSel0|{ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xa, 0xa, 0x0, 0x0 }
 
 
 Ramdisk configuration
-=====================
+---------------------
 There is one PCD available for Ramdisk configuration
 
   - gMarvellTokenSpaceGuid.PcdRamDiskSize
