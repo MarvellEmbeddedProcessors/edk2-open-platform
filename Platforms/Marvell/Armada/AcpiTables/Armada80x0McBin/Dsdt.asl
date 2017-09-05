@@ -171,5 +171,31 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
                 }
             })
         }
+
+        Device (MDIO)
+        {
+            Name (_HID, "MRVL0100")                             // _HID: Hardware ID
+            Name (_UID, 0x00)                                   // _UID: Unique ID
+            Name (_CRS, ResourceTemplate ()
+            {
+                Memory32Fixed (ReadWrite,
+                    0xf212a200,                                 // Address Base
+                    0x00000010,                                 // Address Length
+                    )
+            })
+        }
+
+        Device (XSMI)
+        {
+            Name (_HID, "MRVL0101")                             // _HID: Hardware ID
+            Name (_UID, 0x00)                                   // _UID: Unique ID
+            Name (_CRS, ResourceTemplate ()
+            {
+                Memory32Fixed (ReadWrite,
+                    0xf212a600,                                 // Address Base
+                    0x00000010,                                 // Address Length
+                    )
+            })
+        }
     }
 }
