@@ -690,13 +690,7 @@
 				#size-cells = <0x0>;
 				cell-index = <0x4>;
 				clocks = <0x9 0x1 0x15>;
-				status = "okay";
-
-				spi-flash@0 {
-					compatible = "st,w25q32";
-					spi-max-frequency = <0x2faf080>;
-					reg = <0x0>;
-				};
+				status = "disabled";
 			};
 
 			i2c@701000 {
@@ -706,7 +700,8 @@
 				#size-cells = <0x0>;
 				interrupts = <0x0 0x136 0x4>;
 				clocks = <0x9 0x1 0x15>;
-				status = "disabled";
+				status = "okay";
+				clock-frequency = <0x186a0>;
 			};
 
 			i2c@701100 {
