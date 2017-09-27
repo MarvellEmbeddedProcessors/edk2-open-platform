@@ -57,7 +57,7 @@ DramSizeGet (
   UINT64 *MemSize
   )
 {
-  UINT32 BaseAddr;
+  UINT64 BaseAddr;
   UINT32 RegVal;
   UINT8 AreaLengthMap;
   UINT8 Cs;
@@ -82,8 +82,8 @@ DramSizeGet (
     if (BaseAddr != *MemSize) {
       DEBUG ((
           DEBUG_ERROR,
-          "DramSizeGet: DRAM blocks are not contiguous, limit size to 0x%x\n",
-          MemSize
+          "DramSizeGet: DRAM blocks are not contiguous, limit size to 0x%llx\n",
+          *MemSize
           ));
       return EFI_SUCCESS;
     }
