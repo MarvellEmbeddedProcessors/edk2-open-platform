@@ -414,7 +414,7 @@ SdMmcHcStopClock (
   @param[in] PciIo          The PCI IO protocol instance.
   @param[in] Slot           The slot number of the SD card to send the command to.
   @param[in] ClockFreq      The max clock frequency to be set. The unit is KHz.
-  @param[in] Capability     The capability of the slot.
+  @param[in] BaseClkFreq    The base clock frequency of host controller in MHz.
 
   @retval EFI_SUCCESS       The clock is supplied successfully.
   @retval Others            The clock isn't supplied successfully.
@@ -425,7 +425,7 @@ SdMmcHcClockSupply (
   IN EFI_PCI_IO_PROTOCOL    *PciIo,
   IN UINT8                  Slot,
   IN UINT64                 ClockFreq,
-  IN SD_MMC_HC_SLOT_CAP     Capability
+  IN UINT32                 BaseClockFreq
   );
 
 /**
@@ -473,7 +473,7 @@ SdMmcHcSetBusWidth (
 
   @param[in] PciIo          The PCI IO protocol instance.
   @param[in] Slot           The slot number of the SD card to send the command to.
-  @param[in] Capability     The capability of the slot.
+  @param[in] BaseClkFreq    The base clock frequency of host controller in MHz.
 
   @retval EFI_SUCCESS       The clock is supplied successfully.
   @retval Others            The clock isn't supplied successfully.
@@ -483,7 +483,7 @@ EFI_STATUS
 SdMmcHcInitClockFreq (
   IN EFI_PCI_IO_PROTOCOL    *PciIo,
   IN UINT8                  Slot,
-  IN SD_MMC_HC_SLOT_CAP     Capability
+  IN UINT32                 BaseClockFreq
   );
 
 /**
@@ -531,6 +531,7 @@ SdMmcHcInitTimeoutCtrl (
   @param[in] PciIo          The PCI IO protocol instance.
   @param[in] Slot           The slot number of the SD card to send the command to.
   @param[in] Capability     The capability of the slot.
+  @param[in] BaseClkFreq    The base clock frequency of host controller in MHz.
 
   @retval EFI_SUCCESS       The host controller is initialized successfully.
   @retval Others            The host controller isn't initialized successfully.
@@ -540,7 +541,8 @@ EFI_STATUS
 SdMmcHcInitHost (
   IN EFI_PCI_IO_PROTOCOL    *PciIo,
   IN UINT8                  Slot,
-  IN SD_MMC_HC_SLOT_CAP     Capability
+  IN SD_MMC_HC_SLOT_CAP     Capability,
+  IN UINT32                 BaseClockFreq
   );
 
 #endif
