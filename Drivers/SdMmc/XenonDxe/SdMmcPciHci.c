@@ -16,6 +16,7 @@
 **/
 
 #include "SdMmcPciHcDxe.h"
+#include "XenonSdhci.h"
 
 /**
   Dump the content of SD/MMC host controller's Capability Register.
@@ -703,9 +704,8 @@ SdMmcHcClockSupply (
   //
   // Calculate a divisor for SD clock frequency
   //
-  ASSERT (Capability.BaseClkFreq != 0);
 
-  BaseClkFreq = Capability.BaseClkFreq;
+  BaseClkFreq = XENON_MMC_MAX_CLK / 1000 / 1000;
   if (ClockFreq == 0) {
     return EFI_INVALID_PARAMETER;
   }
