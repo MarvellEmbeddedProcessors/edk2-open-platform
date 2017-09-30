@@ -64,7 +64,7 @@ STATIC PP2_DEVICE_PATH Pp2DevicePathTemplate = {
         (UINT8) ((sizeof(MAC_ADDR_DEVICE_PATH)) >> 8)
       }
     },
-    { { 0 } },
+    { { 0x00, 0x50, 0x43, 0x00, 0x86, 0x10 } },
     0
   },
   {
@@ -1111,7 +1111,8 @@ Pp2DxeSnpInstall (
   CopyMem (SnpMode, &Pp2SnpModeTemplate, sizeof (EFI_SIMPLE_NETWORK_MODE));
 
   /* Handle device path of the controller */
-  Pp2DevicePath->Pp2Mac.MacAddress.Addr[5] = Pp2Context->Instance + 1;
+  Pp2DevicePath->Pp2Mac.MacAddress.Addr[3] += PcdGet8 (PcdBoardId);
+  Pp2DevicePath->Pp2Mac.MacAddress.Addr[5] += Pp2Context->Instance;
   Pp2Context->Signature = PP2DXE_SIGNATURE;
   Pp2Context->DevicePath = Pp2DevicePath;
   Pp2DevicePath->Pp2Mac.IfType = SnpMode->IfType;
