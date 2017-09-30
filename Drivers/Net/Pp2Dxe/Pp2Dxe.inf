@@ -71,6 +71,7 @@
   gMarvellPhyProtocolGuid
 
 [Pcd]
+  gMarvellTokenSpaceGuid.PcdBoardId
   gMarvellTokenSpaceGuid.PcdPp2Controllers
   gMarvellTokenSpaceGuid.PcdPp2GopIndexes
   gMarvellTokenSpaceGuid.PcdPp2InterfaceAlwaysUp
