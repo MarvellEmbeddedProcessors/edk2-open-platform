@@ -250,7 +250,7 @@ Armada70x0PciHostBridgeLibConstructor (
                    0x0,
                    SIZE_64KB,
                    IATU_REGION_CTRL_1_OFF_OUTBOUND_0_TYPE_CFG0,
-                   0);
+                   IATU_REGION_CTRL_2_OFF_OUTBOUND_0_CFG_SHIFT_MODE);
 
   // Region 2: Type 1 config space
   ConfigureWindow (2,
