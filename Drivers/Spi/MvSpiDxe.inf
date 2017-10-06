@@ -63,4 +63,7 @@
   gMarvellSpiMasterProtocolGuid
 
 [Depex]
-  TRUE
+  #
+  # MvSpiDxe must be loaded prior to MvSpiFlash driver
+  #
+  BEFORE gMarvellSpiFlashDxeGuid
