@@ -373,6 +373,17 @@
   # TRNG
   gMarvellTokenSpaceGuid.PcdEip76TrngBaseAddress|0xF2760000
 
+  #
+  # Variable store - default values
+  #
+  gMarvellTokenSpaceGuid.PcdSpiMemoryBase|0xF9000000
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableBase|0xF93C0000
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableSize|0x00010000
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingBase|0xF93D0000
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingSize|0x00010000
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareBase|0xF93E0000
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareSize|0x00010000
+
 ################################################################################
 #
 # Components Section - list of all EDK II Modules needed by this Platform
@@ -432,7 +443,6 @@
   MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf
   MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf
-  MdeModulePkg/Universal/Variable/EmuRuntimeDxe/EmuVariableRuntimeDxe.inf
 
   EmbeddedPkg/EmbeddedMonotonicCounter/EmbeddedMonotonicCounter.inf
   EmbeddedPkg/ResetRuntimeDxe/ResetRuntimeDxe.inf
@@ -490,6 +500,19 @@
       NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf
   }
 
+  #
+  # Variable services
+  #
+  OpenPlatformPkg/Drivers/Spi/Variables/MvFvbDxe.inf
+  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf
+  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf {
+    <LibraryClasses>
+      AuthVariableLib|MdeModulePkg/Library/AuthVariableLibNull/AuthVariableLibNull.inf
+      NULL|MdeModulePkg/Library/VarCheckUefiLib/VarCheckUefiLib.inf
+      TpmMeasurementLib|MdeModulePkg/Library/TpmMeasurementLibNull/TpmMeasurementLibNull.inf
+      VarCheckLib|MdeModulePkg/Library/VarCheckLib/VarCheckLib.inf
+  }
+
   # UEFI application (Shell Embedded Boot Loader)
   ShellPkg/Application/Shell/Shell.inf {
     <LibraryClasses>
@@ -530,7 +553,7 @@
   MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
   MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf {
     <LibraryClasses>
-      #PlatformHasAcpiLib|EmbeddedPkg/Library/PlatformHasAcpiLib/PlatformHasAcpiLib.inf
+      PlatformHasAcpiLib|EmbeddedPkg/Library/PlatformHasAcpiLib/PlatformHasAcpiLib.inf
 
      <PcdsFixedAtBuild>
       # don't bother with ACPI versions older than 5.0
