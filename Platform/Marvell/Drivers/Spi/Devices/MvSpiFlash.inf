@@ -64,4 +64,7 @@
   gMarvellSpiFlashProtocolGuid
 
 [Depex]
-  TRUE
+  #
+  # MvSpiFlashDxe must be loaded prior to variables driver MvFvbDxe
+  #
+  BEFORE gMarvellFvbDxeGuid
