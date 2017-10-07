@@ -114,7 +114,6 @@ XenonSetPower (
   )
 {
   UINT8 Pwr = 0;
-  UINT32 Ctrl = 0;
 
   // Below statement calls routine to set voltage for SDIO devices in either HIGH (1) or LOW (0) mode
   switch (Vcc) {
@@ -151,12 +150,6 @@ XenonSetPower (
   Pwr |= SDHCI_POWER_ON;
 
   SdMmcHcRwMmio (PciIo, SD_BAR_INDEX,SD_MMC_HC_POWER_CTRL, FALSE, SDHC_REG_SIZE_1B, &Pwr);
-
-  // Set VCCQ
-  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SDHC_SLOT_eMMC_CTRL, TRUE, SDHC_REG_SIZE_4B, &Ctrl);
-  Ctrl &= ~eMMC_VCCQ_MASK;
-  Ctrl |= Vccq;
-  SdMmcHcRwMmio (PciIo, SD_BAR_INDEX, SDHC_SLOT_eMMC_CTRL, FALSE, SDHC_REG_SIZE_4B, &Ctrl);
 }
 
 UINTN
