@@ -86,6 +86,8 @@ typedef struct {
   INTN MaxFreq;
   SPI_MODE Mode;
   SPI_FLASH_INFO *Info;
+  UINTN HostRegisterBaseAddress;
+  UINTN CoreClock;
 } SPI_DEVICE;
 
 typedef
