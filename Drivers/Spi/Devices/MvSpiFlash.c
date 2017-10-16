@@ -50,7 +50,7 @@ SPI_FLASH_INSTANCE  *mSpiFlashInstance;
   .PageSize = 256,              \
   .Flags = (FlashFlags),
 
-static SPI_FLASH_INFO SpiFlashIds[] = {
+static CONST SPI_FLASH_INFO SpiFlashIds[] = {
   /* ATMEL */
   {L"at45db011d",        INFO(0x1f2200, 0x0, 64 * 1024,     4, SECT_4K) },
   {L"at45db021d",        INFO(0x1f2300, 0x0, 64 * 1024,     8, SECT_4K) },
@@ -570,7 +570,7 @@ MvSpiFlashReadId (
   IN     SPI_DEVICE *SpiDev
   )
 {
-  SPI_FLASH_INFO *Info;
+  CONST SPI_FLASH_INFO *Info;
   EFI_STATUS Status;
   UINT8 Id[SPI_FLASH_MAX_ID_LEN];
   UINT8 Cmd;
@@ -594,8 +594,13 @@ MvSpiFlashReadId (
   for (; Info->Name != NULL; Info++) {
     if (Info->IdLen != 0) {
       if (CompareMem (Info->Id, Id, Info->IdLen) == 0) {
-        SpiDev->Info = Info;
-        MvPrintFlashInfo (Info);
+        SpiDev->Info = AllocateRuntimeCopyPool (sizeof (SPI_FLASH_INFO),
+                         Info);
+        if (SpiDev->Info == NULL) {
+          DEBUG ((DEBUG_ERROR, "ReadId: Cannot allocate memory\n"));
+          return EFI_OUT_OF_RESOURCES;
+        }
+        MvPrintFlashInfo (SpiDev->Info);
         return EFI_SUCCESS;
       }
     }
