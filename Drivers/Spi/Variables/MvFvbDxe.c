@@ -928,14 +928,18 @@ MvFvbVirtualNotifyEvent (
   IN VOID             *Context
   )
 {
+  EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiDevice);
+  EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiDevice.Info);
   EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiDevice.HostRegisterBaseAddress);
   EfiConvertPointer (0x0, (VOID**)&mFvbDevice->RegionBaseAddress);
 
   // Convert SpiMasterProtocol
+  EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiMasterProtocol);
   EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiMasterProtocol->ReadWrite);
   EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiMasterProtocol->Transfer);
 
   // Convert SpiFlashProtocol
+  EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiFlashProtocol);
   EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiFlashProtocol->Erase);
   EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiFlashProtocol->Write);
 
