@@ -107,10 +107,10 @@ MvSpiFlashWriteCommon (
   UINT8 PollBit = STATUS_REG_POLL_WIP;
   UINT8 CheckStatus = 0x0;
 
-  CmdStatus = (UINT8)PcdGet32 (PcdSpiFlashPollCmd);
-  if (CmdStatus == CMD_FLAG_STATUS) {
+  if (Slave->Info->Flags & NF_WRITE_FSR) {
+    CmdStatus = CMD_FLAG_STATUS;
     PollBit = STATUS_REG_POLL_PEC;
-    CheckStatus = PollBit;
+    CheckStatus = STATUS_REG_POLL_PEC;
   }
 
   // Send command
@@ -181,29 +181,25 @@ MvSpiFlashErase (
   UINTN EraseSize;
   UINT8 Cmd[5];
 
-  AddrSize  = PcdGet32 (PcdSpiFlashAddressCycles);
-  EraseSize = PcdGet64 (PcdSpiFlashEraseSize);
+  if (Slave->Info->Flags & NF_4B_ADDR) {
+    AddrSize = 4;
+  } else {
+    AddrSize = 3;
+  }
+
+  if (Slave->Info->Flags & NF_ERASE_4K) {
+    Cmd[0] = CMD_ERASE_4K;
+    EraseSize = SIZE_4KB;
+  } else {
+    Cmd[0] = CMD_ERASE_64K;
+    EraseSize = Slave->Info->SectorSize;
+  }
 
   // Check input parameters
   if (Offset % EraseSize || Length % EraseSize) {
     DEBUG((DEBUG_ERROR, "SpiFlash: Either erase offset or length "
       "is not multiple of erase size\n"));
     return EFI_DEVICE_ERROR;
-  }
-
-  switch (EraseSize) {
-  case SIZE_4KB:
-    Cmd[0] = CMD_ERASE_4K;
-    break;
-  case SIZE_32KB:
-    Cmd[0] = CMD_ERASE_32K;
-    break;
-  case SIZE_64KB:
-    Cmd[0] = CMD_ERASE_64K;
-    break;
-  default:
-    DEBUG ((DEBUG_ERROR, "MvSpiFlash: Invalid EraseSize parameter\n"));
-    return EFI_INVALID_PARAMETER;
   }
 
   while (Length) {
@@ -239,7 +235,11 @@ MvSpiFlashRead (
   UINT32 AddrSize, ReadAddr, ReadLength, RemainLength;
   UINTN BankSel = 0;
 
-  AddrSize = PcdGet32 (PcdSpiFlashAddressCycles);
+  if (Slave->Info->Flags & NF_4B_ADDR) {
+    AddrSize = 4;
+  } else {
+    AddrSize = 3;
+  }
 
   Cmd[0] = CMD_READ_ARRAY_FAST;
 
@@ -282,8 +282,13 @@ MvSpiFlashWrite (
   UINT32 WriteAddr;
   UINT8 Cmd[5], AddrSize;
 
-  AddrSize = PcdGet32 (PcdSpiFlashAddressCycles);
-  PageSize = PcdGet32 (PcdSpiFlashPageSize);
+  if (Slave->Info->Flags & NF_4B_ADDR) {
+    AddrSize = 4;
+  } else {
+    AddrSize = 3;
+  }
+
+  PageSize = Slave->Info->PageSize;
 
   Cmd[0] = CMD_PAGE_PROGRAM;
 
@@ -370,7 +375,7 @@ MvSpiFlashUpdate (
   UINT64 SectorSize, ToUpdate, Scale = 1;
   UINT8 *TmpBuf, *End;
 
-  SectorSize = PcdGet64 (PcdSpiFlashSectorSize);
+  SectorSize = Slave->Info->SectorSize;
 
   End = Buf + ByteCount;
 
@@ -404,8 +409,7 @@ EFI_STATUS
 EFIAPI
 MvSpiFlashReadId (
   IN     SPI_DEVICE *SpiDev,
-  IN     UINT32     DataByteCount,
-  IN OUT UINT8      *Buffer
+  IN     BOOLEAN     UseInRuntime
   )
 {
   EFI_STATUS Status;
@@ -425,9 +429,7 @@ MvSpiFlashReadId (
     return Status;
   }
 
-  if (CompareMem (Id, Buffer, DataByteCount) != 0) {
-    Status = EFI_NOT_FOUND;
-  }
+  Status = GetNorFlashInfo (Id, &SpiDev->Info, UseInRuntime);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR,
       "%a: Unrecognized JEDEC Id bytes: 0x%02x%02x%02x\n",
@@ -437,6 +439,8 @@ MvSpiFlashReadId (
       Id[2]));
     return Status;
   }
+
+  PrintNorFlashInfo (SpiDev->Info);
 
   return EFI_SUCCESS;
 }
@@ -452,7 +456,11 @@ MvSpiFlashInit (
   UINT8 Cmd, StatusRegister;
   UINT32 AddrSize;
 
-  AddrSize = PcdGet32 (PcdSpiFlashAddressCycles);
+  if (Slave->Info->Flags & NF_4B_ADDR) {
+    AddrSize = 4;
+  } else {
+    AddrSize = 3;
+  }
 
   if (AddrSize == 4) {
     // Set 4 byte address mode

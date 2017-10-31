@@ -94,12 +94,9 @@ SpiFlashProbe (
   )
 {
   EFI_STATUS       Status;
-  UINT8           *FlashId;
-
-  FlashId = (UINT8 *)PcdGetPtr (PcdSpiFlashId);
 
   // Read SPI flash ID
-  Status = SpiFlashProtocol->ReadId (Slave, NOR_FLASH_ID_DEFAULT_LEN, FlashId);
+  Status = SpiFlashProtocol->ReadId (Slave, FALSE);
   if (EFI_ERROR (Status)) {
     return SHELL_ABORTED;
   }
