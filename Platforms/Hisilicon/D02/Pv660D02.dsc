@@ -102,8 +102,6 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdConOutGopSupport|FALSE
 
 [PcdsFixedAtBuild.common]
-  gEmbeddedTokenSpaceGuid.PcdEmbeddedPrompt|"D02"
-
   gArmPlatformTokenSpaceGuid.PcdCoreCount|8
 
   gEfiMdeModulePkgTokenSpaceGuid.PcdMaxVariableSize|0x2000
