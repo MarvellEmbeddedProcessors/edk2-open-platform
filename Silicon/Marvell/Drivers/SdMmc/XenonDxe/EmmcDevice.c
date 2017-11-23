@@ -749,10 +749,6 @@ EmmcSwitchToHighSpeed (
 
   Private = SD_MMC_HC_PRIVATE_FROM_THIS (PassThru);
 
-  Status = EmmcSwitchBusWidth (PciIo, PassThru, Slot, Rca, IsDdr, BusWidth);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
   //
   // Set to Hight Speed timing
   //
@@ -789,6 +785,11 @@ EmmcSwitchToHighSpeed (
 
   HsTiming = 1;
   Status = EmmcSwitchClockFreq (PciIo, PassThru, Slot, Rca, HsTiming, ClockFreq);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = EmmcSwitchBusWidth (PciIo, PassThru, Slot, Rca, IsDdr, BusWidth);
   if (EFI_ERROR (Status)) {
     return Status;
   }
