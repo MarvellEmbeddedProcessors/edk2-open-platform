@@ -201,7 +201,7 @@ MvPhyParseStatus (
 
     DEBUG((DEBUG_ERROR,"MvPhyDxe: Waiting for PHY realtime link"));
     while (!(Data & MIIM_88E1xxx_PHYSTAT_SPDDONE)) {
-      if (i > PHY_AUTONEGOTIATE_TIMEOUT) {
+      if (i > PHY_ANEG_TIMEOUT) {
         DEBUG((DEBUG_ERROR," TIMEOUT !\n"));
         PhyDev->LinkUp = FALSE;
         break;
