@@ -175,6 +175,7 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
 
   # UEFI application (Shell Embedded Boot Loader)
   INF ShellPkg/Application/Shell/Shell.inf
+  INF ShellPkg/DynamicCommand/TftpDynamicCommand/TftpDynamicCommand.inf
 
   # Bds
   INF MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
