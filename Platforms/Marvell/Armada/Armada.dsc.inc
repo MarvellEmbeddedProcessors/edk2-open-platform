@@ -513,7 +513,6 @@
       NULL|ShellPkg/Library/UefiShellDebug1CommandsLib/UefiShellDebug1CommandsLib.inf
       NULL|ShellPkg/Library/UefiShellInstall1CommandsLib/UefiShellInstall1CommandsLib.inf
       NULL|ShellPkg/Library/UefiShellNetwork1CommandsLib/UefiShellNetwork1CommandsLib.inf
-      NULL|ShellPkg/Library/UefiShellTftpCommandLib/UefiShellTftpCommandLib.inf
       NULL|OpenPlatformPkg/Applications/EepromCmd/EepromCmd.inf
       NULL|OpenPlatformPkg/Applications/SpiTool/SpiFlashCmd.inf
       NULL|OpenPlatformPkg/Applications/FirmwareUpdate/FUpdate.inf
@@ -527,6 +526,7 @@
       gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
       gEfiMdePkgTokenSpaceGuid.PcdUefiLibMaxPrintBufferSize|8000
   }
+  ShellPkg/DynamicCommand/TftpDynamicCommand/TftpDynamicCommand.inf
 
   # DTB
   EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
