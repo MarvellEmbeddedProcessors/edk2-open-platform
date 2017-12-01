@@ -44,6 +44,7 @@
   BUILD_TARGETS                  = DEBUG|RELEASE
   SKUID_IDENTIFIER               = DEFAULT
   FLASH_DEFINITION               = Platform/Marvell/Armada/Armada70x0.fdf
+  DEFINE INCLUDE_TFTP_COMMAND    = 1
 
 !include Armada.dsc.inc
 
