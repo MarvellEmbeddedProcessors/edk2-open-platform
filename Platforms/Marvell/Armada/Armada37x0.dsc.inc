@@ -1,3 +1,5 @@
+#
+#Copyright (c) 2011-2012, ARM Limited. All rights reserved.
 #Copyright (C) 2017 Marvell International Ltd.
 #
 #Marvell BSD License Option
