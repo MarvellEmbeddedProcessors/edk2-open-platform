@@ -57,20 +57,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   lane_struct[id].InvFlag = (UINT8 *)GET_LANE_SPEED(id);     \
 }
 
-/***** ComPhy *****/
-#define COMPHY_SPEED_ERROR                           0
-#define COMPHY_SPEED_1_25G                           1
-#define COMPHY_SPEED_1_5G                            2
-#define COMPHY_SPEED_2_5G                            3
-#define COMPHY_SPEED_3G                              4
-#define COMPHY_SPEED_3_125G                          5
-#define COMPHY_SPEED_5G                              6
-#define COMPHY_SPEED_5_15625G                        7
-#define COMPHY_SPEED_6G                              8
-#define COMPHY_SPEED_6_25G                           9
-#define COMPHY_SPEED_10_3125G                        10
-#define COMPHY_SPEED_MAX                             11
+#define COMPHY_SPEED_1_25G                           0
+#define COMPHY_SPEED_2_5G                            1
+#define COMPHY_SPEED_3_125G                          2
+#define COMPHY_SPEED_5G                              3
+#define COMPHY_SPEED_5_15625G                        4
+#define COMPHY_SPEED_6G                              5
+#define COMPHY_SPEED_10_3125G                        6
+#define COMPHY_SPEED_MAX                             7
 #define COMPHY_SPEED_INVALID                         0xff
+/* The  default speed for IO with fixed known speed */
+#define COMPHY_SPEED_DEFAULT                         0x3F
 
 #define COMPHY_TYPE_UNCONNECTED                      0
 #define COMPHY_TYPE_PCIE0                            1
@@ -98,6 +95,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define COMPHY_TYPE_SFI                              23
 #define COMPHY_TYPE_MAX                              24
 #define COMPHY_TYPE_INVALID                          0xff
+
+#define COMPHY_SATA_MODE            0x1
+#define COMPHY_SGMII_MODE           0x2   /* SGMII 1G */
+#define COMPHY_HS_SGMII_MODE        0x3   /* SGMII 2.5G */
+#define COMPHY_USB3H_MODE           0x4
+#define COMPHY_USB3D_MODE           0x5
+#define COMPHY_PCIE_MODE            0x6
+#define COMPHY_RXAUI_MODE           0x7
+#define COMPHY_XFI_MODE             0x8
+#define COMPHY_SFI_MODE             0x9
+#define COMPHY_USB3_MODE            0xa
+#define COMPHY_AP_MODE              0xb
+
+/* Comphy unit index macro */
+#define COMPHY_UNIT_ID0         0
+#define COMPHY_UNIT_ID1         1
+#define COMPHY_UNIT_ID2         2
+#define COMPHY_UNIT_ID3         3
+
+/* Firmware related definitions used for SMC calls */
+#define MV_SIP_CPMPHY_POWER_ON      0x82000001
+#define MV_SIP_CPMPHY_POWER_OFF     0x82000002
+#define MV_SIP_COMPHY_PLL_LOCK      0x82000003
+
+#define COMPHY_FW_FORMAT(mode, idx, speeds)  (((mode) << 12) | ((idx) << 8) | ((speeds) << 2))
+
 
 #define COMPHY_POLARITY_NO_INVERT                    0
 #define COMPHY_POLARITY_TXD_INVERT                   1

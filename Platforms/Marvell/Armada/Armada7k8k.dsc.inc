@@ -552,3 +552,19 @@
 
 [BuildOptions.common.EDKII.DXE_RUNTIME_DRIVER]
   GCC:*_*_*_DLINK_FLAGS = -z common-page-size=0x10000
+
+################################################################################
+#
+# Defines - platform description macros
+#
+################################################################################
+[Defines]
+  # ComPhy speed
+  DEFINE CP_1_25G           = 0x0
+  DEFINE CP_2_5G            = 0x1
+  DEFINE CP_3_125G          = 0x2
+  DEFINE CP_5G              = 0x3
+  DEFINE CP_5_15625G        = 0x4
+  DEFINE CP_6G              = 0x5
+  DEFINE CP_10_3125G        = 0x6
+  DEFINE CP_DEFAULT         = 0x3f

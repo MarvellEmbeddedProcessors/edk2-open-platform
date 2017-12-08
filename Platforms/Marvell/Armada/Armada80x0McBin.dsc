@@ -111,7 +111,7 @@
   # 4: SFI           10.31 Gbps
   # 5: SATA1         5 Gbps
   gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|{ 0x1, 0x1, 0x1, 0x1, 0x17, 0x6 }
-  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|{ 0x6, 0x6, 0x6, 0x6, 0xA, 0x6 }
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|{ $(CP_5G), $(CP_5G), $(CP_5G), $(CP_5G), $(CP_10_3125G), $(CP_5G) }
   # ComPhy1
   # 0: SGMII1        1.25 Gbps
   # 1: SATA0         5 Gbps
@@ -120,7 +120,7 @@
   # 4: SFI           10.31 Gbps
   # 5: SGMII2        3.125 Gbps
   gMarvellTokenSpaceGuid.PcdChip1ComPhyTypes|{ 0xA, 0x7, 0xE, 0x8, 0x17, 0xB }
-  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeeds|{ 0x1, 0x6, 0x6, 0x6, 0xA, 0x5 }
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeeds|{ $(CP_1_25G), $(CP_5G), $(CP_5G), $(CP_5G), $(CP_10_3125G), $(CP_3_125G) }
 
   #UtmiPhy
   gMarvellTokenSpaceGuid.PcdUtmiControllers|{ 0x1, 0x1, 0x1, 0x0 }

@@ -47,11 +47,12 @@
 
 [LibraryClasses]
   ArmLib
+  ArmSmcLib
   DebugLib
+  IoLib
   MemoryAllocationLib
   MvSARLib
   PcdLib
-  IoLib
 
 [Sources.common]
   ComPhyLib.c

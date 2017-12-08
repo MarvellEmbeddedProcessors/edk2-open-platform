@@ -114,7 +114,7 @@
   # 4: USB3_HOST1    5 Gbps
   # 5: PCIE2         5 Gbps
   gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|{ 0xA, 0xE, 0x17, 0x6, 0xF, 0x3 }
-  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|{ 0x1, 0x6, 0xA, 0x6, 0x6, 0x6 }
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|{ $(CP_1_25G), $(CP_5G), $(CP_10_3125G), $(CP_5G), $(CP_5G), $(CP_5G) }
 
   #UtmiPhy
   gMarvellTokenSpaceGuid.PcdUtmiControllers|{ 0x1, 0x1 }
