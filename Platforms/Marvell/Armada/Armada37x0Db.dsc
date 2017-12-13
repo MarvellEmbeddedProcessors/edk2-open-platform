@@ -35,7 +35,7 @@
 #
 ################################################################################
 [Defines]
-  PLATFORM_NAME                  = Armada37x0
+  PLATFORM_NAME                  = Armada37x0Db
   PLATFORM_GUID                  = f1345008-5c01-427b-85d0-5daa7f4f194a
   PLATFORM_VERSION               = 0.1
   DSC_SPECIFICATION              = 0x00010019
