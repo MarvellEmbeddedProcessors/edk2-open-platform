@@ -127,5 +127,65 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA7K", 3)
                 }
             })
         }
+
+        Device (PP20)
+        {
+            Name (_HID, "MRVL0110")                             // _HID: Hardware ID
+            Name (_CCA, 0x01)                                   // Cache-coherent controller
+            Name (_UID, 0x00)                                   // _UID: Unique ID
+            Name (_CRS, ResourceTemplate ()
+            {
+                Memory32Fixed (ReadWrite, 0xf2000000 , 0x100000)
+                Memory32Fixed (ReadWrite, 0xf2129000 , 0xb000)
+                Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
+                {
+                  69, 73, 77, 81, 124, 100,                     // Port0 interrupts
+                  70, 74, 78, 82, 125, 99,                      // Port1 interrupts
+                  71, 75, 79, 83, 126, 98,                      // Port2 interrupts
+                }
+            })
+            Name (_DSD, Package () {
+                ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
+                Package () {
+                  Package () { "clock-frequency", 333333333 },
+                }
+            })
+            Device (ETH0)
+            {
+              Name (_ADR, 0x0)
+              Name (_DSD, Package () {
+                  ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
+                  Package () {
+                    Package () { "port-id", 0 },
+                    Package () { "gop-port-id", 0 },
+                    Package () { "phy-mode", "10gbase-kr"},
+                  }
+              })
+            }
+            Device (ETH1)
+            {
+              Name (_ADR, 0x0)
+              Name (_DSD, Package () {
+                  ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
+                  Package () {
+                    Package () { "port-id", 1 },
+                    Package () { "gop-port-id", 2 },
+                    Package () { "phy-mode", "sgmii"},
+                  }
+              })
+            }
+            Device (ETH2)
+            {
+              Name (_ADR, 0x0)
+              Name (_DSD, Package () {
+                  ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
+                  Package () {
+                    Package () { "port-id", 2 },
+                    Package () { "gop-port-id", 3 },
+                    Package () { "phy-mode", "rgmii-id"},
+                  }
+              })
+            }
+        }
     }
 }
