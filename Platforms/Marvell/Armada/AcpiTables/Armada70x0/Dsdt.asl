@@ -137,12 +137,6 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA7K", 3)
             {
                 Memory32Fixed (ReadWrite, 0xf2000000 , 0x100000)
                 Memory32Fixed (ReadWrite, 0xf2129000 , 0xb000)
-                Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
-                {
-                  69, 73, 77, 81, 124, 100,                     // Port0 interrupts
-                  70, 74, 78, 82, 125, 99,                      // Port1 interrupts
-                  71, 75, 79, 83, 126, 98,                      // Port2 interrupts
-                }
             })
             Name (_DSD, Package () {
                 ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
@@ -153,6 +147,13 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA7K", 3)
             Device (ETH0)
             {
               Name (_ADR, 0x0)
+              Name (_CRS, ResourceTemplate ()
+              {
+                  Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
+                  {
+                    69, 73, 77, 81, 124, 100,                     // Port0 interrupts
+                  }
+              })
               Name (_DSD, Package () {
                   ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
                   Package () {
@@ -165,6 +166,13 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA7K", 3)
             Device (ETH1)
             {
               Name (_ADR, 0x0)
+              Name (_CRS, ResourceTemplate ()
+              {
+                  Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
+                  {
+                    70, 74, 78, 82, 125, 99,                      // Port1 interrupts
+                  }
+              })
               Name (_DSD, Package () {
                   ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
                   Package () {
@@ -177,6 +185,13 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA7K", 3)
             Device (ETH2)
             {
               Name (_ADR, 0x0)
+              Name (_CRS, ResourceTemplate ()
+              {
+                  Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
+                  {
+                    71, 75, 79, 83, 126, 98,                      // Port2 interrupts
+                  }
+              })
               Name (_DSD, Package () {
                   ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
                   Package () {
