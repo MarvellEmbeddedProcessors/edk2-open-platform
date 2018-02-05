@@ -107,6 +107,7 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   INF EmbeddedPkg/ResetRuntimeDxe/ResetRuntimeDxe.inf
   INF EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
   INF EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
+  INF OpenPlatformPkg/Drivers/BoardDesc/MvBoardDescDxe.inf
   INF OpenPlatformPkg/Drivers/I2c/MvI2cDxe/MvI2cDxe.inf
   INF MdeModulePkg/Bus/I2c/I2cDxe/I2cDxe.inf
   INF OpenPlatformPkg/Drivers/I2c/Devices/MvEeprom/MvEeprom.inf
