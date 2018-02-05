@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 
+#include <Protocol/BoardDesc.h>
 #include <Protocol/Gpio.h>
 
 #include <Uefi/UefiBaseType.h>
@@ -61,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define GPIO_DATA_IN_REG                 (0x10)
 
 typedef struct {
-  BOOLEAN                 Enabled;
   UINTN                   BaseAddress;
   UINTN                   PinCount;
 } MV_GPIO_CONTROLLER_DESC;
@@ -69,6 +69,7 @@ typedef struct {
 typedef struct {
   MARVELL_GPIO_PROTOCOL   GpioProtocol;
   MV_GPIO_CONTROLLER_DESC GpioControllerDesc[MVHW_MAX_GPIO_DEVS];
+  UINT8                   MaxControllerIndex;
   UINTN                   Signature;
   EFI_HANDLE              Handle;
   EFI_LOCK                Lock;

@@ -47,15 +47,14 @@
   OpenPlatformPkg/Platforms/Marvell/Marvell.dec
 
 [LibraryClasses]
+  ArmadaSoCDescLib
   DebugLib
   MemoryAllocationLib
   UefiDriverEntryPoint
   UefiLib
 
-[FixedPcd]
-  gMarvellTokenSpaceGuid.PcdGpioControllers
-
 [Protocols]
+  gMarvellBoardDescProtocolGuid
   gMarvellGpioProtocolGuid
 
 [Depex]

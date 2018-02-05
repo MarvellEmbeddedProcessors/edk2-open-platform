@@ -56,9 +56,6 @@
   #BoardId: Armada-8040-MachiatoBin
   gMarvellTokenSpaceGuid.PcdBoardId|0x2
 
-  # GPIO
-  gMarvellTokenSpaceGuid.PcdGpioControllers|{ 0x1, 0x1, 0x1, 0x1, 0x1 }
-
   #Timer
   gEmbeddedTokenSpaceGuid.PcdTimerPeriod|10000
 

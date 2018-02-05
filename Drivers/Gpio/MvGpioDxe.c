@@ -31,11 +31,8 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *******************************************************************************/
-#include <Library/MvHwDescLib.h>
 
 #include "MvGpioDxe.h"
-
-DECLARE_A7K8K_GPIO_TEMPLATE;
 
 MV_GPIO *mGpioInstance;
 
@@ -69,8 +66,7 @@ MvGpioValidate (
   IN  UINT8 GpioPin
   )
 {
-  if (!mGpioInstance->GpioControllerDesc[ControllerIndex].Enabled ||
-      ControllerIndex >= MVHW_MAX_GPIO_DEVS) {
+  if (ControllerIndex > mGpioInstance->MaxControllerIndex) {
     DEBUG ((DEBUG_ERROR, "Invalid GPIO ControllerIndex: %d\n", ControllerIndex));
     return EFI_INVALID_PARAMETER;
   }
@@ -237,26 +233,15 @@ MvGpioEntryPoint (
   IN EFI_SYSTEM_TABLE *SystemTable
   )
 {
-  MVHW_GPIO_DESC *Desc = &mA7k8kGpioDescTemplate;
-  UINT8 *GpioDeviceTable, Index;
+  MVHW_GPIO_DESC *Desc;
+  UINT8 Index;
   EFI_STATUS Status;
   MV_GPIO_DEVICE_PATH *GpioDevicePath;
+  MARVELL_BOARD_DESC_PROTOCOL *BoardDescProtocol;
 
   GpioDevicePath = AllocateCopyPool (sizeof (MV_GPIO_DEVICE_PATH), &mGpioDevicePathTemplate);
   if (GpioDevicePath == NULL) {
     return EFI_OUT_OF_RESOURCES;
-  }
-
-  /* Obtain table with enabled GPIO devices */
-  GpioDeviceTable = (UINT8 *)PcdGetPtr (PcdGpioControllers);
-  if (GpioDeviceTable == NULL) {
-    DEBUG ((DEBUG_ERROR, "Missing PcdGpioControllers\n"));
-    return EFI_INVALID_PARAMETER;
-  }
-
-  if (PcdGetSize (PcdGpioControllers) > MVHW_MAX_GPIO_DEVS) {
-    DEBUG ((DEBUG_ERROR, "Wrong PcdGpioControllers format\n"));
-    return EFI_INVALID_PARAMETER;
   }
 
   mGpioInstance = AllocateZeroPool (sizeof (MV_GPIO));
@@ -270,18 +255,31 @@ MvGpioEntryPoint (
 
   mGpioInstance->Signature = GPIO_SIGNATURE;
 
-  /* Initialize enabled controllers */
-  for (Index = 0; Index < PcdGetSize (PcdGpioControllers); Index++) {
-    if (!MVHW_DEV_ENABLED (Gpio, Index)) {
-      DEBUG ((DEBUG_ERROR, "Skip Gpio controller %d\n", Index));
-      mGpioInstance->GpioControllerDesc[Index].Enabled = FALSE;
-      continue;
-    }
+  /* Obtain list of available controllers */
+  Status = gBS->LocateProtocol (&gMarvellBoardDescProtocolGuid,
+                  NULL,
+                  (VOID **)&BoardDescProtocol);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR,
+      "%a: Cannot locate BoardDesc protocol\n",
+      __FUNCTION__));
+    return EFI_DEVICE_ERROR;
+  }
 
-    mGpioInstance->GpioControllerDesc[Index].Enabled = TRUE;
+  Status = BoardDescProtocol->BoardDescGpioGet (BoardDescProtocol, &Desc);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR,
+      "%a: Cannot get GPIO board desc from BoardDesc protocol\n",
+      __FUNCTION__));
+    return EFI_DEVICE_ERROR;
+  }
+
+  for (Index = 0; Index < Desc->GpioDevCount; Index++) {
     mGpioInstance->GpioControllerDesc[Index].BaseAddress = Desc->GpioBaseAddresses[Index];
     mGpioInstance->GpioControllerDesc[Index].PinCount = Desc->GpioPinCount[Index];
   }
+
+  mGpioInstance->MaxControllerIndex = Desc->GpioDevCount;
 
   Status = gBS->InstallMultipleProtocolInterfaces (
         &(mGpioInstance->Handle),

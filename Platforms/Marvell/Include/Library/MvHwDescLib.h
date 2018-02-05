@@ -60,17 +60,6 @@ typedef struct {
 } MVHW_COMPHY_DESC;
 
 //
-// GPIO devices description template definition
-//
-#define MVHW_MAX_GPIO_DEVS       5
-
-typedef struct {
-  UINT8 GpioDevCount;
-  UINTN GpioBaseAddresses[MVHW_MAX_GPIO_DEVS];
-  UINTN GpioPinCount[MVHW_MAX_GPIO_DEVS];
-} MVHW_GPIO_DESC;
-
-//
 // I2C devices description template definition
 //
 #define MVHW_MAX_I2C_DEVS         4
@@ -171,31 +160,6 @@ MVHW_COMPHY_DESC mA7k8kComPhyDescTemplate = {\
   { MVHW_CP0_COMPHY_LANES, MVHW_CP1_COMPHY_LANES },\
   { MVHW_CP0_COMPHY_MUX_BITS, MVHW_CP1_COMPHY_MUX_BITS },\
   { MvComPhyTypeCp110, MvComPhyTypeCp110 }\
-}
-
-//
-// Platform description of GPIO
-//
-#define MVHW_AP_GPIO0_BASE             0xF06F5040
-#define MVHW_AP_GPIO0_PIN_COUNT        20
-#define MVHW_CP0_GPIO0_BASE            0xF2440100
-#define MVHW_CP0_GPIO0_PIN_COUNT       32
-#define MVHW_CP0_GPIO1_BASE            0xF2440140
-#define MVHW_CP0_GPIO1_PIN_COUNT       31
-#define MVHW_CP1_GPIO0_BASE            0xF4440100
-#define MVHW_CP1_GPIO0_PIN_COUNT       32
-#define MVHW_CP1_GPIO1_BASE            0xF4440140
-#define MVHW_CP1_GPIO1_PIN_COUNT       31
-
-#define DECLARE_A7K8K_GPIO_TEMPLATE \
-STATIC \
-MVHW_GPIO_DESC mA7k8kGpioDescTemplate = {\
-  5,\
-  { MVHW_AP_GPIO0_BASE, MVHW_CP0_GPIO0_BASE, MVHW_CP0_GPIO1_BASE, \
-    MVHW_CP1_GPIO0_BASE, MVHW_CP1_GPIO1_BASE},\
-  { MVHW_AP_GPIO0_PIN_COUNT, MVHW_CP0_GPIO0_PIN_COUNT, \
-    MVHW_CP0_GPIO1_PIN_COUNT, MVHW_CP1_GPIO0_PIN_COUNT, \
-    MVHW_CP1_GPIO1_PIN_COUNT},\
 }
 
 //

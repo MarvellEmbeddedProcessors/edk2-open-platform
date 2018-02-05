@@ -125,9 +125,6 @@
   gMarvellTokenSpaceGuid.PcdChip3MppSel6|{ 0x0 }|VOID*|0x30000044
   gMarvellTokenSpaceGuid.PcdChip3MppSel7|{ 0x0 }|VOID*|0x30000045
 
-#GPIO
-  gMarvellTokenSpaceGuid.PcdGpioControllers|{ 0x0 }|VOID*|0x30000046
-
 #I2C
   gMarvellTokenSpaceGuid.PcdI2cSlaveAddresses|{ 0x0 }|VOID*|0x3000046
   gMarvellTokenSpaceGuid.PcdI2cSlaveBuses|{ 0x0 }|VOID*|0x3000184
