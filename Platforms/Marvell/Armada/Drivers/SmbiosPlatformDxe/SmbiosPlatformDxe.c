@@ -21,6 +21,7 @@
 #include <Library/IoLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/MvBoardDescLib.h>
+#include <Library/MvSARLib.h>
 #include <Library/PcdLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -190,8 +191,8 @@ STATIC SMBIOS_TABLE_TYPE4 mArmadaDefaultType4 = {
   3,             //version
   {0,0,0,0,0,1}, //voltage
   0,             //external clock
-  1600,          //max speed
-  1200,          //current speed
+  2000,          //max speed
+  0,             //current speed - requires update
   0x41,          //status
   ProcessorUpgradeOther,
   SMBIOS_HANDLE_A72_L1I, //l1 cache handle
@@ -440,7 +441,7 @@ STATIC SMBIOS_TABLE_TYPE17 mArmadaDefaultType17 = {
   2,                               //Bank 0
   MemoryTypeDdr4,                  //DDR4
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,1}, //unbuffered
-  1600,                            //1600Mhz DDR
+  0,                               //DRAM speed - requires update
   0, //varies between diffrent production runs
   0, //serial
   0, //asset tag
@@ -691,7 +692,6 @@ Armada7040DbSmbiosFixup (
   mArmadaDefaultType3Strings[1] = "Rev 1.4\0";
 
   // TYPE4
-  mArmadaDefaultType4.CurrentSpeed = 1200;
   mArmadaDefaultType4Strings[0] = "HFCBGA 17x17 0.65mm pitch\0";
 
   // TYPE9 - PCIE2 CP0 information
@@ -719,7 +719,6 @@ Armada8040DbSmbiosFixup (
   mArmadaDefaultType3Strings[1] = "Rev 1.4\0";
 
   // TYPE4
-  mArmadaDefaultType4.CurrentSpeed = 1300;
   mArmadaDefaultType4Strings[0] = "HFCBGA 24x24 0.8mm pitch\0";
 
   // TYPE9
@@ -748,7 +747,6 @@ Armada8040McBinSmbiosFixup (
   mArmadaDefaultType3Strings[1] = "Rev 1.2\0";
 
   // TYPE4
-  mArmadaDefaultType4.CurrentSpeed = 1300;
   mArmadaDefaultType4Strings[0] = "HFCBGA 24x24 0.8mm pitch\0";
 
   // TYPE9 - PCIE0 CP0 information
@@ -816,6 +814,8 @@ InstallAllStructures (
   // Fixup some table values
   mArmadaDefaultType0.SystemBiosMajorRelease = (PcdGet32 (PcdFirmwareRevision) >> 16) & 0xFF;
   mArmadaDefaultType0.SystemBiosMinorRelease = PcdGet32 (PcdFirmwareRevision) & 0xFF;
+  mArmadaDefaultType4.CurrentSpeed = MvSARGetCpuFreq();
+  mArmadaDefaultType17.Speed = MvSARGetDramFreq();
 
   MVBOARD_ID_GET (BoardId);
 

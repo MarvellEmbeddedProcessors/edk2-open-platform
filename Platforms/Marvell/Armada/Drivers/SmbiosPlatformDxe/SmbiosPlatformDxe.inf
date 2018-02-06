@@ -40,6 +40,7 @@
   HobLib
   IoLib
   MemoryAllocationLib
+  MvSARLib
   PcdLib
   UefiBootServicesTableLib
   UefiDriverEntryPoint
