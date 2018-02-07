@@ -49,6 +49,7 @@
   ArmLib
   DebugLib
   MemoryAllocationLib
+  MvSARLib
   PcdLib
   IoLib
 
