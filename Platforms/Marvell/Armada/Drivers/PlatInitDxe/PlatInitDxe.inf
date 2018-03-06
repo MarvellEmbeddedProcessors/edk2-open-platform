@@ -33,6 +33,7 @@
   UtmiPhyLib
   ComPhyLib
   DebugLib
+  IoLib
   MppLib
   PcdLib
   UefiDriverEntryPoint

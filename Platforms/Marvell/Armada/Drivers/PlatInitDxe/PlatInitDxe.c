@@ -12,6 +12,7 @@
 **/
 
 #include <Library/DebugLib.h>
+#include <Library/IoLib.h>
 #include <Library/MppLib.h>
 #include <Library/MvBoardDescLib.h>
 #include <Library/MvComPhyLib.h>
@@ -19,6 +20,9 @@
 #include <Library/UefiDriverEntryPoint.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UtmiPhyLib.h>
+
+#define SOC_CONFIG_AMB_REG(Cp)          (0xf2000000 + 0x2000000 * (Cp) + 0x441910)
+#define SOC_CONFIG_FORCE_CBE_ATTR_MASK  0x1
 
 STATIC
 EFI_STATUS
@@ -32,12 +36,18 @@ ArmadaPlatInitBoardSelect (
   switch (BoardId) {
   case MVBOARD_ID_ARMADA7040_DB:
     DEBUG ((DEBUG_ERROR, "\nArmada 7040 DB Platform Init\n\n"));
+    /* Ensure proper access to memory mapped SPI */
+    MmioAnd32 (SOC_CONFIG_AMB_REG (0), ~SOC_CONFIG_FORCE_CBE_ATTR_MASK);
     return EFI_SUCCESS;
   case MVBOARD_ID_ARMADA8040_DB:
     DEBUG ((DEBUG_ERROR, "\nArmada 8040 DB Platform Init\n\n"));
+    /* Ensure proper access to memory mapped SPI */
+    MmioAnd32 (SOC_CONFIG_AMB_REG (1), ~SOC_CONFIG_FORCE_CBE_ATTR_MASK);
     return EFI_SUCCESS;
   case MVBOARD_ID_ARMADA8040_MCBIN:
     DEBUG ((DEBUG_ERROR, "\nArmada 8040 MachiatoBin Platform Init\n\n"));
+    /* Ensure proper access to memory mapped SPI */
+    MmioAnd32 (SOC_CONFIG_AMB_REG (1), ~SOC_CONFIG_FORCE_CBE_ATTR_MASK);
     return EFI_SUCCESS;
   default:
     DEBUG ((DEBUG_ERROR, "\nInvalid Board Id 0x%x\n", BoardId));
