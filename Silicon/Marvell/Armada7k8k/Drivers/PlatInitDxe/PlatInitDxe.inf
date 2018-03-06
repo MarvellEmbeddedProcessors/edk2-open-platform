@@ -33,6 +33,7 @@
   ArmadaIcuLib
   ComPhyLib
   DebugLib
+  IoLib
   MppLib
   PcdLib
   TimerLib
