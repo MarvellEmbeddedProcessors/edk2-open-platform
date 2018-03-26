@@ -71,8 +71,9 @@
   PciEmulationInitLib|Include/Library/PciEmulationInitLib.h
 
 [PcdsFixedAtBuild.common]
-#BoardId
+#Board description
   gMarvellTokenSpaceGuid.PcdBoardId|0xFF|UINT8|0x30000071
+  gMarvellTokenSpaceGuid.PcdMaxCpCount|0x2|UINT8|0x30000072
 
 #MPP
   gMarvellTokenSpaceGuid.PcdMppChipCount|0|UINT32|0x30000001

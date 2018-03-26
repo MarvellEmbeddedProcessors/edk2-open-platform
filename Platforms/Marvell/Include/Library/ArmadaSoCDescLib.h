@@ -30,4 +30,20 @@ ArmadaSoCDescGpioGet (
   IN OUT MVHW_GPIO_DESC **GpioDesc
   );
 
+//
+// UTMI PHY devices SoC description
+//
+typedef struct {
+  UINT8 UtmiPhyId;
+  UINTN UtmiBaseAddress;
+  UINTN UtmiConfigAddress;
+  UINTN UsbConfigAddress;
+} MV_SOC_UTMI_DESC;
+
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescUtmiGet (
+  IN OUT MV_SOC_UTMI_DESC  **UtmiDesc,
+  IN OUT UINT8              *DescCount
+  );
 #endif /* __ARMADA_SOC_DESC_LIB_H__ */
