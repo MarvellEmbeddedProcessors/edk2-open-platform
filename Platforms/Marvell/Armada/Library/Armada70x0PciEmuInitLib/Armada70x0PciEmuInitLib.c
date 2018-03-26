@@ -76,7 +76,7 @@ Armada70x0InitXhciVbus (
                   ProtHandle,
                   &gMarvellGpioProtocolGuid,
                   gImageHandle,
-                  ProtHandle
+                  NULL
                   );
   return Status;
 }
@@ -138,7 +138,7 @@ Armada80x0InitXhciVbus (
                   ProtHandle,
                   &gMarvellGpioProtocolGuid,
                   gImageHandle,
-                  ProtHandle
+                  NULL
                   );
   return Status;
 }
@@ -185,7 +185,7 @@ Armada8040McBinInitXhciVbus (
                   ProtHandle,
                   &gMarvellGpioProtocolGuid,
                   gImageHandle,
-                  ProtHandle
+                  NULL
                   );
   return Status;
 }
