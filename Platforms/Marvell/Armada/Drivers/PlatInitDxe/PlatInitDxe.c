@@ -21,6 +21,8 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UtmiPhyLib.h>
 
+#include <Protocol/BoardDesc.h>
+
 #define SOC_CONFIG_AMB_REG(Cp)          (0xf2000000 + 0x2000000 * (Cp) + 0x441910)
 #define SOC_CONFIG_FORCE_CBE_ATTR_MASK  0x1
 
@@ -62,6 +64,8 @@ ArmadaPlatInitDxeEntryPoint (
   IN EFI_SYSTEM_TABLE   *SystemTable
   )
 {
+  MARVELL_BOARD_DESC_PROTOCOL *BoardDescProtocol;
+  MV_BOARD_UTMI_DESC *UtmiBoardDesc;
   EFI_STATUS    Status;
 
   Status = ArmadaPlatInitBoardSelect ();
@@ -73,8 +77,19 @@ ArmadaPlatInitDxeEntryPoint (
                   NULL);
   ASSERT_EFI_ERROR (Status);
 
+  /* Obtain list of available controllers */
+  Status = gBS->LocateProtocol (&gMarvellBoardDescProtocolGuid,
+                  NULL,
+                  (VOID **)&BoardDescProtocol);
+  ASSERT_EFI_ERROR (Status);
+
   MvComPhyInit ();
-  UtmiPhyInit ();
+
+  Status = BoardDescProtocol->BoardDescUtmiGet (BoardDescProtocol,
+                                &UtmiBoardDesc);
+  ASSERT_EFI_ERROR (Status);
+  UtmiPhyInit (UtmiBoardDesc);
+
   MppInitialize ();
 
   return EFI_SUCCESS;

@@ -43,6 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/IoLib.h>
 #include <Library/TimerLib.h>
 
+#include <Protocol/BoardDesc.h>
+
 #define UTMI_USB_CFG_DEVICE_EN_OFFSET             0
 #define UTMI_USB_CFG_DEVICE_EN_MASK               (0x1 << UTMI_USB_CFG_DEVICE_EN_OFFSET)
 #define UTMI_USB_CFG_DEVICE_MUX_OFFSET            1

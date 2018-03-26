@@ -35,9 +35,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __UTMIPHYLIB_H__
 #define __UTMIPHYLIB_H__
 
+#include <Library/ArmadaBoardDescLib.h>
+
 EFI_STATUS
 UtmiPhyInit (
-  VOID
+  IN MV_BOARD_UTMI_DESC *BoardDesc
   );
 
 #endif

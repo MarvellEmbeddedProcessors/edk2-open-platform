@@ -398,10 +398,10 @@
   ArmPkg/Drivers/GenericWatchdogDxe/GenericWatchdogDxe.inf
 
   # Platform Initialization
+  OpenPlatformPkg/Drivers/BoardDesc/MvBoardDescDxe.inf
   OpenPlatformPkg/Platforms/Marvell/Armada/Drivers/PlatInitDxe/PlatInitDxe.inf
 
   # Platform drivers
-  OpenPlatformPkg/Drivers/BoardDesc/MvBoardDescDxe.inf
   OpenPlatformPkg/Drivers/I2c/MvI2cDxe/MvI2cDxe.inf
   MdeModulePkg/Bus/I2c/I2cDxe/I2cDxe.inf
   OpenPlatformPkg/Drivers/I2c/Devices/MvEeprom/MvEeprom.inf

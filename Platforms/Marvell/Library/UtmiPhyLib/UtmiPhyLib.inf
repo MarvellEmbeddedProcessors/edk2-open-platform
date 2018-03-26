@@ -51,11 +51,7 @@
   IoLib
   MemoryAllocationLib
   PcdLib
+  UefiLib
 
 [Sources.common]
   UtmiPhyLib.c
-
-[Pcd]
-  gMarvellTokenSpaceGuid.PcdUtmiControllers
-  gMarvellTokenSpaceGuid.PcdUtmiPortType
-  gMarvellTokenSpaceGuid.PcdPciEXhci
