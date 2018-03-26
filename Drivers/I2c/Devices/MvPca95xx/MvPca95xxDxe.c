@@ -423,7 +423,7 @@ MvPca95xxGetFunction (
   )
 {
   EFI_STATUS Status;
-  UINT8 Val;
+  UINT8 Val = 0;
 
   if (ControllerIndex >= PcdGetSize (PcdIoExpanderId)) {
     DEBUG ((DEBUG_ERROR, "Wrong Control ID\n"));
