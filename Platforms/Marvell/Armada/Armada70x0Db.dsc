@@ -145,7 +145,7 @@
   gMarvellTokenSpaceGuid.PcdPciESdhci|{ 0x1, 0x1 }
 
   #RTC
-  gMarvellTokenSpaceGuid.PcdRtcEnabled|{ 0x1 }
+  gMarvellTokenSpaceGuid.PcdRtcBaseAddress|0xF2284000
 
   #SdMmc
   gMarvellTokenSpaceGuid.PcdXenon1v8Enable|{ 0x0, 0x0 }

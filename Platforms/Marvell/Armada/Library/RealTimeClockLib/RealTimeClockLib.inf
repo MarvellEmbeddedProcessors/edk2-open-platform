@@ -50,4 +50,4 @@
   gEfiEventVirtualAddressChangeGuid
 
 [Pcd]
-  gMarvellTokenSpaceGuid.PcdRtcEnabled
+  gMarvellTokenSpaceGuid.PcdRtcBaseAddress
