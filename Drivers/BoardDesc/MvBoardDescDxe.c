@@ -51,11 +51,96 @@ MvBoardDescGpioGet (
 
 STATIC
 EFI_STATUS
+MvBoardDescUtmiGet (
+  IN MARVELL_BOARD_DESC_PROTOCOL  *This,
+  IN OUT MV_BOARD_UTMI_DESC      **UtmiDesc
+  )
+{
+  UINT8 *UtmiDeviceTable, *XhciDeviceTable, *UtmiPortType, UtmiCount;
+  UINTN UtmiDeviceTableSize, UtmiIndex, Index;
+  MV_BOARD_UTMI_DESC *BoardDesc;
+  MV_SOC_UTMI_DESC *SoCDesc;
+  EFI_STATUS Status;
+
+  /* Get SoC data about all available UTMI controllers */
+  Status = ArmadaSoCDescUtmiGet (&SoCDesc, &UtmiCount);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  /* Obtain table with enabled Utmi PHY's */
+  UtmiDeviceTable = (UINT8 *)PcdGetPtr (PcdUtmiControllers);
+  if (UtmiDeviceTable == NULL) {
+    /* No UTMI PHY on platform */
+    return EFI_SUCCESS;
+  }
+
+  /* Make sure XHCI controllers table is present */
+  XhciDeviceTable = (UINT8 *)PcdGetPtr (PcdPciEXhci);
+  if (XhciDeviceTable == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Missing PcdPciEXhci\n", __FUNCTION__));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  UtmiDeviceTableSize = PcdGetSize (PcdUtmiControllers);
+
+  /* Check if PCD with UTMI PHYs is correctly defined */
+  if (UtmiDeviceTableSize > UtmiCount ||
+      UtmiDeviceTableSize > PcdGetSize (PcdPciEXhci)) {
+    DEBUG ((DEBUG_ERROR, "%a: Wrong PcdUtmiControllers format\n", __FUNCTION__));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  /* Obtain port type table */
+  UtmiPortType = (UINT8 *)PcdGetPtr (PcdUtmiPortType);
+  if (UtmiPortType == NULL ||
+      PcdGetSize (PcdUtmiPortType) != UtmiDeviceTableSize) {
+    DEBUG ((DEBUG_ERROR, "%a: Wrong PcdUtmiPortType format\n", __FUNCTION__));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  /* Allocate and fill board description */
+  BoardDesc = AllocateZeroPool (UtmiDeviceTableSize * sizeof (MV_BOARD_UTMI_DESC));
+  if (BoardDesc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  UtmiIndex = 0;
+  for (Index = 0; Index < UtmiDeviceTableSize; Index++) {
+    if (!MVHW_DEV_ENABLED (Utmi, Index)) {
+      continue;
+    }
+
+    /* UTMI PHY without enabled XHCI controller is useless */
+    if (!MVHW_DEV_ENABLED (Xhci, Index)) {
+      DEBUG ((DEBUG_ERROR,
+             "%a: Disabled Xhci controller %d\n",
+             Index,
+             __FUNCTION__));
+      return EFI_INVALID_PARAMETER;
+    }
+
+    BoardDesc[UtmiIndex].SoC = &SoCDesc[Index];
+    BoardDesc[UtmiIndex].UtmiPortType = UtmiPortType[Index];
+    UtmiIndex++;
+  }
+
+  BoardDesc->UtmiDevCount = UtmiIndex;
+
+  *UtmiDesc = BoardDesc;
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
 MvBoardDescInitProtocol (
   IN MARVELL_BOARD_DESC_PROTOCOL *BoardDescProtocol
   )
 {
   BoardDescProtocol->BoardDescGpioGet = MvBoardDescGpioGet;
+  BoardDescProtocol->BoardDescUtmiGet = MvBoardDescUtmiGet;
 
   return EFI_SUCCESS;
 }

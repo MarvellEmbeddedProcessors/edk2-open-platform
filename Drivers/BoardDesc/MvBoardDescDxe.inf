@@ -56,5 +56,10 @@
 [Protocols]
   gMarvellBoardDescProtocolGuid
 
+[Pcd]
+  gMarvellTokenSpaceGuid.PcdUtmiControllers
+  gMarvellTokenSpaceGuid.PcdUtmiPortType
+  gMarvellTokenSpaceGuid.PcdPciEXhci
+
 [Depex]
   TRUE

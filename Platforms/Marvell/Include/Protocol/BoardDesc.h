@@ -35,6 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __MARVELL_BOARD_DESC_PROTOCOL_H__
 
 #include <Library/ArmadaSoCDescLib.h>
+#include <Library/ArmadaBoardDescLib.h>
 
 extern EFI_GUID gMarvellBoardDescProtocolGuid;
 
@@ -47,8 +48,16 @@ EFI_STATUS
   IN OUT MVHW_GPIO_DESC          **GpioDesc
   );
 
+typedef
+EFI_STATUS
+(EFIAPI *MV_BOARD_DESC_UTMI_GET) (
+  IN MARVELL_BOARD_DESC_PROTOCOL  *This,
+  IN OUT MV_BOARD_UTMI_DESC      **UtmiDesc
+  );
+
 struct _MARVELL_BOARD_DESC_PROTOCOL {
   MV_BOARD_DESC_GPIO_GET         BoardDescGpioGet;
+  MV_BOARD_DESC_UTMI_GET         BoardDescUtmiGet;
 };
 
 #endif // __MARVELL_BOARD_DESC_PROTOCOL_H__
