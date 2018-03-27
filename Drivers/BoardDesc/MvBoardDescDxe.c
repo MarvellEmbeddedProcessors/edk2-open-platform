@@ -51,6 +51,65 @@ MvBoardDescGpioGet (
 
 STATIC
 EFI_STATUS
+MvBoardDescPp2Get (
+  IN MARVELL_BOARD_DESC_PROTOCOL  *This,
+  IN OUT MV_BOARD_PP2_DESC       **Pp2Desc
+  )
+{
+  UINT8 *Pp2DeviceTable, Pp2Count;
+  UINTN Pp2DeviceTableSize, Pp2Index, Index;
+  MV_BOARD_PP2_DESC *BoardDesc;
+  MV_SOC_PP2_DESC *SoCDesc;
+  EFI_STATUS Status;
+
+  /* Get SoC data about all available PP2 controllers */
+  Status = ArmadaSoCDescPp2Get (&SoCDesc, &Pp2Count);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  /* Obtain table with enabled PP2 NICs */
+  Pp2DeviceTable = (UINT8 *)PcdGetPtr (PcdPp2Controllers);
+  if (Pp2DeviceTable == NULL) {
+    /* No PP2 NIC on platform */
+    return EFI_SUCCESS;
+  }
+
+  Pp2DeviceTableSize = PcdGetSize (PcdPp2Controllers);
+
+  /* Check if PCD with PP2 NICs is correctly defined */
+  if (Pp2DeviceTableSize > Pp2Count) {
+    DEBUG ((DEBUG_ERROR, "%a: Wrong PcdPp2Controllers format\n", __FUNCTION__));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  /* Allocate and fill board description */
+  BoardDesc = AllocateZeroPool (Pp2DeviceTableSize * sizeof (MV_BOARD_PP2_DESC));
+  if (BoardDesc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Pp2Index = 0;
+  for (Index = 0; Index < Pp2DeviceTableSize; Index++) {
+    if (!MVHW_DEV_ENABLED (Pp2, Index)) {
+      DEBUG ((DEBUG_ERROR, "%a: Skip Pp2 controller %d\n", __FUNCTION__, Index));
+      continue;
+    }
+
+    BoardDesc[Pp2Index].SoC = &SoCDesc[Index];
+    Pp2Index++;
+  }
+
+  BoardDesc->Pp2DevCount = Pp2Index;
+
+  *Pp2Desc = BoardDesc;
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
 MvBoardDescUtmiGet (
   IN MARVELL_BOARD_DESC_PROTOCOL  *This,
   IN OUT MV_BOARD_UTMI_DESC      **UtmiDesc
@@ -140,6 +199,7 @@ MvBoardDescInitProtocol (
   )
 {
   BoardDescProtocol->BoardDescGpioGet = MvBoardDescGpioGet;
+  BoardDescProtocol->BoardDescPp2Get = MvBoardDescPp2Get;
   BoardDescProtocol->BoardDescUtmiGet = MvBoardDescUtmiGet;
 
   return EFI_SUCCESS;
