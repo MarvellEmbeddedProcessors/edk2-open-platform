@@ -51,15 +51,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define MHz                             1000000
 
-#define CP0_PCIE0_CLK_MASK      0x4
-#define CP0_PCIE1_CLK_MASK      0x8
-#define CP1_PCIE0_CLK_MASK      0x1
-#define CP1_PCIE1_CLK_MASK      0x2
-#define CP0_PCIE0_CLK_OFFSET      2
-#define CP0_PCIE1_CLK_OFFSET      3
-#define CP1_PCIE0_CLK_OFFSET      0
-#define CP1_PCIE1_CLK_OFFSET      1
-
 typedef enum {
   CPU_2000_DDR_1200_RCLK_1200 = 0x0,
   CPU_2000_DDR_1050_RCLK_1050 = 0x1,
@@ -93,16 +84,6 @@ static const UINT32 PllFreqTbl[SAR_MAX_OPTIONS][4] = {
   {600  * MHz, 800  * MHz, 800  * MHz, CPU_600_DDR_800_RCLK_800},
   {800  * MHz, 800  * MHz, 800  * MHz, CPU_800_DDR_800_RCLK_800},
   {1000 * MHz, 800  * MHz, 800  * MHz, CPU_1000_DDR_800_RCLK_800}
-};
-
-static const UINT32 PcieClkMask[2][2] = {
-  {CP0_PCIE0_CLK_MASK, CP0_PCIE1_CLK_MASK},
-  {CP1_PCIE0_CLK_MASK, CP1_PCIE1_CLK_MASK}
-};
-
-static const UINT32 PcieClkOffset[2][2] = {
-  {CP0_PCIE0_CLK_OFFSET, CP0_PCIE1_CLK_OFFSET},
-  {CP1_PCIE0_CLK_OFFSET, CP1_PCIE1_CLK_OFFSET}
 };
 
 UINT32
@@ -145,20 +126,4 @@ MvSARGetDramFreq (
   }
 
   return PllFreqTbl[Index][DDR_CLOCK_ID] / MHz;
-}
-
-UINT32
-EFIAPI
-MvSARGetPcieClkDirection (
-  IN UINT32      CpIndex,
-  IN UINT32      PcieIndex
-  )
-{
-  UINT32  ClkDir;
-
-  ClkDir = MmioAnd32 (MV_CP_SAR_BASE(CpIndex),
-                      PcieClkMask[CpIndex][PcieIndex] >>
-                      PcieClkOffset[CpIndex][PcieIndex]);
-
-  return ClkDir;
 }

@@ -47,11 +47,4 @@ MvSARGetDramFreq (
   VOID
   );
 
-UINT32
-EFIAPI
-MvSARGetPcieClkDirection (
-  IN UINT32        CpIndex,
-  IN UINT32        PcieIndex
-  );
-
 #endif /* __MV_SAR_LIB_H__ */
