@@ -73,6 +73,40 @@ ArmadaSoCDescGpioGet (
 }
 
 //
+// Platform description of PP2 NIC
+//
+#define MV_SOC_PP2_BASE(Cp)             MV_SOC_CP_BASE ((Cp))
+#define MV_SOC_PP2_CLK_FREQ             333333333
+
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescPp2Get (
+  IN OUT MV_SOC_PP2_DESC  **Pp2Desc,
+  IN OUT UINT8             *DescCount
+  )
+{
+  MV_SOC_PP2_DESC *Desc;
+  UINT8 CpCount = FixedPcdGet8 (PcdMaxCpCount);
+  UINT8 CpIndex;
+
+  Desc = AllocateZeroPool (CpCount * sizeof (MV_SOC_PP2_DESC));
+  if (Desc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  for (CpIndex = 0; CpIndex < CpCount; CpIndex++) {
+    Desc[CpIndex].Pp2BaseAddress = MV_SOC_PP2_BASE (CpIndex);
+    Desc[CpIndex].Pp2ClockFrequency = MV_SOC_PP2_CLK_FREQ;
+  }
+
+  *Pp2Desc = Desc;
+  *DescCount = CpCount;
+
+  return EFI_SUCCESS;
+}
+
+//
 // Platform description of UTMI PHY's
 //
 #define MV_SOC_UTMI_PER_CP_COUNT         2
