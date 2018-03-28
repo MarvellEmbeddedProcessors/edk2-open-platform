@@ -51,7 +51,10 @@
   IoLib
   MemoryAllocationLib
   PcdLib
-  UefiLib
+  UefiBootServicesTableLib
+
+[Protocols]
+  gMarvellBoardDescProtocolGuid  ## CONSUMES
 
 [Sources.common]
   UtmiPhyLib.c

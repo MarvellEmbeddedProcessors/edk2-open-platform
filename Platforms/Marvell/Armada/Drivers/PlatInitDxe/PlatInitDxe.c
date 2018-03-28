@@ -64,8 +64,6 @@ ArmadaPlatInitDxeEntryPoint (
   IN EFI_SYSTEM_TABLE   *SystemTable
   )
 {
-  MARVELL_BOARD_DESC_PROTOCOL *BoardDescProtocol;
-  MV_BOARD_UTMI_DESC *UtmiBoardDesc;
   EFI_STATUS    Status;
 
   Status = ArmadaPlatInitBoardSelect ();
@@ -77,19 +75,8 @@ ArmadaPlatInitDxeEntryPoint (
                   NULL);
   ASSERT_EFI_ERROR (Status);
 
-  /* Obtain list of available controllers */
-  Status = gBS->LocateProtocol (&gMarvellBoardDescProtocolGuid,
-                  NULL,
-                  (VOID **)&BoardDescProtocol);
-  ASSERT_EFI_ERROR (Status);
-
   MvComPhyInit ();
-
-  Status = BoardDescProtocol->BoardDescUtmiGet (BoardDescProtocol,
-                                &UtmiBoardDesc);
-  ASSERT_EFI_ERROR (Status);
-  UtmiPhyInit (UtmiBoardDesc);
-
+  UtmiPhyInit ();
   MppInitialize ();
 
   return EFI_SUCCESS;

@@ -35,6 +35,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __UTMIPHY_H__
 #define __UTMIPHY_H__
 
+#include <Uefi.h>
+
 #include <Library/ArmLib.h>
 #include <Library/ArmPlatformLib.h>
 #include <Library/DebugLib.h>
@@ -42,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/IoLib.h>
 #include <Library/TimerLib.h>
+#include <Library/UefiBootServicesTableLib.h>
 
 #include <Protocol/BoardDesc.h>
 

@@ -287,11 +287,20 @@ Cp110UtmiPhyInit (
 
 EFI_STATUS
 UtmiPhyInit (
-  IN MV_BOARD_UTMI_DESC *BoardDesc
+  VOID
   )
 {
+  MARVELL_BOARD_DESC_PROTOCOL *BoardDescProtocol;
+  MV_BOARD_UTMI_DESC *BoardDesc;
   UTMI_PHY_DATA UtmiData;
   UINTN Index;
+
+  /* Obtain board description */
+  gBS->LocateProtocol (&gMarvellBoardDescProtocolGuid,
+                  NULL,
+                  (VOID **)&BoardDescProtocol);
+  BoardDescProtocol->BoardDescUtmiGet (BoardDescProtocol,
+                                &BoardDesc);
 
   /* Initialize enabled chips */
   for (Index = 0; Index < BoardDesc->UtmiDevCount; Index++) {
@@ -313,6 +322,8 @@ UtmiPhyInit (
     /* Currently only Cp110 is supported */
     Cp110UtmiPhyInit (&UtmiData);
   }
+
+  FreePool (BoardDesc);
 
   return EFI_SUCCESS;
 }
