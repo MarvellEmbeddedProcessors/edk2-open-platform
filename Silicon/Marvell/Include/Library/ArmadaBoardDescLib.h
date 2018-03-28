@@ -17,6 +17,17 @@
 #include <Library/ArmadaSoCDescLib.h>
 
 //
+// COMPHY NIC devices per-board description
+//
+// TODO - Extend structure with entire
+// ports description instead of PCDs.
+//
+typedef struct {
+  MV_SOC_COMPHY_DESC *SoC;
+  UINT8               ComPhyDevCount;
+} MV_BOARD_COMPHY_DESC;
+
+//
 // NonDiscoverableDevices per-board description
 //
 
