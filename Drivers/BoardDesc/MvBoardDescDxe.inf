@@ -60,6 +60,8 @@
   gMarvellTokenSpaceGuid.PcdPp2Controllers
   gMarvellTokenSpaceGuid.PcdUtmiControllers
   gMarvellTokenSpaceGuid.PcdUtmiPortType
+  gMarvellTokenSpaceGuid.PcdPciEAhci
+  gMarvellTokenSpaceGuid.PcdPciESdhci
   gMarvellTokenSpaceGuid.PcdPciEXhci
 
 [Depex]

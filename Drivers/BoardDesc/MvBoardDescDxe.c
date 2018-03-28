@@ -51,6 +51,183 @@ MvBoardDescGpioGet (
 
 STATIC
 EFI_STATUS
+MvBoardDescAhciGet (
+  IN MARVELL_BOARD_DESC_PROTOCOL  *This,
+  IN OUT MV_BOARD_AHCI_DESC      **AhciDesc
+  )
+{
+  UINT8 *AhciDeviceTable, AhciCount;
+  UINTN AhciDeviceTableSize, AhciIndex, Index;
+  MV_BOARD_AHCI_DESC *BoardDesc;
+  MV_SOC_AHCI_DESC *SoCDesc;
+  EFI_STATUS Status;
+
+  /* Get SoC data about all available AHCI controllers */
+  Status = ArmadaSoCDescAhciGet (&SoCDesc, &AhciCount);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  /* Obtain table with enabled AHCI controllers */
+  AhciDeviceTable = (UINT8 *)PcdGetPtr (PcdPciEAhci);
+  if (AhciDeviceTable == NULL) {
+    /* No AHCI on platform */
+    return EFI_SUCCESS;
+  }
+
+  AhciDeviceTableSize = PcdGetSize (PcdPciEAhci);
+
+  /* Check if PCD with AHCI controllers is correctly defined */
+  if (AhciDeviceTableSize > AhciCount) {
+    DEBUG ((DEBUG_ERROR, "%a: Wrong PcdPciEAhci format\n", __FUNCTION__));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  /* Allocate and fill board description */
+  BoardDesc = AllocateZeroPool (AhciDeviceTableSize * sizeof (MV_BOARD_AHCI_DESC));
+  if (BoardDesc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  AhciIndex = 0;
+  for (Index = 0; Index < AhciDeviceTableSize; Index++) {
+    if (!MVHW_DEV_ENABLED (Ahci, Index)) {
+      DEBUG ((DEBUG_INFO, "%a: Skip Ahci controller %d\n", __FUNCTION__, Index));
+      continue;
+    }
+
+    BoardDesc[AhciIndex].SoC = &SoCDesc[Index];
+    AhciIndex++;
+  }
+
+  BoardDesc->AhciDevCount = AhciIndex;
+
+  *AhciDesc = BoardDesc;
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+MvBoardDescSdMmcGet (
+  IN MARVELL_BOARD_DESC_PROTOCOL  *This,
+  IN OUT MV_BOARD_SDMMC_DESC     **SdMmcDesc
+  )
+{
+  UINT8 *SdMmcDeviceTable, SdMmcCount;
+  UINTN SdMmcDeviceTableSize, SdMmcIndex, Index;
+  MV_BOARD_SDMMC_DESC *BoardDesc;
+  MV_SOC_SDMMC_DESC *SoCDesc;
+  EFI_STATUS Status;
+
+  /* Get SoC data about all available SDMMC controllers */
+  Status = ArmadaSoCDescSdMmcGet (&SoCDesc, &SdMmcCount);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  /* Obtain table with enabled SDMMC controllers */
+  SdMmcDeviceTable = (UINT8 *)PcdGetPtr (PcdPciESdhci);
+  if (SdMmcDeviceTable == NULL) {
+    /* No SDMMC on platform */
+    return EFI_SUCCESS;
+  }
+
+  SdMmcDeviceTableSize = PcdGetSize (PcdPciESdhci);
+
+  /* Check if PCD with SDMMC controllers is correctly defined */
+  if (SdMmcDeviceTableSize > SdMmcCount) {
+    DEBUG ((DEBUG_ERROR, "%a: Wrong PcdPciESdhci format\n", __FUNCTION__));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  /* Allocate and fill board description */
+  BoardDesc = AllocateZeroPool (SdMmcDeviceTableSize * sizeof (MV_BOARD_SDMMC_DESC));
+  if (BoardDesc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  SdMmcIndex = 0;
+  for (Index = 0; Index < SdMmcDeviceTableSize; Index++) {
+    if (!MVHW_DEV_ENABLED (SdMmc, Index)) {
+      DEBUG ((DEBUG_INFO, "%a: Skip SdMmc controller %d\n", __FUNCTION__, Index));
+      continue;
+    }
+
+    BoardDesc[SdMmcIndex].SoC = &SoCDesc[Index];
+    SdMmcIndex++;
+  }
+
+  BoardDesc->SdMmcDevCount = SdMmcIndex;
+
+  *SdMmcDesc = BoardDesc;
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+MvBoardDescXhciGet (
+  IN MARVELL_BOARD_DESC_PROTOCOL  *This,
+  IN OUT MV_BOARD_XHCI_DESC      **XhciDesc
+  )
+{
+  UINT8 *XhciDeviceTable, XhciCount;
+  UINTN XhciDeviceTableSize, XhciIndex, Index;
+  MV_BOARD_XHCI_DESC *BoardDesc;
+  MV_SOC_XHCI_DESC *SoCDesc;
+  EFI_STATUS Status;
+
+  /* Get SoC data about all available XHCI controllers */
+  Status = ArmadaSoCDescXhciGet (&SoCDesc, &XhciCount);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  /* Obtain table with enabled XHCI controllers */
+  XhciDeviceTable = (UINT8 *)PcdGetPtr (PcdPciEXhci);
+  if (XhciDeviceTable == NULL) {
+    /* No XHCI on platform */
+    return EFI_SUCCESS;
+  }
+
+  XhciDeviceTableSize = PcdGetSize (PcdPciEXhci);
+
+  /* Check if PCD with XHCI controllers is correctly defined */
+  if (XhciDeviceTableSize > XhciCount) {
+    DEBUG ((DEBUG_ERROR, "%a: Wrong PcdPciEXhci format\n", __FUNCTION__));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  /* Allocate and fill board description */
+  BoardDesc = AllocateZeroPool (XhciDeviceTableSize * sizeof (MV_BOARD_XHCI_DESC));
+  if (BoardDesc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  XhciIndex = 0;
+  for (Index = 0; Index < XhciDeviceTableSize; Index++) {
+    if (!MVHW_DEV_ENABLED (Xhci, Index)) {
+      DEBUG ((DEBUG_INFO, "%a: Skip Xhci controller %d\n", __FUNCTION__, Index));
+      continue;
+    }
+
+    BoardDesc[XhciIndex].SoC = &SoCDesc[Index];
+    XhciIndex++;
+  }
+
+  BoardDesc->XhciDevCount = XhciIndex;
+
+  *XhciDesc = BoardDesc;
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
 MvBoardDescPp2Get (
   IN MARVELL_BOARD_DESC_PROTOCOL  *This,
   IN OUT MV_BOARD_PP2_DESC       **Pp2Desc
@@ -199,6 +376,9 @@ MvBoardDescInitProtocol (
   )
 {
   BoardDescProtocol->BoardDescGpioGet = MvBoardDescGpioGet;
+  BoardDescProtocol->BoardDescAhciGet = MvBoardDescAhciGet;
+  BoardDescProtocol->BoardDescSdMmcGet = MvBoardDescSdMmcGet;
+  BoardDescProtocol->BoardDescXhciGet = MvBoardDescXhciGet;
   BoardDescProtocol->BoardDescPp2Get = MvBoardDescPp2Get;
   BoardDescProtocol->BoardDescUtmiGet = MvBoardDescUtmiGet;
 
