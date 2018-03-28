@@ -53,11 +53,15 @@
   MemoryAllocationLib
   MvSARLib
   PcdLib
+  UefiBootServicesTableLib
 
 [Sources.common]
   ComPhyLib.c
   ComPhyCp110.c
   ComPhyMux.c
+
+[Protocols]
+  gMarvellBoardDescProtocolGuid  ## CONSUMES
 
 [FixedPcd]
   gMarvellTokenSpaceGuid.PcdComPhyDevices
@@ -81,5 +85,3 @@
   gMarvellTokenSpaceGuid.PcdChip3ComPhyTypes
   gMarvellTokenSpaceGuid.PcdChip3ComPhySpeeds
   gMarvellTokenSpaceGuid.PcdChip3ComPhyInvFlags
-
-  gMarvellTokenSpaceGuid.PcdPciEAhci

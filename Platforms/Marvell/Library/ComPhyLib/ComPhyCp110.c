@@ -33,7 +33,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
 #include "ComPhyLib.h"
-#include <Library/MvHwDescLib.h>
 #include <Library/MvSARLib.h>
 #include <Library/ArmSmcLib.h>
 #include <IndustryStandard/ArmStdSmc.h>
@@ -44,8 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SD_ADDR(base, Lane)         (base + SD_LANE_ADDR_WIDTH * Lane)
 #define HPIPE_ADDR(base, Lane)      (SD_ADDR(base, Lane) + HPIPE_ADDR_OFFSET)
 #define COMPHY_ADDR(base, Lane)     (base + COMPHY_ADDR_LANE_WIDTH * Lane)
-
-DECLARE_A7K8K_NONDISCOVERABLE_TEMPLATE;
 
 /*
  * For CP-110 we have 2 Selector registers "PHY Selectors"
@@ -862,45 +859,30 @@ ComPhySataPowerUp (
   IN UINT32 Lane,
   IN EFI_PHYSICAL_ADDRESS HpipeBase,
   IN EFI_PHYSICAL_ADDRESS ComPhyBase,
-  IN UINT8 SataHostId
+  IN MV_BOARD_AHCI_DESC *Desc
   )
 {
   EFI_STATUS Status;
-  UINT8 *SataDeviceTable;
-  MVHW_NONDISCOVERABLE_DESC *Desc = &mA7k8kNonDiscoverableDescTemplate;
-
-  SataDeviceTable = (UINT8 *) PcdGetPtr (PcdPciEAhci);
-
-  if (SataDeviceTable == NULL || SataHostId >= PcdGetSize (PcdPciEAhci)) {
-    DEBUG ((DEBUG_ERROR, "ComPhySata: Sata host %d is undefined\n", SataHostId));
-    return EFI_INVALID_PARAMETER;
-  }
-
-  if (!MVHW_DEV_ENABLED (Sata, SataHostId)) {
-    DEBUG ((DEBUG_ERROR, "ComPhySata: Sata host %d is disabled\n", SataHostId));
-    return EFI_INVALID_PARAMETER;
-  }
 
   DEBUG ((DEBUG_INFO, "ComPhySata: Initialize SATA PHYs\n"));
 
   DEBUG((DEBUG_INFO, "ComPhySataPowerUp: stage: MAC configuration - power down ComPhy\n"));
 
-  ComPhySataMacPowerDown (Desc->AhciBaseAddresses[SataHostId]);
-
+  ComPhySataMacPowerDown (Desc[ChipId].SoC->AhciBaseAddress);
 
   Status = ComPhySmc (MV_SIP_CPMPHY_POWER_ON,
              ComPhyBase,
              Lane,
-             COMPHY_FW_FORMAT(COMPHY_SATA_MODE, SataHostId, COMPHY_SPEED_DEFAULT));
+             COMPHY_FW_FORMAT (COMPHY_SATA_MODE, Desc[ChipId].SoC->AhciId, COMPHY_SPEED_DEFAULT));
   if (Status)
          return Status;
 
-  ComPhySataPhyPowerUp (Desc->AhciBaseAddresses[SataHostId]);
+  ComPhySataPhyPowerUp (Desc[ChipId].SoC->AhciBaseAddress);
 
   Status = ComPhySmc (MV_SIP_COMPHY_PLL_LOCK,
              ComPhyBase,
              Lane,
-             COMPHY_FW_FORMAT(COMPHY_SATA_MODE, SataHostId, COMPHY_SPEED_DEFAULT));
+             COMPHY_FW_FORMAT (COMPHY_SATA_MODE, Desc[ChipId].SoC->AhciId, COMPHY_SPEED_DEFAULT));
   /* Convert FW error to EFI errors */
   if (Status)
           Status = EFI_D_ERROR;
@@ -1189,6 +1171,8 @@ ComPhyCp110Init (
   EFI_STATUS Status;
   COMPHY_MAP *PtrComPhyMap, *SerdesMap;
   EFI_PHYSICAL_ADDRESS ComPhyBaseAddr, HpipeBaseAddr;
+  MARVELL_BOARD_DESC_PROTOCOL *BoardDescProtocol;
+  MV_BOARD_AHCI_DESC *AhciBoardDesc;
   UINT32 ComPhyMaxCount, Lane;
   UINT32 PcieWidth = 0;
   UINT8 ChipId;
@@ -1231,11 +1215,23 @@ ComPhyCp110Init (
       break;
     case COMPHY_TYPE_SATA0:
     case COMPHY_TYPE_SATA1:
-      Status = ComPhySataPowerUp (ChipId, Lane, HpipeBaseAddr, ComPhyBaseAddr, MVHW_CP0_AHCI0_ID);
-      break;
     case COMPHY_TYPE_SATA2:
     case COMPHY_TYPE_SATA3:
-      Status = ComPhySataPowerUp (ChipId, Lane, HpipeBaseAddr, ComPhyBaseAddr, MVHW_CP1_AHCI0_ID);
+      /* Obtain AHCI board description */
+      Status = gBS->LocateProtocol (&gMarvellBoardDescProtocolGuid,
+                      NULL,
+                      (VOID **)&BoardDescProtocol);
+      if (EFI_ERROR (Status)) {
+        break;
+      }
+
+      Status = BoardDescProtocol->BoardDescAhciGet (BoardDescProtocol,
+                                    &AhciBoardDesc);
+      if (EFI_ERROR (Status)) {
+        break;
+      }
+
+      Status = ComPhySataPowerUp (ChipId, Lane, HpipeBaseAddr, ComPhyBaseAddr, AhciBoardDesc);
       break;
     case COMPHY_TYPE_USB3_HOST0:
     case COMPHY_TYPE_USB3_HOST1:
@@ -1272,5 +1268,8 @@ ComPhyCp110Init (
       DEBUG ((DEBUG_ERROR, "Failed to initialize Lane %d\n with Status = 0x%x\n", Lane, Status));
       PtrComPhyMap->Type = COMPHY_TYPE_UNCONNECTED;
     }
+  }
+  if (AhciBoardDesc) {
+    FreePool (AhciBoardDesc);
   }
 }
