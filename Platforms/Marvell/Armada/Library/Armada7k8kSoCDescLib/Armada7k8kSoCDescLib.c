@@ -29,6 +29,46 @@
 #define MV_SOC_CP_BASE(Cp)               (0xF2000000 + (Cp) * 0x2000000)
 
 //
+// Platform description of ComPhy controllers
+//
+#define MV_SOC_COMPHY_BASE(Cp)           (MV_SOC_CP_BASE ((Cp)) + 0x441000)
+#define MV_SOC_HPIPE3_BASE(Cp)           (MV_SOC_CP_BASE ((Cp)) + 0x120000)
+#define MV_SOC_COMPHY_LANE_COUNT         6
+#define MV_SOC_COMPHY_MUX_BITS           4
+
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescComPhyGet (
+  IN OUT MV_SOC_COMPHY_DESC  **ComPhyDesc,
+  IN OUT UINT8                *DescCount
+  )
+{
+  MV_SOC_COMPHY_DESC *Desc;
+  UINT8 CpCount = FixedPcdGet8 (PcdMaxCpCount);
+  UINT8 CpIndex;
+
+  Desc = AllocateZeroPool (CpCount * sizeof (MV_SOC_COMPHY_DESC));
+  if (Desc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  for (CpIndex = 0; CpIndex < CpCount; CpIndex++) {
+    Desc[CpIndex].ComPhyBaseAddress = MV_SOC_COMPHY_BASE (CpIndex);
+    Desc[CpIndex].ComPhyHpipe3BaseAddress = MV_SOC_HPIPE3_BASE (CpIndex);
+    Desc[CpIndex].ComPhyLaneCount = MV_SOC_COMPHY_LANE_COUNT;
+    Desc[CpIndex].ComPhyMuxBitCount = MV_SOC_COMPHY_MUX_BITS;
+    Desc[CpIndex].ComPhyChipType = MvComPhyTypeCp110;
+    Desc[CpIndex].ComPhyId = CpIndex;
+  }
+
+  *ComPhyDesc = Desc;
+  *DescCount = CpCount;
+
+  return EFI_SUCCESS;
+}
+
+//
 // Platform description of GPIO
 //
 #define MVHW_AP_GPIO0_BASE             0xF06F5040
