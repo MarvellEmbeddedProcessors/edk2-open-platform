@@ -14,6 +14,8 @@
 #ifndef __ARMADA_SOC_DESC_LIB_H__
 #define __ARMADA_SOC_DESC_LIB_H__
 
+#include <Library/NonDiscoverableDeviceRegistrationLib.h>
+
 //
 // GPIO devices description template definition
 //
@@ -28,6 +30,52 @@ EFI_STATUS
 EFIAPI
 ArmadaSoCDescGpioGet (
   IN OUT MVHW_GPIO_DESC **GpioDesc
+  );
+
+//
+// NonDiscoverable devices SoC description
+//
+// AHCI
+typedef struct {
+  UINT8 AhciId;
+  UINTN AhciBaseAddress;
+  UINTN AhciMemSize;
+  NON_DISCOVERABLE_DEVICE_DMA_TYPE AhciDmaType;
+} MV_SOC_AHCI_DESC;
+
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescAhciGet (
+  IN OUT MV_SOC_AHCI_DESC  **AhciDesc,
+  IN OUT UINT8              *DescCount
+  );
+
+// SDMMC
+typedef struct {
+  UINTN SdMmcBaseAddress;
+  UINTN SdMmcMemSize;
+  NON_DISCOVERABLE_DEVICE_DMA_TYPE SdMmcDmaType;
+} MV_SOC_SDMMC_DESC;
+
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescSdMmcGet (
+  IN OUT MV_SOC_SDMMC_DESC  **SdMmcDesc,
+  IN OUT UINT8               *DescCount
+  );
+
+// XHCI
+typedef struct {
+  UINTN XhciBaseAddress;
+  UINTN XhciMemSize;
+  NON_DISCOVERABLE_DEVICE_DMA_TYPE XhciDmaType;
+} MV_SOC_XHCI_DESC;
+
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescXhciGet (
+  IN OUT MV_SOC_XHCI_DESC  **XhciDesc,
+  IN OUT UINT8              *DescCount
   );
 
 //

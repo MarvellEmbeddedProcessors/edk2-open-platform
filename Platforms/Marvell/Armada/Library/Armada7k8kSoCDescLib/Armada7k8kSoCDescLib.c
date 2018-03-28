@@ -73,6 +73,120 @@ ArmadaSoCDescGpioGet (
 }
 
 //
+// Platform description of NonDiscoverableDevices
+//
+
+//
+// Platform description of AHCI controllers
+//
+#define MV_SOC_AHCI_BASE(Cp)            MV_SOC_CP_BASE ((Cp)) + 0x540000
+#define MV_SOC_AHCI_ID(Cp)              ((Cp) % 2)
+
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescAhciGet (
+  IN OUT MV_SOC_AHCI_DESC  **AhciDesc,
+  IN OUT UINT8             *DescCount
+  )
+{
+  MV_SOC_AHCI_DESC *Desc;
+  UINT8 CpCount = FixedPcdGet8 (PcdMaxCpCount);
+  UINT8 CpIndex;
+
+  Desc = AllocateZeroPool (CpCount * sizeof (MV_SOC_AHCI_DESC));
+  if (Desc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  for (CpIndex = 0; CpIndex < CpCount; CpIndex++) {
+    Desc[CpIndex].AhciId = MV_SOC_AHCI_ID (CpIndex);
+    Desc[CpIndex].AhciBaseAddress = MV_SOC_AHCI_BASE (CpIndex);
+    Desc[CpIndex].AhciMemSize = SIZE_8KB;
+    Desc[CpIndex].AhciDmaType = NonDiscoverableDeviceDmaTypeCoherent;
+  }
+
+  *AhciDesc = Desc;
+  *DescCount = CpCount;
+
+  return EFI_SUCCESS;
+}
+
+//
+// Platform description of SDMMC controllers
+//
+#define MV_SOC_MAX_SDMMC_COUNT     2
+#define MV_SOC_SDMMC_BASE(Index)   ((Index) == 0 ? 0xF06E0000 : 0xF2780000)
+
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescSdMmcGet (
+  IN OUT MV_SOC_SDMMC_DESC  **SdMmcDesc,
+  IN OUT UINT8               *DescCount
+  )
+{
+  MV_SOC_SDMMC_DESC *Desc;
+  UINT8 Index;
+
+  Desc = AllocateZeroPool (MV_SOC_MAX_SDMMC_COUNT * sizeof (MV_SOC_SDMMC_DESC));
+  if (Desc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  for (Index = 0; Index < MV_SOC_MAX_SDMMC_COUNT; Index++) {
+    Desc[Index].SdMmcBaseAddress = MV_SOC_SDMMC_BASE (Index);
+    Desc[Index].SdMmcMemSize = SIZE_1KB;
+    Desc[Index].SdMmcDmaType = NonDiscoverableDeviceDmaTypeCoherent;
+  }
+
+  *SdMmcDesc = Desc;
+  *DescCount = MV_SOC_MAX_SDMMC_COUNT;
+
+  return EFI_SUCCESS;
+}
+
+//
+// Platform description of XHCI controllers
+//
+#define MV_SOC_XHCI_PER_CP_COUNT         2
+#define MV_SOC_XHCI_BASE(Xhci)           (0x500000 + (Xhci) * 0x10000)
+
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescXhciGet (
+  IN OUT MV_SOC_XHCI_DESC  **XhciDesc,
+  IN OUT UINT8              *DescCount
+  )
+{
+  MV_SOC_XHCI_DESC *Desc;
+  UINT8 CpCount = FixedPcdGet8 (PcdMaxCpCount);
+  UINT8 Index, CpIndex, XhciIndex = 0;
+
+  Desc = AllocateZeroPool (CpCount * MV_SOC_XHCI_PER_CP_COUNT *
+                           sizeof (MV_SOC_XHCI_DESC));
+  if (Desc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  for (CpIndex = 0; CpIndex < CpCount; CpIndex++) {
+    for (Index = 0; Index < MV_SOC_XHCI_PER_CP_COUNT; Index++) {
+      Desc[XhciIndex].XhciBaseAddress =
+                         MV_SOC_CP_BASE (CpIndex) + MV_SOC_XHCI_BASE (Index);
+      Desc[XhciIndex].XhciMemSize = SIZE_16KB;
+      Desc[XhciIndex].XhciDmaType = NonDiscoverableDeviceDmaTypeCoherent;
+      XhciIndex++;
+    }
+  }
+
+  *XhciDesc = Desc;
+  *DescCount = XhciIndex;
+
+  return EFI_SUCCESS;
+}
+
+//
 // Platform description of PP2 NIC
 //
 #define MV_SOC_PP2_BASE(Cp)             MV_SOC_CP_BASE ((Cp))
