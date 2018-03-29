@@ -34,6 +34,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __MARVELL_GPIO_PROTOCOL_H__
 #define __MARVELL_GPIO_PROTOCOL_H__
 
+#include <Uefi.h>
+
+#include <Library/DebugLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/DevicePathLib.h>
+
 extern EFI_GUID gMarvellGpioProtocolGuid;
 
 typedef struct _MARVELL_GPIO_PROTOCOL MARVELL_GPIO_PROTOCOL;
