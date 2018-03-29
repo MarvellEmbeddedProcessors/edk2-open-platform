@@ -53,6 +53,21 @@ ArmadaSoCDescGpioGet (
   );
 
 //
+// MDIO
+//
+typedef struct {
+  UINT8 MdioId;
+  UINTN MdioBaseAddress;
+} MV_SOC_MDIO_DESC;
+
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescMdioGet (
+  IN OUT MV_SOC_MDIO_DESC  **MdioDesc,
+  IN OUT UINT8              *DescCount
+  );
+
+//
 // NonDiscoverable devices SoC description
 //
 // AHCI

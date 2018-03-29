@@ -113,6 +113,40 @@ ArmadaSoCDescGpioGet (
 }
 
 //
+// Platform description of MDIO controllers
+//
+#define MV_SOC_MDIO_BASE(Cp)            MV_SOC_CP_BASE ((Cp)) + 0x12A200
+#define MV_SOC_MDIO_ID(Cp)              ((Cp))
+
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescMdioGet (
+  IN OUT MV_SOC_MDIO_DESC  **MdioDesc,
+  IN OUT UINT8             *DescCount
+  )
+{
+  MV_SOC_MDIO_DESC *Desc;
+  UINT8 CpCount = FixedPcdGet8 (PcdMaxCpCount);
+  UINT8 CpIndex;
+
+  Desc = AllocateZeroPool (CpCount * sizeof (MV_SOC_MDIO_DESC));
+  if (Desc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  for (CpIndex = 0; CpIndex < CpCount; CpIndex++) {
+    Desc[CpIndex].MdioId = MV_SOC_MDIO_ID (CpIndex);
+    Desc[CpIndex].MdioBaseAddress = MV_SOC_MDIO_BASE (CpIndex);
+  }
+
+  *MdioDesc = Desc;
+  *DescCount = CpCount;
+
+  return EFI_SUCCESS;
+}
+
+//
 // Platform description of NonDiscoverableDevices
 //
 
