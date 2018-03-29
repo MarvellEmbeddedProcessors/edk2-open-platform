@@ -47,6 +47,9 @@
 
 !include Armada7k8k.dsc.inc
 
+[LibraryClasses.common]
+  ArmadaBoardDescLib|OpenPlatformPkg/Platforms/Marvell/Armada/Library/ArmadaMcBinBoardDescLib/ArmadaMcBinBoardDescLib.inf
+
 ################################################################################
 #
 # Pcd Section - list of all EDK II PCD Entries defined by this Platform
