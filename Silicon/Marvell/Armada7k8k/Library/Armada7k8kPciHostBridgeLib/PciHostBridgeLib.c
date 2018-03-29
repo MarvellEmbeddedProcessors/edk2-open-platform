@@ -18,7 +18,9 @@
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PcdLib.h>
+#include <Library/UefiBootServicesTableLib.h>
 
+#include <Protocol/BoardDesc.h>
 #include <Protocol/PciRootBridgeIo.h>
 #include <Protocol/PciHostBridgeResourceAllocation.h>
 
@@ -73,46 +75,76 @@ PciHostBridgeGetRootBridges (
   UINTN *Count
   )
 {
-  PCI_ROOT_BRIDGE     *RootBridge;
+  PCI_ROOT_BRIDGE     *RootBridge = 0;
+  PCI_ROOT_BRIDGE     *CurRootBridge = 0;
+  MV_BOARD_PCIE_DESC  *Desc;
+  EFI_STATUS           Status;
+  UINT8                Index;
+  MARVELL_BOARD_DESC_PROTOCOL *BoardDescProtocol;
+  MV_BOARD_PCIE_DEV_DESC *PcieDevDesc;
 
-  *Count = 1;
-  RootBridge = AllocateZeroPool (*Count * sizeof *RootBridge);
+  /* Obtain list of available controllers */
+  Status = gBS->LocateProtocol (&gMarvellBoardDescProtocolGuid,
+                  NULL,
+                  (VOID **)&BoardDescProtocol);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR,
+      "%a: Cannot locate BoardDesc protocol\n",
+      __FUNCTION__));
+    return 0;
+  }
 
-  RootBridge->Segment     = 0;
-  RootBridge->Supports    = 0;
-  RootBridge->Attributes  = RootBridge->Supports;
+  Status = BoardDescProtocol->BoardDescPcieGet (BoardDescProtocol, &Desc);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR,
+      "%a: Cannot get Pcie board desc from BoardDesc protocol\n",
+      __FUNCTION__));
+    return 0;
+  }
 
-  RootBridge->DmaAbove4G  = FALSE;
+  *Count = Desc->PcieDevCount;
+  RootBridge = AllocateZeroPool (*Count * sizeof (PCI_ROOT_BRIDGE));
+  CurRootBridge = RootBridge;
 
-  RootBridge->AllocationAttributes  = EFI_PCI_HOST_BRIDGE_COMBINE_MEM_PMEM |
-                                      EFI_PCI_HOST_BRIDGE_MEM64_DECODE;
+  for (Index = 0; Index < Desc->PcieDevCount; Index++, CurRootBridge++) {
 
-  RootBridge->Bus.Base              = FixedPcdGet32 (PcdPciBusMin);
-  RootBridge->Bus.Limit             = FixedPcdGet32 (PcdPciBusMax);
-  RootBridge->Io.Base               = FixedPcdGet64 (PcdPciIoBase);
-  RootBridge->Io.Limit              = FixedPcdGet64 (PcdPciIoBase) +
-                                      FixedPcdGet64 (PcdPciIoSize) - 1;
-  RootBridge->Mem.Base              = FixedPcdGet32 (PcdPciMmio32Base);
-  RootBridge->Mem.Limit             = FixedPcdGet32 (PcdPciMmio32Base) +
-                                      FixedPcdGet32 (PcdPciMmio32Size) - 1;
-  RootBridge->MemAbove4G.Base       = FixedPcdGet64 (PcdPciMmio64Base);
-  RootBridge->MemAbove4G.Limit      = FixedPcdGet64 (PcdPciMmio64Base) +
-                                      FixedPcdGet64 (PcdPciMmio64Size) - 1;
+    PcieDevDesc = &(Desc->PcieDevDesc[Index]);
 
-  //
-  // No separate ranges for prefetchable and non-prefetchable BARs
-  //
-  RootBridge->PMem.Base             = MAX_UINT64;
-  RootBridge->PMem.Limit            = 0;
-  RootBridge->PMemAbove4G.Base      = MAX_UINT64;
-  RootBridge->PMemAbove4G.Limit     = 0;
+    CurRootBridge->Segment   = 0;
+    CurRootBridge->Supports  = 0;
+    CurRootBridge->Attributes  = CurRootBridge->Supports;
 
-  ASSERT (FixedPcdGet64 (PcdPciMmio32Translation) == 0);
-  ASSERT (FixedPcdGet64 (PcdPciMmio64Translation) == 0);
+    CurRootBridge->DmaAbove4G  = FALSE;
 
-  RootBridge->NoExtendedConfigSpace = FALSE;
+    CurRootBridge->AllocationAttributes  = EFI_PCI_HOST_BRIDGE_COMBINE_MEM_PMEM |
+                                               EFI_PCI_HOST_BRIDGE_MEM64_DECODE;
 
-  RootBridge->DevicePath = (EFI_DEVICE_PATH_PROTOCOL *)&mEfiPciRootBridgeDevicePath;
+    CurRootBridge->Bus.Base = PcieDevDesc->PcieBusMin;
+    CurRootBridge->Bus.Limit = PcieDevDesc->PcieBusMax;
+    CurRootBridge->Io.Base = PcieDevDesc->PcieIoWinBase;
+    CurRootBridge->Io.Limit = PcieDevDesc->PcieIoWinBase + PcieDevDesc->PcieIoWinSize - 1;
+    CurRootBridge->Mem.Base = PcieDevDesc->PcieMmio32WinBase;
+    CurRootBridge->Mem.Limit = PcieDevDesc->PcieMmio32WinBase +
+                                   PcieDevDesc->PcieMmio32WinSize - 1;
+    CurRootBridge->MemAbove4G.Base = PcieDevDesc->PcieMmio64WinBase;
+    CurRootBridge->MemAbove4G.Limit = PcieDevDesc->PcieMmio64WinBase +
+                                          PcieDevDesc->PcieMmio64WinSize - 1;
+
+    //
+    // No separate ranges for prefetchable and non-prefetchable BARs
+    //
+    CurRootBridge->PMem.Base           = MAX_UINT64;
+    CurRootBridge->PMem.Limit          = 0;
+    CurRootBridge->PMemAbove4G.Base    = MAX_UINT64;
+    CurRootBridge->PMemAbove4G.Limit   = 0;
+
+    ASSERT (PcieDevDesc->PcieMmio64Translation == 0);
+    ASSERT (PcieDevDesc->PcieMmio32Translation == 0);
+
+    CurRootBridge->NoExtendedConfigSpace = FALSE;
+
+    CurRootBridge->DevicePath = (EFI_DEVICE_PATH_PROTOCOL *)&mEfiPciRootBridgeDevicePath;
+  }
 
   return RootBridge;
 }
