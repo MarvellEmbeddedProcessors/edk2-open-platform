@@ -58,6 +58,7 @@
 
 [Pcd]
   gMarvellTokenSpaceGuid.PcdComPhyDevices
+  gMarvellTokenSpaceGuid.PcdMdioControllers
   gMarvellTokenSpaceGuid.PcdPp2Controllers
   gMarvellTokenSpaceGuid.PcdUtmiControllers
   gMarvellTokenSpaceGuid.PcdUtmiPortType

@@ -110,6 +110,42 @@ MvBoardDescGpioGet (
 
 STATIC
 EFI_STATUS
+MvBoardDescMdioGet (
+  IN MARVELL_BOARD_DESC_PROTOCOL  *This,
+  IN OUT MV_BOARD_MDIO_DESC      **MdioDesc
+  )
+{
+  MV_BOARD_MDIO_DESC *BoardDesc;
+  MV_SOC_MDIO_DESC *SoCDesc;
+  EFI_STATUS Status;
+  UINT8 MdioCount;
+  UINTN Index;
+
+  /* Get SoC data about all available MDIO controllers */
+  Status = ArmadaSoCDescMdioGet (&SoCDesc, &MdioCount);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  /* Allocate and fill board description */
+  BoardDesc = AllocateZeroPool (MdioCount * sizeof (MV_BOARD_MDIO_DESC));
+  if (BoardDesc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  for (Index = 0; Index < MdioCount; Index++) {
+    BoardDesc[Index].SoC = &SoCDesc[Index];
+  }
+
+  BoardDesc->MdioDevCount = MdioCount;
+  *MdioDesc = BoardDesc;
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
 MvBoardDescAhciGet (
   IN MARVELL_BOARD_DESC_PROTOCOL  *This,
   IN OUT MV_BOARD_AHCI_DESC      **AhciDesc
@@ -436,6 +472,7 @@ MvBoardDescInitProtocol (
 {
   BoardDescProtocol->BoardDescComPhyGet = MvBoardDescComPhyGet;
   BoardDescProtocol->BoardDescGpioGet = MvBoardDescGpioGet;
+  BoardDescProtocol->BoardDescMdioGet = MvBoardDescMdioGet;
   BoardDescProtocol->BoardDescAhciGet = MvBoardDescAhciGet;
   BoardDescProtocol->BoardDescSdMmcGet = MvBoardDescSdMmcGet;
   BoardDescProtocol->BoardDescXhciGet = MvBoardDescXhciGet;
