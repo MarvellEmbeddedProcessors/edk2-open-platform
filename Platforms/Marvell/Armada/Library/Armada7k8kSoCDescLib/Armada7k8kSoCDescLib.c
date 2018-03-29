@@ -377,3 +377,40 @@ ArmadaSoCDescUtmiGet (
 
   return EFI_SUCCESS;
 }
+
+//
+// Platform description of PCIe
+//
+#define MV_SOC_PCIE_PER_CP_COUNT         3
+#define MV_SOC_PCIE_BASE(Pcie)           (0x600000 + (Pcie) * 0x20000)
+
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescPcieGet (
+  IN OUT UINT8    *DevCount,
+  IN OUT UINTN   **PcieRegBase
+  )
+{
+  UINT8 CpCount = FixedPcdGet8 (PcdMaxCpCount);
+  UINT8 Index, CpIndex, PcieIndex = 0;
+  UINTN *RegBase;
+
+  RegBase = AllocateZeroPool (CpCount * MV_SOC_PCIE_PER_CP_COUNT *
+                              sizeof (UINTN));
+  if (RegBase == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  for (CpIndex = 0; CpIndex < CpCount; CpIndex++) {
+    for (Index = 0; Index < MV_SOC_PCIE_PER_CP_COUNT; Index++) {
+      RegBase[PcieIndex] = MV_SOC_CP_BASE (CpIndex) + MV_SOC_PCIE_BASE (Index);
+      PcieIndex++;
+    }
+  }
+
+  *PcieRegBase = RegBase;
+  *DevCount = PcieIndex;
+
+  return EFI_SUCCESS;
+}

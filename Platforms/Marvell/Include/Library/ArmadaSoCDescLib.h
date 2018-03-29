@@ -159,4 +159,15 @@ ArmadaSoCDescUtmiGet (
   IN OUT MV_SOC_UTMI_DESC  **UtmiDesc,
   IN OUT UINT8              *DescCount
   );
+
+//
+// PCIe devices SoC description
+//
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescPcieGet (
+  IN OUT UINT8              *DevCount,
+  IN OUT UINTN             **PcieRegBase
+  );
+
 #endif /* __ARMADA_SOC_DESC_LIB_H__ */
