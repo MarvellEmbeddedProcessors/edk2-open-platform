@@ -16,6 +16,8 @@
 
 #include <Library/ArmadaSoCDescLib.h>
 
+#include <Protocol/Gpio.h>
+
 //
 // COMPHY NIC devices per-board description
 //
@@ -96,4 +98,37 @@ typedef struct {
   UINT8             UtmiDevCount;
   UINT8             UtmiPortType;
 } MV_BOARD_UTMI_DESC;
+
+//
+// PCIE devices per-device description
+//
+typedef struct {
+  UINT8 PcieIndex;
+  UINTN PcieRegBase;
+  UINT8 PcieBusMin;
+  UINT8 PcieBusMax;
+  UINTN PcieBaseAddress;
+  UINTN PcieIoTranslation;
+  UINTN PcieIoWinBase;
+  UINTN PcieIoWinSize;
+  UINT8 PcieMmio32Translation;
+  UINTN PcieMmio32WinBase;
+  UINTN PcieMmio32WinSize;
+  UINT8 PcieMmio64Translation;
+  UINT64 PcieMmio64WinBase;
+  UINT64 PcieMmio64WinSize;
+  GPIO_PIN_DESC PcieResetGpio;
+} MV_BOARD_PCIE_DEV_DESC;
+
+typedef struct {
+  MV_BOARD_PCIE_DEV_DESC *PcieDevDesc;
+  UINT8                   PcieDevCount;
+} MV_BOARD_PCIE_DESC;
+
+EFI_STATUS
+EFIAPI
+ArmadaBoardDescPcieGet (
+  IN OUT UINT8 *PcieDevCount,
+  IN OUT MV_BOARD_PCIE_DEV_DESC **PcieDesc
+  );
 #endif /* __ARMADA_SOC_DESC_LIB_H__ */
