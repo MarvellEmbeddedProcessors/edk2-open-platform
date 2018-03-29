@@ -191,6 +191,26 @@ ArmadaSoCDescXhciGet (
   IN OUT UINTN              *DescCount
   );
 
+/**
+  This function returns the total number of PCIE controllers and an array
+  with their base addresses.
+
+  @param[in out] **PcieBaseAddresses  Array containing PCIE controllers' base
+                                     adresses.
+  @param[in out]  *Count             Total amount of available PCIE controllers.
+
+  @retval EFI_SUCCESS                The data were obtained successfully.
+  @retval EFI_OUT_OF_RESOURCES       The request could not be completed due to a
+                                     lack of resources.
+
+**/
+EFI_STATUS
+EFIAPI
+ArmadaSoCPcieGet (
+  IN OUT EFI_PHYSICAL_ADDRESS  **PcieBaseAddresses,
+  IN OUT UINTN                  *Count
+  );
+
 //
 // PP2 NIC devices SoC description
 //
