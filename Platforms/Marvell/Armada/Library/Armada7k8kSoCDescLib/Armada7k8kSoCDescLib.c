@@ -113,6 +113,44 @@ ArmadaSoCDescGpioGet (
 }
 
 //
+// Platform description of I2C controllers
+//
+#define MV_SOC_I2C_PER_CP_COUNT         2
+#define MV_SOC_I2C_BASE(I2c)         (0x701000 + (I2c) * 0x100)
+
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescI2cGet (
+  IN OUT MV_SOC_I2C_DESC  **I2cDesc,
+  IN OUT UINT8             *DescCount
+  )
+{
+  MV_SOC_I2C_DESC *Desc;
+  UINT8 CpCount = FixedPcdGet8 (PcdMaxCpCount);
+  UINT8 Index, CpIndex, I2cIndex = 0;
+
+  Desc = AllocateZeroPool (CpCount * MV_SOC_I2C_PER_CP_COUNT *
+                           sizeof (MV_SOC_I2C_DESC));
+  if (Desc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  for (CpIndex = 0; CpIndex < CpCount; CpIndex++) {
+    for (Index = 0; Index < MV_SOC_I2C_PER_CP_COUNT; Index++) {
+      Desc[I2cIndex].I2cBaseAddress =
+                         MV_SOC_CP_BASE (CpIndex) + MV_SOC_I2C_BASE (Index);
+      I2cIndex++;
+    }
+  }
+
+  *I2cDesc = Desc;
+  *DescCount = I2cIndex;
+
+  return EFI_SUCCESS;
+}
+
+//
 // Platform description of MDIO controllers
 //
 #define MV_SOC_MDIO_BASE(Cp)            MV_SOC_CP_BASE ((Cp)) + 0x12A200
