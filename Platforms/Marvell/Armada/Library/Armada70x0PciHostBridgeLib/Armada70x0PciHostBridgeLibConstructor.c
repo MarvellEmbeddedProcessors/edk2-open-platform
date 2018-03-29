@@ -20,15 +20,8 @@
 #include <Library/IoLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#define GPIO_BASE                 FixedPcdGet64 (PcdChip1MppBaseAddress) + 0x100
-#define GPIO_DIR_OFFSET(n)        (((n) >> 5) * 0x40)
-#define GPIO_ENABLE_OFFSET(n)     (((n) >> 5) * 0x40 + 0x4)
-
-#define GPIO_PIN_MASK(n)          (1 << ((n) & 0x1f))
-
-#define PCIE_SLOT_RESET_GPIO      52
-
-#define MV_PCIE_BASE                                        0xF2600000
+#include <Protocol/BoardDesc.h>
+#include <Protocol/Gpio.h>
 
 #define IATU_VIEWPORT_OFF                                   0x900
 #define IATU_VIEWPORT_INBOUND                               BIT31
@@ -109,6 +102,7 @@
 STATIC
 VOID
 ConfigureWindow (
+  UINTN     PcieRegBase,
   UINTN     Index,
   UINT64    CpuBase,
   UINT64    PciBase,
@@ -119,38 +113,38 @@ ConfigureWindow (
 {
   ArmDataMemoryBarrier ();
 
-  MmioWrite32 (MV_PCIE_BASE + IATU_VIEWPORT_OFF,
+  MmioWrite32 (PcieRegBase + IATU_VIEWPORT_OFF,
                IATU_VIEWPORT_OUTBOUND | IATU_VIEWPORT_REGION_INDEX (Index));
 
   ArmDataMemoryBarrier ();
 
-  MmioWrite32 (MV_PCIE_BASE + IATU_LWR_BASE_ADDR_OFF_OUTBOUND_0,
+  MmioWrite32 (PcieRegBase + IATU_LWR_BASE_ADDR_OFF_OUTBOUND_0,
                (UINT32)(CpuBase & 0xFFFFFFFF));
-  MmioWrite32 (MV_PCIE_BASE + IATU_UPPER_BASE_ADDR_OFF_OUTBOUND_0,
+  MmioWrite32 (PcieRegBase + IATU_UPPER_BASE_ADDR_OFF_OUTBOUND_0,
                (UINT32)(CpuBase >> 32));
-  MmioWrite32 (MV_PCIE_BASE + IATU_LIMIT_ADDR_OFF_OUTBOUND_0,
+  MmioWrite32 (PcieRegBase + IATU_LIMIT_ADDR_OFF_OUTBOUND_0,
                (UINT32)(CpuBase + Size - 1));
-  MmioWrite32 (MV_PCIE_BASE + IATU_LWR_TARGET_ADDR_OFF_OUTBOUND_0,
+  MmioWrite32 (PcieRegBase + IATU_LWR_TARGET_ADDR_OFF_OUTBOUND_0,
                (UINT32)(PciBase & 0xFFFFFFFF));
-  MmioWrite32 (MV_PCIE_BASE + IATU_UPPER_TARGET_ADDR_OFF_OUTBOUND_0,
+  MmioWrite32 (PcieRegBase + IATU_UPPER_TARGET_ADDR_OFF_OUTBOUND_0,
                (UINT32)(PciBase >> 32));
-  MmioWrite32 (MV_PCIE_BASE + IATU_REGION_CTRL_1_OFF_OUTBOUND_0,
+  MmioWrite32 (PcieRegBase + IATU_REGION_CTRL_1_OFF_OUTBOUND_0,
                Type);
-  MmioWrite32 (MV_PCIE_BASE + IATU_REGION_CTRL_2_OFF_OUTBOUND_0,
+  MmioWrite32 (PcieRegBase + IATU_REGION_CTRL_2_OFF_OUTBOUND_0,
                IATU_REGION_CTRL_2_OFF_OUTBOUND_0_REGION_EN | EnableFlags);
 }
 
 STATIC
 VOID
 WaitForLink (
-  VOID
+  UINTN PcieRegBase
   )
 {
   UINT32 Mask;
   UINT32 Status;
   UINT32 Timeout;
 
-  if (!(MmioRead32 (MV_PCIE_BASE + PCIE_PM_STATUS) & PCIE_PM_LTSSM_STAT_MASK)) {
+  if (!(MmioRead32 (PcieRegBase + PCIE_PM_STATUS) & PCIE_PM_LTSSM_STAT_MASK)) {
     DEBUG ((DEBUG_INIT, "%a: no PCIe device detected\n", __FUNCTION__));
     return;
   }
@@ -163,12 +157,71 @@ WaitForLink (
   Mask = PCIE_GLOBAL_STATUS_RDLH_LINK_UP | PCIE_GLOBAL_STATUS_PHY_LINK_UP;
   Timeout = PCIE_LINK_UP_TIMEOUT_US / 10;
   do {
-    Status = MmioRead32 (MV_PCIE_BASE + PCIE_GLOBAL_STATUS_REG);
+    Status = MmioRead32 (PcieRegBase + PCIE_GLOBAL_STATUS_REG);
     if ((Status & Mask) == Mask) {
       break;
     }
     gBS->Stall (10);
   } while (Timeout--);
+}
+
+STATIC
+EFI_STATUS
+ResetPciSlot (
+  IN GPIO_PIN_DESC *PcieResetGpio
+  )
+{
+  MARVELL_GPIO_PROTOCOL *GpioProtocol;
+  EFI_HANDLE                *ProtHandle = NULL;
+  EFI_STATUS                 Status;
+
+  /* Get GPIO protocol */
+  Status = MarvellGpioGetHandle (GPIO_DRIVER_TYPE_SOC_CONTROLLER, &ProtHandle);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Failed to find GPIO for SoC protocol, Status: 0x%x\n", Status));
+    return Status;
+  }
+
+  Status = gBS->OpenProtocol (
+                  ProtHandle,
+                  &gMarvellGpioProtocolGuid,
+                  (void **)&GpioProtocol,
+                  gImageHandle,
+                  NULL,
+                  EFI_OPEN_PROTOCOL_GET_PROTOCOL
+                  );
+  if(EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "Failed to open GPIO protocol, Status: 0x%x\n", Status));
+    return Status;
+  }
+
+  //
+  // Reset the slot
+  //
+  Status = GpioProtocol->DirectionOutput(
+                  GpioProtocol,
+                  PcieResetGpio->ControllerId,
+                  PcieResetGpio->PinNumber,
+                  PcieResetGpio->ActiveHigh
+                  );
+  gBS->Stall (10 * 1000);
+
+  Status = GpioProtocol->SetValue(
+                  GpioProtocol,
+                  PcieResetGpio->ControllerId,
+                  PcieResetGpio->PinNumber,
+                  0
+                  );
+  gBS->Stall (20 * 1000);
+
+  Status = gBS->CloseProtocol (
+                  ProtHandle,
+                  &gMarvellGpioProtocolGuid,
+                  gImageHandle,
+                  NULL
+                  );
+
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -178,119 +231,151 @@ Armada70x0PciHostBridgeLibConstructor (
   IN EFI_SYSTEM_TABLE *SystemTable
   )
 {
-  ASSERT (FixedPcdGet32 (PcdPciBusMin) == 0);
-  ASSERT (FixedPcdGet64 (PcdPciExpressBaseAddress) % SIZE_256MB == 0);
+  MARVELL_BOARD_DESC_PROTOCOL *BoardDescProtocol;
+  MV_BOARD_PCIE_DESC  *PcieDesc;
+  EFI_STATUS           Status;
+  UINT8                Index;
+  MV_BOARD_PCIE_DEV_DESC *PcieDevDesc;
+  UINTN                PcieBaseReg;
 
-  //
-  // Reset the slot
-  //
-  MmioOr32 (GPIO_BASE + GPIO_DIR_OFFSET (PCIE_SLOT_RESET_GPIO),
-            GPIO_PIN_MASK (PCIE_SLOT_RESET_GPIO));
-  ArmDataMemoryBarrier ();
-  gBS->Stall (10 * 1000);
+  /* Obtain list of available controllers */
+  Status = gBS->LocateProtocol (&gMarvellBoardDescProtocolGuid,
+                NULL,
+                (VOID **)&BoardDescProtocol);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR,
+      "%a: Cannot locate BoardDesc protocol\n",
+      __FUNCTION__));
+    return EFI_DEVICE_ERROR;
+  }
 
-  MmioAnd32 (GPIO_BASE + GPIO_ENABLE_OFFSET (PCIE_SLOT_RESET_GPIO),
-             ~GPIO_PIN_MASK (PCIE_SLOT_RESET_GPIO));
-  ArmDataMemoryBarrier ();
-  gBS->Stall (20 * 1000);
+  Status = BoardDescProtocol->BoardDescPcieGet (BoardDescProtocol, &PcieDesc);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR,
+      "%a: Cannot get Pcie board desc from BoardDesc protocol\n",
+      __FUNCTION__));
+    return EFI_DEVICE_ERROR;
+  }
 
-  MmioAndThenOr32 (MV_PCIE_BASE + PORT_LINK_CTRL_OFF,
-                   ~PORT_LINK_CTRL_OFF_LINK_CAPABLE_MASK,
-                   PORT_LINK_CTRL_OFF_LINK_CAPABLE_x4);
+  for (Index = 0; Index < PcieDesc->PcieDevCount; Index++) {
+    PcieDevDesc = &(PcieDesc->PcieDevDesc[Index]);
+    PcieBaseReg = PcieDevDesc->PcieRegBase;
 
-  MmioAndThenOr32 (MV_PCIE_BASE + GEN2_CTRL_OFF,
-                   ~GEN2_CTRL_OFF_NUM_OF_LANES_MASK,
-                   GEN2_CTRL_OFF_NUM_OF_LANES(4) |
-                   GEN2_CTRL_OFF_DIRECT_SPEED_CHANGE);
+    ASSERT (PcieDevDesc->PcieBusMin == 0);
+    ASSERT (PcieDevDesc->PcieBaseAddress % SIZE_256MB == 0);
 
-  MmioAndThenOr32 (MV_PCIE_BASE + PCIE_GLOBAL_CTRL_OFFSET,
-                   ~(PCIE_GLOBAL_CTRL_DEVICE_TYPE_MASK |
-                     PCIE_GLOBAL_APP_LTSSM_EN),
-                   PCIE_GLOBAL_CTRL_DEVICE_TYPE_RC);
+    /* Reset PCIe slot */
+    Status = ResetPciSlot(&PcieDevDesc->PcieResetGpio);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR,
+        "%a: Cannot reset Pcie Slot\n",
+        __FUNCTION__));
+      return EFI_DEVICE_ERROR;
+    }
 
-  MmioWrite32 (MV_PCIE_BASE + PCIE_ARCACHE_TRC_REG,
-               ARCACHE_DEFAULT_VALUE);
+    MmioAndThenOr32 (PcieBaseReg + PORT_LINK_CTRL_OFF,
+                     ~PORT_LINK_CTRL_OFF_LINK_CAPABLE_MASK,
+                     PORT_LINK_CTRL_OFF_LINK_CAPABLE_x4);
 
-  MmioWrite32 (MV_PCIE_BASE + PCIE_AWCACHE_TRC_REG,
-               AWCACHE_DEFAULT_VALUE);
+    MmioAndThenOr32 (PcieBaseReg + GEN2_CTRL_OFF,
+                     ~GEN2_CTRL_OFF_NUM_OF_LANES_MASK,
+                     GEN2_CTRL_OFF_NUM_OF_LANES(4) |
+                     GEN2_CTRL_OFF_DIRECT_SPEED_CHANGE);
 
-  MmioAndThenOr32 (MV_PCIE_BASE + PCIE_ARUSER_REG,
-                   ~AX_USER_DOMAIN_MASK,
-                   AX_USER_DOMAIN_OUTER_SHAREABLE);
+    MmioAndThenOr32 (PcieBaseReg + PCIE_GLOBAL_CTRL_OFFSET,
+                     ~(PCIE_GLOBAL_CTRL_DEVICE_TYPE_MASK |
+                       PCIE_GLOBAL_APP_LTSSM_EN),
+                     PCIE_GLOBAL_CTRL_DEVICE_TYPE_RC);
 
-  MmioAndThenOr32 (MV_PCIE_BASE + PCIE_AWUSER_REG,
-                   ~AX_USER_DOMAIN_MASK,
-                   AX_USER_DOMAIN_OUTER_SHAREABLE);
+    MmioWrite32 (PcieBaseReg + PCIE_ARCACHE_TRC_REG,
+                 ARCACHE_DEFAULT_VALUE);
 
-  MmioAndThenOr32 (MV_PCIE_BASE + PCIE_LINK_CTL_2,
-                   ~TARGET_LINK_SPEED_MASK,
-                   LINK_SPEED_GEN_3);
+    MmioWrite32 (PcieBaseReg + PCIE_AWCACHE_TRC_REG,
+                 AWCACHE_DEFAULT_VALUE);
 
-  MmioAndThenOr32 (MV_PCIE_BASE + PCIE_LINK_CAPABILITY,
-                   ~TARGET_LINK_SPEED_MASK,
-                   LINK_SPEED_GEN_3);
+    MmioAndThenOr32 (PcieBaseReg + PCIE_ARUSER_REG,
+                     ~AX_USER_DOMAIN_MASK,
+                     AX_USER_DOMAIN_OUTER_SHAREABLE);
 
-  MmioOr32 (MV_PCIE_BASE + PCIE_GEN3_EQU_CTRL,
-            GEN3_EQU_EVAL_2MS_DISABLE);
+    MmioAndThenOr32 (PcieBaseReg + PCIE_AWUSER_REG,
+                     ~AX_USER_DOMAIN_MASK,
+                     AX_USER_DOMAIN_OUTER_SHAREABLE);
 
-  MmioOr32 (MV_PCIE_BASE + PCIE_GLOBAL_CTRL_OFFSET,
-            PCIE_GLOBAL_APP_LTSSM_EN);
+    MmioAndThenOr32 (PcieBaseReg + PCIE_LINK_CTL_2,
+                     ~TARGET_LINK_SPEED_MASK,
+                     LINK_SPEED_GEN_3);
 
-  // Region 0: MMIO32 range
-  ConfigureWindow (0,
-                   FixedPcdGet32 (PcdPciMmio32Base),
-                   FixedPcdGet32 (PcdPciMmio32Base),
-                   FixedPcdGet32 (PcdPciMmio32Size),
-                   IATU_REGION_CTRL_1_OFF_OUTBOUND_0_TYPE_MEM,
-                   0);
+    MmioAndThenOr32 (PcieBaseReg + PCIE_LINK_CAPABILITY,
+                     ~TARGET_LINK_SPEED_MASK,
+                     LINK_SPEED_GEN_3);
 
-  // Region 1: Type 0 config space
-  ConfigureWindow (1,
-                   FixedPcdGet64 (PcdPciExpressBaseAddress),
-                   0x0,
-                   SIZE_64KB,
-                   IATU_REGION_CTRL_1_OFF_OUTBOUND_0_TYPE_CFG0,
-                   IATU_REGION_CTRL_2_OFF_OUTBOUND_0_CFG_SHIFT_MODE);
+    MmioOr32 (PcieBaseReg + PCIE_GEN3_EQU_CTRL,
+              GEN3_EQU_EVAL_2MS_DISABLE);
 
-  // Region 2: Type 1 config space
-  ConfigureWindow (2,
-                   FixedPcdGet64 (PcdPciExpressBaseAddress) + SIZE_64KB,
-                   0x0,
-                   FixedPcdGet32 (PcdPciBusMax) * SIZE_1MB,
-                   IATU_REGION_CTRL_1_OFF_OUTBOUND_0_TYPE_CFG1,
-                   IATU_REGION_CTRL_2_OFF_OUTBOUND_0_CFG_SHIFT_MODE);
+    MmioOr32 (PcieBaseReg + PCIE_GLOBAL_CTRL_OFFSET,
+              PCIE_GLOBAL_APP_LTSSM_EN);
 
-  // Region 3: port I/O range
-  ConfigureWindow (3,
-                   FixedPcdGet64 (PcdPciIoTranslation),
-                   FixedPcdGet32 (PcdPciIoBase),
-                   FixedPcdGet32 (PcdPciIoSize),
-                   IATU_REGION_CTRL_1_OFF_OUTBOUND_0_TYPE_IO,
-                   0);
+    // Region 0: MMIO32 range
+    ConfigureWindow (PcieBaseReg,
+                     0,
+                     PcieDevDesc->PcieMmio32WinBase,
+                     PcieDevDesc->PcieMmio32WinBase,
+                     PcieDevDesc->PcieMmio32WinSize,
+                     IATU_REGION_CTRL_1_OFF_OUTBOUND_0_TYPE_MEM,
+                     0);
 
-  // Region 4: MMIO64 range
-  ConfigureWindow (4,
-                   FixedPcdGet64 (PcdPciMmio64Base),
-                   FixedPcdGet64 (PcdPciMmio64Base),
-                   FixedPcdGet64 (PcdPciMmio64Size),
-                   IATU_REGION_CTRL_1_OFF_OUTBOUND_0_TYPE_MEM,
-                   0);
+    // Region 1: Type 0 config space
+    ConfigureWindow (PcieBaseReg,
+                     1,
+                     PcieDevDesc->PcieBaseAddress,
+                     0x0,
+                     SIZE_64KB,
+                     IATU_REGION_CTRL_1_OFF_OUTBOUND_0_TYPE_CFG0,
+                     IATU_REGION_CTRL_2_OFF_OUTBOUND_0_CFG_SHIFT_MODE);
 
-  MmioOr32 (MV_PCIE_BASE + PCIE_GLOBAL_INT_MASK1_REG,
-            PCIE_INT_A_ASSERT_MASK |
-            PCIE_INT_B_ASSERT_MASK |
-            PCIE_INT_C_ASSERT_MASK |
-            PCIE_INT_D_ASSERT_MASK);
+    // Region 2: Type 1 config space
+    ConfigureWindow (PcieBaseReg,
+                     2,
+                     PcieDevDesc->PcieBaseAddress + SIZE_64KB,
+                     0x0,
+                     PcieDevDesc->PcieBusMax * SIZE_1MB,
+                     IATU_REGION_CTRL_1_OFF_OUTBOUND_0_TYPE_CFG1,
+                     IATU_REGION_CTRL_2_OFF_OUTBOUND_0_CFG_SHIFT_MODE);
 
-  WaitForLink ();
+    // Region 3: port I/O range
+    ConfigureWindow (PcieBaseReg,
+                     3,
+                     PcieDevDesc->PcieIoTranslation,
+                     PcieDevDesc->PcieIoWinBase,
+                     PcieDevDesc->PcieIoWinSize,
+                     IATU_REGION_CTRL_1_OFF_OUTBOUND_0_TYPE_IO,
+                     0);
 
-  //
-  // Enable the RC
-  //
-  MmioOr32 (MV_PCIE_BASE + PCI_COMMAND_OFFSET,
-            EFI_PCI_COMMAND_IO_SPACE |
-            EFI_PCI_COMMAND_MEMORY_SPACE |
-            EFI_PCI_COMMAND_BUS_MASTER);
+    // Region 4: MMIO64 range
+    ConfigureWindow (PcieBaseReg,
+                     4,
+                     PcieDevDesc->PcieMmio64WinBase,
+                     PcieDevDesc->PcieMmio64WinBase,
+                     PcieDevDesc->PcieMmio64WinSize,
+                     IATU_REGION_CTRL_1_OFF_OUTBOUND_0_TYPE_MEM,
+                     0);
+
+    MmioOr32 (PcieBaseReg + PCIE_GLOBAL_INT_MASK1_REG,
+              PCIE_INT_A_ASSERT_MASK |
+              PCIE_INT_B_ASSERT_MASK |
+              PCIE_INT_C_ASSERT_MASK |
+              PCIE_INT_D_ASSERT_MASK);
+
+    WaitForLink (PcieBaseReg);
+
+    //
+    // Enable the RC
+    //
+    MmioOr32 (PcieBaseReg + PCI_COMMAND_OFFSET,
+              EFI_PCI_COMMAND_IO_SPACE |
+              EFI_PCI_COMMAND_MEMORY_SPACE |
+              EFI_PCI_COMMAND_BUS_MASTER);
+  }
 
   return EFI_SUCCESS;
 }

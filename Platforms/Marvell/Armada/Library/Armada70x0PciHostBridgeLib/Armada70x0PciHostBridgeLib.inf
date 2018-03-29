@@ -41,26 +41,16 @@
   OpenPlatformPkg/Platforms/Marvell/Marvell.dec
 
 [LibraryClasses]
+  ArmadaSoCDescLib
   ArmLib
   DebugLib
   DevicePathLib
   MemoryAllocationLib
   UefiBootServicesTableLib
 
-[FixedPcd]
-  gArmTokenSpaceGuid.PcdPciBusMin
-  gArmTokenSpaceGuid.PcdPciBusMax
-  gArmTokenSpaceGuid.PcdPciIoBase
-  gArmTokenSpaceGuid.PcdPciIoSize
-  gArmTokenSpaceGuid.PcdPciIoTranslation
-  gArmTokenSpaceGuid.PcdPciMmio32Base
-  gArmTokenSpaceGuid.PcdPciMmio32Size
-  gArmTokenSpaceGuid.PcdPciMmio32Translation
-  gArmTokenSpaceGuid.PcdPciMmio64Base
-  gArmTokenSpaceGuid.PcdPciMmio64Size
-  gArmTokenSpaceGuid.PcdPciMmio64Translation
-  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
-  gMarvellTokenSpaceGuid.PcdChip1MppBaseAddress
+[Protocols]
+  gMarvellBoardDescProtocolGuid
+  gMarvellGpioProtocolGuid
 
 [Depex]
   gMarvellPlatformInitCompleteProtocolGuid
