@@ -163,6 +163,9 @@
   gMarvellTokenSpaceGuid.PcdPp2PortIds|{ 0x0, 0x2, 0x0, 0x1 }
   gMarvellTokenSpaceGuid.PcdPp2Controllers|{ 0x1, 0x1 }
 
+  #Pcie
+  gMarvellTokenSpaceGuid.PcdPcieControllersEnabled|{ 0x0 }
+
   #PciEmulation
   gMarvellTokenSpaceGuid.PcdPciEXhci|{ 0x1, 0x1, 0x1, 0x0 }
   gMarvellTokenSpaceGuid.PcdPciEAhci|{ 0x1, 0x1 }

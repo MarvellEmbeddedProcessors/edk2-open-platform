@@ -198,6 +198,9 @@
   gMarvellTokenSpaceGuid.PcdPp2Port2Controller|{ 0x0 }|VOID*|0x300002D
   gMarvellTokenSpaceGuid.PcdPp2PortIds|{ 0x0 }|VOID*|0x300002C
 
+#Pcie
+  gMarvellTokenSpaceGuid.PcdPcieControllersEnabled|{ 0x0 }|VOID*|0x3000040
+
 #PciEmulation
   gMarvellTokenSpaceGuid.PcdPciEXhci|{ 0x0 }|VOID*|0x3000033
   gMarvellTokenSpaceGuid.PcdPciEAhci|{ 0x0 }|VOID*|0x3000034

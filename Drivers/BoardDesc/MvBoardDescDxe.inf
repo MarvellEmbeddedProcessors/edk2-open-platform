@@ -47,6 +47,7 @@
   OpenPlatformPkg/Platforms/Marvell/Marvell.dec
 
 [LibraryClasses]
+  ArmadaBoardDescLib
   ArmadaSoCDescLib
   DebugLib
   MemoryAllocationLib
@@ -60,6 +61,7 @@
   gMarvellTokenSpaceGuid.PcdComPhyDevices
   gMarvellTokenSpaceGuid.PcdI2cControllers
   gMarvellTokenSpaceGuid.PcdMdioControllers
+  gMarvellTokenSpaceGuid.PcdPcieControllersEnabled
   gMarvellTokenSpaceGuid.PcdPp2Controllers
   gMarvellTokenSpaceGuid.PcdUtmiControllers
   gMarvellTokenSpaceGuid.PcdUtmiPortType

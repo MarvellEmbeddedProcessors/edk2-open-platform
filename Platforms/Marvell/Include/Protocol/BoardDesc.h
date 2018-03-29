@@ -104,6 +104,13 @@ EFI_STATUS
   IN OUT MV_BOARD_UTMI_DESC      **UtmiDesc
   );
 
+typedef
+EFI_STATUS
+(EFIAPI *MV_BOARD_DESC_PCIE_GET) (
+  IN MARVELL_BOARD_DESC_PROTOCOL  *This,
+  IN OUT MV_BOARD_PCIE_DESC      **PcieDesc
+  );
+
 struct _MARVELL_BOARD_DESC_PROTOCOL {
   MV_BOARD_DESC_COMPHY_GET       BoardDescComPhyGet;
   MV_BOARD_DESC_GPIO_GET         BoardDescGpioGet;
@@ -112,6 +119,7 @@ struct _MARVELL_BOARD_DESC_PROTOCOL {
   MV_BOARD_DESC_AHCI_GET         BoardDescAhciGet;
   MV_BOARD_DESC_SDMMC_GET        BoardDescSdMmcGet;
   MV_BOARD_DESC_XHCI_GET         BoardDescXhciGet;
+  MV_BOARD_DESC_PCIE_GET         BoardDescPcieGet;
   MV_BOARD_DESC_PP2_GET          BoardDescPp2Get;
   MV_BOARD_DESC_UTMI_GET         BoardDescUtmiGet;
 };

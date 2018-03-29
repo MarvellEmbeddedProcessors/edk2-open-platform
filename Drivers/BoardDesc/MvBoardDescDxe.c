@@ -525,6 +525,67 @@ MvBoardDescUtmiGet (
 
 STATIC
 EFI_STATUS
+MvBoardDescPcieGet (
+  IN MARVELL_BOARD_DESC_PROTOCOL  *This,
+  IN OUT MV_BOARD_PCIE_DESC      **PcieBoardDesc
+  )
+{
+  UINT8 Index;
+  UINT8 *PcieDeviceTable;
+
+  MV_BOARD_PCIE_DEV_DESC *PcieDevDesc;
+  MV_BOARD_PCIE_DEV_DESC *PcieDevDescTmp;
+  UINTN *PcieRegBase;
+  UINT8 PcieDevNum = 0;
+  UINT8 PcieEnabledDevNum = 0;
+  UINT8 PcieDevIndex = 0;
+
+  /*
+   * Get SoC data about all available PCIE controllers, and
+   * get the enabled ones from PCD, then get other configurations
+   * from BoardDescLib.
+   */
+  ArmadaSoCDescPcieGet (&PcieDevNum, &PcieRegBase);
+  ArmadaBoardDescPcieGet (&PcieEnabledDevNum, &PcieDevDesc);
+
+  /* Obtain table with enabled PCIe devices */
+  PcieDeviceTable = (UINT8 *)PcdGetPtr (PcdPcieControllersEnabled);
+  if (PcieDeviceTable == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Missing PcdPcieControllersEnabled\n", __FUNCTION__));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  /* Allocate and fill board description */
+  *PcieBoardDesc = AllocateZeroPool (sizeof (MV_BOARD_PCIE_DESC));
+  if (*PcieBoardDesc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  PcieDevDescTmp = PcieDevDesc;
+
+  for (Index = 0; Index < PcieEnabledDevNum; Index++) {
+    if (!MVHW_DEV_ENABLED (Pcie, Index))
+      continue;
+
+    if (PcieDevDescTmp->PcieIndex > PcieDevNum) {
+      DEBUG ((DEBUG_ERROR, "%a: Wrong pcie index\n", __FUNCTION__));
+      return EFI_INVALID_PARAMETER;
+    }
+
+    PcieDevDescTmp->PcieRegBase = PcieRegBase[PcieDevDescTmp->PcieIndex];
+    PcieDevIndex++;
+    PcieDevDescTmp++;
+  }
+
+  (*PcieBoardDesc)->PcieDevCount = PcieDevIndex;
+  (*PcieBoardDesc)->PcieDevDesc = PcieDevDesc;
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
 MvBoardDescInitProtocol (
   IN MARVELL_BOARD_DESC_PROTOCOL *BoardDescProtocol
   )
@@ -538,6 +599,7 @@ MvBoardDescInitProtocol (
   BoardDescProtocol->BoardDescXhciGet = MvBoardDescXhciGet;
   BoardDescProtocol->BoardDescPp2Get = MvBoardDescPp2Get;
   BoardDescProtocol->BoardDescUtmiGet = MvBoardDescUtmiGet;
+  BoardDescProtocol->BoardDescPcieGet = MvBoardDescPcieGet;
 
   return EFI_SUCCESS;
 }
