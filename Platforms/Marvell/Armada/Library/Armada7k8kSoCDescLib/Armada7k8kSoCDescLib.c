@@ -92,7 +92,8 @@ ArmadaSoCDescUtmiGet (
   UINT8 CpCount = FixedPcdGet8 (PcdMaxCpCount);
   UINT8 Index, CpIndex, UtmiIndex = 0;
 
-  Desc = AllocateZeroPool (CpCount * sizeof (MV_SOC_UTMI_DESC));
+  Desc = AllocateZeroPool (CpCount * MV_SOC_UTMI_PER_CP_COUNT *
+                           sizeof (MV_SOC_UTMI_DESC));
   if (Desc == NULL) {
     DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
     return EFI_OUT_OF_RESOURCES;
