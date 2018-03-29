@@ -28,6 +28,17 @@ typedef struct {
 } MV_BOARD_COMPHY_DESC;
 
 //
+// I2C devices per-board description
+//
+// TODO - Extend structure with entire
+// ports description instead of PCDs.
+//
+typedef struct {
+  MV_SOC_I2C_DESC *SoC;
+  UINT8            I2cDevCount;
+} MV_BOARD_I2C_DESC;
+
+//
 // MDIO devices per-board description
 //
 typedef struct {
