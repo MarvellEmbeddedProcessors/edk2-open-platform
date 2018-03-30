@@ -224,6 +224,13 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   INF MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
   INF Silicon/Marvell/Drivers/SmbiosPlatformDxe/SmbiosPlatformDxe.inf
 
+!if $(ARCH) == AARCH64
+  # ACPI support
+  INF MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
+  INF MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
+  INF RuleOverride = ACPITABLE Silicon/Marvell/Armada8kPlus/AcpiTables/Armada8082Db/AcpiTables.inf
+!endif
+
 # PEI phase firmware volume
 [FV.FVMAIN_COMPACT]
 FvAlignment        = 8

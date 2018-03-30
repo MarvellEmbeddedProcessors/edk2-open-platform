@@ -171,3 +171,6 @@
   gMarvellTokenSpaceGuid.PcdXenon1v8Enable|{ 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdXenon8BitBusEnable|{ 0x0, 0x0 }
   gMarvellTokenSpaceGuid.PcdXenonSlowModeEnable|{ 0x0, 0x0 }
+
+[Components.AARCH64]
+  Silicon/Marvell/Armada8kPlus/AcpiTables/Armada8082Db/AcpiTables.inf

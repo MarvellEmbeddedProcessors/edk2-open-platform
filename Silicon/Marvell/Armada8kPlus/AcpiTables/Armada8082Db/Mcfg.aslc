@@ -1,0 +1,53 @@
+/** @file
+
+  Memory mapped config space base address table (MCFG)
+
+  Copyright (c) 2017, Linaro Ltd. All rights reserved.<BR>
+
+  This program and the accompanying materials
+  are licensed and made available under the terms and conditions of the BSD License
+  which accompanies this distribution.  The full text of the license may be found at
+  http://opensource.org/licenses/bsd-license.php
+
+  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+
+**/
+
+#include <Library/AcpiLib.h>
+
+#include "AcpiHeader.h"
+
+#include <IndustryStandard/MemoryMappedConfigurationSpaceAccessTable.h>
+
+#pragma pack(1)
+typedef struct {
+  EFI_ACPI_MEMORY_MAPPED_CONFIGURATION_BASE_ADDRESS_TABLE_HEADER Header;
+  EFI_ACPI_MEMORY_MAPPED_ENHANCED_CONFIGURATION_SPACE_BASE_ADDRESS_ALLOCATION_STRUCTURE Structure;
+} ACPI_6_0_MCFG_STRUCTURE;
+#pragma pack()
+
+STATIC ACPI_6_0_MCFG_STRUCTURE Mcfg = {
+  {
+    __ACPI_HEADER (EFI_ACPI_5_0_PCI_EXPRESS_MEMORY_MAPPED_CONFIGURATION_SPACE_BASE_ADDRESS_DESCRIPTION_TABLE_SIGNATURE,
+                   ACPI_6_0_MCFG_STRUCTURE,
+                   EFI_ACPI_MEMORY_MAPPED_CONFIGURATION_SPACE_ACCESS_TABLE_REVISION),
+    EFI_ACPI_RESERVED_QWORD
+  }, {
+    //
+    // NOTE: the Synopsys IP used in the Armada 70x0/80x0 is not 100% ECAM
+    // compliant, and requires a workaround in order for arm64 Linux to use
+    // it when booting in ACPI mode. This involves reducing the bus range to
+    // a single bus, and shifting the config space base address by 32 KB.
+    // This prevents the OS from detecting the same device multiple times
+    // on bus 0.
+    //
+    FixedPcdGet32 (PcdPciExpressBaseAddress) | 0x8000,  // BaseAddress
+    0,                                                  // PciSegmentGroupNumber
+    0,                                                  // StartBusNumber
+    0,                                                  // EndBusNumber
+    EFI_ACPI_RESERVED_DWORD                             // Reserved
+  }
+};
+
+VOID CONST * CONST ReferenceAcpiTable = &Mcfg;

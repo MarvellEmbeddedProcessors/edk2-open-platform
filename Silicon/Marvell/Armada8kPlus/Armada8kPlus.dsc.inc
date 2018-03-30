@@ -277,9 +277,9 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdResetOnMemoryTypeInformationChange|FALSE
 
   # ARM Generic Interrupt Controller
-  gArmTokenSpaceGuid.PcdGicDistributorBase|0xEB000000
-  gArmTokenSpaceGuid.PcdGicRedistributorsBase|0xEB060000
-  gArmTokenSpaceGuid.PcdGicInterruptInterfaceBase|0xE80C0000
+  gArmTokenSpaceGuid.PcdGicDistributorBase|0xEF000000
+  gArmTokenSpaceGuid.PcdGicRedistributorsBase|0xEF060000
+  gArmTokenSpaceGuid.PcdGicInterruptInterfaceBase|0xEC0C0000
 
   # ARM Architectural Timer Support
   gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|25000000
@@ -605,6 +605,19 @@
   MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
   Silicon/Marvell/Drivers/SmbiosPlatformDxe/SmbiosPlatformDxe.inf
 
+[Components.AARCH64]
+  #
+  # Generic ACPI modules
+  #
+  MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
+  MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf {
+    <LibraryClasses>
+      PlatformHasAcpiLib|EmbeddedPkg/Library/PlatformHasAcpiLib/PlatformHasAcpiLib.inf
+
+     <PcdsFixedAtBuild>
+      # don't bother with ACPI versions older than 5.0
+      gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiExposedTableVersions|0x20
+  }
 
 [BuildOptions.common.EDKII.DXE_CORE,BuildOptions.common.EDKII.DXE_DRIVER,BuildOptions.common.EDKII.UEFI_DRIVER,BuildOptions.common.EDKII.UEFI_APPLICATION]
   GCC:*_*_*_DLINK_FLAGS = -z common-page-size=0x1000
