@@ -756,6 +756,32 @@ Armada8040McBinSmbiosFixup (
 }
 
 STATIC
+VOID
+Armada8082DbSmbiosFixup (
+   VOID
+   )
+{
+  // TYPE1
+  mArmadaDefaultType1Strings[1] = "Armada 8082 Development Board\0";
+  mArmadaDefaultType1Strings[2] = "Rev 1.2\0";
+
+  // TYPE2
+  mArmadaDefaultType2Strings[1] = "Armada 8082 Development Board\0";
+  mArmadaDefaultType2Strings[2] = "Rev 1.2\0";
+
+  // TYPE3
+  mArmadaDefaultType3Strings[1] = "Rev 1.2\0";
+
+  // TYPE4
+  mArmadaDefaultType4Strings[0] = "HFCBGA\0";
+
+  // TYPE9 - PCIE0 CP0 information
+  mArmadaDefaultType9_0.Hdr.Type = EFI_SMBIOS_TYPE_SYSTEM_SLOTS;
+  mArmadaDefaultType9_0.SlotType = SlotTypePciExpressGen2X4;
+  mArmadaDefaultType9_0.SlotDataBusWidth = SlotDataBusWidth4X;
+}
+
+STATIC
 EFI_STATUS
 ArmadaMemoryInstall (
   IN EFI_SMBIOS_PROTOCOL       *Smbios
@@ -828,6 +854,9 @@ InstallAllStructures (
     break;
   case MVBOARD_ID_ARMADA8040_MCBIN:
     Armada8040McBinSmbiosFixup ();
+    break;
+  case MVBOARD_ID_ARMADA8082_DB:
+    Armada8082DbSmbiosFixup ();
     break;
   default:
     DEBUG ((DEBUG_ERROR, "SmbiosPlatformDxe: Use default SBMIOS/DMI tables\n"));
