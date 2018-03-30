@@ -273,9 +273,9 @@
   gEfiIntelFrameworkModulePkgTokenSpaceGuid.PcdShellFile|{ 0x83, 0xA5, 0x04, 0x7C, 0x3E, 0x9E, 0x1C, 0x4F, 0xAD, 0x65, 0xE0, 0x52, 0x68, 0xD0, 0xB4, 0xD1 }
 
   # ARM Generic Interrupt Controller
-  gArmTokenSpaceGuid.PcdGicDistributorBase|0xEB000000
-  gArmTokenSpaceGuid.PcdGicRedistributorsBase|0xEB060000
-  gArmTokenSpaceGuid.PcdGicInterruptInterfaceBase|0xE80C0000
+  gArmTokenSpaceGuid.PcdGicDistributorBase|0xEF000000
+  gArmTokenSpaceGuid.PcdGicRedistributorsBase|0xEF060000
+  gArmTokenSpaceGuid.PcdGicInterruptInterfaceBase|0xEC0C0000
 
   # ARM Architectural Timer Support
   gArmTokenSpaceGuid.PcdArmArchTimerFreqInHz|25000000
@@ -567,17 +567,17 @@
 
 [Components.AARCH64]
   #
-  # Generic ACPI modules - XXX
+  # Generic ACPI modules
   #
-  # MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
-  # MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf {
-  #   <LibraryClasses>
-  #     PlatformHasAcpiLib|EmbeddedPkg/Library/PlatformHasAcpiLib/PlatformHasAcpiLib.inf
+  MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
+  MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf {
+    <LibraryClasses>
+      PlatformHasAcpiLib|EmbeddedPkg/Library/PlatformHasAcpiLib/PlatformHasAcpiLib.inf
 
-  #    <PcdsFixedAtBuild>
-  #     # don't bother with ACPI versions older than 5.0
-  #     gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiExposedTableVersions|0x20
-  # }
+     <PcdsFixedAtBuild>
+      # don't bother with ACPI versions older than 5.0
+      gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiExposedTableVersions|0x20
+  }
 
 [BuildOptions.common.EDKII.DXE_CORE,BuildOptions.common.EDKII.DXE_DRIVER,BuildOptions.common.EDKII.UEFI_DRIVER,BuildOptions.common.EDKII.UEFI_APPLICATION]
   GCC:*_*_*_DLINK_FLAGS = -z common-page-size=0x1000

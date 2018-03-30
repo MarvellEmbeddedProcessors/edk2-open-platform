@@ -1,0 +1,162 @@
+/** @file
+
+  Multiple APIC Description Table (MADT)
+
+  Copyright (c) 2017, Linaro Ltd. All rights reserved.<BR>
+
+  This program and the accompanying materials
+  are licensed and made available under the terms and conditions of the BSD License
+  which accompanies this distribution.  The full text of the license may be found at
+  http://opensource.org/licenses/bsd-license.php
+
+  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+
+**/
+
+#include <Library/AcpiLib.h>
+#include <Library/ArmLib.h>
+#include <Library/PcdLib.h>
+#include <IndustryStandard/Acpi.h>
+
+#include "AcpiHeader.h"
+
+#define GICC_BASE                 FixedPcdGet64 (PcdGicInterruptInterfaceBase)
+#define GICD_BASE                 FixedPcdGet64 (PcdGicDistributorBase)
+#define GICH_BASE                 0xEC0D0000
+#define GICV_BASE                 0xEC0E0000
+#define ITS_BASE                  0xEB040000
+#define VGIC_MAINT_INT            25 // SPI #9
+
+#define PMU_INTERRUPT             23
+
+#pragma pack(push, 1)
+typedef struct {
+  EFI_ACPI_6_0_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER Header;
+  EFI_ACPI_6_0_GIC_STRUCTURE                          GicC[FixedPcdGet32 (PcdCoreCount)];
+  EFI_ACPI_6_0_GIC_DISTRIBUTOR_STRUCTURE              GicD;
+  EFI_ACPI_6_0_GICR_STRUCTURE                         GicRedistributor;
+  EFI_ACPI_6_0_GIC_ITS_STRUCTURE                      GicIts;
+} EFI_ACPI_6_0_MULTIPLE_APIC_DESCRIPTION_TABLE;
+#pragma pack(pop)
+
+
+EFI_ACPI_6_0_MULTIPLE_APIC_DESCRIPTION_TABLE Madt = {
+  {
+    __ACPI_HEADER (EFI_ACPI_6_0_MULTIPLE_APIC_DESCRIPTION_TABLE_SIGNATURE,
+                   EFI_ACPI_6_0_MULTIPLE_APIC_DESCRIPTION_TABLE,
+                   EFI_ACPI_6_0_MULTIPLE_APIC_DESCRIPTION_TABLE_REVISION),
+    0,      // UINT32  LocalApicAddress
+    0       // UINT32  Flags
+  },
+  {
+    EFI_ACPI_6_0_GICC_STRUCTURE_INIT(0,                         // GicId
+                                     0,                         // AcpiCpuUid
+                                     GET_MPID(0, 0),            // Mpidr
+                                     EFI_ACPI_6_0_GIC_ENABLED,  // Flags
+                                     PMU_INTERRUPT,             // PmuIrq
+                                     GICC_BASE,                 // GicBase
+                                     GICV_BASE,                 // GicVBase
+                                     GICH_BASE,                 // GicHBase
+                                     VGIC_MAINT_INT,            // GsivId
+                                     0,                         // GicRBase
+                                     0                          // Efficiency
+                                     ),
+    EFI_ACPI_6_0_GICC_STRUCTURE_INIT(1,                         // GicId
+                                     1,                         // AcpiCpuUid
+                                     GET_MPID(0, 1),            // Mpidr
+                                     EFI_ACPI_6_0_GIC_ENABLED,  // Flags
+                                     PMU_INTERRUPT,             // PmuIrq
+                                     GICC_BASE,                 // GicBase
+                                     GICV_BASE,                 // GicVBase
+                                     GICH_BASE,                 // GicHBase
+                                     VGIC_MAINT_INT,            // GsivId
+                                     0,                         // GicRBase
+                                     0                          // Efficiency
+                                     ),
+    EFI_ACPI_6_0_GICC_STRUCTURE_INIT(2,                         // GicId
+                                     2,                         // AcpiCpuUid
+                                     GET_MPID(1, 0),            // Mpidr
+                                     EFI_ACPI_6_0_GIC_ENABLED,  // Flags
+                                     PMU_INTERRUPT,             // PmuIrq
+                                     GICC_BASE,                 // GicBase
+                                     GICV_BASE,                 // GicVBase
+                                     GICH_BASE,                 // GicHBase
+                                     VGIC_MAINT_INT,            // GsivId
+                                     0,                         // GicRBase
+                                     0                          // Efficiency
+                                     ),
+    EFI_ACPI_6_0_GICC_STRUCTURE_INIT(3,                         // GicId
+                                     3,                         // AcpiCpuUid
+                                     GET_MPID(1, 1),            // Mpidr
+                                     EFI_ACPI_6_0_GIC_ENABLED,  // Flags
+                                     PMU_INTERRUPT,             // PmuIrq
+                                     GICC_BASE,                 // GicBase
+                                     GICV_BASE,                 // GicVBase
+                                     GICH_BASE,                 // GicHBase
+                                     VGIC_MAINT_INT,            // GsivId
+                                     0,                         // GicRBase
+                                     0                          // Efficiency
+                                     ),
+    EFI_ACPI_6_0_GICC_STRUCTURE_INIT(4,                         // GicId
+                                     4,                         // AcpiCpuUid
+                                     GET_MPID(2, 0),            // Mpidr
+                                     EFI_ACPI_6_0_GIC_ENABLED,  // Flags
+                                     PMU_INTERRUPT,             // PmuIrq
+                                     GICC_BASE,                 // GicBase
+                                     GICV_BASE,                 // GicVBase
+                                     GICH_BASE,                 // GicHBase
+                                     VGIC_MAINT_INT,            // GsivId
+                                     0,                         // GicRBase
+                                     0                          // Efficiency
+                                     ),
+    EFI_ACPI_6_0_GICC_STRUCTURE_INIT(5,                         // GicId
+                                     5,                         // AcpiCpuUid
+                                     GET_MPID(2, 1),            // Mpidr
+                                     EFI_ACPI_6_0_GIC_ENABLED,  // Flags
+                                     PMU_INTERRUPT,             // PmuIrq
+                                     GICC_BASE,                 // GicBase
+                                     GICV_BASE,                 // GicVBase
+                                     GICH_BASE,                 // GicHBase
+                                     VGIC_MAINT_INT,            // GsivId
+                                     0,                         // GicRBase
+                                     0                          // Efficiency
+                                     ),
+    EFI_ACPI_6_0_GICC_STRUCTURE_INIT(6,                         // GicId
+                                     6,                         // AcpiCpuUid
+                                     GET_MPID(3, 0),            // Mpidr
+                                     EFI_ACPI_6_0_GIC_ENABLED,  // Flags
+                                     PMU_INTERRUPT,             // PmuIrq
+                                     GICC_BASE,                 // GicBase
+                                     GICV_BASE,                 // GicVBase
+                                     GICH_BASE,                 // GicHBase
+                                     VGIC_MAINT_INT,            // GsivId
+                                     0,                         // GicRBase
+                                     0                          // Efficiency
+                                     ),
+    EFI_ACPI_6_0_GICC_STRUCTURE_INIT(7,                         // GicId
+                                     7,                         // AcpiCpuUid
+                                     GET_MPID(3, 1),            // Mpidr
+                                     EFI_ACPI_6_0_GIC_ENABLED,  // Flags
+                                     PMU_INTERRUPT,             // PmuIrq
+                                     GICC_BASE,                 // GicBase
+                                     GICV_BASE,                 // GicVBase
+                                     GICH_BASE,                 // GicHBase
+                                     VGIC_MAINT_INT,            // GsivId
+                                     0,                         // GicRBase
+                                     0                          // Efficiency
+                                     ),
+  },
+  EFI_ACPI_6_0_GIC_DISTRIBUTOR_INIT(0x0,                        // GicDistHwId
+                                    GICD_BASE,                  // GicDistBase
+                                    0x0,                        // GicDistVector
+                                    EFI_ACPI_6_0_GIC_V3         // GicVersion
+                                    ),
+  // GIC Redistributor
+  EFI_ACPI_6_0_GIC_REDISTRIBUTOR_INIT (FixedPcdGet32 (PcdGicRedistributorsBase),
+                                       0x300000),
+  // GIC ITS
+  EFI_ACPI_6_0_GIC_ITS_FRAME_INIT(0, ITS_BASE)
+};
+
+VOID CONST * CONST ReferenceAcpiTable = &Madt;

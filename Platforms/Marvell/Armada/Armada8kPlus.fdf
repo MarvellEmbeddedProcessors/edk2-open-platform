@@ -198,16 +198,12 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   INF MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
   INF OpenPlatformPkg/Platforms/Marvell/Armada/Drivers/SmbiosPlatformDxe/SmbiosPlatformDxe.inf
 
-# !if $(ARCH) == AARCH64
-#   # ACPI support - XXX
-#   INF MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
-#   INF MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
-# !if ( gMarvellTokenSpaceGuid.PcdBoardId == 0x0 )
-#   INF RuleOverride = ACPITABLE OpenPlatformPkg/Platforms/Marvell/Armada/AcpiTables/Armada70x0/AcpiTables.inf
-# !elseif ( gMarvellTokenSpaceGuid.PcdBoardId == 0x1 ) || ( gMarvellTokenSpaceGuid.PcdBoardId == 0x2 )
-#   INF RuleOverride = ACPITABLE OpenPlatformPkg/Platforms/Marvell/Armada/AcpiTables/Armada80x0/AcpiTables.inf
-# !endif
-# !endif
+ !if $(ARCH) == AARCH64
+   # ACPI support
+   INF MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
+   INF MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
+   INF RuleOverride = ACPITABLE OpenPlatformPkg/Platforms/Marvell/Armada/AcpiTables8kPlus/Armada8082Db/AcpiTables.inf
+  !endif
 
 # PEI phase firmware volume
 [FV.FVMAIN_COMPACT]
