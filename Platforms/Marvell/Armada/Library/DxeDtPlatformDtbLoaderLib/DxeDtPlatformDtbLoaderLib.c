@@ -55,6 +55,9 @@ DtPlatformLoadDtb (
   case MVBOARD_ID_ARMADA8040_MCBIN:
     DtbInstance = BoardId;
     break;
+  case MVBOARD_ID_ARMADA8082_DB:
+    DtbInstance = BoardId - MVBOARD_ID_ARMADA8082_DB;
+    break;
   default:
     DEBUG ((DEBUG_ERROR, "DtPlatformLoadDtb: Invalid Board Id 0x%x\n", BoardId));
     return EFI_INVALID_PARAMETER;

@@ -558,8 +558,8 @@
       gEfiMdePkgTokenSpaceGuid.PcdUefiLibMaxPrintBufferSize|8000
   }
 
-  # DTB - XXX
-  # EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+  # DTB
+  EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
 
   # SMBIOS/DMI
   MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
