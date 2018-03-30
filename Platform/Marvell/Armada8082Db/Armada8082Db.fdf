@@ -214,6 +214,12 @@ FvNameGuid         = 5eda4200-2c5f-43cb-9da3-0baf74b1b30c
   }
 !endif
 
+  # DTB
+  INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+  FILE FREEFORM = 25462CDA-221F-47DF-AC1D-259CFAA4E326 {
+    SECTION RAW = Platform/Marvell/Armada8082Db/armada-8082-db.dtb
+  }
+
   # SMBIOS/DMI
   INF MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
   INF Silicon/Marvell/Drivers/SmbiosPlatformDxe/SmbiosPlatformDxe.inf

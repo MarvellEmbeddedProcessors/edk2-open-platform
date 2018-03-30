@@ -598,6 +598,9 @@
   ShellPkg/DynamicCommand/TftpDynamicCommand/TftpDynamicCommand.inf
 !endif #$(INCLUDE_TFTP_COMMAND)
 
+  # DTB
+  EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+
   # SMBIOS/DMI
   MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
   Silicon/Marvell/Drivers/SmbiosPlatformDxe/SmbiosPlatformDxe.inf
