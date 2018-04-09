@@ -730,11 +730,10 @@ ComPhyCp110Init (
     case COMPHY_TYPE_PCIE1:
     case COMPHY_TYPE_PCIE2:
     case COMPHY_TYPE_PCIE3:
-      /* UINIT_ID not relevant for SGMII - will be ignored by firmware */
       Status = ComPhySmc (MV_SIP_CPMPHY_POWER_ON,
                  PtrChipCfg->ComPhyBaseAddr,
                  Lane,
-                 COMPHY_FW_PCIE_FORMAT (PcieWidth, COMPHY_PCIE_MODE, COMPHY_UNIT_ID0, PtrComPhyMap->Speed));
+                 COMPHY_FW_PCIE_FORMAT (PcieWidth, COMPHY_PCIE_MODE, PtrComPhyMap->Speed));
       break;
     case COMPHY_TYPE_SATA0:
     case COMPHY_TYPE_SATA1:
