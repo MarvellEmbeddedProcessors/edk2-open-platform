@@ -350,13 +350,18 @@ ComPhyCp110Init (
       break;
     case COMPHY_TYPE_SGMII0:
     case COMPHY_TYPE_SGMII1:
-    case COMPHY_TYPE_SGMII2:
     case COMPHY_TYPE_SGMII3:
-      /* UINIT_ID not relevant for SGMII - will be ignored by firmware */
+      /* UINIT_ID is relevant only for SGMII2 - for other it will be ignored by firmware */
       Status = ComPhySmc (MV_SIP_CPMPHY_POWER_ON,
                  PtrChipCfg->ComPhyBaseAddr,
                  Lane,
                  COMPHY_FW_FORMAT (COMPHY_SGMII_MODE, COMPHY_UNIT_ID0, PtrComPhyMap->Speed));
+      break;
+    case COMPHY_TYPE_SGMII2:
+      Status = ComPhySmc (MV_SIP_CPMPHY_POWER_ON,
+                 PtrChipCfg->ComPhyBaseAddr,
+                 Lane,
+                 COMPHY_FW_FORMAT (COMPHY_SGMII_MODE, COMPHY_UNIT_ID2, PtrComPhyMap->Speed));
       break;
     case COMPHY_TYPE_SFI:
       Status = ComPhySmc (MV_SIP_CPMPHY_POWER_ON,
