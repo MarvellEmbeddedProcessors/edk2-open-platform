@@ -36,42 +36,42 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K+", 3)
         Device (CPU0)
         {
             Name (_HID, "ACPI0007" /* Processor Device */)  // _HID: Hardware ID
-            Name (_UID, GET_MPID(0, 0))  // _UID: Unique ID
+            Name (_UID, 0x000)  // _UID: Unique ID
         }
         Device (CPU1)
         {
             Name (_HID, "ACPI0007" /* Processor Device */)  // _HID: Hardware ID
-            Name (_UID, GET_MPID(0, 1))  // _UID: Unique ID
+            Name (_UID, 0x001)  // _UID: Unique ID
         }
         Device (CPU2)
         {
             Name (_HID, "ACPI0007" /* Processor Device */)  // _HID: Hardware ID
-            Name (_UID, GET_MPID(1, 0))  // _UID: Unique ID
+            Name (_UID, 0x100)  // _UID: Unique ID
         }
         Device (CPU3)
         {
             Name (_HID, "ACPI0007" /* Processor Device */)  // _HID: Hardware ID
-            Name (_UID, GET_MPID(1, 1))  // _UID: Unique ID
+            Name (_UID, 0x101)  // _UID: Unique ID
         }
         Device (CPU4)
         {
             Name (_HID, "ACPI0007" /* Processor Device */)  // _HID: Hardware ID
-            Name (_UID, GET_MPID(2, 0))  // _UID: Unique ID
+            Name (_UID, 0x200)  // _UID: Unique ID
         }
         Device (CPU5)
         {
             Name (_HID, "ACPI0007" /* Processor Device */)  // _HID: Hardware ID
-            Name (_UID, GET_MPID(2, 1))  // _UID: Unique ID
+            Name (_UID, 0x201)  // _UID: Unique ID
         }
         Device (CPU6)
         {
             Name (_HID, "ACPI0007" /* Processor Device */)  // _HID: Hardware ID
-            Name (_UID, GET_MPID(3, 0))  // _UID: Unique ID
+            Name (_UID, 0x300)  // _UID: Unique ID
         }
         Device (CPU7)
         {
             Name (_HID, "ACPI0007" /* Processor Device */)  // _HID: Hardware ID
-            Name (_UID, GET_MPID(3, 1))  // _UID: Unique ID
+            Name (_UID, 0x301)  // _UID: Unique ID
         }
 
 //        Device (AHC0)
