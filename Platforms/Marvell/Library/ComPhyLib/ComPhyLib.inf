@@ -47,7 +47,6 @@
 
 [LibraryClasses]
   ArmLib
-  ArmSmcLib
   DebugLib
   IoLib
   MemoryAllocationLib

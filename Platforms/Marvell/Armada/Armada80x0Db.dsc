@@ -129,7 +129,7 @@
   # 4: USB_HOST1     5 Gbps
   # 5: PCIE2         5 Gbps
   gMarvellTokenSpaceGuid.PcdChip0ComPhyTypes|{ 0x1, 0x5, 0x17, 0x6, 0xF, 0x3 }
-  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|{ $(CP_5G), $(CP_5G), $(CP_10_3125G), $(CP_5G), $(CP_5G), $(CP_5G) }
+  gMarvellTokenSpaceGuid.PcdChip0ComPhySpeeds|{ 0x6, 0x6, 0xA, 0x6, 0x6, 0x6 }
   # ComPhy1
   # 0: PCIE0         5 Gbps
   # 1: SATA0         5 Gbps
@@ -138,7 +138,7 @@
   # 4: PCIE1         5 Gbps
   # 5: PCIE2         5 Gbps
   gMarvellTokenSpaceGuid.PcdChip1ComPhyTypes|{ 0x1, 0x5, 0x17, 0x6, 0x2, 0x3 }
-  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeeds|{ $(CP_5G), $(CP_5G), $(CP_5_15625G), $(CP_5G), $(CP_5G), $(CP_5G) }
+  gMarvellTokenSpaceGuid.PcdChip1ComPhySpeeds|{ 0x6, 0x6, 0xA, 0x6, 0x6, 0x6 }
 
   #UtmiPhy
   gMarvellTokenSpaceGuid.PcdUtmiControllers|{ 0x1, 0x1, 0x1, 0x0 }
