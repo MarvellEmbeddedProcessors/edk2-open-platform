@@ -464,8 +464,10 @@
   Silicon/Marvell/Drivers/I2c/MvI2cDxe/MvI2cDxe.inf
   MdeModulePkg/Bus/I2c/I2cDxe/I2cDxe.inf
   Silicon/Marvell/Drivers/I2c/MvEepromDxe/MvEepromDxe.inf
+  Silicon/Marvell/Drivers/I2c/MvPca95xxDxe/MvPca95xxDxe.inf
   Silicon/Marvell/Drivers/Spi/MvSpiOrionDxe/MvSpiOrionDxe.inf
   Silicon/Marvell/Drivers/Spi/MvSpiFlashDxe/MvSpiFlashDxe.inf
+  Silicon/Marvell/Drivers/Gpio/MvGpioDxe.inf
   Silicon/Marvell/Armada7k8k/Drivers/Armada7k8kRngDxe/Armada7k8kRngDxe.inf
 
   # Network support

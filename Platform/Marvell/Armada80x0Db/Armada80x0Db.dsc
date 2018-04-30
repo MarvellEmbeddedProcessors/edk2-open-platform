@@ -113,6 +113,11 @@
   gMarvellTokenSpaceGuid.PcdI2cBaudRate|100000
   gMarvellTokenSpaceGuid.PcdI2cBusCount|2
 
+  # IOExpander
+  gMarvellTokenSpaceGuid.PcdIoExpanderId|{ 0x08, 0x08 }
+  gMarvellTokenSpaceGuid.PcdIoExpanderI2cAddress|{ 0x21, 0x25 }
+  gMarvellTokenSpaceGuid.PcdIOExpanderI2cBuses|{ 0x0, 0x0 }
+
   #SPI
   gMarvellTokenSpaceGuid.PcdSpiRegBase|0xF4700680
   gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|10000000
