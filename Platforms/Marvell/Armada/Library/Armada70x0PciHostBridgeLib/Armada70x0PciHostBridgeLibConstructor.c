@@ -210,7 +210,7 @@ ResetPciSlot (
                   GpioProtocol,
                   PcieResetGpio->ControllerId,
                   PcieResetGpio->PinNumber,
-                  0
+                  !PcieResetGpio->ActiveHigh
                   );
   gBS->Stall (20 * 1000);
 
