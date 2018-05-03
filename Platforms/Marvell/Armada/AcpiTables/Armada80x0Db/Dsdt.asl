@@ -288,9 +288,27 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
         {
             Name (_HID, "PRP0001")                                 // _HID: Hardware ID
             Name (_UID, 0x00)                                      // _UID: Unique ID
-            Name (_CRS, ResourceTemplate () {
+            Name (_CRS, ResourceTemplate ()
+            {
                 Memory32Fixed (ReadWrite, 0xF2760000, 0x7D)
-                Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive) { 105 }
+                Interrupt (ResourceConsumer, Level, ActiveHigh, Shared) { 95 }
+            })
+            Name (_DSD, Package () {
+                ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
+                Package () {
+                    Package () { "compatible", "inside-secure,safexcel-eip76" },
+                }
+            })
+        }
+
+        Device (RNG1)
+        {
+            Name (_HID, "PRP0001")                                 // _HID: Hardware ID
+            Name (_UID, 0x01)                                      // _UID: Unique ID
+            Name (_CRS, ResourceTemplate ()
+            {
+                Memory32Fixed (ReadWrite, 0xF4760000, 0x7D)
+                Interrupt (ResourceConsumer, Level, ActiveHigh, Shared) { 95 }
             })
             Name (_DSD, Package () {
                 ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
