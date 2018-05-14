@@ -974,14 +974,14 @@ ComPhySataSetAnalogParameters (
   MmioAndThenOr32 (
           HpipeAddr + HPIPE_G3_SET4_REG,
           ~HPIPE_GX_SET4_DFE_RES_MASK,
-          0x2 << HPIPE_GX_SET4_DFE_RES_OFFSET
+          0x1 << HPIPE_GX_SET4_DFE_RES_OFFSET
           );
 
   /* Offset Phase Control - force offset and toggle 'valid' bit */
   MmioAndThenOr32 (
           HpipeAddr + HPIPE_PHASE_CONTROL_REG,
-          ~(HPIPE_OS_PH_OFFSET_MASK | HPIPE_OS_PH_OFFSET_FORCE_MASK),
-          0x5c | (0x1 << HPIPE_OS_PH_OFFSET_FORCE_OFFSET)
+          ~(HPIPE_OS_PH_OFFSET_MASK | HPIPE_OS_PH_OFFSET_FORCE_MASK | HPIPE_OS_PH_VALID_MASK),
+          0x61 | (0x1 << HPIPE_OS_PH_OFFSET_FORCE_OFFSET)
           );
   MmioAndThenOr32 (
           HpipeAddr + HPIPE_PHASE_CONTROL_REG,
@@ -1022,9 +1022,9 @@ ComPhySataSetAnalogParameters (
          HPIPE_GX_SET0_TX_EMPH1_EN_MASK |
          HPIPE_GX_SET0_TX_SLEW_RATE_SEL_MASK |
          HPIPE_GX_SET0_TX_SLEW_CTRL_EN_MASK;
-  Data = (0xe << HPIPE_GX_SET0_TX_AMP_OFFSET) |
+  Data = (0x1e << HPIPE_GX_SET0_TX_AMP_OFFSET) |
          (0x1 << HPIPE_GX_SET0_TX_AMP_ADJ_OFFSET) |
-         (0x6 << HPIPE_GX_SET0_TX_EMPH1_OFFSET) |
+         (0xe << HPIPE_GX_SET0_TX_EMPH1_OFFSET) |
          (0x1 << HPIPE_GX_SET0_TX_EMPH1_EN_OFFSET) |
          (0x4 << HPIPE_GX_SET0_TX_SLEW_RATE_SEL_OFFSET);
   MmioAndThenOr32 (HpipeAddr + HPIPE_G3_SET0_REG, ~Mask, Data);
