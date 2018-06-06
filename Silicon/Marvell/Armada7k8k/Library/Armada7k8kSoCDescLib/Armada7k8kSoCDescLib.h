@@ -22,6 +22,7 @@
 // Common macros
 //
 #define MV_SOC_CP_BASE(Cp)               (0xF2000000 + ((Cp) * 0x2000000))
+#define MV_SOC_AP806_BASE                0xF0000000
 #define MV_SOC_AP806_COUNT               1
 
 //

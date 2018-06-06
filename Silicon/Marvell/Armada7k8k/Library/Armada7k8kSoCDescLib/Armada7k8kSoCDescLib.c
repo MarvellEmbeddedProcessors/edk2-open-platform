@@ -30,6 +30,23 @@
 
 EFI_STATUS
 EFIAPI
+ArmadaSoCAp8xxBaseGet (
+  IN OUT UINT64  *ApBase,
+  IN UINTN        ApIndex
+  )
+{
+  if (ApIndex != 0) {
+    DEBUG ((DEBUG_ERROR, "%a: Only one AP806 in A7K/A8K SoC\n", __FUNCTION__));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  *ApBase = MV_SOC_AP806_BASE;
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
 ArmadaSoCDescComPhyGet (
   IN OUT MV_SOC_COMPHY_DESC  **ComPhyDesc,
   IN OUT UINTN                *DescCount

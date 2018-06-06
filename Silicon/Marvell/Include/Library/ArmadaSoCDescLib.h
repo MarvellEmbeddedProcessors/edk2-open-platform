@@ -20,6 +20,16 @@
 #include <Protocol/EmbeddedGpio.h>
 
 //
+// North Bridge description
+//
+EFI_STATUS
+EFIAPI
+ArmadaSoCAp8xxBaseGet (
+  IN OUT UINT64  *ApBase,
+  IN UINTN        ApIndex
+  );
+
+//
 // ComPhy SoC description
 //
 typedef struct {
