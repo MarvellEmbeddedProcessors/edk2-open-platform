@@ -25,6 +25,14 @@ typedef struct {
 } MV_BOARD_COMPHY_DESC;
 
 //
+// GPIO devices per-board description
+//
+typedef struct {
+  MV_SOC_GPIO_DESC *SoC;
+  UINTN             GpioDevCount;
+} MV_BOARD_GPIO_DESC;
+
+//
 // I2C devices per-board description
 //
 typedef struct {

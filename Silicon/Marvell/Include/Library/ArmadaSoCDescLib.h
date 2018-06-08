@@ -49,14 +49,14 @@ ArmadaSoCDescCpBaseGet (
 // GPIO devices description template definition
 //
 typedef struct {
-  UINTN GpioBaseAddresses;
+  UINTN GpioBaseAddress;
   UINTN GpioPinCount;
 } MV_SOC_GPIO_DESC;
 
 EFI_STATUS
 EFIAPI
 ArmadaSoCDescGpioGet (
-  IN OUT MV_SOC_GPIO_DESC  **GpioDesc
+  IN OUT MV_SOC_GPIO_DESC  **GpioDesc,
   IN OUT UINTN              *DescCount
   );
 
