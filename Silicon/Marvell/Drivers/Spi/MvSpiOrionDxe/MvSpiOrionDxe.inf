@@ -59,7 +59,10 @@
   UefiRuntimeLib
 
 [FixedPcd]
+  gMarvellTokenSpaceGuid.PcdSpiClockFixed
   gMarvellTokenSpaceGuid.PcdSpiClockFrequency
+  gMarvellTokenSpaceGuid.PcdSpiClockMask
+  gMarvellTokenSpaceGuid.PcdSpiClockRegBase
   gMarvellTokenSpaceGuid.PcdSpiMaxFrequency
   gMarvellTokenSpaceGuid.PcdSpiRegBase
 

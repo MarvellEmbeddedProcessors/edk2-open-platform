@@ -311,6 +311,11 @@ MvFvbGetAttributes (
 
   FlashInstance = INSTANCE_FROM_FVB_THIS (This);
 
+  // Ensure proper access to the flash device from OS level
+  if (EfiAtRuntime ()) {
+    FlashInstance->SpiFlashProtocol->FlashPowerOn (&FlashInstance->SpiDevice);
+  }
+
   FwVolHeader = (EFI_FIRMWARE_VOLUME_HEADER *)FlashInstance->RegionBaseAddress;
   FlashFvbAttributes = (EFI_FVB_ATTRIBUTES_2 *)&(FwVolHeader->Attributes);
 
@@ -349,9 +354,17 @@ MvFvbSetAttributes (
   EFI_FVB_ATTRIBUTES_2  OldAttributes;
   EFI_FVB_ATTRIBUTES_2  FlashFvbAttributes;
   EFI_FVB_ATTRIBUTES_2  UnchangedAttributes;
+  FVB_DEVICE            *FlashInstance;
   UINT32                Capabilities;
   UINT32                OldStatus;
   UINT32                NewStatus;
+
+  FlashInstance = INSTANCE_FROM_FVB_THIS (This);
+
+  // Ensure proper access to the flash device from OS level
+  if (EfiAtRuntime ()) {
+    FlashInstance->SpiFlashProtocol->FlashPowerOn (&FlashInstance->SpiDevice);
+  }
 
   //
   // Obtain attributes from FVB header
@@ -467,6 +480,11 @@ MvFvbGetPhysicalAddress (
   ASSERT (Address != NULL);
 
   FlashInstance = INSTANCE_FROM_FVB_THIS (This);
+
+  // Ensure proper access to the flash device from OS level
+  if (EfiAtRuntime ()) {
+    FlashInstance->SpiFlashProtocol->FlashPowerOn (&FlashInstance->SpiDevice);
+  }
 
   *Address = FlashInstance->RegionBaseAddress;
 
@@ -588,6 +606,10 @@ MvFvbRead (
 
   FlashInstance = INSTANCE_FROM_FVB_THIS (This);
 
+  // Ensure proper access to the flash device from OS level
+  if (EfiAtRuntime ()) {
+    FlashInstance->SpiFlashProtocol->FlashPowerOn (&FlashInstance->SpiDevice);
+  }
 
   // Cache the block size to avoid de-referencing pointers all the time
   BlockSize = FlashInstance->Media.BlockSize;
@@ -697,6 +719,11 @@ MvFvbWrite (
 
   FlashInstance = INSTANCE_FROM_FVB_THIS (This);
 
+  // Ensure proper access to the flash device from OS level
+  if (EfiAtRuntime ()) {
+    FlashInstance->SpiFlashProtocol->FlashPowerOn (&FlashInstance->SpiDevice);
+  }
+
   DataOffset = GET_DATA_OFFSET (FlashInstance->FvbOffset + Offset,
                  FlashInstance->StartLba + Lba,
                  FlashInstance->Media.BlockSize);
@@ -769,6 +796,11 @@ MvFvbEraseBlocks (
   UINTN                  NumOfLba;     // Number of Lba blocks to erase
 
   FlashInstance = INSTANCE_FROM_FVB_THIS (This);
+
+  // Ensure proper access to the flash device from OS level
+  if (EfiAtRuntime ()) {
+    FlashInstance->SpiFlashProtocol->FlashPowerOn (&FlashInstance->SpiDevice);
+  }
 
   Status = EFI_SUCCESS;
 
@@ -882,11 +914,13 @@ MvFvbVirtualNotifyEvent (
   // Convert SPI device description
   EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiDevice.Info);
   EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiDevice.HostRegisterBaseAddress);
+  EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiDevice.HostClockEnableRegister);
   EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiDevice);
 
   // Convert SpiFlashProtocol
   EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiFlashProtocol->Erase);
   EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiFlashProtocol->Write);
+  EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiFlashProtocol->FlashPowerOn);
   EfiConvertPointer (0x0, (VOID**)&mFvbDevice->SpiFlashProtocol);
 
   return;
