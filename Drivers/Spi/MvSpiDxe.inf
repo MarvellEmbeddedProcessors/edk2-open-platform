@@ -58,7 +58,10 @@
 
 [FixedPcd]
   gMarvellTokenSpaceGuid.PcdSpiRegBase
+  gMarvellTokenSpaceGuid.PcdSpiClockFixed
   gMarvellTokenSpaceGuid.PcdSpiClockFrequency
+  gMarvellTokenSpaceGuid.PcdSpiClockMask
+  gMarvellTokenSpaceGuid.PcdSpiClockRegBase
   gMarvellTokenSpaceGuid.PcdSpiMaxFrequency
 
 [Protocols]

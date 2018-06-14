@@ -323,6 +323,11 @@ MvSpiSetupSlave (
   }
 
   Slave->HostRegisterBaseAddress = PcdGet32 (PcdSpiRegBase);
+  Slave->HostClockFixed = PcdGetBool (PcdSpiClockFixed);
+  if (!Slave->HostClockFixed) {
+    Slave->HostClockEnableRegister = PcdGet64 (PcdSpiClockRegBase);
+    Slave->HostClockEnableMask = PcdGet32 (PcdSpiClockMask);
+  }
   Slave->CoreClock = PcdGet32 (PcdSpiClockFrequency);
   Slave->MaxFreq = PcdGet32 (PcdSpiMaxFrequency);
 
@@ -344,12 +349,26 @@ MvSpiFreeSlave (
 
 EFI_STATUS
 EFIAPI
+MvSpiControllerPowerOn (
+  IN SPI_DEVICE *Slave
+  )
+{
+  if (!Slave->HostClockFixed) {
+    MmioOr32 (Slave->HostClockEnableRegister, Slave->HostClockEnableMask);
+  }
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
 MvSpiConfigRuntime (
   IN SPI_DEVICE *Slave
   )
 {
   EFI_STATUS Status;
   UINTN AlignedAddress;
+  UINTN ClockEnableAlignedAddress;
 
   //
   // Host register base may be not aligned to the page size,
@@ -373,11 +392,50 @@ MvSpiConfigRuntime (
                   EFI_MEMORY_UC | EFI_MEMORY_RUNTIME);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "%a: Failed to set memory attributes\n", __FUNCTION__));
-    gDS->RemoveMemorySpace (AlignedAddress, SIZE_4KB);
-    return Status;
+    goto ErrorSetHostMemorySpace;
+  }
+
+  //
+  // In case a clock feeding the SPI interface is always on, skip its
+  // configuration for Runtime.
+  //
+  if (Slave->HostClockFixed) {
+    return EFI_SUCCESS;
+  }
+
+  //
+  // Make sure about an alignment of the memory space needed for clock enabling.
+  // Add one aligned page of memory space which covers the clock enabling
+  // register.
+  //
+  ClockEnableAlignedAddress = Slave->HostClockEnableRegister & ~(SIZE_4KB - 1);
+
+  Status = gDS->AddMemorySpace (EfiGcdMemoryTypeMemoryMappedIo,
+                  ClockEnableAlignedAddress,
+                  SIZE_4KB,
+                  EFI_MEMORY_UC | EFI_MEMORY_RUNTIME);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a: Failed to add memory space\n", __FUNCTION__));
+    goto ErrorSetHostMemorySpace;
+  }
+
+  Status = gDS->SetMemorySpaceAttributes (ClockEnableAlignedAddress,
+                  SIZE_4KB,
+                  EFI_MEMORY_UC | EFI_MEMORY_RUNTIME);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "%a: Failed to set memory attributes\n", __FUNCTION__));
+    goto ErrorSetClockMemorySpace;
   }
 
   return EFI_SUCCESS;
+
+ErrorSetClockMemorySpace:
+  gDS->RemoveMemorySpace (ClockEnableAlignedAddress, SIZE_4KB);
+
+ErrorSetHostMemorySpace:
+  gDS->RemoveMemorySpace (AlignedAddress, SIZE_4KB);
+
+  return Status;
 }
 
 STATIC
@@ -393,6 +451,7 @@ SpiMasterInitProtocol (
   SpiMasterProtocol->Transfer    = MvSpiTransfer;
   SpiMasterProtocol->ReadWrite   = MvSpiReadWrite;
   SpiMasterProtocol->ConfigRuntime = MvSpiConfigRuntime;
+  SpiMasterProtocol->ControllerPowerOn = MvSpiControllerPowerOn;
 
   return EFI_SUCCESS;
 }

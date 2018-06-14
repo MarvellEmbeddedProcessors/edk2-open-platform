@@ -666,6 +666,15 @@ MvSpiFlashInit (
 }
 
 EFI_STATUS
+EFIAPI
+MvSpiFlashPowerOn (
+  IN SPI_DEVICE *Slave
+  )
+{
+  return SpiMasterProtocol->ControllerPowerOn (Slave);
+}
+
+EFI_STATUS
 MvSpiFlashInitProtocol (
   IN MARVELL_SPI_FLASH_PROTOCOL *SpiFlashProtocol
   )
@@ -677,6 +686,7 @@ MvSpiFlashInitProtocol (
   SpiFlashProtocol->Write = MvSpiFlashWrite;
   SpiFlashProtocol->Erase = MvSpiFlashErase;
   SpiFlashProtocol->Update = MvSpiFlashUpdate;
+  SpiFlashProtocol->FlashPowerOn = MvSpiFlashPowerOn;
 
   return EFI_SUCCESS;
 }
@@ -703,6 +713,7 @@ MvSpiFlashVirtualNotifyEvent (
   //
   EfiConvertPointer (0x0, (VOID**)&SpiMasterProtocol->ReadWrite);
   EfiConvertPointer (0x0, (VOID**)&SpiMasterProtocol->Transfer);
+  EfiConvertPointer (0x0, (VOID**)&SpiMasterProtocol->ControllerPowerOn);
   EfiConvertPointer (0x0, (VOID**)&SpiMasterProtocol);
 
   return;

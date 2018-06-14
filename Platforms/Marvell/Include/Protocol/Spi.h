@@ -87,6 +87,9 @@ typedef struct {
   SPI_MODE Mode;
   SPI_FLASH_INFO *Info;
   UINTN HostRegisterBaseAddress;
+  BOOLEAN HostClockFixed;
+  UINTN HostClockEnableRegister;
+  UINT32 HostClockEnableMask;
   UINTN CoreClock;
 } SPI_DEVICE;
 
@@ -140,6 +143,12 @@ EFI_STATUS
   IN SPI_DEVICE *SpiDev
   );
 
+typedef
+EFI_STATUS
+(EFIAPI *MV_SPI_POWER_ON) (
+  IN SPI_DEVICE *SpiDev
+  );
+
 struct _MARVELL_SPI_MASTER_PROTOCOL {
   MV_SPI_INIT         Init;
   MV_SPI_READ_WRITE   ReadWrite;
@@ -147,6 +156,7 @@ struct _MARVELL_SPI_MASTER_PROTOCOL {
   MV_SPI_SETUP_DEVICE SetupDevice;
   MV_SPI_FREE_DEVICE  FreeDevice;
   MV_SPI_CONFIG_RT    ConfigRuntime;
+  MV_SPI_POWER_ON     ControllerPowerOn;
 };
 
 #endif // __MARVELL_SPI_MASTER_PROTOCOL_H__

@@ -99,6 +99,12 @@ EFI_STATUS
   IN UINT8      *Buffer
   );
 
+typedef
+EFI_STATUS
+(EFIAPI *MV_SPI_FLASH_POWER_ON) (
+  IN SPI_DEVICE *SpiDev
+  );
+
 struct _MARVELL_SPI_FLASH_PROTOCOL {
   MV_SPI_FLASH_INIT    Init;
   MV_SPI_FLASH_READ_ID ReadId;
@@ -106,6 +112,7 @@ struct _MARVELL_SPI_FLASH_PROTOCOL {
   MV_SPI_FLASH_WRITE   Write;
   MV_SPI_FLASH_ERASE   Erase;
   MV_SPI_FLASH_UPDATE  Update;
+  MV_SPI_FLASH_POWER_ON FlashPowerOn;
 };
 
 #endif // __MV_SPI_FLASH__
