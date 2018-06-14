@@ -97,6 +97,9 @@
   gMarvellTokenSpaceGuid.PcdChip2MppSel6|{ 0xFF, 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 }
 
   #SPI
+  gMarvellTokenSpaceGuid.PcdSpiClockFixed|FALSE
+  gMarvellTokenSpaceGuid.PcdSpiClockMask|0x220000
+  gMarvellTokenSpaceGuid.PcdSpiClockRegBase|0xF4440220
   gMarvellTokenSpaceGuid.PcdSpiRegBase|0xF4700680
   gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|10000000
   gMarvellTokenSpaceGuid.PcdSpiClockFrequency|200000000

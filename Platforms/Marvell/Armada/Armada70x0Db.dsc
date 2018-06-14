@@ -100,6 +100,9 @@
   gMarvellTokenSpaceGuid.PcdIOExpanderI2cBuses|{ 0x0 }
 
   #SPI
+  gMarvellTokenSpaceGuid.PcdSpiClockFixed|FALSE
+  gMarvellTokenSpaceGuid.PcdSpiClockMask|0x220000
+  gMarvellTokenSpaceGuid.PcdSpiClockRegBase|0xF2440220
   gMarvellTokenSpaceGuid.PcdSpiRegBase|0xF2700680
   gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|10000000
   gMarvellTokenSpaceGuid.PcdSpiClockFrequency|200000000
