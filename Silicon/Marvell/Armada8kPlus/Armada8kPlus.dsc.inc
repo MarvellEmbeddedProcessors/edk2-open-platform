@@ -532,6 +532,7 @@
   MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
   MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
   MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
+  Silicon/Marvell/Drivers/Block/RamDisk/ramdisk.inf
 
   # Bds - Use Intel BDS
   MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
