@@ -36,6 +36,12 @@ ArmadaSoCDescComPhyGet (
   IN OUT UINTN                *DescCount
   );
 
+UINTN
+EFIAPI
+ArmadaSoCDescCpBaseGet (
+  IN UINTN  CpIndex
+  );
+
 //
 // I2C
 //
