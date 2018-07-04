@@ -379,12 +379,12 @@
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuIoSize|36
   gEmbeddedTokenSpaceGuid.PcdPrePiCpuMemorySize|36
 
-  gArmPlatformTokenSpaceGuid.PcdCPUCoresStackBase|0x41F0000
+  gArmPlatformTokenSpaceGuid.PcdCPUCoresStackBase|0x43F0000
   gArmPlatformTokenSpaceGuid.PcdCPUCorePrimaryStackSize|0x10000
 
   # Secure region reservation
   gMarvellTokenSpaceGuid.PcdSecureRegionBase|0x4000000
-  gMarvellTokenSpaceGuid.PcdSecureRegionSize|0x0200000
+  gMarvellTokenSpaceGuid.PcdSecureRegionSize|0x1400000
 
   # SMBIOS/DMI
   gEfiMdeModulePkgTokenSpaceGuid.PcdSmbiosDocRev|0x0
