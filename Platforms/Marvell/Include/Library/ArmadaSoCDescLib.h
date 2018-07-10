@@ -36,6 +36,12 @@ ArmadaSoCDescComPhyGet (
   IN OUT UINT8                *DescCount
   );
 
+UINTN
+EFIAPI
+ArmadaSoCDescCpBaseGet (
+  IN UINTN        CpIndex
+  );
+
 //
 // GPIO devices description template definition
 //

@@ -68,6 +68,20 @@ ArmadaSoCDescComPhyGet (
   return EFI_SUCCESS;
 }
 
+UINTN
+EFIAPI
+ArmadaSoCDescCpBaseGet (
+  IN UINTN        CpIndex
+  )
+{
+  if (CpIndex >= FixedPcdGet8 (PcdMaxCpCount)) {
+    DEBUG ((DEBUG_ERROR, "%a: Wrong CP index (%d)\n", __FUNCTION__, CpIndex));
+    return 0;
+  }
+
+  return MV_SOC_CP_BASE (CpIndex);
+}
+
 //
 // Platform description of GPIO
 //
