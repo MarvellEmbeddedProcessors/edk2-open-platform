@@ -29,6 +29,7 @@
   OpenPlatformPkg/Platforms/Marvell/Marvell.dec
 
 [LibraryClasses]
+  ArmadaIcuLib
   TimerLib
   UtmiPhyLib
   ComPhyLib
