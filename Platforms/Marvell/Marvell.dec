@@ -67,6 +67,7 @@
 
 [LibraryClasses]
   ArmadaBoardDescLib|Include/Library/ArmadaBoardDescLib.h
+  ArmadaIcuLib|Include/Library/ArmadaIcuLib.h
   ArmadaSoCDescLib|Include/Library/ArmadaSoCDescLib.h
   MvSARLib|Include/Library/MvSARLib.h
   PciEmulationInitLib|Include/Library/PciEmulationInitLib.h
