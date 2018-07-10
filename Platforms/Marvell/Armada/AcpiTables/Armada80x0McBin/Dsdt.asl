@@ -72,7 +72,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
                     )
                 Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
                 {
-                  95
+                  114
                 }
             })
         }
@@ -97,7 +97,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
                     )
                 Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
                 {
-                  319
+                  338
                 }
             })
         }
@@ -116,7 +116,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
                     )
                 Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
                 {
-                  94
+                  113
                 }
             })
         }
@@ -135,7 +135,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
                     )
                 Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
                 {
-                  93
+                  112
                 }
             })
         }
@@ -154,7 +154,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
                     )
                 Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
                 {
-                  318
+                  337
                 }
             })
         }
@@ -234,7 +234,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
               {
                   Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
                   {
-                    69, 73, 77, 81, 124, 100,                     // Port0 interrupts
+                    69, 72, 75, 78, 81, 127,                     // Port0 interrupts
                   }
               })
               Name (_DSD, Package () {
@@ -271,7 +271,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
               {
                   Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
                   {
-                    293, 297, 301, 305, 348, 324,                 // Port0 interrupts
+                    293, 296, 299, 302, 305, 351,                 // Port0 interrupts
                   }
               })
               Name (_DSD, Package () {
@@ -290,7 +290,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
               {
                   Interrupt (ResourceConsumer, Level, ActiveHigh, Exclusive, ,, )
                   {
-                    294, 298, 302, 306, 349, 323,                 // Port1 interrupts
+                    294, 297, 300, 303, 306, 350,                 // Port1 interrupts
                   }
               })
               Name (_DSD, Package () {
@@ -311,7 +311,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
             Name (_CRS, ResourceTemplate ()
             {
                 Memory32Fixed (ReadWrite, 0xF2760000, 0x7D)
-                Interrupt (ResourceConsumer, Level, ActiveHigh, Shared) { 95 }
+                Interrupt (ResourceConsumer, Level, ActiveHigh, Shared) { 105 }
             })
             Name (_DSD, Package () {
                 ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
@@ -328,7 +328,7 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
             Name (_CRS, ResourceTemplate ()
             {
                 Memory32Fixed (ReadWrite, 0xF4760000, 0x7D)
-                Interrupt (ResourceConsumer, Level, ActiveHigh, Shared) { 95 }
+                Interrupt (ResourceConsumer, Level, ActiveHigh, Shared) { 329 }
             })
             Name (_DSD, Package () {
                 ToUUID("daffd814-6eba-4d8c-8a91-bc9bbf4aa301"),
