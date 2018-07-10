@@ -29,7 +29,7 @@
 #define GIC_MSI_FRAME2            0xF02A0000
 #define GIC_MSI_FRAME3            0xF02B0000
 
-#define PMU_INTERRUPT             50
+#define PMU_INTERRUPT             29
 
 #pragma pack(push, 1)
 typedef struct {
