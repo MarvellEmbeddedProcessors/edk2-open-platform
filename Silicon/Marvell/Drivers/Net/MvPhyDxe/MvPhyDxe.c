@@ -66,6 +66,7 @@ STATIC UINT8 * CONST PhySmiAddresses = PcdGetPtr (PcdPhySmiAddresses);
 
 STATIC MV_PHY_DEVICE MvPhyDevices[] = {
   { MV_PHY_DEVICE_1512, MvPhyInit1512 },
+  { MV_PHY_DEVICE_1112, MvPhyInit1112 },
   { 0, NULL }
 };
 
@@ -356,6 +357,31 @@ MvPhyInit1512 (
     Mdio->Write (Mdio, PhyDev->Addr, PhyDev->MdioIndex, 22, 0x0000);
     gBS->Stall(100);
   }
+
+  MvPhyM88e1111sConfig (PhyDev);
+
+  /* autonegotiation on startup is not always required */
+  if (!PcdGetBool (PcdPhyStartupAutoneg))
+    return EFI_SUCCESS;
+
+  Status = MvPhyConfigureAutonegotiation (PhyDev);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  MvPhyParseStatus (PhyDev);
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+MvPhyInit1112 (
+  IN CONST MARVELL_PHY_PROTOCOL *Snp,
+  IN OUT PHY_DEVICE *PhyDev
+  )
+{
+  EFI_STATUS Status;
 
   MvPhyM88e1111sConfig (PhyDev);
 
