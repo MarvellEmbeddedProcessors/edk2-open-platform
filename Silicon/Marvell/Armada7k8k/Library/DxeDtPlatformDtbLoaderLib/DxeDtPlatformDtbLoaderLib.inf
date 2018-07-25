@@ -1,0 +1,43 @@
+/** @file
+*
+*  Copyright (c) 2017, Linaro, Ltd. All rights reserved.
+*  Copyright (c) 2018, Marvell International Ltd. and its affiliates
+*
+*  This program and the accompanying materials
+*  are licensed and made available under the terms and conditions of the BSD License
+*  which accompanies this distribution.  The full text of the license may be found at
+*  http://opensource.org/licenses/bsd-license.php
+*
+*  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+*
+**/
+
+[Defines]
+  INF_VERSION                    = 0x0001001A
+  BASE_NAME                      = DxeDtPlatformDtbLoaderLibDefault
+  FILE_GUID                      = dde55569-ad3f-421d-b94b-3be66bb916ce
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = DtPlatformDtbLoaderLib|DXE_DRIVER
+
+[Sources]
+  DxeDtPlatformDtbLoaderLib.c
+
+[Packages]
+  ArmPkg/ArmPkg.dec
+  EmbeddedPkg/EmbeddedPkg.dec
+  MdePkg/MdePkg.dec
+  Silicon/Marvell/Marvell.dec
+
+[LibraryClasses]
+  ArmSmcLib
+  BaseLib
+  DebugLib
+  DxeServicesLib
+  MemoryAllocationLib
+  UefiRuntimeServicesTableLib
+
+[Guids]
+  gDtPlatformDefaultDtbFileGuid
+  gDtPlatformFormSetGuid
