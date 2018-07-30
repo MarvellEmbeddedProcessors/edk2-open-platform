@@ -688,6 +688,8 @@ SdMmcPciHcDriverBindingStart (
     return EFI_D_ERROR;
   }
 
+  SdMmcHcSetBusWidth(PciIo, Slot, 1);
+
   //
   // Perform Xenon-specific init sequence
   //
@@ -939,6 +941,8 @@ SdMmcPciHcDriverBindingStop (
   ASSERT_EFI_ERROR (Status);
 
   FreePool (Private);
+
+  XenonIdx = 0;
 
   DEBUG ((DEBUG_INFO, "SdMmcPciHcDriverBindingStop: End with %r\n", Status));
 
