@@ -63,6 +63,13 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define SD_MMC_HC_CTRL_VER            0xFE
 
 //
+// Software reset register bits description
+//
+#define SD_MMC_HC_ALL_RESET_BIT      (1 << 0)
+#define SD_MMC_HC_CMD_RESET_BIT      (1 << 1)
+#define SD_MMC_HC_DATA_RESET_BIT     (1 << 2)
+
+//
 // The transfer modes supported by SD Host Controller
 // Simplified Spec 3.0 Table 1-2
 //
@@ -312,7 +319,8 @@ SdMmcHcWaitMmioSet (
 EFI_STATUS
 SdMmcHcReset (
   IN EFI_PCI_IO_PROTOCOL    *PciIo,
-  IN UINT8                  Slot
+  IN UINT8                  Slot,
+  IN UINT8                  Mask
   );
 
 /**

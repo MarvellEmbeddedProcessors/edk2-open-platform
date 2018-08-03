@@ -434,14 +434,13 @@ SdMmcHcWaitMmioSet (
 EFI_STATUS
 SdMmcHcReset (
   IN EFI_PCI_IO_PROTOCOL    *PciIo,
-  IN UINT8                  Slot
+  IN UINT8                  Slot,
+  IN UINT8                  Mask
   )
 {
   EFI_STATUS                Status;
-  UINT8                     SwReset;
 
-  SwReset = 0xFF;
-  Status  = SdMmcHcRwMmio (PciIo, Slot, SD_MMC_HC_SW_RST, FALSE, sizeof (SwReset), &SwReset);
+  Status  = SdMmcHcRwMmio (PciIo, Slot, SD_MMC_HC_SW_RST, FALSE, sizeof (Mask), &Mask);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "SdMmcHcReset: write full 1 fails: %r\n", Status));
@@ -452,8 +451,8 @@ SdMmcHcReset (
              PciIo,
              Slot,
              SD_MMC_HC_SW_RST,
-             sizeof (SwReset),
-             0xFF,
+             sizeof (Mask),
+             Mask,
              0x00,
              SD_MMC_HC_GENERIC_TIMEOUT
              );
@@ -1925,4 +1924,3 @@ SdMmcWaitTrbResult (
 
   return EFI_TIMEOUT;
 }
-

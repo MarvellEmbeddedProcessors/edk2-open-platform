@@ -298,7 +298,7 @@ SdMmcPciHcEnumerateDevice (
         //
         // Reset the specified slot of the SD/MMC Pci Host Controller
         //
-        Status = SdMmcHcReset (Private->PciIo, Slot);
+        Status = SdMmcHcReset (Private->PciIo, Slot, SD_MMC_HC_ALL_RESET_BIT | SD_MMC_HC_CMD_RESET_BIT | SD_MMC_HC_DATA_RESET_BIT);
         if (EFI_ERROR (Status)) {
           continue;
         }
@@ -1374,4 +1374,3 @@ SdMmcPassThruResetDevice (
 
   return EFI_SUCCESS;
 }
-
