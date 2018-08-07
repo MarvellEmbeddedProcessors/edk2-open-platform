@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Protocol/Ip6.h>
 #include <Protocol/MvPhy.h>
 #include <Protocol/SimpleNetwork.h>
+#include <Protocol/AdapterInformation.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -60,6 +61,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define PP2DXE_SIGNATURE                    SIGNATURE_32('P', 'P', '2', 'D')
 #define INSTANCE_FROM_SNP(a)                CR((a), PP2DXE_CONTEXT, Snp, PP2DXE_SIGNATURE)
+#define INSTANCE_FROM_AIP(a)                CR((a), PP2DXE_CONTEXT, Aip, PP2DXE_SIGNATURE)
 
 /* OS API */
 #define Mvpp2Alloc(v)                       AllocateZeroPool(v)
@@ -350,21 +352,22 @@ typedef struct {
 
 #define QUEUE_DEPTH 64
 typedef struct {
-  UINT32                      Signature;
-  INTN                        Instance;
-  EFI_HANDLE                  Controller;
-  EFI_LOCK                    Lock;
-  EFI_SIMPLE_NETWORK_PROTOCOL Snp;
-  MARVELL_PHY_PROTOCOL        *Phy;
-  PHY_DEVICE                  *PhyDev;
-  PP2DXE_PORT                 Port;
-  BOOLEAN                     Initialized;
-  BOOLEAN                     LateInitialized;
-  VOID                        *CompletionQueue[QUEUE_DEPTH];
-  UINTN                       CompletionQueueHead;
-  UINTN                       CompletionQueueTail;
-  EFI_EVENT                   EfiExitBootServicesEvent;
-  PP2_DEVICE_PATH             *DevicePath;
+  UINT32                           Signature;
+  INTN                             Instance;
+  EFI_HANDLE                       Controller;
+  EFI_LOCK                         Lock;
+  EFI_SIMPLE_NETWORK_PROTOCOL      Snp;
+  EFI_ADAPTER_INFORMATION_PROTOCOL Aip;
+  MARVELL_PHY_PROTOCOL             *Phy;
+  PHY_DEVICE                       *PhyDev;
+  PP2DXE_PORT                      Port;
+  BOOLEAN                          Initialized;
+  BOOLEAN                          LateInitialized;
+  VOID                             *CompletionQueue[QUEUE_DEPTH];
+  UINTN                            CompletionQueueHead;
+  UINTN                            CompletionQueueTail;
+  EFI_EVENT                        EfiExitBootServicesEvent;
+  PP2_DEVICE_PATH                  *DevicePath;
 } PP2DXE_CONTEXT;
 
 /* Inline helpers */
@@ -620,4 +623,33 @@ Pp2SnpReceive (
   OUT EFI_MAC_ADDRESS            *DstAddr OPTIONAL,
   OUT UINT16                     *EtherType OPTIONAL
   );
+
+/* AIP Callbacks */
+
+EFI_STATUS
+EFIAPI
+Pp2AipGetInformation (
+  IN  EFI_ADAPTER_INFORMATION_PROTOCOL  *This,
+  IN  EFI_GUID                          *InformationType,
+  OUT VOID                              **InformationBlock,
+  OUT UINTN                             *InformationBlockSize
+  );
+
+EFI_STATUS
+EFIAPI
+Pp2AipSetInformation (
+  IN  EFI_ADAPTER_INFORMATION_PROTOCOL  *This,
+  IN  EFI_GUID                          *InformationType,
+  IN  VOID                              *InformationBlock,
+  IN  UINTN                             InformationBlockSize
+  );
+
+EFI_STATUS
+EFIAPI
+Pp2AipGetSupportedTypes (
+  IN  EFI_ADAPTER_INFORMATION_PROTOCOL  *This,
+  OUT EFI_GUID                          **InfoTypesBuffer,
+  OUT UINTN                             *InfoTypesBufferCount
+  );
+
 #endif

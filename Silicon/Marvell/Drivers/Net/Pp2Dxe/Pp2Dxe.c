@@ -1130,6 +1130,7 @@ Pp2DxeSnpInstall (
       &Handle,
       &gEfiSimpleNetworkProtocolGuid, &Pp2Context->Snp,
       &gEfiDevicePathProtocolGuid, Pp2DevicePath,
+      &gEfiAdapterInformationProtocolGuid, &Pp2Context->Aip,
       NULL
       );
 
@@ -1138,6 +1139,84 @@ Pp2DxeSnpInstall (
   }
 
   return Status;
+}
+
+EFI_STATUS
+EFIAPI
+Pp2AipGetInformation (
+  IN  EFI_ADAPTER_INFORMATION_PROTOCOL  *This,
+  IN  EFI_GUID                          *InformationType,
+  OUT VOID                              **InformationBlock,
+  OUT UINTN                             *InformationBlockSize
+  )
+{
+  PP2DXE_CONTEXT               *Pp2Context;
+  EFI_STATUS                   Status;
+
+  if (This == NULL || InformationBlock == NULL || InformationBlockSize == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Pp2Context = INSTANCE_FROM_AIP (This);
+  if (CompareGuid (InformationType, &gEfiAdapterInfoMediaStateGuid)) {
+    *InformationBlockSize = sizeof(EFI_ADAPTER_INFO_MEDIA_STATE);
+    *InformationBlock = AllocateZeroPool (*InformationBlockSize);
+    if (*InformationBlock == NULL) {
+      return EFI_OUT_OF_RESOURCES;
+    }
+    Status = Pp2Context->Snp.GetStatus(&(Pp2Context->Snp), NULL, NULL);
+    if (EFI_ERROR (Status)){
+      if (Status == EFI_NOT_READY){
+        ((EFI_ADAPTER_INFO_MEDIA_STATE*)*InformationBlock)->MediaState = EFI_NOT_READY;
+        return EFI_SUCCESS;
+      } else {
+        FreePool (*InformationBlock);
+        return EFI_DEVICE_ERROR;
+      }
+    }
+    ((EFI_ADAPTER_INFO_MEDIA_STATE*)*InformationBlock)->MediaState =
+                                      (Pp2Context->Snp.Mode->MediaPresent ? EFI_SUCCESS : EFI_NOT_READY);
+    return EFI_SUCCESS;
+  }
+  return EFI_UNSUPPORTED;
+}
+
+EFI_STATUS
+EFIAPI
+Pp2AipSetInformation (
+  IN  EFI_ADAPTER_INFORMATION_PROTOCOL  *This,
+  IN  EFI_GUID                          *InformationType,
+  IN  VOID                              *InformationBlock,
+  IN  UINTN                             InformationBlockSize
+  )
+{
+  if (This == NULL || InformationBlock == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+  if (CompareGuid (InformationType, &gEfiAdapterInfoMediaStateGuid)) {
+    return EFI_WRITE_PROTECTED;
+  }
+  return EFI_UNSUPPORTED;
+}
+
+EFI_STATUS
+EFIAPI
+Pp2AipGetSupportedTypes (
+  IN  EFI_ADAPTER_INFORMATION_PROTOCOL  *This,
+  OUT EFI_GUID                          **InfoTypesBuffer,
+  OUT UINTN                             *InfoTypesBufferCount
+  )
+{
+  if (This == NULL || InfoTypesBuffer == NULL || InfoTypesBufferCount == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+  *InfoTypesBufferCount = 1;
+  *InfoTypesBuffer = AllocateZeroPool (sizeof(EFI_GUID) * (*InfoTypesBufferCount));
+  if (*InfoTypesBuffer == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+  (*InfoTypesBuffer)[0] = gEfiAdapterInfoMediaStateGuid;
+  return EFI_SUCCESS;
 }
 
 STATIC
@@ -1290,6 +1369,11 @@ Pp2DxeInitialiseController (
     /* Instances are enumerated from 0 */
     Pp2Context->Instance = DeviceInstance;
     DeviceInstance++;
+
+    /* Prepare AIP Protocol */
+    Pp2Context->Aip.GetInformation    = Pp2AipGetInformation;
+    Pp2Context->Aip.SetInformation    = Pp2AipSetInformation;
+    Pp2Context->Aip.GetSupportedTypes = Pp2AipGetSupportedTypes;
 
     /* Install SNP protocol */
     Status = Pp2DxeSnpInstall(Pp2Context);
