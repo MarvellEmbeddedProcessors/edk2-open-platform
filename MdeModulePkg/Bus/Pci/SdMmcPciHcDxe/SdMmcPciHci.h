@@ -63,6 +63,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define SD_MMC_HC_CTRL_VER            0xFE
 
 //
+// SD Host Control 1 Register bits description
+//
+#define SD_MMC_HC_HOST_CTRL1_HS_ENABLE  (1 << 2)
+
+//
 // The transfer modes supported by SD Host Controller
 // Simplified Spec 3.0 Table 1-2
 //
