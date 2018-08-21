@@ -886,6 +886,23 @@ SdCardSetBusMode (
     return Status;
   }
 
+  if (mOverride != NULL && mOverride->SwitchClockFreqPost != NULL) {
+    Status = mOverride->SwitchClockFreqPost (
+                          Private->ControllerHandle,
+                          Slot,
+                          Timing
+                          );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "%a: SD/MMC switch clock freq post notifier callback failed - %r\n",
+        __FUNCTION__,
+        Status
+        ));
+      return Status;
+    }
+  }
+
   if ((AccessMode == 3) || ((AccessMode == 2) && (Capability->TuningSDR50 != 0))) {
     Status = SdCardTuningClock (PciIo, PassThru, Slot);
     if (EFI_ERROR (Status)) {
