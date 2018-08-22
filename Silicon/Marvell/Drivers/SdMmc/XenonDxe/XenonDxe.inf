@@ -6,7 +6,7 @@
 #  to specified devices from upper layer.
 #
 #  Copyright (c) 2015, Intel Corporation. All rights reserved.<BR>
-#  Copyright (C) 2016 Marvell International Ltd. All rights reserved.<BR>
+#  Copyright (C) 2018, Marvell International Ltd. All rights reserved.<BR>
 #
 #  This program and the accompanying materials
 #  are licensed and made available under the terms and conditions of the BSD License
@@ -19,33 +19,29 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010019
+  INF_VERSION                    = 0x0001001A
   BASE_NAME                      = XenonDxe
-  MODULE_UNI_FILE                = SdMmcPciHcDxe.uni
   FILE_GUID                      = 17f56b40-f7c1-435c-ab8d-404872da951e
   MODULE_TYPE                    = UEFI_DRIVER
   VERSION_STRING                 = 1.0
-  ENTRY_POINT                    = InitializeSdMmcPciHcDxe
+  ENTRY_POINT                    = InitializeXenonDxe
 
 [Sources]
-  ComponentName.c
-  EmmcDevice.c
-  SdDevice.c
-  SdMmcPciHcDxe.c
-  SdMmcPciHcDxe.h
-  SdMmcPciHci.c
-  SdMmcPciHci.h
+  XenonPciHci.c
+  XenonPciHci.h
   XenonSdhci.c
   XenonSdhci.h
+  XenonSdMmcOverride.c
+  XenonSdMmcOverride.h
 
 [Packages]
   MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  Silicon/Marvell/Marvell.dec
 
 [LibraryClasses]
   BaseLib
-  BaseMemoryLib
   DebugLib
-  DevicePathLib
   MemoryAllocationLib
   UefiBootServicesTableLib
   UefiDriverEntryPoint
@@ -53,12 +49,7 @@
   UefiRuntimeServicesTableLib
 
 [Protocols]
-  gEfiDevicePathProtocolGuid                    ## TO_START
+  gEdkiiSdMmcOverrideProtocolGuid               ## BY_START
+  gEdkiiNonDiscoverableDeviceProtocolGuid       ## TO_START
   gEfiPciIoProtocolGuid                         ## TO_START
-  gEfiSdMmcPassThruProtocolGuid                 ## BY_START
-
-# [Event]
-# EVENT_TYPE_PERIODIC_TIMER ## SOMETIMES_CONSUMES
-
-[UserExtensions.TianoCore."ExtraFiles"]
-  SdMmcPciHcDxeExtra.uni
+  gMarvellBoardDescProtocolGuid                 ## TO_START
