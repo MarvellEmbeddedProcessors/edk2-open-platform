@@ -46,6 +46,21 @@ ArmadaSoCDescCpBaseGet (
   );
 
 //
+// GPIO devices description template definition
+//
+typedef struct {
+  UINTN GpioBaseAddress;
+  UINTN GpioPinCount;
+} MV_SOC_GPIO_DESC;
+
+EFI_STATUS
+EFIAPI
+ArmadaSoCDescGpioGet (
+  IN OUT MV_SOC_GPIO_DESC  **GpioDesc,
+  IN OUT UINTN              *DescCount
+  );
+
+//
 // I2C
 //
 typedef struct {
