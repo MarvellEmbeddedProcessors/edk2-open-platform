@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <Library/DebugLib.h>
 #include <Library/NonDiscoverableDeviceRegistrationLib.h>
+#include <Library/NonDiscoverableInitLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 #include <Protocol/BoardDesc.h>
@@ -57,7 +58,7 @@ NonDiscoverableInitXhci (
     Status = RegisterNonDiscoverableMmioDevice (
                      NonDiscoverableDeviceTypeXhci,
                      Desc[i].SoC->XhciDmaType,
-                     NULL,
+                     GetInitializerForType (NonDiscoverableDeviceTypeXhci, i),
                      NULL,
                      1,
                      Desc[i].SoC->XhciBaseAddress,
@@ -86,7 +87,7 @@ NonDiscoverableInitAhci (
     Status = RegisterNonDiscoverableMmioDevice (
                      NonDiscoverableDeviceTypeAhci,
                      Desc[i].SoC->AhciDmaType,
-                     NULL,
+                     GetInitializerForType (NonDiscoverableDeviceTypeAhci, i),
                      NULL,
                      1,
                      Desc[i].SoC->AhciBaseAddress,
@@ -115,7 +116,7 @@ NonDiscoverableInitSdhci (
     Status = RegisterNonDiscoverableMmioDevice (
                      NonDiscoverableDeviceTypeSdhci,
                      Desc[i].SoC->SdMmcDmaType,
-                     NULL,
+                     GetInitializerForType (NonDiscoverableDeviceTypeSdhci, i),
                      NULL,
                      1,
                      Desc[i].SoC->SdMmcBaseAddress,
