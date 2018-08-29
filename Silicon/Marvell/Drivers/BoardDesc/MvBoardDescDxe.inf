@@ -47,6 +47,7 @@
   Silicon/Marvell/Marvell.dec
 
 [LibraryClasses]
+  ArmadaBoardDescLib
   ArmadaSoCDescLib
   DebugLib
   MemoryAllocationLib
@@ -59,6 +60,7 @@
 [Pcd]
   gMarvellTokenSpaceGuid.PcdComPhyDevices
   gMarvellTokenSpaceGuid.PcdI2cControllersEnabled
+  gMarvellTokenSpaceGuid.PcdPcieControllersEnabled
   gMarvellTokenSpaceGuid.PcdPciEAhci
   gMarvellTokenSpaceGuid.PcdPciESdhci
   gMarvellTokenSpaceGuid.PcdPciEXhci

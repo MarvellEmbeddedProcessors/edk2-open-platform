@@ -92,6 +92,13 @@ EFI_STATUS
 
 typedef
 EFI_STATUS
+(EFIAPI *MV_BOARD_DESC_PCIE_GET) (
+  IN MARVELL_BOARD_DESC_PROTOCOL  *This,
+  IN OUT MV_BOARD_PCIE_DESC      **PcieDesc
+  );
+
+typedef
+EFI_STATUS
 (EFIAPI *MV_BOARD_DESC_PP2_GET) (
   IN MARVELL_BOARD_DESC_PROTOCOL  *This,
   IN OUT MV_BOARD_PP2_DESC       **Pp2Desc
@@ -116,6 +123,7 @@ struct _MARVELL_BOARD_DESC_PROTOCOL {
   MV_BOARD_DESC_GPIO_GET         BoardDescGpioGet;
   MV_BOARD_DESC_I2C_GET          BoardDescI2cGet;
   MV_BOARD_DESC_MDIO_GET         BoardDescMdioGet;
+  MV_BOARD_DESC_PCIE_GET         BoardDescPcieGet;
   MV_BOARD_DESC_PP2_GET          BoardDescPp2Get;
   MV_BOARD_DESC_SDMMC_GET        BoardDescSdMmcGet;
   MV_BOARD_DESC_UTMI_GET         BoardDescUtmiGet;
