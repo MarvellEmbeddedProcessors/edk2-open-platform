@@ -688,6 +688,8 @@ SdMmcPciHcDriverBindingStart (
     return EFI_D_ERROR;
   }
 
+  SdMmcHcReset (Private->PciIo, Slot, SD_MMC_HC_ALL_RESET_BIT);
+
   SdMmcHcSetBusWidth(PciIo, Slot, 1);
 
   //
