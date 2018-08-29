@@ -69,6 +69,9 @@
   #CP110 count
   gMarvellTokenSpaceGuid.PcdMaxCpCount|1
 
+  #Timer
+  gEmbeddedTokenSpaceGuid.PcdTimerPeriod|10000
+
   #MPP
   gMarvellTokenSpaceGuid.PcdMppChipCount|2
 

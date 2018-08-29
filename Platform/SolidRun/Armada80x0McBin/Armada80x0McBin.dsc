@@ -67,6 +67,9 @@
   #BoardId: Armada-8040-mcbin
   gMarvellTokenSpaceGuid.PcdBoardId|0x1
 
+  #Timer
+  gEmbeddedTokenSpaceGuid.PcdTimerPeriod|10000
+
   #MPP
   gMarvellTokenSpaceGuid.PcdMppChipCount|3
 
