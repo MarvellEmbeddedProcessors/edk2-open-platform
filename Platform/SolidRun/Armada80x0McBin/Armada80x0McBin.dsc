@@ -64,6 +64,9 @@
 #
 ################################################################################
 [PcdsFixedAtBuild.common]
+  #BoardId: Armada-8040-mcbin
+  gMarvellTokenSpaceGuid.PcdBoardId|0x1
+
   #MPP
   gMarvellTokenSpaceGuid.PcdMppChipCount|3
 

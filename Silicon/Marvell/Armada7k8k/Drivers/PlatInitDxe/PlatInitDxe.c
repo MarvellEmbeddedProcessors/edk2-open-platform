@@ -14,12 +14,39 @@
 
 #include <Library/ArmadaIcuLib.h>
 #include <Library/DebugLib.h>
+#include <Library/IoLib.h>
 #include <Library/MppLib.h>
+#include <Library/MvBoardDescLib.h>
 #include <Library/MvComPhyLib.h>
 #include <Library/PcdLib.h>
 #include <Library/UefiDriverEntryPoint.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UtmiPhyLib.h>
+
+STATIC
+EFI_STATUS
+ArmadaPlatInitBoardSelect (
+  )
+{
+  UINT8    BoardId;
+
+  MVBOARD_ID_GET (BoardId);
+
+  switch (BoardId) {
+  case MVBOARD_ID_ARMADA7040_DB:
+    DEBUG ((DEBUG_ERROR, "\nArmada 7040 DB Platform Init\n\n"));
+    return EFI_SUCCESS;
+  case MVBOARD_ID_ARMADA8040_DB:
+    DEBUG ((DEBUG_ERROR, "\nArmada 8040 DB Platform Init\n\n"));
+    return EFI_SUCCESS;
+  case MVBOARD_ID_ARMADA8040_MCBIN:
+    DEBUG ((DEBUG_ERROR, "\nArmada 8040 MachiatoBin Platform Init\n\n"));
+    return EFI_SUCCESS;
+  default:
+    DEBUG ((DEBUG_ERROR, "\nInvalid Board Id 0x%x\n", BoardId));
+    return EFI_INVALID_PARAMETER;
+  }
+}
 
 EFI_STATUS
 EFIAPI
@@ -30,7 +57,8 @@ ArmadaPlatInitDxeEntryPoint (
 {
   EFI_STATUS    Status;
 
-  DEBUG ((DEBUG_ERROR, "\nArmada Platform Init\n\n"));
+  Status = ArmadaPlatInitBoardSelect ();
+  ASSERT_EFI_ERROR (Status);
 
   Status = gBS->InstallProtocolInterface (&ImageHandle,
                   &gMarvellPlatformInitCompleteProtocolGuid,

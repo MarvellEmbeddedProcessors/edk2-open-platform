@@ -5,34 +5,43 @@ This document provides instructions for adding support for new Marvell Armada
 board. For the sake of simplicity new Marvell board will be called "new_board".
 
 1. Create configuration files for new target
-        1.1 Create FDF file for new board
+  1.1 Create FDF file for new board
 
-         - Copy and rename edk2-platforms/Platform/Marvell/Armada/Armada70x0.fdf to
-           edk2-platforms/Platform/Marvell/Armada/new_board.fdf
-         - Change the first no-comment line:
-           [FD.Armada70x0_EFI] to [FD.{new_board}_EFI]
+   - Copy and rename PathToYourOpp/Platforms/Marvell/Armada/Armada70x0.fdf to
+     PathToYourOpp/Platforms/Marvell/Armada/new_board.fdf
+   - Change the first no-comment line:
+     [FD.Armada70x0_EFI] to [FD.{new_board}_EFI]
 
-        1.2 Create DSC file for new board
+  1.2 Create DSC file for new board
 
-         - Add new_board.dsc file to edk2-platforms/Platform/Marvell/Armada directory
-         - Insert following [Defines] section to new_board.dsc:
+   - Add new_board.dsc file to PathToYourOpp/Platforms/Marvell/Armada directory
+   - Insert following [Defines] section to new_board.dsc:
 
-                        [Defines]
-                          PLATFORM_NAME                  = {new_board}
-                          PLATFORM_GUID                  = {newly_generated_GUID}
-                          PLATFORM_VERSION               = 0.1
-                          DSC_SPECIFICATION              = 0x00010019
-                          OUTPUT_DIRECTORY               = {output_directory}
-                          SUPPORTED_ARCHITECTURES        = AARCH64
-                          BUILD_TARGETS                  = DEBUG|RELEASE
-                          SKUID_IDENTIFIER               = DEFAULT
-                          FLASH_DEFINITION               = {path_to_fdf_file}
+      [Defines]
+        PLATFORM_NAME                  = {new_board}
+        PLATFORM_GUID                  = {newly_generated_GUID}
+        PLATFORM_VERSION               = 0.1
+        DSC_SPECIFICATION              = 0x00010019
+        OUTPUT_DIRECTORY               = {output_directory}
+        SUPPORTED_ARCHITECTURES        = AARCH64
+        BUILD_TARGETS                  = DEBUG|RELEASE
+        SKUID_IDENTIFIER               = DEFAULT
+        FLASH_DEFINITION               = {path_to_fdf_file}
 
-         - Add "!include Armada.dsc.inc" entry to new_board.dsc
+   - Add "!include Armada.dsc.inc" entry to new_board.dsc
+
+   - Add unique Board ID to MVBOARD_ID list in
+     PathToYourOpp/Platforms/Marvell/Include/Library/MvBoardDescLib.h:
+
+      typedef enum {
+        MVBOARD_ID_ARMADA7040_DB,
+        MVBOARD_ID_MAX,
+        MVBOARD_ID_DEFAULT = 0xFF,
+      } MVBOARD_ID;
+
+     and assign according value to gMarvellTokenSpaceGuid.PcdBoardId PCD.
 
 2. Driver support
- - According to content of files from
-   edk2-platforms/Silicon/Marvell/Documentation/PortingGuide.txt
    insert PCD entries into new_board.dsc for every needed interface (as listed below).
 
 3. Compilation
