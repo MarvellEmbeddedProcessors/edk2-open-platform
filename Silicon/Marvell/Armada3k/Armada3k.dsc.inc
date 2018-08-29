@@ -145,7 +145,7 @@
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
 
 [LibraryClasses.common.SEC, LibraryClasses.common.PEIM]
-  MemoryInitPeiLib|Silicon/Marvell/Armada7k8k/Library/Armada7k8kMemoryInitPeiLib/Armada7k8kMemoryInitPeiLib.inf
+  MemoryInitPeiLib|Silicon/Marvell/Armada3k/Library/Armada3kMemoryInitPeiLib/Armada3kMemoryInitPeiLib.inf
   BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
 
 [LibraryClasses.common.DXE_CORE]
