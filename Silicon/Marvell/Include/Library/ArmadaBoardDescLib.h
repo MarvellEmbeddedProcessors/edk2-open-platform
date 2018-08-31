@@ -14,6 +14,8 @@
 #ifndef __ARMADA_BOARD_DESC_LIB_H__
 #define __ARMADA_BOARD_DESC_LIB_H__
 
+#include <Bus/Pci/SdMmcPciHcDxe/SdMmcPciHcDxe.h>
+
 #include <Library/ArmadaSoCDescLib.h>
 
 //
@@ -57,7 +59,12 @@ typedef struct {
 //
 typedef struct {
   MV_SOC_SDMMC_DESC *SoC;
-  UINTN              SdMmcDevCount;
+  UINTN    SdMmcDevCount;
+  BOOLEAN  Xenon1v8Enabled;
+  BOOLEAN  Xenon8BitBusEnabled;
+  BOOLEAN  XenonSlowModeEnabled;
+  UINT8    XenonTuningStepDivisor;
+  EFI_SD_MMC_SLOT_TYPE SlotType;
 } MV_BOARD_SDMMC_DESC;
 
 //
@@ -84,4 +91,12 @@ typedef struct {
   UINTN             UtmiDevCount;
   UINTN             UtmiPortType;
 } MV_BOARD_UTMI_DESC;
+
+EFI_STATUS
+EFIAPI
+ArmadaBoardDescSdMmcGet (
+  IN OUT UINTN               *SdMmcDevCount,
+  IN OUT MV_BOARD_SDMMC_DESC **SdMmcDesc
+  );
+
 #endif /* __ARMADA_SOC_DESC_LIB_H__ */
