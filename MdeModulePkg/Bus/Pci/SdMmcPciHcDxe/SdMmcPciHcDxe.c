@@ -636,7 +636,24 @@ SdMmcPciHcDriverBindingStart (
         continue;
       }
     }
-    DumpCapabilityReg (Slot, &Private->Capability[Slot]);
+    Private->BaseClkFreq[Slot] = Private->Capability[Slot].BaseClkFreq;
+    if (mOverride != NULL && mOverride->BaseClockFreq != NULL) {
+      Status = mOverride->BaseClockFreq (
+                            Controller,
+                            Slot,
+                            &Private->BaseClkFreq[Slot]
+                            );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((
+          DEBUG_ERROR,
+          "%a: Failed to override capability - %r\n",
+          __FUNCTION__,
+          Status
+          ));
+        continue;
+      }
+    }
+    DumpCapabilityReg (Slot, &Private->Capability[Slot], Private->BaseClkFreq[Slot]);
 
     Support64BitDma &= Private->Capability[Slot].SysBus64;
 
