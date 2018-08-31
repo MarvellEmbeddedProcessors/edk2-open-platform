@@ -740,10 +740,13 @@ EmmcSwitchToHighSpeed (
   IN UINT8                              BusWidth
   )
 {
-  EFI_STATUS          Status;
-  UINT8               HsTiming;
-  UINT8               HostCtrl1;
-  UINT8               HostCtrl2;
+  EFI_STATUS              Status;
+  UINT8                   HsTiming;
+  UINT8                   HostCtrl1;
+  SD_MMC_UHS_TIMING       Timing;
+  SD_MMC_HC_PRIVATE_DATA  *Private;
+
+  Private = SD_MMC_HC_PRIVATE_FROM_THIS (PassThru);
 
   Status = EmmcSwitchBusWidth (PciIo, PassThru, Slot, Rca, IsDdr, BusWidth);
   if (EFI_ERROR (Status)) {
@@ -758,27 +761,36 @@ EmmcSwitchToHighSpeed (
     return Status;
   }
 
-  //
-  // Clean UHS Mode Select field of Host Control 2 reigster before update
-  //
-  HostCtrl2 = (UINT8)~0x7;
-  Status = SdMmcHcAndMmio (PciIo, Slot, SD_MMC_HC_HOST_CTRL2, sizeof (HostCtrl2), &HostCtrl2);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-  //
-  // Set UHS Mode Select field of Host Control 2 reigster to SDR12/25/50
-  //
   if (IsDdr) {
-    HostCtrl2 = BIT2;
+    Timing = SdMmcMmcDdr52;
   } else if (ClockFreq == 52) {
-    HostCtrl2 = BIT0;
+    Timing = SdMmcMmcSdr50;
+  } else if (ClockFreq == 26) {
+    Timing = SdMmcMmcSdr25;
   } else {
-    HostCtrl2 = 0;
+    Timing = SdMmcMmcSdr12;
   }
-  Status = SdMmcHcOrMmio (PciIo, Slot, SD_MMC_HC_HOST_CTRL2, sizeof (HostCtrl2), &HostCtrl2);
-  if (EFI_ERROR (Status)) {
-    return Status;
+
+  if (mOverride != NULL && mOverride->UhsSignaling != NULL) {
+    Status = mOverride->UhsSignaling (
+                          Private->ControllerHandle,
+                          Slot,
+                          Timing
+                          );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "%a: SD/MMC uhs signaling notifier callback failed - %r\n",
+        __FUNCTION__,
+        Status
+        ));
+      return Status;
+    }
+  } else {
+    Status = SdMmcHcUhsSignaling (PciIo, Slot, Timing);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
   }
 
   HsTiming = 1;
@@ -814,10 +826,13 @@ EmmcSwitchToHS200 (
   IN UINT8                              BusWidth
   )
 {
-  EFI_STATUS          Status;
-  UINT8               HsTiming;
-  UINT8               HostCtrl1;
-  UINT8               HostCtrl2;
+  EFI_STATUS                 Status;
+  UINT8                      HsTiming;
+  UINT8                      HostCtrl1;
+  SD_MMC_UHS_TIMING          Timing;
+  SD_MMC_HC_PRIVATE_DATA     *Private;
+
+  Private = SD_MMC_HC_PRIVATE_FROM_THIS (PassThru);
 
   if ((BusWidth != 4) && (BusWidth != 8)) {
     return EFI_INVALID_PARAMETER;
@@ -835,21 +850,29 @@ EmmcSwitchToHS200 (
   if (EFI_ERROR (Status)) {
     return Status;
   }
-  //
-  // Clean UHS Mode Select field of Host Control 2 reigster before update
-  //
-  HostCtrl2 = (UINT8)~0x7;
-  Status = SdMmcHcAndMmio (PciIo, Slot, SD_MMC_HC_HOST_CTRL2, sizeof (HostCtrl2), &HostCtrl2);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-  //
-  // Set UHS Mode Select field of Host Control 2 reigster to SDR104
-  //
-  HostCtrl2 = BIT0 | BIT1;
-  Status = SdMmcHcOrMmio (PciIo, Slot, SD_MMC_HC_HOST_CTRL2, sizeof (HostCtrl2), &HostCtrl2);
-  if (EFI_ERROR (Status)) {
-    return Status;
+
+  Timing = SdMmcMmcHs200;
+
+  if (mOverride != NULL && mOverride->UhsSignaling != NULL) {
+    Status = mOverride->UhsSignaling (
+                          Private->ControllerHandle,
+                          Slot,
+                          Timing
+                          );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "%a: SD/MMC uhs signaling notifier callback failed - %r\n",
+        __FUNCTION__,
+        Status
+        ));
+      return Status;
+    }
+  } else {
+    Status = SdMmcHcUhsSignaling (PciIo, Slot, Timing);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
   }
 
   HsTiming = 2;
@@ -888,9 +911,12 @@ EmmcSwitchToHS400 (
   IN UINT32                             ClockFreq
   )
 {
-  EFI_STATUS          Status;
-  UINT8               HsTiming;
-  UINT8               HostCtrl2;
+  EFI_STATUS                 Status;
+  UINT8                      HsTiming;
+  SD_MMC_UHS_TIMING          Timing;
+  SD_MMC_HC_PRIVATE_DATA     *Private;
+
+  Private = SD_MMC_HC_PRIVATE_FROM_THIS (PassThru);
 
   Status = EmmcSwitchToHS200 (PciIo, PassThru, Slot, Rca, ClockFreq, 8);
   if (EFI_ERROR (Status)) {
@@ -911,21 +937,29 @@ EmmcSwitchToHS400 (
   if (EFI_ERROR (Status)) {
     return Status;
   }
-  //
-  // Clean UHS Mode Select field of Host Control 2 reigster before update
-  //
-  HostCtrl2 = (UINT8)~0x7;
-  Status = SdMmcHcAndMmio (PciIo, Slot, SD_MMC_HC_HOST_CTRL2, sizeof (HostCtrl2), &HostCtrl2);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-  //
-  // Set UHS Mode Select field of Host Control 2 reigster to HS400
-  //
-  HostCtrl2 = BIT0 | BIT2;
-  Status = SdMmcHcOrMmio (PciIo, Slot, SD_MMC_HC_HOST_CTRL2, sizeof (HostCtrl2), &HostCtrl2);
-  if (EFI_ERROR (Status)) {
-    return Status;
+
+  Timing = SdMmcMmcHs400;
+
+  if (mOverride != NULL && mOverride->UhsSignaling != NULL) {
+    Status = mOverride->UhsSignaling (
+                          Private->ControllerHandle,
+                          Slot,
+                          Timing
+                          );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "%a: SD/MMC uhs signaling notifier callback failed - %r\n",
+        __FUNCTION__,
+        Status
+        ));
+      return Status;
+    }
+  } else {
+    Status = SdMmcHcUhsSignaling (PciIo, Slot, Timing);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
   }
 
   HsTiming = 3;
