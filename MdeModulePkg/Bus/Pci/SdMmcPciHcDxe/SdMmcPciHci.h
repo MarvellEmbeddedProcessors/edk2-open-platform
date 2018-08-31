@@ -68,6 +68,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define SD_MMC_HC_HOST_CTRL1_HS_ENABLE  (1 << 2)
 
 //
+// SD Software Reset Register bits description
+//
+#define SD_MMC_HC_SW_RST_ALL            (1 << 0)
+
+//
 // The transfer modes supported by SD Host Controller
 // Simplified Spec 3.0 Table 1-2
 //
