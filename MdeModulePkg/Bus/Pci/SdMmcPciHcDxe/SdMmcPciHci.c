@@ -459,8 +459,8 @@ SdMmcHcReset (
   }
 
   PciIo   = Private->PciIo;
-  SwReset = 0xFF;
-  Status  = SdMmcHcRwMmio (PciIo, Slot, SD_MMC_HC_SW_RST, FALSE, sizeof (SwReset), &SwReset);
+  SwReset = BIT0;
+  Status  = SdMmcHcOrMmio (PciIo, Slot, SD_MMC_HC_SW_RST, sizeof (SwReset), &SwReset);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "SdMmcHcReset: write full 1 fails: %r\n", Status));
@@ -472,7 +472,7 @@ SdMmcHcReset (
              Slot,
              SD_MMC_HC_SW_RST,
              sizeof (SwReset),
-             0xFF,
+             BIT0,
              0x00,
              SD_MMC_HC_GENERIC_TIMEOUT
              );
