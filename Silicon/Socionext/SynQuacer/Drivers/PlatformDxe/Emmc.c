@@ -59,6 +59,8 @@
 
 STATIC EFI_HANDLE mSdMmcControllerHandle;
 
+STATIC EDKII_SD_MMC_OVERRIDE           *mSdMmcOverride;
+
 STATIC EFI_ACPI_DESCRIPTION_HEADER      *mSsdt;
 STATIC UINTN                            mSsdtSize;
 STATIC VOID                             *mEventRegistration;
@@ -180,12 +182,6 @@ SynQuacerSdMmcNotifyPhase (
   return EFI_SUCCESS;
 }
 
-STATIC EDKII_SD_MMC_OVERRIDE mSdMmcOverride = {
-  EDKII_SD_MMC_OVERRIDE_PROTOCOL_VERSION,
-  SynQuacerSdMmcCapability,
-  SynQuacerSdMmcNotifyPhase,
-};
-
 STATIC
 VOID
 EFIAPI
@@ -255,10 +251,20 @@ RegisterEmmc (
              SYNQUACER_EMMC_BASE, SYNQUACER_EMMC_BASE_SZ);
   ASSERT_EFI_ERROR (Status);
 
+  mSdMmcOverride = AllocateZeroPool (sizeof (EDKII_SD_MMC_OVERRIDE));
+  if (mSdMmcOverride == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  mSdMmcOverride->Version = EDKII_SD_MMC_OVERRIDE_PROTOCOL_VERSION;
+  mSdMmcOverride->Capability = SynQuacerSdMmcCapability;
+  mSdMmcOverride->NotifyPhase = SynQuacerSdMmcNotifyPhase;
+
   Handle = NULL;
   Status = gBS->InstallProtocolInterface (&Handle,
                   &gEdkiiSdMmcOverrideProtocolGuid,
-                  EFI_NATIVE_INTERFACE, (VOID **)&mSdMmcOverride);
+                  EFI_NATIVE_INTERFACE, mSdMmcOverride);
   ASSERT_EFI_ERROR (Status);
 
   return EFI_SUCCESS;
