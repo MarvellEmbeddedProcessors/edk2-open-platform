@@ -121,6 +121,28 @@ EFI_STATUS
   IN      SD_MMC_UHS_TIMING               Timing
   );
 
+/**
+
+  Callback that allow to override base clock frequency with value
+  higher then 255MHz
+
+  @param[in]      ControllerHandle      The EFI_HANDLE of the controller.
+  @param[in]      Slot                  The 0 based slot index.
+  @param[in,out]  BaseClkFreq           The base clock frequency that can be
+                                        overriden with greater value then 255.
+
+  @retval EFI_SUCCESS           The override function completed successfully.
+  @retval EFI_NOT_FOUND         The specified controller or slot does not exist.
+
+**/
+typedef
+EFI_STATUS
+(EFIAPI * EDKII_SD_MMC_BASE_CLOCK_FREQ) (
+  IN      EFI_HANDLE                      ControllerHandle,
+  IN      UINT8                           Slot,
+  IN  OUT UINT32                          *BaseClkFreq
+  );
+
 struct _EDKII_SD_MMC_OVERRIDE {
   //
   // Protocol version of this implementation
@@ -142,6 +164,10 @@ struct _EDKII_SD_MMC_OVERRIDE {
   // Callback to add host controller specific operations after SwitchClockFreq
   //
   EDKII_SD_MMC_POST_CLOCK_FREQ_SWITCH  SwitchClockFreqPost;
+  //
+  // Callback that allow to override base clock frequency
+  //
+  EDKII_SD_MMC_BASE_CLOCK_FREQ         BaseClockFreq;
 };
 
 extern EFI_GUID gEdkiiSdMmcOverrideProtocolGuid;
