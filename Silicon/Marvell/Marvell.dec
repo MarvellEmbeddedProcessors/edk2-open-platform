@@ -58,6 +58,12 @@
 
   gMarvellFvbDxeGuid = { 0x42903750, 0x7e61, 0x4aaf, { 0x83, 0x29, 0xbf, 0x42, 0x36, 0x4e, 0x24, 0x85 } }
   gMarvellSpiFlashDxeGuid = { 0x49d7fb74, 0x306d, 0x42bd, { 0x94, 0xc8, 0xc0, 0xc5, 0x4b, 0x18, 0x1d, 0xd7 } }
+  #
+  # Generic FaultTolerantWriteDxe driver use variables,
+  # whose setting is done in MvFvbDxe driver in case
+  # the SPI contents are not mapped in memory.
+  #
+  gFaultTolerantWriteDxeFileGuid = { 0xfe5cea76, 0x4f72, 0x49e8, { 0x98, 0x6f, 0x2c, 0xd8, 0x99, 0xdf, 0xfe, 0x5d} }
 
 [LibraryClasses]
   ArmadaBoardDescLib|Include/Library/ArmadaBoardDescLib.h
@@ -143,6 +149,8 @@
   gMarvellTokenSpaceGuid.PcdSpiClockRegBase|0|UINT64|0x30000056
   gMarvellTokenSpaceGuid.PcdSpiRegBase|0|UINT32|0x3000051
   gMarvellTokenSpaceGuid.PcdSpiMemoryBase|0|UINT64|0x3000059
+  gMarvellTokenSpaceGuid.PcdSpiMemoryMapped|TRUE|BOOLEAN|0x3000060
+  gMarvellTokenSpaceGuid.PcdSpiVariableOffset|0|UINT32|0x3000061
   gMarvellTokenSpaceGuid.PcdSpiMaxFrequency|0|UINT32|0x30000052
   gMarvellTokenSpaceGuid.PcdSpiClockFrequency|0|UINT32|0x30000053
 

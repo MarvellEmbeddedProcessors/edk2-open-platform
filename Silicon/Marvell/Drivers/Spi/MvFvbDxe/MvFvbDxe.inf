@@ -76,13 +76,22 @@
   gMarvellSpiMasterProtocolGuid
 
 [FixedPcd]
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableBase64
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableSize
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingBase64
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingSize
-  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareBase64
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareSize
   gMarvellTokenSpaceGuid.PcdSpiMemoryBase
+  gMarvellTokenSpaceGuid.PcdSpiMemoryMapped
+  gMarvellTokenSpaceGuid.PcdSpiVariableOffset
+
+[Pcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableBase64
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingBase64
+  gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwSpareBase64
 
 [Depex]
-  gEfiCpuArchProtocolGuid
+  #
+  # Generic FaultTolerantWriteDxe driver use variables,
+  # whose setting is done in MvFvbDxe driver in case
+  # the SPI contents are not mapped in memory.
+  #
+  BEFORE gFaultTolerantWriteDxeFileGuid
