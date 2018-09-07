@@ -745,10 +745,6 @@ EmmcSwitchToHighSpeed (
   UINT8               HostCtrl1;
   UINT8               HostCtrl2;
 
-  Status = EmmcSwitchBusWidth (PciIo, PassThru, Slot, Rca, IsDdr, BusWidth);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
   //
   // Set to Hight Speed timing
   //
@@ -783,6 +779,11 @@ EmmcSwitchToHighSpeed (
 
   HsTiming = 1;
   Status = EmmcSwitchClockFreq (PciIo, PassThru, Slot, Rca, HsTiming, ClockFreq);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = EmmcSwitchBusWidth (PciIo, PassThru, Slot, Rca, IsDdr, BusWidth);
 
   return Status;
 }
