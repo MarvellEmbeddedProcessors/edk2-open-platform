@@ -134,6 +134,9 @@ ArmPlatformGetVirtualMemoryMap (
     MemSize = FixedPcdGet64 (PcdSystemMemorySize);
     DEBUG ((DEBUG_ERROR, "Limit total memory size to %d MB\n", MemSize / 1024 / 1024));
   }
+  if (MemSize > FixedPcdGet64 (PcdConfigSpaceBaseAddress)) {
+    MemSize = FixedPcdGet64 (PcdConfigSpaceBaseAddress);
+  }
 
   ResourceAttributes = (
       EFI_RESOURCE_ATTRIBUTE_PRESENT |
