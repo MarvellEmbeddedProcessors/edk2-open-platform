@@ -14,7 +14,7 @@
 
 [Defines]
   INF_VERSION                    = 0x0001001A
-  BASE_NAME                      = Armada7k8kDescLib
+  BASE_NAME                      = Armada7k8kSoCDescLib
   FILE_GUID                      = c64f0048-4ca3-4573-b0a6-c2e9e6457285
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
