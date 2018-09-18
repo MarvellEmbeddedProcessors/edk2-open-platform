@@ -17,6 +17,7 @@
 #ifndef __SD_MMC_OVERRIDE_H__
 #define __SD_MMC_OVERRIDE_H__
 
+#include <Bus/Pci/SdMmcPciHcDxe/SdMmcPciHci.h>
 #include <Protocol/SdMmcPassThru.h>
 
 #define EDKII_SD_MMC_OVERRIDE_PROTOCOL_GUID \
@@ -31,6 +32,7 @@ typedef enum {
   EdkiiSdMmcResetPost,
   EdkiiSdMmcInitHostPre,
   EdkiiSdMmcInitHostPost,
+  EdkiiSdMmcUhsSignaling,
 } EDKII_SD_MMC_PHASE_TYPE;
 
 /**

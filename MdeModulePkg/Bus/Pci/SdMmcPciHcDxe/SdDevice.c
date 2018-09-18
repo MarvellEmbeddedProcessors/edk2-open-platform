@@ -784,8 +784,8 @@ SdCardSetBusMode (
   UINT8                        BusWidth;
   UINT8                        AccessMode;
   UINT8                        HostCtrl1;
-  UINT8                        HostCtrl2;
   UINT8                        SwitchResp[64];
+  SD_MMC_UHS_TIMING            Timing;
   SD_MMC_HC_PRIVATE_DATA       *Private;
 
   Private = SD_MMC_HC_PRIVATE_FROM_THIS (PassThru);
@@ -817,18 +817,23 @@ SdCardSetBusMode (
   if (S18A && (Capability->Sdr104 != 0) && ((SwitchResp[13] & BIT3) != 0)) {
     ClockFreq = 208;
     AccessMode = 3;
+    Timing = SdMmcUhsSdr104;
   } else if (S18A && (Capability->Sdr50 != 0) && ((SwitchResp[13] & BIT2) != 0)) {
     ClockFreq = 100;
     AccessMode = 2;
+    Timing = SdMmcUhsSdr50;
   } else if (S18A && (Capability->Ddr50 != 0) && ((SwitchResp[13] & BIT4) != 0)) {
     ClockFreq = 50;
     AccessMode = 4;
+    Timing = SdMmcUhsDdr50;
   } else if ((SwitchResp[13] & BIT1) != 0) {
     ClockFreq = 50;
     AccessMode = 1;
+    Timing = SdMmcUhsSdr25;
   } else {
     ClockFreq = 25;
     AccessMode = 0;
+    Timing = SdMmcUhsSdr12;
   }
 
   Status = SdCardSwitch (PassThru, Slot, AccessMode, 0xF, 0xF, 0xF, TRUE, SwitchResp);
@@ -854,15 +859,27 @@ SdCardSetBusMode (
     }
   }
 
-  HostCtrl2 = (UINT8)~0x7;
-  Status = SdMmcHcAndMmio (PciIo, Slot, SD_MMC_HC_HOST_CTRL2, sizeof (HostCtrl2), &HostCtrl2);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-  HostCtrl2 = AccessMode;
-  Status = SdMmcHcOrMmio (PciIo, Slot, SD_MMC_HC_HOST_CTRL2, sizeof (HostCtrl2), &HostCtrl2);
-  if (EFI_ERROR (Status)) {
-    return Status;
+  if (mOverride != NULL && mOverride->NotifyPhase != NULL) {
+    Status = mOverride->NotifyPhase (
+                          Private->ControllerHandle,
+                          Slot,
+                          EdkiiSdMmcUhsSignaling,
+                          &Timing
+                          );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "%a: SD/MMC uhs signaling notifier callback failed - %r\n",
+        __FUNCTION__,
+        Status
+        ));
+      return Status;
+    }
+  } else {
+    Status = SdMmcHcUhsSignaling (PciIo, Slot, Timing);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
   }
 
   Status = SdMmcHcClockSupply (PciIo, Slot, ClockFreq * 1000, *Capability);
