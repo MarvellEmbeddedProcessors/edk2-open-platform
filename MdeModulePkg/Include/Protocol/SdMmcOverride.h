@@ -17,12 +17,14 @@
 #ifndef __SD_MMC_OVERRIDE_H__
 #define __SD_MMC_OVERRIDE_H__
 
+#include <Bus/Pci/SdMmcPciHcDxe/SdMmcPciHci.h>
 #include <Protocol/SdMmcPassThru.h>
 
 #define EDKII_SD_MMC_OVERRIDE_PROTOCOL_GUID \
   { 0xeaf9e3c1, 0xc9cd, 0x46db, { 0xa5, 0xe5, 0x5a, 0x12, 0x4c, 0x83, 0x23, 0x23 } }
 
 #define EDKII_SD_MMC_OVERRIDE_PROTOCOL_VERSION    0x1
+#define EDKII_SD_MMC_OVERRIDE_PROTOCOL_VERSION2   0x2
 
 typedef struct _EDKII_SD_MMC_OVERRIDE EDKII_SD_MMC_OVERRIDE;
 
@@ -77,6 +79,27 @@ EFI_STATUS
   IN      EDKII_SD_MMC_PHASE_TYPE         PhaseType
   );
 
+/**
+
+  Override function for uhs signaling
+
+  @param[in]      ControllerHandle      The EFI_HANDLE of the controller.
+  @param[in]      Slot                  The 0 based slot index.
+  @param[in]      Timing                The timing which should be set by
+                                        host controller.
+
+  @retval EFI_SUCCESS           The override function completed successfully.
+  @retval EFI_NOT_FOUND         The specified controller or slot does not exist.
+
+**/
+typedef
+EFI_STATUS
+(EFIAPI * EDKII_SD_MMC_UHS_SIGNALING) (
+  IN      EFI_HANDLE                      ControllerHandle,
+  IN      UINT8                           Slot,
+  IN      SD_MMC_UHS_TIMING               Timing
+  );
+
 struct _EDKII_SD_MMC_OVERRIDE {
   //
   // Protocol version of this implementation
@@ -90,6 +113,10 @@ struct _EDKII_SD_MMC_OVERRIDE {
   // Callback to invoke SD/MMC override hooks
   //
   EDKII_SD_MMC_NOTIFY_PHASE     NotifyPhase;
+  //
+  // Callback to override SD/MMC host controller uhs signaling
+  //
+  EDKII_SD_MMC_UHS_SIGNALING    UhsSignaling;
 };
 
 extern EFI_GUID gEdkiiSdMmcOverrideProtocolGuid;
