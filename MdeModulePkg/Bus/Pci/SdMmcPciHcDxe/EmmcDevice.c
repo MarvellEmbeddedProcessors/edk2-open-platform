@@ -794,6 +794,27 @@ EmmcSwitchToHighSpeed (
 
   HsTiming = 1;
   Status = EmmcSwitchClockFreq (PciIo, PassThru, Slot, Rca, HsTiming, ClockFreq);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (mOverride != NULL && mOverride->NotifyPhase != NULL) {
+    Status = mOverride->NotifyPhase (
+                          Private->ControllerHandle,
+                          Slot,
+                          EdkiiSdMmcSwitchClockFreqPost,
+                          &Timing
+                          );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "%a: SD/MMC switch clock freq post notifier callback failed - %r\n",
+        __FUNCTION__,
+        Status
+        ));
+      return Status;
+    }
+  }
 
   return Status;
 }
@@ -904,6 +925,24 @@ EmmcSwitchToHS200 (
     return Status;
   }
 
+  if (mOverride != NULL && mOverride->NotifyPhase != NULL) {
+    Status = mOverride->NotifyPhase (
+                          Private->ControllerHandle,
+                          Slot,
+                          EdkiiSdMmcSwitchClockFreqPost,
+                          &Timing
+                          );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "%a: SD/MMC switch clock freq post notifier callback failed - %r\n",
+        __FUNCTION__,
+        Status
+        ));
+      return Status;
+    }
+  }
+
   Status = EmmcTuningClkForHs200 (PciIo, PassThru, Slot, BusWidth);
 
   return Status;
@@ -988,6 +1027,27 @@ EmmcSwitchToHS400 (
 
   HsTiming = 3;
   Status = EmmcSwitchClockFreq (PciIo, PassThru, Slot, Rca, HsTiming, ClockFreq);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (mOverride != NULL && mOverride->NotifyPhase != NULL) {
+    Status = mOverride->NotifyPhase (
+                          Private->ControllerHandle,
+                          Slot,
+                          EdkiiSdMmcSwitchClockFreqPost,
+                          &Timing
+                          );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "%a: SD/MMC switch clock freq post notifier callback failed - %r\n",
+        __FUNCTION__,
+        Status
+        ));
+      return Status;
+    }
+  }
 
   return Status;
 }
