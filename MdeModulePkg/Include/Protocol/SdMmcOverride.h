@@ -33,6 +33,7 @@ typedef enum {
   EdkiiSdMmcInitHostPre,
   EdkiiSdMmcInitHostPost,
   EdkiiSdMmcUhsSignaling,
+  EdkiiSdMmcSwitchClockFreqPost,
 } EDKII_SD_MMC_PHASE_TYPE;
 
 /**
