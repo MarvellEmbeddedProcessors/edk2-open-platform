@@ -625,18 +625,32 @@ SdMmcPciHcDriverBindingStart (
     if (EFI_ERROR (Status)) {
       continue;
     }
+
+    Private->BaseClkFreq[Slot] = Private->Capability[Slot].BaseClkFreq;
+
     if (mOverride != NULL && mOverride->Capability != NULL) {
       Status = mOverride->Capability (
                             Controller,
                             Slot,
-                            &Private->Capability[Slot]);
+                            &Private->Capability[Slot],
+                            &Private->BaseClkFreq[Slot]
+                            );
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_WARN, "%a: Failed to override capability - %r\n",
           __FUNCTION__, Status));
         continue;
       }
     }
-    DumpCapabilityReg (Slot, &Private->Capability[Slot]);
+
+    //
+    // According to SDHCI specification ver. 4.2, BaseClkFreq field value of
+    // the Capability Register 1 can be zero, which means a need for obtaining
+    // the clock frequency via another method. Fail in case it is not updated
+    // by SW at this point.
+    //
+    ASSERT (Private->BaseClkFreq[Slot] != 0);
+
+    DumpCapabilityReg (Slot, &Private->Capability[Slot], Private->BaseClkFreq[Slot]);
 
     Support64BitDma &= Private->Capability[Slot].SysBus64;
 

@@ -43,6 +43,8 @@ typedef enum {
   @param[in]      ControllerHandle      The EFI_HANDLE of the controller.
   @param[in]      Slot                  The 0 based slot index.
   @param[in,out]  SdMmcHcSlotCapability The SDHCI capability structure.
+  @param[in,out]  BaseClkFreq           The base clock frequency value that
+                                        optionally can be updated.
 
   @retval EFI_SUCCESS           The override function completed successfully.
   @retval EFI_NOT_FOUND         The specified controller or slot does not exist.
@@ -54,7 +56,8 @@ EFI_STATUS
 (EFIAPI * EDKII_SD_MMC_CAPABILITY) (
   IN      EFI_HANDLE                      ControllerHandle,
   IN      UINT8                           Slot,
-  IN  OUT VOID                            *SdMmcHcSlotCapability
+  IN OUT  VOID                            *SdMmcHcSlotCapability,
+  IN OUT  UINT32                          *BaseClkFreq
   );
 
 /**
