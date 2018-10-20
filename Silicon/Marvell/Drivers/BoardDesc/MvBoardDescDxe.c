@@ -100,6 +100,53 @@ MvBoardDescComPhyGet (
 
 STATIC
 EFI_STATUS
+MvBoardDescGpioGet (
+  IN MARVELL_BOARD_DESC_PROTOCOL  *This,
+  IN OUT MV_BOARD_GPIO_DESC      **GpioDesc
+  )
+{
+  MV_I2C_IO_EXPANDER_DESC *I2cIoExpanderDesc;
+  UINTN SoCGpioCount, I2cIoExpanderCount;
+  STATIC MV_BOARD_GPIO_DESC *BoardDesc;
+  MV_SOC_GPIO_DESC *SoCDesc;
+  EFI_STATUS Status;
+
+  if (BoardDesc != NULL) {
+    *GpioDesc = BoardDesc;
+    return EFI_SUCCESS;
+  }
+
+  /* Get SoC data about all available GPIO controllers */
+  Status = ArmadaSoCDescGpioGet (&SoCDesc, &SoCGpioCount);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  /* Get per-board information about all available I2C IO expanders */
+  Status = ArmadaBoardDescGpioGet (&I2cIoExpanderDesc, &I2cIoExpanderCount);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  /* Allocate and fill board description */
+  BoardDesc = AllocateZeroPool (sizeof (MV_BOARD_GPIO_DESC));
+  if (BoardDesc == NULL) {
+    DEBUG ((DEBUG_ERROR, "%a: Cannot allocate memory\n", __FUNCTION__));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  BoardDesc->SoC = SoCDesc;
+  BoardDesc->GpioDevCount = SoCGpioCount;
+  BoardDesc->I2cIoExpanderDesc = I2cIoExpanderDesc;
+  BoardDesc->I2cIoExpanderCount = I2cIoExpanderCount;
+
+  *GpioDesc = BoardDesc;
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
 MvBoardDescI2cGet (
   IN MARVELL_BOARD_DESC_PROTOCOL  *This,
   IN OUT MV_BOARD_I2C_DESC       **I2cDesc
@@ -556,6 +603,7 @@ MvBoardDescInitProtocol (
 {
   BoardDescProtocol->BoardDescAhciGet = MvBoardDescAhciGet;
   BoardDescProtocol->BoardDescComPhyGet = MvBoardDescComPhyGet;
+  BoardDescProtocol->BoardDescGpioGet = MvBoardDescGpioGet;
   BoardDescProtocol->BoardDescI2cGet = MvBoardDescI2cGet;
   BoardDescProtocol->BoardDescMdioGet = MvBoardDescMdioGet;
   BoardDescProtocol->BoardDescPp2Get = MvBoardDescPp2Get;
