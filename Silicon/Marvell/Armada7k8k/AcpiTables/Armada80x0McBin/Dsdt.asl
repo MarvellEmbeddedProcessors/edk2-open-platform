@@ -14,6 +14,7 @@
 
 **/
 
+#include "Armada80x0McBin/Pcie.h"
 #include "IcuInterrupts.h"
 
 DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
@@ -305,6 +306,222 @@ DefinitionBlock ("DSDT.aml", "DSDT", 2, "MVEBU ", "ARMADA8K", 3)
                     Package () { "compatible", "inside-secure,safexcel-eip76" },
                 }
             })
+        }
+
+        //
+        // PCIe Root Bus
+        //
+        Device (PCI0)
+        {
+            Name (_HID, "PNP0A08" /* PCI Express Bus */)  // _HID: Hardware ID
+            Name (_CID, "PNP0A03" /* PCI Bus */)  // _CID: Compatible ID
+            Name (_SEG, 0x00)  // _SEG: PCI Segment
+            Name (_BBN, 0x00)  // _BBN: BIOS Bus Number
+            Name (_CCA, 0x01)  // _CCA: Cache Coherency Attribute
+            Name (_PRT, Package ()  // _PRT: PCI Routing Table
+            {
+                Package () { 0xFFFF, 0x0, 0x0, 0x40 },
+                Package () { 0xFFFF, 0x1, 0x0, 0x40 },
+                Package () { 0xFFFF, 0x2, 0x0, 0x40 },
+                Package () { 0xFFFF, 0x3, 0x0, 0x40 }
+            })
+
+            Method (_CRS, 0, Serialized)  // _CRS: Current Resource Settings
+            {
+                Name (RBUF, ResourceTemplate ()
+                {
+                    WordBusNumber (ResourceProducer, MinFixed, MaxFixed, PosDecode,
+                        0x0000,                             // Granularity
+                        PCI_BUS_MIN,                        // Range Minimum
+                        PCI_BUS_MAX,                        // Range Maximum
+                        0x0000,                             // Translation Offset
+                        PCI_BUS_COUNT                       // Length
+                        )
+                    DWordMemory (ResourceProducer, PosDecode, MinFixed, MaxFixed, NonCacheable, ReadWrite,
+                        0x00000000,                         // Granularity
+                        PCI_MMIO32_BASE,                    // Range Minimum
+                        0xDFFFFFFF,                         // Range Maximum
+                        0x00000000,                         // Translation Offset
+                        PCI_MMIO32_SIZE                     // Length
+                        )
+                    QWordMemory (ResourceProducer, PosDecode, MinFixed, MaxFixed, NonCacheable, ReadWrite,
+                        0x0000000000000000,                 // Granularity
+                        PCI_MMIO64_BASE,                    // Range Minimum
+                        0x8FFFFFFFF,                        // Range Maximum
+                        0x00000000,                         // Translation Offset
+                        PCI_MMIO64_SIZE                     // Length
+                        )
+                    DWordIo (ResourceProducer, MinFixed, MaxFixed, PosDecode, EntireRange,
+                        0x00000000,                         // Granularity
+                        PCI_IO_BASE,                        // Range Minimum
+                        0x0000FFFF,                         // Range Maximum
+                        PCI_IO_TRANSLATION,                 // Translation Address
+                        PCI_IO_SIZE,                        // Length
+                        ,
+                        ,
+                        ,
+                        TypeTranslation
+                        )
+                })
+                Return (RBUF) /* \_SB_.PCI0._CRS.RBUF */
+            } // Method(_CRS)
+
+            Device (RES0)
+            {
+                Name (_HID, "PNP0C02")
+                Name (_CRS, ResourceTemplate ()
+                {
+                    Memory32Fixed (ReadWrite,
+                                   PCI_ECAM_BASE,
+                                   0x10000000
+                                   )
+                })
+            }
+            Name (SUPP, 0x00)
+            Name (CTRL, 0x00)
+            Method (_OSC, 4, NotSerialized)  // _OSC: Operating System Capabilities
+            {
+                CreateDWordField (Arg3, 0x00, CDW1)
+                If (LEqual (Arg0, ToUUID ("33db4d5b-1ff7-401c-9657-7441c03dd766") /* PCI Host Bridge Device */))
+                {
+                    CreateDWordField (Arg3, 0x04, CDW2)
+                    CreateDWordField (Arg3, 0x08, CDW3)
+                    Store (CDW2, SUPP) /* \_SB_.PCI0.SUPP */
+                    Store (CDW3, CTRL) /* \_SB_.PCI0.CTRL */
+                    If (LNotEqual (And (SUPP, 0x16), 0x16))
+                    {
+                        And (CTRL, 0x1E, CTRL) /* \_SB_.PCI0.CTRL */
+                    }
+
+                    And (CTRL, 0x1D, CTRL) /* \_SB_.PCI0.CTRL */
+                    If (LNotEqual (Arg1, One))
+                    {
+                        Or (CDW1, 0x08, CDW1) /* \_SB_.PCI0._OSC.CDW1 */
+                    }
+
+                    If (LNotEqual (CDW3, CTRL))
+                    {
+                        Or (CDW1, 0x10, CDW1) /* \_SB_.PCI0._OSC.CDW1 */
+                    }
+
+                    Store (CTRL, CDW3) /* \_SB_.PCI0._OSC.CDW3 */
+                    Return (Arg3)
+                }
+                Else
+                {
+                    Or (CDW1, 0x04, CDW1) /* \_SB_.PCI0._OSC.CDW1 */
+                    Return (Arg3)
+                }
+            } // Method(_OSC)
+
+            //
+            // Device-Specific Methods
+            //
+            Method(_DSM, 0x4, NotSerialized) {
+              If (LEqual(Arg0, ToUUID("E5C937D0-3553-4d7a-9117-EA4D19C3434D"))) {
+                switch (ToInteger(Arg2)) {
+                  //
+                  // Function 0: Return supported functions
+                  //
+                  case(0) {
+                    Return (Buffer() {0xFF})
+                  }
+
+                  //
+                  // Function 1: Return PCIe Slot Information
+                  //
+                  case(1) {
+                    Return (Package(2) {
+                      One, // Success
+                      Package(3) {
+                        0x1,  // x1 PCIe link
+                        0x1,  // PCI express card slot
+                        0x1   // WAKE# signal supported
+                      }
+                    })
+                  }
+
+                  //
+                  // Function 2: Return PCIe Slot Number.
+                  //
+                  case(2) {
+                    Return (Package(1) {
+                      Package(4) {
+                        2,  // Source ID
+                        4,  // Token ID: ID refers to a slot
+                        0,  // Start bit of the field to use.
+                        7   // End bit of the field to use.
+                      }
+                    })
+                  }
+
+                  //
+                  // Function 4: Return PCI Bus Capabilities
+                  //
+                  case(4) {
+                    Return (Package(2) {
+                      One, // Success
+                      Buffer() {
+                        1,0,            // Version
+                        0,0,            // Status, 0:Success
+                        24,0,0,0,       // Length
+                        1,0,            // PCI
+                        16,0,           // Length
+                        0,              // Attributes
+                        0x0D,           // Current Speed/Mode
+                        0x3F,0,         // Supported Speeds/Modes
+                        0,              // Voltage
+                        0,0,0,0,0,0,0   // Reserved
+                      }
+                    })
+                  }
+
+                  //
+                  // Function 5: Return Ignore PCI Boot Configuration
+                  //
+                  case(5) {
+                    Return (Package(1) {1})
+                  }
+
+                  //
+                  // Function 6: Return LTR Maximum Latency
+                  //
+                  case(6) {
+                    Return (Package(4) {
+                      Package(1){0},  // Maximum Snoop Latency Scale
+                      Package(1){0},  // Maximum Snoop Latency Value
+                      Package(1){0},  // Maximum No-Snoop Latency Scale
+                      Package(1){0}   // Maximum No-Snoop Latency Value
+                    })
+                  }
+
+                  //
+                  // Function 7: Return PCI Express Naming
+                  //
+                  case(7) {
+                    Return (Package(2) {
+                      Package(1) {0},
+                      Package(1) {Unicode("PCI0")}
+                    })
+                  }
+
+                  //
+                  // Not supported
+                  //
+                  default {
+                  }
+                }
+              }
+              Return (Buffer(){0})
+            } // Method(_DSM)
+
+            //
+            // Root-Complex 0
+            //
+            Device (RP0)
+            {
+                Name (_ADR, PCI_ECAM_BASE)  // _ADR: Bus 0, Dev 0, Func 0
+            }
         }
     }
 }
