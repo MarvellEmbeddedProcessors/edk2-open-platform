@@ -13,7 +13,11 @@
 #
 ################################################################################
 [Defines]
+!if $(CN9131)
+  PLATFORM_NAME                  = Cn9131DbA
+!else
   PLATFORM_NAME                  = Cn9130DbA
+!endif
   PLATFORM_GUID                  = 087305a1-8ddd-4027-89ca-68a3ef78fcc7
   PLATFORM_VERSION               = 0.1
   DSC_SPECIFICATION              = 0x0001000B
@@ -34,6 +38,9 @@
 
 !include Silicon/Marvell/Armada7k8k/Armada7k8k.dsc.inc
 !include Platform/Marvell/Cn913xDb/Cn9130DbA.dsc.inc
+!if $(CN9131)
+!include Platform/Marvell/Cn913xDb/Cn9131DbA.dsc.inc
+!endif
 
 [Components.common]
   Silicon/Marvell/OcteonTx/DeviceTree/T91/$(PLATFORM_NAME).inf
