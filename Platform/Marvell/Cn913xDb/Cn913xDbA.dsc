@@ -13,7 +13,9 @@
 #
 ################################################################################
 [Defines]
-!if $(CN9131)
+!if $(CN9132)
+  PLATFORM_NAME                  = Cn9132DbA
+!elseif $(CN9131)
   PLATFORM_NAME                  = Cn9131DbA
 !else
   PLATFORM_NAME                  = Cn9130DbA
@@ -38,16 +40,25 @@
 
 !include Silicon/Marvell/Armada7k8k/Armada7k8k.dsc.inc
 !include Platform/Marvell/Cn913xDb/Cn9130DbA.dsc.inc
-!if $(CN9131)
+!if $(CN9131) || $(CN9132)
 !include Platform/Marvell/Cn913xDb/Cn9131DbA.dsc.inc
+!endif
+!if $(CN9132)
+!include Platform/Marvell/Cn913xDb/Cn9132DbA.dsc.inc
 !endif
 
 [Components.common]
   Silicon/Marvell/OcteonTx/DeviceTree/T91/$(PLATFORM_NAME).inf
 
+!ifndef $(CN9132)
 [Components.AARCH64]
   Silicon/Marvell/OcteonTx/AcpiTables/T91/$(PLATFORM_NAME).inf
+!endif
 
 [LibraryClasses.common]
+!if $(CN9132)
+  ArmadaBoardDescLib|Platform/Marvell/Cn913xDb/BoardDescriptionLib/Cn9132DbABoardDescLib.inf
+!else
   ArmadaBoardDescLib|Platform/Marvell/Cn913xDb/BoardDescriptionLib/Cn9130DbABoardDescLib.inf
+!endif
   NonDiscoverableInitLib|Platform/Marvell/Cn913xDb/NonDiscoverableInitLib/NonDiscoverableInitLib.inf
