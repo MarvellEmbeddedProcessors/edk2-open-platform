@@ -102,7 +102,7 @@ STATIC SMBIOS_TABLE_TYPE1 mArmadaDefaultType1 = {
 
 STATIC CHAR8 CONST *mArmadaDefaultType1Strings[] = {
   "Marvell                        \0",/* Manufacturer */
-  "Armada 7k/8k Family Board      \0",/* Product Name placeholder*/
+  "Marvell Development Board      \0",/* Product Name placeholder*/
   "Revision unknown               \0",/* Version placeholder */
   "                               \0",/* 32 character buffer */
   NULL
@@ -130,7 +130,7 @@ STATIC SMBIOS_TABLE_TYPE2 mArmadaDefaultType2 = {
 
 STATIC CHAR8 CONST *mArmadaDefaultType2Strings[] = {
   "Marvell                        \0",/* Manufacturer */
-  "Armada 7k/8k Family Board      \0",/* Product Name placeholder*/
+  "Marvell Development Board      \0",/* Product Name placeholder*/
   "Revision unknown               \0",/* Version placeholder */
   "Serial Not Set                 \0",/* Serial */
   "Base of Chassis                \0",/* Board location */
