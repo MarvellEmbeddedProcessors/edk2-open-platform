@@ -36,6 +36,7 @@ GetDramSize (
   IN OUT UINT64 *MemSize
   )
 {
+#if defined(MDE_CPU_AARCH64)
   ARM_SMC_ARGS SmcRegs = {0};
   EFI_STATUS Status;
 
@@ -48,6 +49,9 @@ GetDramSize (
   ArmCallSmc (&SmcRegs);
 
   *MemSize = SmcRegs.Arg0;
+#else
+  *MemSize = FixedPcdGet64 (PcdSystemMemorySize);
+#endif
 
   return EFI_SUCCESS;
 }

@@ -23,7 +23,7 @@
 
 #include <Uefi/UefiBaseType.h>
 
-#define MV_GPIO_SIGNATURE        SIGNATURE_64 ('M', 'V','_','G', 'P', 'I','O',' ')
+#define MV_GPIO_SIGNATURE        SIGNATURE_32 ('G', 'P', 'I', 'O')
 
 // Marvell MV_GPIO Controller Registers
 #define MV_GPIO_DATA_OUT_REG     (0x0)

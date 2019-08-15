@@ -18,7 +18,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <Uefi/UefiBaseType.h>
 
-#define MV_BOARD_DESC_SIGNATURE SIGNATURE_64 ('M', 'V', 'B', 'R', 'D', 'D', 'S', 'C')
+#define MV_BOARD_DESC_SIGNATURE SIGNATURE_32 ('B', 'D', 'S', 'C')
 
 typedef struct {
   MARVELL_BOARD_DESC_PROTOCOL   BoardDescProtocol;

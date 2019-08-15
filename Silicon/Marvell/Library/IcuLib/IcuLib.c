@@ -185,10 +185,15 @@ IcuConfigure (
   for (Index = 0; Index < IcuGroupMax; Index++, Msi++) {
     MmioWrite32 (IcuBase + ICU_SET_SPI_AL (Msi->Group),
       Msi->SetSpiAddr & 0xFFFFFFFF);
-    MmioWrite32 (IcuBase + ICU_SET_SPI_AH (Msi->Group), Msi->SetSpiAddr >> 32);
     MmioWrite32 (IcuBase + ICU_CLR_SPI_AL (Msi->Group),
       Msi->ClrSpiAddr & 0xFFFFFFFF);
+#if defined(MDE_CPU_AARCH64)
+    MmioWrite32 (IcuBase + ICU_SET_SPI_AH (Msi->Group), Msi->SetSpiAddr >> 32);
     MmioWrite32 (IcuBase + ICU_CLR_SPI_AH (Msi->Group), Msi->ClrSpiAddr >> 32);
+#else
+    MmioWrite32 (IcuBase + ICU_SET_SPI_AH (Msi->Group), 0);
+    MmioWrite32 (IcuBase + ICU_CLR_SPI_AH (Msi->Group), 0);
+#endif
   }
 
   /* Mask all ICU interrupts */
