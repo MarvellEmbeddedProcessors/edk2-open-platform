@@ -21,6 +21,22 @@
 #include <IndustryStandard/SmBios.h>
 
 //
+// SMBIOS specification indicates that there is no limit for string size.
+// However, some strings are printed in UEFI and OS. Printing very big string
+// can lead to unexpected behaviour. Second reason of string size definition
+// is that static buffers can be used instead of dynamic ones.
+//
+// Nevertheless, this value can be increased if necessary
+//
+
+#define MV_SMBIOS_STRING_MAX_SIZE 32
+
+STATIC CHAR8 mSysInfoManufacturer[MV_SMBIOS_STRING_MAX_SIZE];
+STATIC CHAR8 mSysInfoProductName[MV_SMBIOS_STRING_MAX_SIZE];
+STATIC CHAR8 mSysInfoVersion[MV_SMBIOS_STRING_MAX_SIZE];
+STATIC CHAR8 mSysInfoSerial[MV_SMBIOS_STRING_MAX_SIZE];
+
+//
 // SMBIOS tables often reference each other using
 // fixed constants, define a list of these constants
 // for our hardcoded tables
@@ -101,10 +117,10 @@ STATIC SMBIOS_TABLE_TYPE1 mArmadaDefaultType1 = {
 };
 
 STATIC CHAR8 CONST *mArmadaDefaultType1Strings[] = {
-  "Marvell                        \0",/* Manufacturer */
-  "Armada 7k/8k Family Board      \0",/* Product Name placeholder*/
-  "Revision unknown               \0",/* Version placeholder */
-  "                               \0",/* 32 character buffer */
+  mSysInfoManufacturer,
+  mSysInfoProductName,
+  mSysInfoVersion,
+  mSysInfoSerial,
   NULL
 };
 
@@ -129,10 +145,10 @@ STATIC SMBIOS_TABLE_TYPE2 mArmadaDefaultType2 = {
 };
 
 STATIC CHAR8 CONST *mArmadaDefaultType2Strings[] = {
-  "Marvell                        \0",/* Manufacturer */
-  "Armada 7k/8k Family Board      \0",/* Product Name placeholder*/
-  "Revision unknown               \0",/* Version placeholder */
-  "Serial Not Set                 \0",/* Serial */
+  mSysInfoManufacturer,
+  mSysInfoProductName,
+  mSysInfoVersion,
+  mSysInfoSerial,
   "Base of Chassis                \0",/* Board location */
   NULL
 };
@@ -160,9 +176,9 @@ STATIC SMBIOS_TABLE_TYPE3 mArmadaDefaultType3 = {
 };
 
 STATIC CHAR8 CONST *mArmadaDefaultType3Strings[] = {
-  "Marvell                        \0",/* Manufacturer placeholder */
-  "Revision unknown               \0",/* Version placeholder */
-  "Serial Not Set                 \0",/* Serial placeholder */
+  mSysInfoManufacturer,
+  mSysInfoVersion,
+  mSysInfoSerial,
   NULL
 };
 
@@ -743,6 +759,45 @@ SmbiosMemoryInstall (
 }
 
 /**
+   Copy Type1, Type2, Type3 strings form PCD
+**/
+
+STATIC
+VOID
+MvSmbiosCopyStrings (
+   VOID
+   )
+{
+  EFI_STATUS Status;
+
+  ASSERT (AsciiStrnLenS ((CHAR8 *)PcdGetPtr (PcdProductManufacturer),
+    MV_SMBIOS_STRING_MAX_SIZE) < MV_SMBIOS_STRING_MAX_SIZE);
+  ASSERT (AsciiStrnLenS ((CHAR8 *)PcdGetPtr (PcdProductPlatformName),
+    MV_SMBIOS_STRING_MAX_SIZE) < MV_SMBIOS_STRING_MAX_SIZE);
+  ASSERT (AsciiStrnLenS ((CHAR8 *)PcdGetPtr (PcdProductVersion),
+    MV_SMBIOS_STRING_MAX_SIZE) < MV_SMBIOS_STRING_MAX_SIZE);
+  ASSERT (AsciiStrnLenS ((CHAR8 *)PcdGetPtr (PcdProductSerial),
+    MV_SMBIOS_STRING_MAX_SIZE) < MV_SMBIOS_STRING_MAX_SIZE);
+
+  Status = AsciiStrCpyS (mSysInfoManufacturer,
+             MV_SMBIOS_STRING_MAX_SIZE,
+             (CHAR8 *)PcdGetPtr (PcdProductManufacturer));
+  ASSERT_EFI_ERROR (Status);
+  Status = AsciiStrCpyS (mSysInfoProductName,
+             MV_SMBIOS_STRING_MAX_SIZE,
+             (CHAR8 *)PcdGetPtr (PcdProductPlatformName));
+  ASSERT_EFI_ERROR (Status);
+  Status = AsciiStrCpyS (mSysInfoVersion,
+             MV_SMBIOS_STRING_MAX_SIZE,
+             (CHAR8 *)PcdGetPtr (PcdProductVersion));
+  ASSERT_EFI_ERROR (Status);
+  Status = AsciiStrCpyS (mSysInfoSerial,
+             MV_SMBIOS_STRING_MAX_SIZE,
+             (CHAR8 *)PcdGetPtr (PcdProductSerial));
+  ASSERT_EFI_ERROR (Status);
+}
+
+/**
    Install all structures from the DefaultTables structure
 
    @param  Smbios               SMBIOS protocol
@@ -759,6 +814,8 @@ SmbiosInstallAllStructures (
 
   FirmwareMajorRevisionNumber = (PcdGet32 (PcdFirmwareRevision) >> 16) & 0xFF;
   FirmwareMinorRevisionNumber = PcdGet32 (PcdFirmwareRevision) & 0xFF;
+
+  MvSmbiosCopyStrings();
 
   //
   // Update Firmware Revision, CPU and DRAM frequencies.
