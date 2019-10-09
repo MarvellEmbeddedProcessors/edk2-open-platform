@@ -45,6 +45,10 @@
 #
 ################################################################################
 [PcdsFixedAtBuild.common]
+  #Platform description
+  gMarvellTokenSpaceGuid.PcdProductPlatformName|"Armada 8040 DB\0"
+  gMarvellTokenSpaceGuid.PcdProductVersion|"Rev. 1.4\0"
+
   #MPP
   gMarvellTokenSpaceGuid.PcdMppChipCount|3
 

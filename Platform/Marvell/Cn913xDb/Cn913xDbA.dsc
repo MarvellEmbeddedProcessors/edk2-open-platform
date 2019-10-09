@@ -62,3 +62,14 @@
   ArmadaBoardDescLib|Platform/Marvell/Cn913xDb/BoardDescriptionLib/Cn9130DbABoardDescLib.inf
 !endif
   NonDiscoverableInitLib|Platform/Marvell/Cn913xDb/NonDiscoverableInitLib/NonDiscoverableInitLib.inf
+
+[PcdsFixedAtBuild.common]
+  #Platform description
+  !if $(CN9130)
+  gMarvellTokenSpaceGuid.PcdProductPlatformName|"CN9130 DB-A\0"
+  !elseif $(CN9131)
+  gMarvellTokenSpaceGuid.PcdProductPlatformName|"CN9131 DB-A\0"
+  !elseif $(CN9132)
+  gMarvellTokenSpaceGuid.PcdProductPlatformName|"CN9132 DB-A\0"
+  !endif
+  gMarvellTokenSpaceGuid.PcdProductVersion|"Rev. 1.1\0"

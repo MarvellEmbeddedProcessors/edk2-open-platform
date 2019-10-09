@@ -46,6 +46,11 @@
 #
 ################################################################################
 [PcdsFixedAtBuild.common]
+  #Platform description
+  gMarvellTokenSpaceGuid.PcdProductManufacturer|"SolidRun\0"
+  gMarvellTokenSpaceGuid.PcdProductPlatformName|"Armada 8040 MacchiatoBin\0"
+  gMarvellTokenSpaceGuid.PcdProductVersion|"Rev. 1.3\0"
+
   #MPP
   gMarvellTokenSpaceGuid.PcdMppChipCount|3
 
